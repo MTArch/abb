@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  hiecm-gatewaydb:
+    image: notification-app:1.0.0
+    ports:
+      - "9101:9101"
+      - "8101:8101"
+    volumes:
+      - "/data"
+    environment:
+      - CONSUL_SERVER_FQDN=${CONSUL_SERVER_FQDN}
+      - CONSUL_SERVER_PORT=${CONSUL_SERVER_PORT}
+networks:
+    default:
+      name: abdm-bridge
+      driver: abdm-network
+

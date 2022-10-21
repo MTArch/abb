@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: abha-enrollment-app
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    consul:
+      config:
+        enabled: true
+        prefix: config
+        data-key: application.yml
+        format: YAML
+        default-context: defaults,${spring.application.name}
+      discovery:
+        instanceId: ${spring.application.name}:${random.value}
+      host: ${CONSUL_SERVER_FQDN}
+      port: ${CONSUL_SERVER_PORT}
