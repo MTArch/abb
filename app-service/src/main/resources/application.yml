@@ -1,7 +1,3 @@
-spring:
-  profiles:
-    active: local
-
 abdm:
   abha.enrollment.db.service: abha-enrollment-db
   aadhaar.service: abha-aadhaar-app

@@ -1,5 +1,1 @@
 server.port: 9188
-
-spring:
-  profiles:
-    active: local
