@@ -1,0 +1,16 @@
+package in.gov.abdm.abha.enrollment.services.database.transaction;
+
+import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarUserKycDto;
+import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import reactor.core.publisher.Mono;
+
+public interface TransactionService {
+
+    void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType);
+
+    String generateTransactionId(boolean isKYCTxn);
+
+    Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto);
+
+    Mono<TransactionDto> findTransactionDetailsFromDB(String txnId);
+}
