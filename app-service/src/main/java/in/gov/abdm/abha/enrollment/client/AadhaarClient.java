@@ -19,10 +19,7 @@ import java.net.URI;
 import java.util.Optional;
 
 @Component
-public class AadhaarClient<T> {
-
-    @Autowired
-    private DiscoveryClient discoveryClient;
+public class AadhaarClient {
 
     @Autowired
     private WebClient.Builder webClient;
@@ -30,18 +27,8 @@ public class AadhaarClient<T> {
     @Value("${abdm.aadhaar.service}")
     private String aadhaarService;
 
-    public Optional<URI> getAadhaarServiceURI() {
-        return discoveryClient
-                .getInstances(aadhaarService)
-                .stream()
-                .findFirst()
-                .map(ServiceInstance::getUri);
-    }
-
     public Mono<AadhaarResponseDto> sendOtp(AadhaarOtpRequestDto aadhaarOtpRequestDto) {
-        return webClient.baseUrl(
-                        this.getAadhaarServiceURI().isPresent() ?
-                                this.getAadhaarServiceURI().get().toString() : "NA")
+        return webClient.baseUrl("http://global2dev.abdm.gov.internal")
                 .build()
                 .post()
                 .uri(ABHAEnrollmentConstant.AADHAAR_SEND_OTP_URI)
@@ -54,9 +41,7 @@ public class AadhaarClient<T> {
     public Mono<AadhaarResponseDto> verifyOtp(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto) {
         //TODO call aadhaar verify otp
 
-        return webClient.baseUrl(
-                        this.getAadhaarServiceURI().isPresent() ?
-                                this.getAadhaarServiceURI().get().toString() : "NA")
+        return webClient.baseUrl("http://global2dev.abdm.gov.internal")
                 .build()
                 .post()
                 .uri(ABHAEnrollmentConstant.AADHAAR_VERIFY_OTP_URI)
