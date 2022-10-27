@@ -6,7 +6,9 @@ import org.springframework.util.StringUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
-
+/**
+ * Validating abha number should be valid
+ */
 public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
     String parttern = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
 

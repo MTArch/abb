@@ -23,7 +23,8 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        return !mobileOrEmailOtpRequestDto.getScope().isEmpty()
+        return mobileOrEmailOtpRequestDto.getScope()!=null
+                && !mobileOrEmailOtpRequestDto.getScope().isEmpty()
                 && mobileOrEmailOtpRequestDto.getScope().get(0) != null
                 && !mobileOrEmailOtpRequestDto.getScope().contains(ScopeEnum.WRONG);
     }

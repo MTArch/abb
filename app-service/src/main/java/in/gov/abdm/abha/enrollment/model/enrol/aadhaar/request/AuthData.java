@@ -1,48 +1,55 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
+import in.gov.abdm.abha.enrollment.validators.annotations.Bio;
+import in.gov.abdm.abha.enrollment.validators.annotations.Demo;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Otp
+@Demo
+@Bio
+@AuthMethod
 public class AuthData {
+
+    /**
+     * enum list for authmethods
+     */
     @JsonProperty("authMethods")
-    @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD)
     ArrayList<AuthMethods> authMethods;
+
     /**
      * It is token
      */
-//    @NotNull(message = FIELD_BLANK_ERROR_MSG)
     @JsonProperty("token")
     private TokenDto token;
+
     /**
      * It is Demo
      */
-//    @NotNull(message = FIELD_BLANK_ERROR_MSG)
     @JsonProperty("demo")
+    @Valid
     private DemoDto demo;
+
     /**
      * It is Otp
      */
-//    @NotNull(message = FIELD_BLANK_ERROR_MSG)
     @JsonProperty("otp")
     @Valid
     private OtpDto otp;
-    /*
+
+    /**
      * It is Bio
      */
-    //@NotNull(message = FIELD_BLANK_ERROR_MSG)
     @JsonProperty("bio")
+    @Valid
     private BioDto bio;
 }
