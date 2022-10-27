@@ -1,0 +1,8 @@
+FROM  harbor.pmjaydevmgmt.tatacommunications.com/abdm/openjdk:17.0-jdk
+ENV TZ=Asia/Calcutta
+RUN mkdir /APP
+WORKDIR /APP
+COPY app-service/target/app-service-1.0.0.jar  /APP/app-service-1.0.0.jar
+EXPOSE 7102
+RUN chmod -R 777 /APP
+ENTRYPOINT ["java","-jar","/APP/app-service-1.0.0.jar"]
