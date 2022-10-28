@@ -1,22 +1,18 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarOtpRequestDto;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.Optional;
+import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
+import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarOtpRequestDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
+import reactor.core.publisher.Mono;
 
 @Component
 public class AadhaarClient {
