@@ -1,20 +1,13 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
+import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
+import reactor.core.publisher.Mono;
 
 @Component
 public class ABHAEnrollmentDBClient<T> {
@@ -23,30 +16,8 @@ public class ABHAEnrollmentDBClient<T> {
      *
      */
     @Autowired
-    private DiscoveryClient discoveryClient;
-
-    /**
-     *
-     */
-    @Autowired
     private WebClient.Builder webClient;
 
-    /**
-     *
-     */
-    @Value("${abdm.abha.enrollment.db.service}")
-    private String abhaEnrollmentDBService;
-
-    /**
-     * @return
-     */
-    private Optional<URI> getDBURI() {
-        return discoveryClient
-                .getInstances(abhaEnrollmentDBService)
-                .stream()
-                .findFirst()
-                .map(ServiceInstance::getUri);
-    }
 
 //    private Flux<T> fluxGetDatabase(Class<T> t, String uri) {
 //        return webClient.
@@ -64,10 +35,7 @@ public class ABHAEnrollmentDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                baseUrl(
-                        this.getDBURI()
-                                .isPresent() ?
-                                this.getDBURI().get().toString() : "NA")
+                baseUrl("http://abha2dev.abdm.gov.internal")
                 .build()
                 .get()
                 .uri(uri)
@@ -77,9 +45,7 @@ public class ABHAEnrollmentDBClient<T> {
     }
 
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl(
-                        this.getDBURI().isPresent() ?
-                                this.getDBURI().get().toString() : "NA")
+        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
                 .build()
                 .post()
                 .uri(uri)
