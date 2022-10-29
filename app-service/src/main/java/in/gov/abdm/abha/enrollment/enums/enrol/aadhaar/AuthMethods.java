@@ -5,13 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * define enum values for AuthMthods
+ */
 @Getter
 @AllArgsConstructor
 @ToString
 public enum AuthMethods {
     OTP("otp"),
     PI("pi"),
-    WRONG("wrong");
+    WRONG("wrong"),
+    EMPTY("");
     private final String value;
 
     @JsonCreator

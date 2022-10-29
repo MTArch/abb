@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginHint;
 
@@ -22,6 +23,6 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        return true;
+        return mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getLoginHint().equals(StringConstants.EMPTY);
     }
 }
