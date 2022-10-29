@@ -1,9 +1,11 @@
 package in.gov.abdm.abha.enrollment.validators;
-
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
+import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -43,53 +45,30 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-//
-//        String value = mobileOrEmailOtpRequestDto.getLoginId();
-//        if(mobileOrEmailOtpRequestDto.getOtpSystem()!=null && !mobileOrEmailOtpRequestDto.getOtpSystem().isEmpty())
-//        {
-//            if(isRSAEncrypted(value))
-//            {
-//                String loginId = rsaUtil.decrypt(value);
-//                if (mobileOrEmailOtpRequestDto.getOtpSystem().equals("abdm")) {
-//                    if(isDigit(loginId) && loginId.length() == 10)
-//                        return isValidMobile(loginId);
-//                    else
-//                        return false;
-//                } else if (mobileOrEmailOtpRequestDto.getOtpSystem().equals("aadhaar")) {
-//                    if(isDigit(loginId) && loginId.length() == 12)
-//                        return isValidAadhaar(loginId);
-//                    else
-//                        return false;
-//                }
-//                else
-//                {
-//                    if(isDigit(loginId) && loginId.length() == 10)
-//                        return isValidMobile(loginId);
-//                    else if(isDigit(loginId) && loginId.length() == 12)
-//                        return isValidAadhaar(loginId);
-//                    else
-//                        return false;
-//                }
-//            }
-//            else
-//                return false;
-//        }
-//        else if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getOtpSystem()))
-//        {
-//            if(isRSAEncrypted(value))
-//            {
-//                String loginId = rsaUtil.decrypt(value);
-//                if (isDigit(loginId) && loginId.length() == 10)
-//                    return isValidMobile(loginId);
-//                else if (isDigit(loginId) && loginId.length() == 12)
-//                    return isValidAadhaar(loginId);
-//                else
-//                    return false;
-//            }
-//        }
-//        return false;
-        return true;
+
+        if(mobileOrEmailOtpRequestDto.getLoginId()!=null
+                && !StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId()))
+        {
+            if(isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId()) && isValidInput(mobileOrEmailOtpRequestDto.getLoginId()))
+            {
+                if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==10)
+                {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM.getValue())
+                            && isValidMobile(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
+                }
+                else if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==12) {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())
+                            && isValidAadhaar(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
+                }
+            }
+        }
+        return false;
     }
+    private boolean isValidInput(String loginId) {
+        return !Pattern.compile("[0-9]+").matcher(loginId).matches()
+                && !Pattern.compile("[a-zA-Z]+").matcher(loginId).matches();
+    }
+
 
     private boolean isDigit(String loginId) {
         return loginId.chars().allMatch(Character::isDigit);
@@ -124,55 +103,6 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * @return
      */
     private boolean isValidAadhaar(String aadhaar){
-        String decryptedAaadhar = rsaUtil.decrypt(aadhaar);
-        return validateVerhoeff(decryptedAaadhar);
-    }
-
-    static int[][] d = new int[][] {
-            { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-            { 1, 2, 3, 4, 0, 6, 7, 8, 9, 5 },
-            { 2, 3, 4, 0, 1, 7, 8, 9, 5, 6 },
-            { 3, 4, 0, 1, 2, 8, 9, 5, 6, 7 },
-            { 4, 0, 1, 2, 3, 9, 5, 6, 7, 8 },
-            { 5, 9, 8, 7, 6, 0, 4, 3, 2, 1 },
-            { 6, 5, 9, 8, 7, 1, 0, 4, 3, 2 },
-            { 7, 6, 5, 9, 8, 2, 1, 0, 4, 3 },
-            { 8, 7, 6, 5, 9, 3, 2, 1, 0, 4 },
-            { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 } };
-
-    static int[][] p = new int[][] {
-            { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-            { 1, 5, 7, 6, 2, 8, 3, 0, 9, 4 },
-            { 5, 8, 0, 3, 7, 9, 6, 1, 4, 2 },
-            { 8, 9, 1, 6, 0, 4, 3, 5, 2, 7 },
-            { 9, 4, 5, 3, 1, 2, 6, 8, 7, 0 },
-            { 4, 2, 8, 6, 5, 7, 3, 9, 0, 1 },
-            { 2, 7, 9, 3, 8, 0, 6, 4, 1, 5 },
-            { 7, 0, 4, 6, 9, 1, 3, 2, 5, 8 } };
-
-    public static boolean validateVerhoeff(String aadhaar) {
-        int c = 0;
-        int[] myArray = StringToReversedIntArray(aadhaar);
-        for (int i = 0; i < myArray.length; i++) {
-            c = d[c][p[(i % 8)][myArray[i]]];
-        }
-        return (c == 0);
-    }
-
-    private static int[] StringToReversedIntArray(String aadhaar) {
-        int[] myArray = new int[aadhaar.length()];
-        for (int i = 0; i < aadhaar.length(); i++) {
-            myArray[i] = Integer.parseInt(aadhaar.substring(i, i + 1));
-        }
-        myArray = Reverse(myArray);
-        return myArray;
-    }
-
-    private static int[] Reverse(int[] myArray) {
-        int[] reversed = new int[myArray.length];
-        for (int i = 0; i < myArray.length; i++) {
-            reversed[i] = myArray[myArray.length - (i + 1)];
-        }
-        return reversed;
+        return VerhoeffAlgorithm.validateVerhoeff(aadhaar);
     }
 }

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -28,6 +29,7 @@ public class MobileOrEmailOtpRequestDto {
     /**
      * field to log transaction
      */
+    @NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
     private String txnId;
 
     /**
@@ -43,7 +45,7 @@ public class MobileOrEmailOtpRequestDto {
      * Existing loginHint values: abha-number or mobile or phr-address
      * LoginHint will be empty for abha creation using aadhaar
      */
-    //@NotNull(message = AbhaConstants.VALIDATION_NULL_LOGIN_HINT_FIELD)
+    @NotNull(message = AbhaConstants.VALIDATION_NULL_LOGIN_HINT_FIELD)
     private String loginHint;
 
     /**
@@ -57,7 +59,7 @@ public class MobileOrEmailOtpRequestDto {
      * refers to the system used to send verification otp
      * Possible values : aadhaar or abdm
      */
-    //@ValidOtpSystem
-    //@NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_OTP_SYSTEM_FIELD)
-    private OtpSystem otpSystem;
+    @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_OTP_SYSTEM_FIELD)
+    @ValidOtpSystem
+    private String otpSystem;
 }

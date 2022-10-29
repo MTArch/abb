@@ -1,40 +1,62 @@
 package in.gov.abdm.abha.enrollment.validators;
-
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.DemoDto;
+import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Base64;
 import java.util.regex.Pattern;
+/**
+ * Validating mobile number should be encrypted and valid
+ *
+ */
+public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
 
-public class MobileValidator implements ConstraintValidator<Mobile, String> {
+    @Autowired
+    RSAUtil rsaUtil;
 
-    private Boolean isOptional;
-    private Boolean isEncrypted;
-
-    String parttern = "(\\+91)?[1-9][0-9]{9}";
-
-    boolean mobileCheck = true;
-
-    @Override
-    public void initialize(Mobile mobile) {
-        this.isOptional = mobile.optional();
-        this.isEncrypted = mobile.encrypted();
-    }
+    private static final String MOBILE_NUMBER_REGEX_PATTERN = "(\\+91)?[1-9][0-9]{9}";
 
     @Override
-    public boolean isValid(String value, ConstraintValidatorContext cvc) {
-        if (isOptional) {
-            mobileCheck = !StringUtils.isEmpty(value);
-        }
-
-        if (mobileCheck) {
-            if (isEncrypted) {
-              //  value = RSAUtil.decrypt(value);
+    public boolean isValid(DemoDto demoDto, ConstraintValidatorContext cvc) {
+        if(!StringUtils.isEmpty(demoDto)
+                && demoDto!=null && mobileNotNullorEmpty(demoDto)) {
+            if (isValidInput(demoDto.getMobile()) && isRSAEncrypted(demoDto.getMobile())) {
+                String decryptedMobile = rsaUtil.decrypt(demoDto.getMobile());
+                return Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(decryptedMobile).matches();
             }
-            return StringUtils.isEmpty(value) || Pattern.compile(parttern).matcher(value).matches();
+            return false;
         }
         return true;
+    }
 
+    private boolean mobileNotNullorEmpty(DemoDto demoDto) {
+        return demoDto.getMobile()!=null
+                && !demoDto.getMobile().isEmpty();
+    }
+
+    private boolean isValidInput(String mobile) {
+        return !Pattern.compile("[0-9]+").matcher(mobile).matches()
+                && !Pattern.compile("[a-zA-Z]+").matcher(mobile).matches();
+    }
+
+
+    /**
+     * to validate input is encrypted or not
+     * @param mobile
+     * @return
+     */
+    private boolean isRSAEncrypted(String mobile) {
+        try {
+            new String(Base64.getDecoder().decode(mobile));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
     }
 }

@@ -25,25 +25,29 @@ public interface AbhaConstants {
     String MISSING_COMMA_ERROR_CONDITION = "was expecting comma to separate Object entries";
     String MISSING_COMMA_ERROR_MESSAGE = "JSON Syntax Error: Missing comma at the end of line: ";
     String SUCCESS_MESSAGE = "Entered Input is Valid";
-    String AADHAAR_NUMBER_INVALID = "AADHAAR_NUMBER_INVALID";
-    String PATTREN_MISMATCHED = "PATTREN_MISMATCHED";
-    String OTP_MISSMATCH = "OTP_MISSMATCH";
-    String UUID_MISSMATCH = "UUID_MISSMATCH";
-    String MOBILE_NUMBER_MISSMATCH = "MOBILE_NUMBER_MISSMATCH";
-    String ABHA_ID = "ABHA_ID";
-    String INVALID_NAME_FORMAT = "INVALID_NAME_FORMAT";
 
-    String VALIDATION_EMPTY_AUTHMETHOD = "AuthMethod cannot be null or empty";
+    String AADHAAR_NUMBER_INVALID = "Invalid Aadhaar Number";
+    String PATTERN_MISMATCHED = "Pattern Mismatched for Year of Birth";
+    String MOBILE_NUMBER_MISSMATCH = "Invalid Mobile Number";
+    String ABHA_ID= "ABHA_ID";
+    String INVALID_NAME_FORMAT = "Invalid Name format";
+    String VALIDATION_ERROR_GENDER_FIELD= "Invalid Gender";
 
-    String VALIDATION_ERROR_AUTHMETHOD = "Invalid AuthMethod";
-    String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
-    String VALIDATION_ERROR_OTP_VALUE_FIELD = "Invalid OTP Value";
+    String VALIDATION_EMPTY_AUTHMETHOD= "AuthMethod cannot be null or empty";
 
-    String VALIDATION_ERROR_CONSENT_FIELD = "Consent cannot be null or empty";
-    String VALIDATION_ERROR_CONSENT_CODE_FIELD = "Invalid Code or null or empty";
-    String VALIDATION_ERROR_CONSENT_VERSION_FIELD = "Invalid Version or null or empty";
+    String VALIDATION_ERROR_AUTHMETHOD= "Invalid AuthMethod";
+    String VALIDATION_ERROR_TIMESTAMP_FIELD= "Invalid Timestamp";
+    String VALIDATION_ERROR_OTP_VALUE_FIELD= "Invalid OTP Value";
 
-    String VALIDATION_ERROR_OTP_FIELD = "timeStamp ,txnId or otpValue is Null or Empty";
+    String VALIDATION_ERROR_CONSENT_FIELD= "Consent cannot be null or empty";
+    String VALIDATION_ERROR_CONSENT_CODE_FIELD= "Invalid Code or null or empty";
+    String VALIDATION_ERROR_CONSENT_VERSION_FIELD= "Invalid Version or null or empty";
+
+    String VALIDATION_ERROR_OTP_OBJECT= "otp cannot be null or empty OR timeStamp ,txnId or otpValue cannot be null or empty";
+
+    String VALIDATION_ERROR_DEMO_OBJECT= "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";
+
+    String VALIDATION_ERROR_BIO_OBJECT= "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
 
 
 }
