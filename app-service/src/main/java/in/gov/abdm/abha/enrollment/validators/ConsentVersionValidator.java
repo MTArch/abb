@@ -3,10 +3,16 @@ import in.gov.abdm.abha.enrollment.validators.annotations.ConsentVersion;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
+/**
+ * Validating consent version should not be null or empty
+ *
+ * It should match '1.4'
+ */
 public class ConsentVersionValidator implements ConstraintValidator<ConsentVersion, String> {
+
+    private String CONSENT_VERSION = "1.4";
     @Override
     public boolean isValid(String str, ConstraintValidatorContext context) {
-        return str!=null && str.equals("1.4");
+        return str!=null && str.equals(CONSENT_VERSION);
     }
 }

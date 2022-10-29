@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 /**
  * Validates Transaction id attribute
+ *
+ * it should match transaction id regex pattern
  */
 public class TransactionIdValidator implements ConstraintValidator<ValidTransactionId, MobileOrEmailOtpRequestDto> {
 
@@ -34,17 +36,39 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 
-        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(ScopeEnum.ABHA_ENROL))) {
+//        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(ScopeEnum.ABHA_ENROL))) {
+//            if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+//                mobileOrEmailOtpRequestDto.setTxnId("");
+//            }
+//            return true;
+//        } else {
+//            if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+//                return false;
+//            }else{
+//                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
+//            }
+//        }
+
+
+        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(ScopeEnum.ABHA_ENROL)))
+        {
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 mobileOrEmailOtpRequestDto.setTxnId("");
-            }
-            return true;
-        } else {
-            if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 return false;
-            }else{
-                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
+            }
+            else if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId()))
+            {
+                return true;
             }
         }
+        else {
+            if(!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
+            }else{
+                // return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
+                return true;
+            }
+        }
+        return false;
     }
 }

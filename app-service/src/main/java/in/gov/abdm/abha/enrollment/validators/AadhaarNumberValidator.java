@@ -5,7 +5,9 @@ import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
+/**
+ * Validating aadhaar number should be valid and encrypted for abha creation using aadhaar
+ */
 
 public class AadhaarNumberValidator implements ConstraintValidator<AadhaarNumber, String> {
 

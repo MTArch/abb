@@ -20,6 +20,7 @@ public class ConsentDto {
     @ConsentCode
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_CONSENT_CODE_FIELD)
     private String code;
+
     /**
      * It is consent version( 1.4)
      */

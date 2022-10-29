@@ -1,5 +1,4 @@
 package in.gov.abdm.abha.enrollment.validators;
-
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidOtpSystem;
 
@@ -22,7 +21,7 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem,St
      */
     @Override
     public boolean isValid(String otpSystem, ConstraintValidatorContext context) {
-        if(otpSystem!=null)
+        if(otpSystem!=null && !otpSystem.isEmpty())
             return (otpSystem.equals(OtpSystem.AADHAAR.getValue()) || otpSystem.equals(OtpSystem.ABDM.getValue()));
         else
             return false;

@@ -6,7 +6,9 @@ import javax.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-
+/**
+ * Validating timestamp should not be greater than current date
+ */
 public class TimestampValidator implements ConstraintValidator<Timestamp, String> {
 
     private String DATE_TIME_FORMATTER = "dd-MM-yyyy HH:mm:ss";

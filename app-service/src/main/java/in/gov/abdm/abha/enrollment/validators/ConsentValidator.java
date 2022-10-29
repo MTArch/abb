@@ -6,6 +6,10 @@ import org.springframework.util.StringUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+/**
+ * Validating consent should not be null or empty
+ *
+ */
 public class ConsentValidator implements ConstraintValidator<Consent, EnrolByAadhaarRequestDto> {
     @Override
     public boolean isValid(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, ConstraintValidatorContext context) {
