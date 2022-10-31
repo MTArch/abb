@@ -37,7 +37,7 @@ public class AadhaarClient {
     public Mono<AadhaarResponseDto> verifyOtp(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto) {
         //TODO call aadhaar verify otp
 
-        return webClient.baseUrl("http://global2dev.abdm.gov.internal")
+        return webClient.baseUrl("http://localhost:9999")
                 .build()
                 .post()
                 .uri(ABHAEnrollmentConstant.AADHAAR_VERIFY_OTP_URI)

@@ -19,6 +19,10 @@ public class AccountDto {
      * 14-digit unique number
      */
     private String healthIdNumber;
+    /**
+     * type of account
+     */
+    private String type;
     
     /**
      * address of abha id

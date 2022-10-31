@@ -7,7 +7,7 @@ spring:
     consul:
       config:
         enabled: true
-        prefix: abdmconfig
+        prefix: config
         data-key: application.yml
         format: YAML
         default-context: defaults,${spring.application.name}

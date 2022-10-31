@@ -1,8 +1,10 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.exception.aadhaar.PostgresqlDataIntegrityViolationException;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -65,5 +67,15 @@ public class GlobalExceptionHandler {
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
+    }
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(PostgresqlDataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDuplicateHealthIDException(PostgresqlDataIntegrityViolationException ex) {
+        System.out.println("Hello");
+        //Map<String, Object> errorMap = new LinkedHashMap<>();
+
+        //log.error(ex.getMessage(),ex);
+
+        return new ResponseEntity<String>(ex.getMessage(),HttpStatus.BAD_REQUEST);
     }
 }

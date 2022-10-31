@@ -9,8 +9,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.FIELD_BLANK_ERROR_MSG;
 
 
 /**
@@ -27,6 +29,12 @@ public class Accounts implements Persistable<String>{
      */
 	@Id
     private String healthIdNumber;
+
+    /**
+     * type of account
+     */
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private String type;
 
 	/**
 	 * address of abha id

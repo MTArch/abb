@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.database.account.impl;
 import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.PostgresqlDataIntegrityViolationException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -11,7 +12,6 @@ import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -286,12 +286,21 @@ public class AccountServiceImpl implements AccountService {
         return new AccountDto();
     }
 
-    public Mono<AccountDto> createAccountEntity(AccountDto accountDto) {
+    public Mono<AccountDto> createAccountEntity(AccountDto accountDto) throws PostgresqlDataIntegrityViolationException{
         //TODO Call to DB service to save entity
+       // try {
+            accountDto.setXmlUID(accountDto.getHealthIdNumber());
+            accountDto.setNewAccount(true);
 
-        accountDto.setXmlUID(accountDto.getHealthIdNumber());
-        accountDto.setNewAccount(true);
 
-        return abhaEnrollmentDBClient.addEntity(AccountDto.class, accountDto);
+            return abhaEnrollmentDBClient.addEntity(AccountDto.class, accountDto);
+       /* }
+        catch(PostgresqlDataIntegrityViolationException pgie){
+            //if(pgie instanceof DuplicateKeyException) {
+               // throw new GlobalExceptionHandler().handleDuplicateHealthIDException(pgie);
+               throw new "Error While Creating Abha Number";
+            //}
+            }
+        }*/
     }
 }

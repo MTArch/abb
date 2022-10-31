@@ -3,8 +3,12 @@ package in.gov.abdm.abha.enrollment.model.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.FIELD_BLANK_ERROR_MSG;
 
 /**
  * Data Transfer Object for Account
@@ -18,7 +22,14 @@ public class AccountDto {
      * abha id
      * 14-digit unique number
      */
+    @Id
+    //@DefaultValue("XX-XXXX-XXXX-XXXX")
     private String healthIdNumber;
+    /**
+     * Type of account
+     */
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private String type;
     
     /**
      * address of abha id
