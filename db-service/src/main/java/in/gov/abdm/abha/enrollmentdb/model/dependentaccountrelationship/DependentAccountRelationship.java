@@ -41,8 +41,6 @@ public class DependentAccountRelationship {
      *  It is a relationship_proof_document_location
      */
     private String relationshipProofDocumentLocation;
-
-    //TODO : audit columns
     /**
      * It is createdBy
      */

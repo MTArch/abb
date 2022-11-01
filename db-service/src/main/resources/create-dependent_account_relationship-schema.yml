@@ -25,7 +25,6 @@ databaseChangeLog:
                       foreignKeyName: "parent_health_id_number_fk"
                       referencedColumnNames: health_id_number
                       referencedTableName: accounts
-                      referencedTableSchemaName: abdm
                 - column:
                     name: dependent_health_id_number
                       type: varchar(30)
@@ -35,7 +34,6 @@ databaseChangeLog:
                         foreignKeyName: "dependent_health_id_number_fk"
                         referencedColumnNames: health_id_number
                         referencedTableName: accounts
-                        referencedTableSchemaName: abdm
                 - column:
                     name: related_as
                     type: varchar(50)
