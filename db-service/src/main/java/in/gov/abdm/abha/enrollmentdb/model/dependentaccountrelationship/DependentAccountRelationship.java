@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.model.dependent.account.relationship;
+package in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class DependentAccountRelationship {
 
     /**
