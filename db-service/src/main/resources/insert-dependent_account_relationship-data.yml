@@ -7,7 +7,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  value: 100
+                  value:
               - column:
                   name: parent_health_id_number
                   value: ""

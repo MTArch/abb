@@ -1,9 +1,11 @@
-package in.gov.abdm.abha.enrollmentdb.model.dependent_account_relationship;
+package in.gov.abdm.abha.enrollmentdb.model.dependent.account.relationship;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+
+import java.time.LocalDateTime;
 
 /**
  * It's a Dependent_account_relationship POJO class
@@ -12,7 +14,7 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class Dependent_account_relationship {
+public class DependentAccountRelationship {
 
     /**
      *  it is Id and Primary key
@@ -24,22 +26,22 @@ public class Dependent_account_relationship {
     /**
      * it is a parent_health_id_number it is a Foreign key
      */
-    private String parent_health_id_number;
+    private String parentHealthIdNumber;
 
     /**
      *  it is dependent_health_id_number for child ABHA
      */
-    private  String dependent_health_id_number;
+    private  String dependentHealthIdNumber;
 
     /**
      *  It is a relation with child
      */
-    private String related_as;
+    private String relatedAs;
 
     /**
      *  It is a relationship_proof_document_location
      */
-    private String relationship_proof_document_location;
+    private String relationshipProofDocumentLocation;
 
     //TODO : audit columns
     /**
@@ -54,10 +56,10 @@ public class Dependent_account_relationship {
     /**
      * It is createdAt
      */
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     /**
      * It is UpdatedAt
      */
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 }

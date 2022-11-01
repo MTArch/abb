@@ -22,9 +22,9 @@ databaseChangeLog:
                     constraints:
                       nullable: "false"
                       foreignKey: "true"
-                      foreignKeyName: "dependent_account_relationship_fk"
-                      referencedColumnNames: id
-                      referencedTableName:
+                      foreignKeyName: "parent_health_id_number_fk"
+                      referencedColumnNames: health_id_number
+                      referencedTableName: accounts
                       referencedTableSchemaName: abdm
                 - column:
                     name: dependent_health_id_number
@@ -32,9 +32,9 @@ databaseChangeLog:
                       constraints:
                         nullable: "false"
                         foreignKey: "true"
-                        foreignKeyName: "dependent_account_relationship_fk"
-                        referencedColumnNames: id
-                        referencedTableName:
+                        foreignKeyName: "dependent_health_id_number_fk"
+                        referencedColumnNames: health_id_number
+                        referencedTableName: accounts
                         referencedTableSchemaName: abdm
                 - column:
                     name: related_as
@@ -59,12 +59,12 @@ databaseChangeLog:
 
                 - column:
                     name: createdAt
-                    type: varchar(50)
+                    type: timestamp
                     constraints:
                       nullable: "false"
                 - column:
                     name: updatedAt
-                    type: varchar(50)
+                    type: timestamp
                     constraints:
                     nullable: "false"
                 -

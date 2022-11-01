@@ -1,9 +1,11 @@
-package in.gov.abdm.abha.enrollmentdb.model.dependent_account_relationship;
+package in.gov.abdm.abha.enrollment.model.entities;
+
+import java.time.LocalDateTime;
 
 /**
  * It's a Data Transfer Object for Dependent_account_relationship
  */
-public class Dependent_account_relationship_Dto {
+public class DependentAccountRelationshipDto {
 
     /**
      *  it is Id and Primary key
@@ -14,24 +16,22 @@ public class Dependent_account_relationship_Dto {
     /**
      * it is a parent_health_id_number it is a Foreign key
      */
-    private String parent_health_id_number;
+    private String parentHealthIdNumber;
 
     /**
      *  it is dependent_health_id_number for child ABHA
      */
-    private  String dependent_health_id_number;
+    private  String dependentHealthIdNumber;
 
     /**
      *  It is a relation with child
      */
-    private String related_as;
+    private String relatedAs;
 
     /**
      *  It is a relationship_proof_document_location
      */
-    private String relationship_proof_document_location;
-
-    //TODO : audit columns
+    private String relationshipProofDocumentLocation;
 
     /**
      * It is createdBy
@@ -45,10 +45,10 @@ public class Dependent_account_relationship_Dto {
     /**
      * It is createdAt
      */
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     /**
      * It is UpdatedAt
      */
-    private String updatedAt;
+    private LocalDateTime updatedAt;
 }
