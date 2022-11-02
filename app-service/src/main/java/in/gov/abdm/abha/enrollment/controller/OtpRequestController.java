@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 @RestController
+@CrossOrigin
 @RequestMapping(ABHAEnrollmentConstant.OTP_REQUEST_ENDPOINT)
 public class OtpRequestController {
 

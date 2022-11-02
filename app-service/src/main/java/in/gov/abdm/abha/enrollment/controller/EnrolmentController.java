@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin
 @RequestMapping(ABHAEnrollmentConstant.ENROL_ENDPOINT)
 public class EnrolmentController {
 
