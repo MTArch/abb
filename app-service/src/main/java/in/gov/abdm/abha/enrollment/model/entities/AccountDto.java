@@ -1,17 +1,17 @@
 package in.gov.abdm.abha.enrollment.model.entities;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.FIELD_BLANK_ERROR_MSG;
+
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.data.annotation.Id;
-
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.FIELD_BLANK_ERROR_MSG;
 
 /**
  * Data Transfer Object for Account
@@ -26,6 +26,7 @@ public class AccountDto {
      * 14-digit unique number
      */
     private String healthIdNumber;
+    
     /**
      * address of abha id
      */

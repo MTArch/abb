@@ -1,19 +1,21 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
-import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.FIELD_BLANK_ERROR_MSG;
+
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.FIELD_BLANK_ERROR_MSG;
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**

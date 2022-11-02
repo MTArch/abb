@@ -1,11 +1,11 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
-import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import java.time.LocalDateTime;
+
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for Account

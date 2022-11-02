@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.enums.childabha;
+package in.gov.abdm.abha.enrollmentdb.enums;
 
 
 import lombok.AllArgsConstructor;
