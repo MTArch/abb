@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,7 @@ public class AccountDto {
      * 14-digit unique number
      */
     private String healthIdNumber;
-    /**
-     * type of account
-     */
-    private String type;
-    
+
     /**
      * address of abha id
      */
@@ -278,5 +275,10 @@ public class AccountDto {
      * isNewTemplate of boolean type that stores the state of an entity object.
      */
 	private boolean isNewAccount;
+
+    /**
+     * type of account
+     */
+    private AbhaType type;
     
 }

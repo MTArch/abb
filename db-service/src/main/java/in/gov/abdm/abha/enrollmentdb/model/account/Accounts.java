@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,12 +30,6 @@ public class Accounts implements Persistable<String>{
      */
 	@Id
     private String healthIdNumber;
-
-    /**
-     * type of account
-     */
-    @NotNull(message = FIELD_BLANK_ERROR_MSG)
-    private String type;
 
 	/**
 	 * address of abha id
@@ -303,6 +298,13 @@ public class Accounts implements Persistable<String>{
 	 * mobile type
 	 */
 	private String mobileType;
+
+    /**
+     * type of account
+     */
+
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private AbhaType type;
     
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.

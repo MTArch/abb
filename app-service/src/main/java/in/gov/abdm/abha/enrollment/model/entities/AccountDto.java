@@ -1,8 +1,11 @@
 package in.gov.abdm.abha.enrollment.model.entities;
 
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.annotation.Id;
 
 import javax.validation.constraints.NotNull;
@@ -22,15 +25,7 @@ public class AccountDto {
      * abha id
      * 14-digit unique number
      */
-    @Id
-    //@DefaultValue("XX-XXXX-XXXX-XXXX")
     private String healthIdNumber;
-    /**
-     * Type of account
-     */
-    @NotNull(message = FIELD_BLANK_ERROR_MSG)
-    private String type;
-    
     /**
      * address of abha id
      */
@@ -285,5 +280,16 @@ public class AccountDto {
      * isNewTemplate of boolean type that stores the state of an entity object.
      */
 	private boolean isNewAccount;
+
+    /**
+     * Type of account
+     */
+
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private AbhaType type;
+
+    public AccountDto(@DefaultValue("Standard") AbhaType type){
+        this.type=type;
+    }
     
 }
