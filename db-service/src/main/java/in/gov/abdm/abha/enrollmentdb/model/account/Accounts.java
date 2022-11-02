@@ -1,16 +1,21 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.FIELD_BLANK_ERROR_MSG;
+
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
-import java.time.LocalDateTime;
-
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -295,6 +300,13 @@ public class Accounts implements Persistable<String>{
 	 * mobile type
 	 */
 	private String mobileType;
+
+    /**
+     * type of account
+     */
+
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private AbhaType type;
     
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.

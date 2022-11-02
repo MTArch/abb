@@ -66,4 +66,5 @@ public class GlobalExceptionHandler {
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
+   
 }
