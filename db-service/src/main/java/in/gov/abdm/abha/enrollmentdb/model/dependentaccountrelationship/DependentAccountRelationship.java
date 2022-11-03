@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DependentAccountRelationship {
+public class DependentAccountRelationship implements Persistable<String> {
 
     /**
      *  it is Id and Primary key
@@ -59,4 +60,9 @@ public class DependentAccountRelationship {
      * It is UpdatedAt
      */
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean isNew() {
+        return false;
+    }
 }
