@@ -52,9 +52,10 @@ public class OtpRequestServiceImpl implements OtpRequestService {
      */
     @Override
     public Mono<MobileOrEmailOtpResponseDto> sendOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
-        if (mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
+        if (mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())) {
             return sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
+
         return null;
     }
 
