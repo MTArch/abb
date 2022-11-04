@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -52,7 +53,10 @@ public class ABHAEnrollmentDBClient<T> {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(row), t)
                 .retrieve()
-                .bodyToMono(t);
+                .bodyToMono(t)
+                .onErrorResume(error -> {
+                    throw new DatabaseConstraintFailedException("Exception occurred , Postgres Database Constraint Failed");
+                });
     }
 
 
