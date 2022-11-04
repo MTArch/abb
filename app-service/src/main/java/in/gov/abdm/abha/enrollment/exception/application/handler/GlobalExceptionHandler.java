@@ -43,17 +43,9 @@ public class GlobalExceptionHandler {
     public Map<String, Object> handleInvalidFieldException(WebExchangeBindException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
 
-        if (ex.getFieldErrorCount() != 0) {
-            ex.getBindingResult().getFieldErrors()
-                    .forEach(error -> errorMap.put(error.getField(), error.getDefaultMessage()));
-        }
-
         if (!ex.getAllErrors().isEmpty()) {
             ex.getAllErrors().forEach(error -> {
-                if (!errorMap.containsValue(error.getDefaultMessage())
-                        && Arrays.stream(ClassLevelExceptionConstants.values())
-                        .anyMatch(v -> v.getValue().equals(error.getDefaultMessage()))) {
-
+                {
                     errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
                             .filter(v -> v.getValue().equals(error.getDefaultMessage()))
                             .findAny()
@@ -66,4 +58,5 @@ public class GlobalExceptionHandler {
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
+   
 }
