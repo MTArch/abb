@@ -37,7 +37,7 @@ public class MobileOrEmailOtpRequestDto {
      * Existing scopes : abha-enrol,mobile-update,mobile-verify,email-update
      * Scope will be abha-enrol for abha creation using aadhaar
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_SCOPE_FIELD)
+    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
     private List<ScopeEnum> scope;
 
     /**
@@ -45,21 +45,21 @@ public class MobileOrEmailOtpRequestDto {
      * Existing loginHint values: abha-number or mobile or phr-address
      * LoginHint will be empty for abha creation using aadhaar
      */
-    @NotNull(message = AbhaConstants.VALIDATION_NULL_LOGIN_HINT_FIELD)
+    @NotNull(message = AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD)
     private String loginHint;
 
     /**
      * refers to the way user logs in to the system
      * Possible login id values : aadhaar number or mobile number
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_LOGIN_ID_FIELD)
+    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_LOGIN_ID_FIELD)
     private String loginId;
 
     /**
      * refers to the system used to send verification otp
      * Possible values : aadhaar or abdm
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_OTP_SYSTEM_FIELD)
+    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD)
     @ValidOtpSystem
     private String otpSystem;
 }

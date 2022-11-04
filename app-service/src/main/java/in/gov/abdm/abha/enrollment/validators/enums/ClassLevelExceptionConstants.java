@@ -21,12 +21,12 @@ public enum ClassLevelExceptionConstants {
     authMethods(AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD),
     txnId(AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD),
     otpValue(AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD),
-    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID),
+    Timestamp(AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD),
     name(AbhaConstants.INVALID_NAME_FORMAT),
     gender(AbhaConstants.VALIDATION_ERROR_GENDER_FIELD),
     yob(AbhaConstants.PATTERN_MISMATCHED),
     mobile(AbhaConstants.MOBILE_NUMBER_MISSMATCH),
-    timestamp(AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD);
+    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID);
     private final String value;
 
 
