@@ -26,6 +26,8 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
         return mobileOrEmailOtpRequestDto.getScope()!=null
                 && !mobileOrEmailOtpRequestDto.getScope().isEmpty()
                 && mobileOrEmailOtpRequestDto.getScope().get(0) != null
+                && !mobileOrEmailOtpRequestDto.getScope().get(0).equals("")
+                && !mobileOrEmailOtpRequestDto.getScope().contains(ScopeEnum.EMPTY)
                 && !mobileOrEmailOtpRequestDto.getScope().contains(ScopeEnum.WRONG);
     }
 }
