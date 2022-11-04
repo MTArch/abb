@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DependentAccountRelationship implements Persistable<String> {
+public class DependentAccountRelationship implements Persistable<Long> {
 
     /**
      *  it is Id and Primary key
@@ -54,12 +54,12 @@ public class DependentAccountRelationship implements Persistable<String> {
     /**
      * It is createdAt
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createdDate;
 
     /**
      * It is UpdatedAt
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedDate;
 
     @Override
     public boolean isNew() {
