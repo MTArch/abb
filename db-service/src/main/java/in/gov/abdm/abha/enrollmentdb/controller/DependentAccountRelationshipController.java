@@ -13,20 +13,20 @@ public class DependentAccountRelationshipController {
     @Autowired
     DependentAccountRelationshipService dependentAccountRelationshipService;
 
-    @GetMapping(value = ABHAEnrollmentDBConstant.GET_DEPENDENT_ACCOUNT_BY_ID)
-    public ResponseEntity<?> getDependentAccountById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(dependentAccountRelationshipService.getDependentAccountById(id));
+    @GetMapping(value = ABHAEnrollmentDBConstant.GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID)
+    public ResponseEntity<?> getDependentAccountRelationshipDetail(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(dependentAccountRelationshipService.getDependentAccountRelationshipDetailById(id));
     }
 
-    @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_RELATIONSHIP_ACCOUNT_BY_ID)
-    public ResponseEntity<?> updateDependentAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto,
+    @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID)
+    public ResponseEntity<?> updateDependentAccountRelationshipDetail(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto,
                                            @PathVariable("id") Long id) {
-        return ResponseEntity.ok(dependentAccountRelationshipService.updateDependentAccountById(dependentAccountRelationshipDto, id));
+        return ResponseEntity.ok(dependentAccountRelationshipService.updateDependentAccountRelationshipDetailById(dependentAccountRelationshipDto, id));
     }
 
-    @DeleteMapping(value = ABHAEnrollmentDBConstant.DELETE_RELATIONSHIP_ACCOUNT_BY_ID)
-    public ResponseEntity<?> deleteDependentAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto,
+    @DeleteMapping(value = ABHAEnrollmentDBConstant.DELETE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID)
+    public ResponseEntity<?> deleteDependentAccountRelationshipDetail(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto,
                                                     @PathVariable("id") Long id) {
-        return ResponseEntity.ok(dependentAccountRelationshipService.deleteDependentAccountById(dependentAccountRelationshipDto, id));
+        return ResponseEntity.ok(dependentAccountRelationshipService.deleteDependentAccountRelationshipDetailById(dependentAccountRelationshipDto, id));
     }
 }

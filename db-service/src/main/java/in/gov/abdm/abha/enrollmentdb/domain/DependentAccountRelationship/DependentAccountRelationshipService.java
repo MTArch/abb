@@ -17,7 +17,7 @@ public interface DependentAccountRelationshipService {
      * @return
      */
 
-    Mono<DependentAccountRelationshipDto> getDependentAccountById(Long id);
+    Mono<DependentAccountRelationshipDto> getDependentAccountRelationshipDetailById(Long id);
 
     /**
      * to update dependent account relationship details by Id
@@ -26,7 +26,7 @@ public interface DependentAccountRelationshipService {
      * @param id
      * @return
      */
-    Mono updateDependentAccountById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
+    Mono updateDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
 
     /**
      * to delete dependent account relationship details by Id
@@ -34,6 +34,6 @@ public interface DependentAccountRelationshipService {
      * @param id
      * @return
      */
-    Mono deleteDependentAccountById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
+    Mono deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
 
 }

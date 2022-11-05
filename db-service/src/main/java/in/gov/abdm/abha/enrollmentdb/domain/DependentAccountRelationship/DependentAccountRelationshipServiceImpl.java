@@ -23,7 +23,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
      * for implementing singleton, with the reference all its methods can be utilized.
      */
     @Autowired
-    DependentAccountRelationshipRepository repo;
+    DependentAccountRelationshipRepository relationshipRepository;
 
     /**
      * Here we are creating a ModelMapper object and putting into IOC
@@ -33,26 +33,26 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     private ModelMapper modelMapper;
 
     @Override
-    public Mono<DependentAccountRelationshipDto> getDependentAccountById(Long id) {
-        log.info(ENROLLMENT_LOG_PREFIX + "Executing getDependentAccountById method.");
-        return repo.findById(id)
+    public Mono<DependentAccountRelationshipDto> getDependentAccountRelationshipDetailById(Long id) {
+        log.info(ENROLLMENT_LOG_PREFIX + "Executing getDependentAccountRelationshipDetailById method.");
+        return relationshipRepository.findById(id)
                 .map(dependentAccount -> modelMapper.map(dependentAccount, DependentAccountRelationshipDto.class));
 
     }
 
     @Override
-    public Mono<DependentAccountRelationship> updateDependentAccountById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
-        log.info(ENROLLMENT_LOG_PREFIX + "Executing updateDependentAccountById method.");
+    public Mono<DependentAccountRelationship> updateDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
+        log.info(ENROLLMENT_LOG_PREFIX + "Executing updateDependentAccountRelationshipDetailById method.");
         DependentAccountRelationship dependentAccount = modelMapper.map(dependentAccountRelationshipDto, DependentAccountRelationship.class);
-        return repo.save(dependentAccount);
+        return relationshipRepository.save(dependentAccount);
     }
 
     @Override
-    public Mono deleteDependentAccountById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
-        log.info(ENROLLMENT_LOG_PREFIX + "Executing deleteDependentAccountById method.");
+    public Mono deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
+        log.info(ENROLLMENT_LOG_PREFIX + "Executing deleteDependentAccountRelationshipDetailById method.");
         DependentAccountRelationship dependentAccount =
                 modelMapper.map(dependentAccountRelationshipDto, DependentAccountRelationship.class);
-        return repo.deleteById(id);
+        return relationshipRepository.deleteById(id);
 
     }
 }
