@@ -26,7 +26,8 @@ public enum ClassLevelExceptionConstants {
     gender(AbhaConstants.VALIDATION_ERROR_GENDER_FIELD),
     yob(AbhaConstants.PATTERN_MISMATCHED),
     mobile(AbhaConstants.MOBILE_NUMBER_MISSMATCH),
-    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID);
+    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID),
+    otpSystem(AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD);
     private final String value;
 
 

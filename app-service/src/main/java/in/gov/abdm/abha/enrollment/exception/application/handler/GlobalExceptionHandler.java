@@ -1,8 +1,11 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -57,5 +60,17 @@ public class GlobalExceptionHandler {
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
+    }
+
+
+    /**
+     * handle exception on failing of database constraints
+     * @param ex
+     * @return status code and error message
+     */
+    @ExceptionHandler(DatabaseConstraintFailedException.class)
+    public ResponseEntity<ErrorResponse> dbConstraintFailed(DatabaseConstraintFailedException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
 }
