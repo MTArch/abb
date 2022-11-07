@@ -15,6 +15,8 @@ public enum ClassLevelExceptionConstants {
     loginHint(AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD),
     loginId(AbhaConstants.VALIDATION_ERROR_LOGIN_ID_FIELD),
     consent(AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD),
+    consentCode(AbhaConstants.VALIDATION_ERROR_CONSENT_CODE_FIELD),
+    consentVersion(AbhaConstants.VALIDATION_ERROR_CONSENT_VERSION_FIELD),
     otp(AbhaConstants.VALIDATION_ERROR_OTP_OBJECT),
     bio(AbhaConstants.VALIDATION_ERROR_BIO_OBJECT),
     demo(AbhaConstants.VALIDATION_ERROR_DEMO_OBJECT),
