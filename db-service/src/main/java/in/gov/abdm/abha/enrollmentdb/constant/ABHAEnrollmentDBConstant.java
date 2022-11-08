@@ -19,4 +19,10 @@ public interface ABHAEnrollmentDBConstant {
     String DELETE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
 
     String GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+
+    String HID_PHR_ADDRESS_ENDPOINT = API_VERSION+"/hidphraddress";
+
+    String GET_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+
+    String DELETE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
 }
