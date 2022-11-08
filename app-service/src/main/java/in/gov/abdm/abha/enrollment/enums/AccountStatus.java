@@ -2,7 +2,8 @@ package in.gov.abdm.abha.enrollment.enums;
 
 public enum AccountStatus {
 	ACTIVE("ACTIVE"), BLOCKED("BLOCKED"), LOCKED("LOCKED"), CONSENTPENDING("CONSENTPENDING"), 
-	DEACTIVATED("DEACTIVATED"), DELETED("DELETED"), DELINKED("DELINKED");
+	DEACTIVATED("DEACTIVATED"), DELETED("DELETED"), DELINKED("DELINKED"),
+	PARENT_LINKING_PENDING("PARENT_LINKING_PENDING");
 
 	public static boolean isValid(String status) {
 		AccountStatus[] values = AccountStatus.values();
