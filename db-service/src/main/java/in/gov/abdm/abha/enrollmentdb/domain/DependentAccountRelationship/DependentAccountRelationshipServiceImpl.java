@@ -21,13 +21,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class DependentAccountRelationshipServiceImpl implements DependentAccountRelationshipService{
 
+    @Autowired
+    DependentAccountRelationshipRepository dependentAccountRelationshipRepository;
+    
     /**
      * Here we are creating a ModelMapper object and putting into IOC
      * for implementing singleton, with the reference all its methods can be utilized.
      */
-    @Autowired
-    DependentAccountRelationshipRepository dependentAccountRelationshipRepository;
-
     @Autowired
     private ModelMapper modelMapper;
 
