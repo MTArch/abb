@@ -13,6 +13,16 @@ public class DependentAccountRelationshipController {
     @Autowired
     DependentAccountRelationshipService dependentAccountRelationshipService;
 
+    @PostMapping
+    public ResponseEntity<?>createAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto){
+        return ResponseEntity.ok(dependentAccountRelationshipService.addDependentAccountRelationship(dependentAccountRelationshipDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<?>getAllDependentAccountRelationship(){
+        return ResponseEntity.ok(dependentAccountRelationshipService.getAllDependentAccountRelationship());
+    }
+    
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID)
     public ResponseEntity<?> getDependentAccountRelationshipDetail(@PathVariable("id") Long id) {
         return ResponseEntity.ok(dependentAccountRelationshipService.getDependentAccountRelationshipDetailById(id));
