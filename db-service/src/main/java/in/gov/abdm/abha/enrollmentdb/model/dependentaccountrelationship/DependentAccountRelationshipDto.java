@@ -52,10 +52,10 @@ public class DependentAccountRelationshipDto {
     /**
      * It is createdAt
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createdDate;
 
     /**
      * It is UpdatedAt
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedDate;
 }

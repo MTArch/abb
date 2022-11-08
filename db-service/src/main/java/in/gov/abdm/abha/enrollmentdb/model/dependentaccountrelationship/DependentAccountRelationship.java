@@ -1,9 +1,11 @@
 package in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DependentAccountRelationship implements Persistable<String> {
+public class DependentAccountRelationship implements Persistable<Long> {
 
     /**
      *  it is Id and Primary key
@@ -54,15 +56,27 @@ public class DependentAccountRelationship implements Persistable<String> {
     /**
      * It is createdAt
      */
-    private LocalDateTime createdAt;
+    private LocalDateTime createdDate;
 
     /**
      * It is UpdatedAt
      */
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedDate;
+
+    @Transient
+    private boolean isNewDependentAccountRelationship;
 
     @Override
+    @Transient
     public boolean isNew() {
-        return false;
+        return this.isNewDependentAccountRelationship;
+    }
+
+    /**
+     * setAsNew() method sets an entity as a new record.
+     */
+    public DependentAccountRelationship setAsNew() {
+        isNewDependentAccountRelationship = true;
+        return this;
     }
 }
