@@ -36,7 +36,7 @@ public class ABHAEnrollmentDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                baseUrl("http://localhost:9188")
+                 baseUrl("http://abha2dev.abdm.gov.internal")
                 .build()
                 .get()
                 .uri(uri)
@@ -46,7 +46,7 @@ public class ABHAEnrollmentDBClient<T> {
     }
 
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
                 .build()
                 .post()
                 .uri(uri)

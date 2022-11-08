@@ -67,7 +67,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         String encodedXmluid = encoder.encodeToString(aadhaarResponseDto.getAadhaarUserKycDto().getSignature().getBytes());
         return accountService.findByXmlUid(encodedXmluid)
                 .flatMap(response -> {
-                        // send existing user details
                         return Mono.just(EnrolByAadhaarResponseDto.builder()
                                 .txnId(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                                 .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(),response))
@@ -75,7 +74,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 .build());
                 })
                 .switchIfEmpty( Mono.defer(()->{
-                    // create new user and send all kyc details
                     AccountDto accountDto = accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto);
                     String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
                     accountDto.setHealthIdNumber(newAbhaNumber);

@@ -10,8 +10,6 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface AccountRepository extends ReactiveCrudRepository<Accounts, String> {
-
-    @Query("SELECT * FROM accounts u where u.xmluid = :xmluid")
-    public Mono<Accounts> findByxmluid(@Param("xmluid") String xmluid);
+     Mono<Accounts> findByXmluid(@Param("xmluid") String xmluid);
 
 }
