@@ -9,4 +9,6 @@ public interface ABHAEnrollmentDBConstant {
     String GET_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     String UPDATE_TRANSACTION_BY_TXN_ID = "/{id}";
     String ENROLLMENT_LOG_PREFIX = "ENROLLMENT_DB: ";
+
+    String GET_ACCOUNT_BY_XML_UID = "/getByXml/{xmluid}";
 }

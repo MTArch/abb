@@ -39,4 +39,9 @@ public class AccountServiceImpl implements AccountService {
 		return accountRepository.save(account);	
 	}
 
+	@Override
+	public Mono<AccountDto> getAccountByXmlUid(String xmluid) {
+		return accountRepository.findByxmluid(xmluid).map(account -> modelMapper.map(account,AccountDto.class));
+	}
+
 }

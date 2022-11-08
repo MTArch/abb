@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 
 @Service
@@ -62,26 +63,31 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
         transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
 
-        AccountDto existingAccountDto = accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
-
-        if (accountService.isItNewUser(existingAccountDto)) {
-            // create new user and send all kyc details
-            AccountDto accountDto = accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto);
-            String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
-            accountDto.setHealthIdNumber(newAbhaNumber);
-            ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            //TODO update phr address in db
-            abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber))));
-            //TODO call account db update
-            Mono<AccountDto> accountDtoResponse = accountService.createAccountEntity(accountDto);
-            //TODO call transaction db service
-            //TODO delete transaction
-            return accountDtoResponse.flatMap(res -> handleCreateAccountResponse(res, enrolByAadhaarRequestDto, abhaProfileDto));
-
-        } else {
-            // send existing user
-            return null;
-        }
+        Base64.Encoder encoder = Base64.getEncoder();
+        String encodedXmluid = encoder.encodeToString(aadhaarResponseDto.getAadhaarUserKycDto().getSignature().getBytes());
+        return accountService.findByXmlUid(encodedXmluid)
+                .flatMap(response -> {
+                        // send existing user details
+                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                .txnId(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
+                                .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(),response))
+                                .responseTokensDto(new ResponseTokensDto())
+                                .build());
+                })
+                .switchIfEmpty( Mono.defer(()->{
+                    // create new user and send all kyc details
+                    AccountDto accountDto = accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto);
+                    String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+                    accountDto.setHealthIdNumber(newAbhaNumber);
+                    ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
+                    //TODO update phr address in db
+                    abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber))));
+                    //TODO call account db update
+                    Mono<AccountDto> newAccountDtoResponse = accountService.createAccountEntity(accountDto);
+                    //TODO call transaction db service
+                    //TODO delete transaction
+                    return newAccountDtoResponse.flatMap(response -> handleCreateAccountResponse(response, enrolByAadhaarRequestDto, abhaProfileDto));
+                }));
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, ABHAProfileDto abhaProfileDto) {

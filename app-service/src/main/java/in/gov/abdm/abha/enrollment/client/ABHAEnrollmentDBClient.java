@@ -36,7 +36,7 @@ public class ABHAEnrollmentDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                baseUrl("http://abha2dev.abdm.gov.internal")
+                baseUrl("http://localhost:9188")
                 .build()
                 .get()
                 .uri(uri)
@@ -46,7 +46,7 @@ public class ABHAEnrollmentDBClient<T> {
     }
 
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
+        return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .post()
                 .uri(uri)
@@ -64,6 +64,8 @@ public class ABHAEnrollmentDBClient<T> {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return GetMonoDatabase(t, ABHAEnrollmentConstant.DB_GET_TRANSACTION_BY_TXN_ID+id);
+            case "AccountDto":
+                return GetMonoDatabase(t, ABHAEnrollmentConstant.DB_GET_ACCOUNT_BY_XML_UID+id);
         }
         return Mono.empty();
     }
