@@ -17,7 +17,7 @@ public interface DependentAccountRelationshipService {
      * @param dependentAccountRelationshipDto
      * @return
      */
-    Mono addAccount(DependentAccountRelationshipDto dependentAccountRelationshipDto);
+    Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto);
 
 
 
@@ -26,5 +26,31 @@ public interface DependentAccountRelationshipService {
      * @return
      */
     Flux<DependentAccountRelationshipDto> getAllDependentAccountRelationship();
+
+    /**
+     * to fetch dependent account relationship details by id
+     *
+     * @param id
+     * @return
+     */
+
+    Mono<DependentAccountRelationshipDto> getDependentAccountRelationshipDetailById(Long id);
+
+    /**
+     * to update dependent account relationship details by Id
+     *
+     * @param dependentAccountRelationshipDto
+     * @param id
+     * @return
+     */
+    Mono updateDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
+
+    /**
+     * to delete dependent account relationship details by Id
+     * @param dependentAccountRelationshipDto
+     * @param id
+     * @return
+     */
+    Mono deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
 
 }

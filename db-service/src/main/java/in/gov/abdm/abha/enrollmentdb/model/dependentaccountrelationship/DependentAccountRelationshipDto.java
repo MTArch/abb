@@ -58,5 +58,4 @@ public class DependentAccountRelationshipDto {
      * It is UpdatedAt
      */
     private LocalDateTime updatedDate;
-
 }

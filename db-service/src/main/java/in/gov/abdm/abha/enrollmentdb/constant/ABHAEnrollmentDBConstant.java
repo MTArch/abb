@@ -11,7 +11,12 @@ public interface ABHAEnrollmentDBConstant {
     String ENROLLMENT_LOG_PREFIX = "ENROLLMENT_DB: ";
     String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " + "Valid Format Reference:" +
             " 1. The specified field is mandatory (not null), 2. The specified field shouldn't be Blank, 3. The specified field shouldn't be Empty.";
-     String DEPENDENTACCOUNTRELATIONSHIP_ENDPOINT = API_VERSION+"/dependentaccountrelationship";
+            
+    String DEPENDENT_ACCOUNT_RELATIONSHIP_ENDPOINT = API_VERSION+"/dependentaccountrelationship";
 
-     String GET_DEPENDENTACCOUNTRELATIONSHIP_BY_ID = "/{id}";
+    String UPDATE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+
+    String DELETE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+
+    String GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
 }

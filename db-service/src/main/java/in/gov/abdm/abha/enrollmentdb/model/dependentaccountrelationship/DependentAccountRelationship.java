@@ -66,8 +66,6 @@ public class DependentAccountRelationship implements Persistable<Long> {
     @Transient
     private boolean isNewDependentAccountRelationship;
 
-
-
     @Override
     @Transient
     public boolean isNew() {
