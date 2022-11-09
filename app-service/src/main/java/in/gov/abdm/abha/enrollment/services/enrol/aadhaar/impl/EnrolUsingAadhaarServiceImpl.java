@@ -17,6 +17,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account.impl.AccountServiceImpl;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
@@ -61,7 +62,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(res -> HandleAadhaarOtpResponse(enrolByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> HandleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    public Mono<EnrolByAadhaarResponseDto> HandleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
 
@@ -72,31 +73,14 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (accountService.isItNewUser(existingAccountDto)) {
             // create new user and send all kyc details
             AccountDto accountDto = accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto);
-            //Logic to Determine Age
-            // Get the Birth date from accountDto
-            LocalDate date = LocalDate.of(Integer.parseInt(accountDto.getYearOfBirth()),Integer.parseInt(accountDto.getMonthOfBirth()),Integer.parseInt(accountDto.getDayOfBirth()));
-            //Period is the predefined method to calculate age
-           Period age= Period.between(date,LocalDate.now());
-           //get the Age
-           int yob = age.getYears();
-
-           //Logic to check user is child or Adult
-            if(yob>=18){
-                //accountDto.setStatus(AbhaType.STANDARD.getValue());
-                //if user is greater than or equal to 18 years then set the Type as STANDARD
+            int age = Common.calculateYearDifference(Integer.parseInt(accountDto.getYearOfBirth()), Integer.parseInt(accountDto.getMonthOfBirth()), Integer.parseInt(accountDto.getDayOfBirth()), LocalDate.now());
+            if (age >= 18) {
                 accountDto.setType(AbhaType.STANDARD);
                 accountDto.setStatus(AccountStatus.ACTIVE.toString());
-            }
-            else {
-                //if user is greater than or equal to 18 years then set the Type as CHILD
+            } else {
                 accountDto.setType(AbhaType.CHILD);
                 accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
             }
-
-            //System.out.println(transactionDto.getStatus());
-            //System.out.println(accountDto.getStatus());
-
-
 
             String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
             accountDto.setHealthIdNumber(newAbhaNumber);
