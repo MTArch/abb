@@ -1,7 +1,9 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
+import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
@@ -12,8 +14,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDt
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.account.impl.AccountServiceImpl;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
@@ -22,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -56,7 +62,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(res -> HandleAadhaarOtpResponse(enrolByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> HandleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    public Mono<EnrolByAadhaarResponseDto> HandleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
 
@@ -67,6 +73,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (accountService.isItNewUser(existingAccountDto)) {
             // create new user and send all kyc details
             AccountDto accountDto = accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto);
+            int age = Common.calculateYearDifference(Integer.parseInt(accountDto.getYearOfBirth()), Integer.parseInt(accountDto.getMonthOfBirth()), Integer.parseInt(accountDto.getDayOfBirth()), LocalDate.now());
+            if (age >= 18) {
+                accountDto.setType(AbhaType.STANDARD);
+                accountDto.setStatus(AccountStatus.ACTIVE.toString());
+            } else {
+                accountDto.setType(AbhaType.CHILD);
+                accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
+            }
+
             String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
             accountDto.setHealthIdNumber(newAbhaNumber);
             ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
