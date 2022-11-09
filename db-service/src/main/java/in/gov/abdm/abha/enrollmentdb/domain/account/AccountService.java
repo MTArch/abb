@@ -34,4 +34,14 @@ public interface AccountService {
      * @return
      */
     Mono updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber);
+
+    /**
+     * to fetch account details by xmluid
+     *
+     * @param xmluid
+     * @return
+     */
+    Mono<AccountDto> getAccountByXmlUid(String xmluid);
+
+
 }

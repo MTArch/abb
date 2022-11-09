@@ -36,7 +36,7 @@ public class ABHAEnrollmentDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                baseUrl("http://abha2dev.abdm.gov.internal")
+                 baseUrl("http://abha2dev.abdm.gov.internal")
                 .build()
                 .get()
                 .uri(uri)
@@ -64,6 +64,8 @@ public class ABHAEnrollmentDBClient<T> {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return GetMonoDatabase(t, ABHAEnrollmentConstant.DB_GET_TRANSACTION_BY_TXN_ID+id);
+            case "AccountDto":
+                return GetMonoDatabase(t, ABHAEnrollmentConstant.DB_GET_ACCOUNT_BY_XML_UID+id);
         }
         return Mono.empty();
     }
