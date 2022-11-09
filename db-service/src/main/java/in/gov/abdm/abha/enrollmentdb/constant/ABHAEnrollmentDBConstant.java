@@ -25,4 +25,6 @@ public interface ABHAEnrollmentDBConstant {
     String GET_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
 
     String DELETE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+
+    String UPDATE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
 }
