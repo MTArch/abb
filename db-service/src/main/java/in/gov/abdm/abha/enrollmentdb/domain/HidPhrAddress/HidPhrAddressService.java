@@ -20,10 +20,10 @@ public interface HidPhrAddressService {
 
     /**
      * to delete Hid Phr Address details by Id
-     * @param hidPhrAddressDto
+     *
      * @param hidPhrAddressId
      * @return
      */
-    Mono deleteHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId);
+    Mono deleteHidPhrAddressById(Long hidPhrAddressId);
 
 }

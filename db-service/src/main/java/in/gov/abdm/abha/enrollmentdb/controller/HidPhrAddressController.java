@@ -21,8 +21,7 @@ public class HidPhrAddressController {
     }
 
     @DeleteMapping(value = ABHAEnrollmentDBConstant.DELETE_HID_PHR_ADDRESS_BY_ID)
-    public ResponseEntity<?>deleteHidPhrAddress(@RequestBody HidPhrAddressDto hidPhrAddressDto,
-                                                @PathVariable("hidPhrAddressId") Long hidPhrAddressId){
-        return ResponseEntity.ok(hidPhrAddressService.deleteHidPhrAddressById(hidPhrAddressDto,hidPhrAddressId));
+    public ResponseEntity<?>deleteHidPhrAddress(@PathVariable("hidPhrAddressId") Long hidPhrAddressId){
+        return ResponseEntity.ok(hidPhrAddressService.deleteHidPhrAddressById(hidPhrAddressId));
     }
 }

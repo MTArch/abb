@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 @Service
 public class HidPhrAddressServiceImpl implements HidPhrAddressService{
 
-
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
@@ -29,18 +28,15 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService{
 
     @Autowired
     private HidPhrAddressSubscriber hidPhrAddressSubscriber;
-
     @Override
     public Mono<HidPhrAddressDto> getHidPhrAddressById(Long hidPhrAddressId) {
 
         return hidPhrAddressRepository.findById(hidPhrAddressId).
                 map(HidPhrAddress -> modelMapper.map(HidPhrAddress, HidPhrAddressDto.class));
     }
-
     @Override
-    public Mono deleteHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
+    public Mono deleteHidPhrAddressById( Long hidPhrAddressId) {
 
-        HidPhrAddress hidPhrAddress= modelMapper.map(hidPhrAddressDto,HidPhrAddress.class);
         return hidPhrAddressRepository.deleteById(hidPhrAddressId);
     }
 }
