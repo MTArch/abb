@@ -10,6 +10,23 @@ import reactor.core.publisher.Mono;
 public interface HidPhrAddressService {
 
     /**
+     * to add new Hid Phr address
+     *
+     * @param hidPhrAddressDto
+     * @return
+     */
+    Mono addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto);
+
+    /**
+     * to update HidPhrAddress by Id
+     *
+     * @param hidPhrAddressDto
+     * @param hidPhrAddressId
+     * @return
+     */
+    Mono updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId);
+
+    /**
      * to fetch Hid Phr Address details by id
      *
      * @param hidPhrAddressId
