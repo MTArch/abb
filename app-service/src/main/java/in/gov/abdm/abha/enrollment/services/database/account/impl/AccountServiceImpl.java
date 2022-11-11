@@ -41,9 +41,8 @@ public class AccountServiceImpl implements AccountService {
     ABHAEnrollmentDBClient abhaEnrollmentDBClient;
 
     @Override
-    public AccountDto findByXmlUid(String xmlUid) {
-        //TODO call accounts table to fetch user details
-        return new AccountDto();
+    public Mono<AccountDto> findByXmlUid(String xmlUid) {
+        return abhaEnrollmentDBClient.getEntityById(AccountDto.class, xmlUid);
     }
 
     @Override
@@ -289,7 +288,6 @@ public class AccountServiceImpl implements AccountService {
     public Mono<AccountDto> createAccountEntity(AccountDto accountDto) {
         //TODO Call to DB service to save entity
 
-        accountDto.setXmlUID(accountDto.getHealthIdNumber());
         accountDto.setNewAccount(true);
 
         return abhaEnrollmentDBClient.addEntity(AccountDto.class, accountDto);

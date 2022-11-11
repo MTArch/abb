@@ -54,11 +54,17 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             {
                 if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==10)
                 {
-                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM.getValue())
+                    return mobileOrEmailOtpRequestDto.getOtpSystem()!=null
+                            && !mobileOrEmailOtpRequestDto.getOtpSystem().isEmpty()
+                            && !mobileOrEmailOtpRequestDto.getOtpSystem().equals("")
+                            && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM.getValue())
                             && isValidMobile(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
                 }
                 else if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==12) {
-                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())
+                    return mobileOrEmailOtpRequestDto.getOtpSystem()!=null
+                            && !mobileOrEmailOtpRequestDto.getOtpSystem().isEmpty()
+                            && !mobileOrEmailOtpRequestDto.getOtpSystem().equals("")
+                            && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())
                             && isValidAadhaar(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
                 }
 

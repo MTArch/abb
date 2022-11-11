@@ -17,7 +17,10 @@ public enum ScopeEnum {
     MOBILE_UPDATE("mobile-update"),
     MOBILE_VERIFY("mobile-verify"),
     EMAIL_UPDATE("email-update"),
+
     CHILD_ABHA_ENROL("child-abha-enrol"),
+    EMPTY(""),
+
     WRONG("wrong");
     private final String value;
 
