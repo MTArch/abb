@@ -18,7 +18,7 @@ public class HidPhrAddressDto {
 
 
     /**
-     *  it is Id and Primary key
+     * it is Id and Primary key
      */
 
     @Id
@@ -78,5 +78,7 @@ public class HidPhrAddressDto {
      * it is cm migrated
      */
     private Integer cmMigrated;
+
+    private boolean isNewHidPhrAddress;
 
 }
