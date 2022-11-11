@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
+
 /**
  *
  */
@@ -31,6 +33,11 @@ public class AccountController {
     public ResponseEntity<?> updateAccount(@RequestBody AccountDto accountDto,
                                            @PathVariable("healthIdNumber") String healthIdNumber) {
         return ResponseEntity.ok(accountService.updateAccountByHealthIdNumber(accountDto, healthIdNumber));
+    }
+
+    @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_XML_UID)
+    public ResponseEntity<?> getAccountByXmlUid(@PathVariable("xmluid") String xmluid) {
+        return ResponseEntity.ok(accountService.getAccountByXmlUid(new String(Base64.getDecoder().decode(xmluid))));
     }
 
 }
