@@ -15,6 +15,8 @@ public interface ABHAEnrollmentConstant {
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
 
+    String DB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/";
+
     String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
 
 //    Aadhaar Service URI
