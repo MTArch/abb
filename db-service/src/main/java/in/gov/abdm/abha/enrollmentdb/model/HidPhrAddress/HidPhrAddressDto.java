@@ -79,6 +79,9 @@ public class HidPhrAddressDto {
      */
     private Integer cmMigrated;
 
+    /**
+     * isNewTemplate of boolean type that stores the state of an entity object.
+     */
     private boolean isNewHidPhrAddress;
 
 }
