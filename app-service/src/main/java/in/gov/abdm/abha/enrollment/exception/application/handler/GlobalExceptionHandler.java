@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
@@ -69,6 +70,17 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DatabaseConstraintFailedException.class)
     public ResponseEntity<ErrorResponse> dbConstraintFailed(DatabaseConstraintFailedException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+    }
+
+    /**
+     * handling exception to show error message incase account doesn't exists with the xmluid
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
