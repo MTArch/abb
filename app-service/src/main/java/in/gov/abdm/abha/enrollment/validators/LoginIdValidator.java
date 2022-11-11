@@ -26,7 +26,8 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * Constant for 10-digit mobile number pattern matching
      */
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "(0/91)?[7-9]\\d{9}";
-
+    private static final String ABHA_NO_17_DIGIT_REGEX_PATTERN = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\\\.[A-Za-z0-9]+)))$";
+    private static final String ABHA_NO_REGEX_PATTERN ="^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.
      */
@@ -59,6 +60,11 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
                 else if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==12) {
                     return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())
                             && isValidAadhaar(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
+                }
+
+                else if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==17) {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABHA.getValue())
+                            && isValidAbha(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
                 }
             }
         }
@@ -104,5 +110,15 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      */
     private boolean isValidAadhaar(String aadhaar){
         return VerhoeffAlgorithm.validateVerhoeff(aadhaar);
+    }
+
+    /**@apiNote
+     *
+     * @param abha
+     * @return
+     */
+    private boolean isValidAbha(String abha){
+        return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches()
+                && Pattern.compile(ABHA_NO_17_DIGIT_REGEX_PATTERN).matcher(abha).matches();
     }
 }

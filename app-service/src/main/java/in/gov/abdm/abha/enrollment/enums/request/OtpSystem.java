@@ -15,6 +15,7 @@ import lombok.ToString;
 public enum OtpSystem {
     AADHAAR("aadhaar"),
     ABDM("abdm"),
+    ABHA("abha"),
     WRONG("wrong");
 
     private final String value;
