@@ -15,6 +15,8 @@ public enum ClassLevelExceptionConstants {
     loginHint(AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD),
     loginId(AbhaConstants.VALIDATION_ERROR_LOGIN_ID_FIELD),
     consent(AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD),
+    consentCode(AbhaConstants.VALIDATION_ERROR_CONSENT_CODE_FIELD),
+    consentVersion(AbhaConstants.VALIDATION_ERROR_CONSENT_VERSION_FIELD),
     otp(AbhaConstants.VALIDATION_ERROR_OTP_OBJECT),
     bio(AbhaConstants.VALIDATION_ERROR_BIO_OBJECT),
     demo(AbhaConstants.VALIDATION_ERROR_DEMO_OBJECT),
@@ -26,7 +28,8 @@ public enum ClassLevelExceptionConstants {
     gender(AbhaConstants.VALIDATION_ERROR_GENDER_FIELD),
     yob(AbhaConstants.PATTERN_MISMATCHED),
     mobile(AbhaConstants.MOBILE_NUMBER_MISSMATCH),
-    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID);
+    aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID),
+    otpSystem(AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD);
     private final String value;
 
 

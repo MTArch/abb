@@ -40,9 +40,8 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_OTP_VALUE_FIELD= "Invalid OTP Value";
 
     String VALIDATION_ERROR_CONSENT_FIELD= "Consent cannot be null or empty";
-    String VALIDATION_ERROR_CONSENT_CODE_FIELD= "Invalid Code or null or empty";
-    String VALIDATION_ERROR_CONSENT_VERSION_FIELD= "Invalid Version or null or empty";
-
+    String VALIDATION_ERROR_CONSENT_CODE_FIELD= "Invalid Consent Code";
+    String VALIDATION_ERROR_CONSENT_VERSION_FIELD= "Invalid Consent Version";
     String VALIDATION_ERROR_OTP_OBJECT= "otp cannot be null or empty OR timeStamp ,txnId or otpValue cannot be null or empty";
 
     String VALIDATION_ERROR_DEMO_OBJECT= "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";

@@ -25,6 +25,7 @@ public class MapperUtils {
         abhaProfileDto.setPinCode(accountDto.getPincode());
         abhaProfileDto.setEmail(accountDto.getEmail());
         abhaProfileDto.setAbhaStatus(AccountStatus.valueOf(accountDto.getStatus()));
+        abhaProfileDto.setABHAType(accountDto.getType());
         return abhaProfileDto;
     }
 }

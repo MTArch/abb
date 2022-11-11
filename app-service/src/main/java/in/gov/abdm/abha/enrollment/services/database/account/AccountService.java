@@ -7,11 +7,12 @@ import reactor.core.publisher.Mono;
 
 public interface AccountService {
 
-    AccountDto findByXmlUid(String xmlUid);
+    Mono<AccountDto> findByXmlUid(String xmlUid);
 
     AccountDto prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto);
 
     Mono<AccountDto> createAccountEntity(AccountDto accountDto);
 
     boolean isItNewUser(AccountDto accountDto);
+
 }

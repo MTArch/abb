@@ -18,7 +18,7 @@ public class HidPhrAddressDto {
 
 
     /**
-     *  it is Id and Primary key
+     * it is Id and Primary key
      */
 
     @Id
