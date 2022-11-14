@@ -35,9 +35,13 @@ public class OtpRequestController {
      */
     @PostMapping(ABHAEnrollmentConstant.MOBILE_OR_EMAIL_TOP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
-        if (mobileOrEmailOtpRequestDto.getScope().equals(ScopeEnum.ABHA_ENROL.getValue())) {
+
+        if (mobileOrEmailOtpRequestDto.getScope().get(0).getValue().equals(ScopeEnum.ABHA_ENROL.getValue())) {
+            System.out.println("inside ABHA Enroll");
             return otpRequestService.sendOtp(mobileOrEmailOtpRequestDto);
-        } else if (mobileOrEmailOtpRequestDto.getScope().equals(ScopeEnum.CHILD_ABHA_ENROL.getValue())) {
+        } else if (mobileOrEmailOtpRequestDto.getScope().get(0).getValue().equals(ScopeEnum.CHILD_ABHA_ENROL.getValue())) {
+            System.out.println("Inside Child Abha Enrol");
+            System.out.println(mobileOrEmailOtpRequestDto);
             return idpService.sendOtpByIDP(mobileOrEmailOtpRequestDto);
         }else{
             return null; //TODO Handle her scope exceptions
