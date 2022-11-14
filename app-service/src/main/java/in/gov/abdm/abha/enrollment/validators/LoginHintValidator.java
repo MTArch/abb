@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginHint;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -17,12 +18,11 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
      * LoginHint should be empty for abha creation using aadhaar flow
      *
      * @param mobileOrEmailOtpRequestDto object to validate
-     * @param context context in which the constraint is evaluated
-     *
+     * @param context                    context in which the constraint is evaluated
      * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        return mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getLoginHint().equals(StringConstants.EMPTY);
+        return !StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginHint());
     }
 }
