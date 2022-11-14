@@ -18,7 +18,7 @@ public class HidPhrAddressDto {
 
 
     /**
-     *  it is Id and Primary key
+     * it is Id and Primary key
      */
 
     @Id
@@ -78,5 +78,10 @@ public class HidPhrAddressDto {
      * it is cm migrated
      */
     private Integer cmMigrated;
+
+    /**
+     * isNewTemplate of boolean type that stores the state of an entity object.
+     */
+    private boolean isNewHidPhrAddress;
 
 }
