@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping(ABHAEnrollmentDBConstant.DEPENDENT_ACCOUNT_RELATIONSHIP_ENDPOINT)
 @RestController
 public class DependentAccountRelationshipController {
@@ -16,6 +18,11 @@ public class DependentAccountRelationshipController {
     @PostMapping
     public ResponseEntity<?>createAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto){
         return ResponseEntity.ok(dependentAccountRelationshipService.addDependentAccountRelationship(dependentAccountRelationshipDto));
+    }
+
+    @PostMapping
+    public ResponseEntity<?>createDependentRelationships(@RequestBody List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList){
+        return ResponseEntity.ok(dependentAccountRelationshipService.linkDependentAccountRelationships(dependentAccountRelationshipDtoList));
     }
 
     @GetMapping

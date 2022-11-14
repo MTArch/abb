@@ -1,10 +1,15 @@
 package in.gov.abdm.abha.enrollment.model.entities;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
  * It's a Data Transfer Object for Dependent_account_relationship
  */
+@Data
+@Builder
 public class DependentAccountRelationshipDto {
 
     /**

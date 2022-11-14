@@ -19,6 +19,7 @@ public enum ScopeEnum {
     EMAIL_UPDATE("email-update"),
     EMPTY(""),
     CHILD_ABHA_ENROL("child-abha-enrol"),
+    PARENT_ABHA_LINK("parent-abha-link"),
     WRONG("wrong");
 
     private final String value;

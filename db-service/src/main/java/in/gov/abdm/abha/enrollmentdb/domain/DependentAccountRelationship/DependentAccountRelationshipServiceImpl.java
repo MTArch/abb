@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 
 /**
  * A class which implements Business logic.
@@ -44,6 +46,13 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 
 
     }
+
+    @Override
+    public Flux<DependentAccountRelationshipDto> linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList) {
+       // DependentAccountRelationship dependentAccountRelationship= modelMapper.map(dependentAccountRelationshipDtoList,DependentAccountRelationship.class);
+        return dependentAccountRelationshipRepository.sa
+    }
+
     private Mono<DependentAccountRelationship> handle(DependentAccountRelationship dependentAccountRelationship, Long id) {
         dependentAccountRelationship.setId(id + 1);
         return dependentAccountRelationshipRepository.save(dependentAccountRelationship);

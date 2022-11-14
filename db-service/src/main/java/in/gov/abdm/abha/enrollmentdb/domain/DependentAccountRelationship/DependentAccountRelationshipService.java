@@ -4,6 +4,8 @@ import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.Dependen
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 
 /**
  * Service layer to perform crud operations on DependentAccountRelationship Entity
@@ -19,6 +21,8 @@ public interface DependentAccountRelationshipService {
      */
     Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto);
 
+
+    Flux linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);
 
 
     /**

@@ -8,7 +8,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthB
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
+import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponseDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

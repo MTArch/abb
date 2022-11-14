@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -36,7 +37,7 @@ public class ABHAEnrollmentDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl("http://abha2dev.abdm.gov.internal")
+                 baseUrl("http://localhost:9188")//http://abha2dev.abdm.gov.internal
                 .build()
                 .get()
                 .uri(uri)
@@ -46,7 +47,7 @@ public class ABHAEnrollmentDBClient<T> {
     }
 
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
+        return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .post()
                 .uri(uri)
@@ -54,6 +55,20 @@ public class ABHAEnrollmentDBClient<T> {
                 .body(Mono.just(row), t)
                 .retrieve()
                 .bodyToMono(t)
+                .onErrorResume(error -> {
+                    throw new DatabaseConstraintFailedException("Exception occurred , Postgres Database Constraint Failed");
+                });
+    }
+
+    private Flux<T> fluxPostDatabase(Class<T> t, String uri, T row) {
+        return webClient.baseUrl("http://localhost:9188")
+                .build()
+                .post()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(row), t)
+                .retrieve()
+                .bodyToFlux(t)
                 .onErrorResume(error -> {
                     throw new DatabaseConstraintFailedException("Exception occurred , Postgres Database Constraint Failed");
                 });
@@ -76,7 +91,17 @@ public class ABHAEnrollmentDBClient<T> {
                 return monoPostDatabase(t, ABHAEnrollmentConstant.DB_ADD_TRANSACTION_URI, row);
             case "AccountDto":
                 return monoPostDatabase(t, ABHAEnrollmentConstant.DB_ADD_ACCOUNT_URI, row);
+            case "DependentAccountRelationshipDto":
+                return monoPostDatabase(t,ABHAEnrollmentConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
         }
         return Mono.empty();
+    }
+
+    public Flux<T> addFluxEntity(Class<T> t, T row) {
+        switch (t.getSimpleName()) {
+            case "DependentAccountRelationshipDto":
+                return fluxPostDatabase(t,ABHAEnrollmentConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+        }
+        return Flux.empty();
     }
 }
