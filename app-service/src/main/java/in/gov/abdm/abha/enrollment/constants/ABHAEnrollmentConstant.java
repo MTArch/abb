@@ -24,4 +24,9 @@ public interface ABHAEnrollmentConstant {
     String AADHAAR_BASE_URI = "/api/v3/aadhaar/";
     String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
     String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
+
+    //    IDP Service URI
+
+    String IDP_BASE_URI = "/api/v3/identity";
+    String IDP_SEND_OTP_URI = AADHAAR_BASE_URI + "/authentication";
 }
