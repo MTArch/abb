@@ -82,10 +82,12 @@ public class LinkParentServiceImpl implements LinkParentService {
                     {
                         if(accountRelationshipDto!=null && accountRelationshipDto.getId()!=null)
                         {
-                            return handleDependentAccountResponse(value,linkParentRequestDto,accountRelationshipDto);
+                            return handleDependentAccountResponse(value,linkParentRequestDto);
                         }
                         return Mono.empty();
-                    });
+                    }).switchIfEmpty(Mono.defer(() -> {
+                    	return handleDependentAccountResponse(value,linkParentRequestDto);
+                    }));
                 }
                 return Mono.empty();
             });
@@ -122,17 +124,17 @@ public class LinkParentServiceImpl implements LinkParentService {
 //        });
 //    }
 
-    private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto, DependentAccountRelationshipDto accountRelationshipDto) {
+    private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto) {
         return Mono.just(LinkParentResponseDto.builder()
                 .txnId(linkParentRequestDto.getTxnId())
-                .abhaProfileDto(mapAccountToProfile(accountDto,accountRelationshipDto))
+                .abhaProfileDto(mapAccountToProfile(accountDto))
                 .build()
         );
     }
 
-    private ABHAProfileDto mapAccountToProfile(AccountDto accountDto,DependentAccountRelationshipDto accountRelationshipDto) {
+    private ABHAProfileDto mapAccountToProfile(AccountDto accountDto) {
         return ABHAProfileDto.builder()
-                .abhaNumber(accountRelationshipDto.getDependentHealthIdNumber())
+                .abhaNumber(accountDto.getHealthIdNumber())
                 .abhaStatus(AccountStatus.ACTIVE)
                 .ABHAType(AbhaType.CHILD)
                 .abhaStatusReasonCode(StringConstants.EMPTY)

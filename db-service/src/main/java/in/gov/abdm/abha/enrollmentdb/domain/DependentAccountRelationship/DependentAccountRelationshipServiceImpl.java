@@ -56,20 +56,15 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 //    }
 
     @Override
-    public Flux linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountDtos) {
+	public Mono linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountDtos) {
 
-        DependentAccountRelationshipSubscriberImpl.rowCount = (long)dependentAccountDtos.size();
+		DependentAccountRelationshipSubscriberImpl.rowCount = (long) dependentAccountDtos.size();
 
-//        Mono<Long> i = dependentAccountRelationshipRepository.getMaxId();
-//        i.flatMap(v->
-//        {
-//            return Mono.just(v);
-//        });
-
-        return dependentAccountRelationshipRepository.saveAll(dependentAccountDtos.parallelStream()
-                        .map(result->modelMapper.map(result,DependentAccountRelationship.class).setAsNew())
-                        .collect(Collectors.toList()));
-    }
+		dependentAccountRelationshipRepository.saveAll(dependentAccountDtos.parallelStream()
+				.map(result -> modelMapper.map(result, DependentAccountRelationship.class).setAsNew())
+				.collect(Collectors.toList())).subscribe(dependentAccountRelationshipSubscriber);
+		return Mono.empty();
+	}
 
     /** to uncomment later **/
 //    private Mono<DependentAccountRelationship> handle(DependentAccountRelationship dependentAccountRelationship, Long id) {
