@@ -22,7 +22,7 @@ public interface DependentAccountRelationshipService {
     Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto);
 
 
-    Mono linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);
+    Flux linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);
 
 
     /**
