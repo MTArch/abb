@@ -15,10 +15,10 @@ public class DependentAccountRelationshipController {
     @Autowired
     DependentAccountRelationshipService dependentAccountRelationshipService;
 
-    @PostMapping
-    public ResponseEntity<?>createAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto){
-        return ResponseEntity.ok(dependentAccountRelationshipService.addDependentAccountRelationship(dependentAccountRelationshipDto));
-    }
+//    @PostMapping
+//    public ResponseEntity<?>createAccount(@RequestBody DependentAccountRelationshipDto dependentAccountRelationshipDto){
+//        return ResponseEntity.ok(dependentAccountRelationshipService.addDependentAccountRelationship(dependentAccountRelationshipDto));
+//    }
 
     @PostMapping
     public ResponseEntity<?>createDependentRelationships(@RequestBody List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList){

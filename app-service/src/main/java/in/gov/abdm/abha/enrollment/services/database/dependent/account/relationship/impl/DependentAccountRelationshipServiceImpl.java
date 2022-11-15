@@ -51,17 +51,19 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     @Override
     public List<DependentAccountRelationshipDto> prepareDependentAccount(LinkParentRequestDto linkParentRequestDto, AccountDto accountDto) {
         List<DependentAccountRelationshipDto> list = new ArrayList<>();
-        DependentAccountRelationshipDto dependentAccountDto = null;
-        for (int i = 0; i < linkParentRequestDto.getParentAbhaRequestDtoList().size(); i++) {
-            dependentAccountDto.setParentHealthIdNumber(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getABHANumber());
-            dependentAccountDto.setDependentHealthIdNumber(accountDto.getHealthIdNumber());
-            dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship());
-            dependentAccountDto.setRelationshipProofDocumentLocation(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getDocument());
-            dependentAccountDto.setCreatedBy("anchal");
-            dependentAccountDto.setUpdatedBy("anchal");
-            dependentAccountDto.setCreatedDate(LocalDateTime.now());
-            dependentAccountDto.setUpdatedDate(LocalDateTime.now());
-            list.add(dependentAccountDto);
+        DependentAccountRelationshipDto dependentAccountDto = new DependentAccountRelationshipDto();
+        if(linkParentRequestDto.getParentAbhaRequestDtoList().size()>0 && accountDto!=null) {
+            for (int i = 0; i < linkParentRequestDto.getParentAbhaRequestDtoList().size(); i++) {
+                dependentAccountDto.setParentHealthIdNumber(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getABHANumber());
+                dependentAccountDto.setDependentHealthIdNumber(accountDto.getHealthIdNumber());
+                dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship());
+                dependentAccountDto.setRelationshipProofDocumentLocation(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getDocument());
+                dependentAccountDto.setCreatedBy("anchal");
+                dependentAccountDto.setUpdatedBy("anchal");
+                dependentAccountDto.setCreatedDate(LocalDateTime.now());
+                dependentAccountDto.setUpdatedDate(LocalDateTime.now());
+                list.add(dependentAccountDto);
+            }
         }
         return list;
     }
@@ -73,7 +75,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 
 
 //    @Override
-    public Flux<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
+    public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
         return abhaEnrollmentDBClient.addFluxEntity(DependentAccountRelationshipDto.class, dependentAccountRelationshipList);
     }
 

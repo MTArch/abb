@@ -77,7 +77,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 if(value!=null)
                 {
                     List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService.prepareDependentAccount(linkParentRequestDto,value);
-                    Flux<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
+                    Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
                     return dependentAccountRelationshipDtoFlux.flatMap(accountRelationshipDto->
                     {
                         if(accountRelationshipDto!=null && accountRelationshipDto.getId()!=null)

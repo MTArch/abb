@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,27 +37,48 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     @Autowired
     private DependentAccountRelationshipSubscriber dependentAccountRelationshipSubscriber;
 
+    /** To remove later **/
     @Override
-    public Mono<DependentAccountRelationship> addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto) {
-
-        DependentAccountRelationship dependentAccountRelationship= modelMapper.map(dependentAccountRelationshipDto,DependentAccountRelationship.class);
-        dependentAccountRelationship.setAsNew();
-        Mono<Long> i = dependentAccountRelationshipRepository.getMaxId();
-        return i.flatMap(k -> handle(dependentAccountRelationship, k));
-
-
+    public Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto) {
+        return null;
     }
+
+    /** to uncomment later **/
+//    @Override
+//    public Mono<DependentAccountRelationship> addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto) {
+//
+//        DependentAccountRelationship dependentAccountRelationship= modelMapper.map(dependentAccountRelationshipDto,DependentAccountRelationship.class);
+//        dependentAccountRelationship.setAsNew();
+//        Mono<Long> i = dependentAccountRelationshipRepository.getMaxId();
+//        return i.flatMap(k -> handle(dependentAccountRelationship, k));
+//
+//
+//    }
 
     @Override
-    public Flux<DependentAccountRelationshipDto> linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList) {
-       // DependentAccountRelationship dependentAccountRelationship= modelMapper.map(dependentAccountRelationshipDtoList,DependentAccountRelationship.class);
-        return dependentAccountRelationshipRepository.sa
+    public Mono linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountDtos) {
+
+        DependentAccountRelationshipSubscriberImpl.rowCount = (long)dependentAccountDtos.size();
+
+//        Mono<Long> i = dependentAccountRelationshipRepository.getMaxId();
+//        i.flatMap(v->
+//        {
+//            return Mono.just(v);
+//        });
+
+        dependentAccountRelationshipRepository.saveAll(dependentAccountDtos.parallelStream()
+                        .map(result->modelMapper.map(result,DependentAccountRelationship.class).setAsNew())
+                       // .map(result->modelMapper.map(result,DependentAccountRelationship.class).setId(v+1))
+                        .collect(Collectors.toList()))
+                .subscribe(dependentAccountRelationshipSubscriber);
+        return Mono.empty();
     }
 
-    private Mono<DependentAccountRelationship> handle(DependentAccountRelationship dependentAccountRelationship, Long id) {
-        dependentAccountRelationship.setId(id + 1);
-        return dependentAccountRelationshipRepository.save(dependentAccountRelationship);
-    }
+    /** to uncomment later **/
+//    private Mono<DependentAccountRelationship> handle(DependentAccountRelationship dependentAccountRelationship, Long id) {
+//        dependentAccountRelationship.setId(id + 1);
+//        return dependentAccountRelationshipRepository.save(dependentAccountRelationship);
+//    }
 
     @Override
     public Flux<DependentAccountRelationshipDto> getAllDependentAccountRelationship() {
