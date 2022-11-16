@@ -14,5 +14,5 @@ public enum LoginHint {
     MOBILE("mobile"),
     PHR_ADDRESS("phr-address");
 
-    private final String name;
+    private final String value;
 }

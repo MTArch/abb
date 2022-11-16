@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import java.util.List;
 @ValidScope
 @ValidLoginHint
 @ValidLoginId
+@ToString
 public class MobileOrEmailOtpRequestDto {
 
     /**

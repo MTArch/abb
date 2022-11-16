@@ -8,11 +8,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 /**
- * It is a Response class
+ * It is a Pojo class Parameters
  */
-public class Response {
+public class Parameters {
     /**
-     * It is a Request Id
+     * It is Key
      */
-    private String requestId;
+    private String key;
+    /**
+     * It is value
+     */
+    private String value;
 }

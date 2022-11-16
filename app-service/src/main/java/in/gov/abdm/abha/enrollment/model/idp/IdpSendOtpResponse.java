@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
-/**
- * It is IdpMobileSendOtpResponse pojo class
- */
-public class IdpMobileSendOtpResponse {
-
+//It is an POJO class IdpSendOtpResponse
+public class IdpSendOtpResponse {
+    /**
+     * It is a TransactionId
+     */
     private String transactionId;
-
+    /**
+     * It is a Response
+     */
     private Response response;
 }

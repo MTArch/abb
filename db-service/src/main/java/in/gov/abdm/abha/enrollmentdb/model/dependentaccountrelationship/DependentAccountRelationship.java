@@ -3,12 +3,16 @@ package in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Generated;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
+//import javax.persistence.GeneratedValue;
+//import javax.persistence.GenerationType;
 
 /**
  * It's a Dependent_account_relationship POJO class
@@ -16,14 +20,16 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DependentAccountRelationship implements Persistable<Long> {
+public class DependentAccountRelationship implements Persistable<BigInteger> {
 
     /**
      *  it is Id and Primary key
      */
 
     @Id
-    private Long id;
+    @Generated
+    //@GeneratedValue(strategy = GenerationType.AUTO)
+    private BigInteger id;
 
     /**
      * it is a parent_health_id_number it is a Foreign key
