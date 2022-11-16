@@ -47,6 +47,6 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_DEMO_OBJECT= "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_BIO_OBJECT= "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
-
+    String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE="No account found with aadhaar number.Please,create account by clicking create account link";
 
 }

@@ -1,20 +1,19 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
-import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
-import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
-import in.gov.abdm.abha.enrollment.services.idp.IdpService;
-import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
+import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
+import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
+import in.gov.abdm.abha.enrollment.services.idp.IdpService;
+import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
+import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin

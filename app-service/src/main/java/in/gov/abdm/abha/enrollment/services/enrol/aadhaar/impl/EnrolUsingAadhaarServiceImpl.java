@@ -1,11 +1,17 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -31,6 +37,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -126,4 +133,57 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             throw new UidaiException(aadhaarResponseDto);
         }
     }
+
+	@Override
+	public Mono<AuthByAadhaarResponseDto> verifyOtpChildAbha(AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+		Mono<TransactionDto> txnResponseDto = transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
+		return txnResponseDto.flatMap(res->verifyAadhaarOtpChildAbha(res,authByAadhaarRequestDto));
+	}
+
+	private Mono<AuthByAadhaarResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+		Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarClient.verifyOtp(
+				AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
+						.aadhaarTransactionId(transactionDto.getAadharTxn())
+						.otp(authByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
+						.build());
+
+		return aadhaarResponseDtoMono
+				.flatMap(res->HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto,res));
+	}
+
+	private Mono<AuthByAadhaarResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
+		handleAadhaarExceptions(aadhaarResponseDto);
+
+		Base64.Encoder encoder = Base64.getEncoder();
+		String encodedXmluid = encoder.encodeToString(aadhaarResponseDto.getAadhaarUserKycDto().getSignature().getBytes());
+
+		return accountService.findByXmlUid(encodedXmluid)
+				.flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
+				.flatMap(accountResponseDtoMono-> handleAccountListResponse(authByAadhaarRequestDto,Collections.singletonList(accountResponseDtoMono)))
+				.switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));
+	}
+
+	private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto) {
+		return Mono.just(AccountResponseDto.builder()
+				.ABHANumber(accountDto.getHealthIdNumber())
+				.name(accountDto.getName())
+				.preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
+				.yearOfBirth(accountDto.getYearOfBirth())
+				.gender(accountDto.getGender())
+				.mobile(accountDto.getMobile())
+				.email(accountDto.getEmail())
+				.build());
+	}
+
+	private Mono<AuthByAadhaarResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
+		if(accountDtoList!=null && !accountDtoList.isEmpty()) {
+			return Mono.just(AuthByAadhaarResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
+					.authResult(StringConstants.SUCCESS)
+					.accounts(accountDtoList)
+					.build());
+		}
+		else {
+			return Mono.empty();
+		}
+	}
 }

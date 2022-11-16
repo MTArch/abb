@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollmentdb.domain.DependentAccountRelationship;
 
 
+import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationship;
 import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationshipDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,10 +40,10 @@ public class DependentAccountRelationshipSubscriberImpl implements DependentAcco
      * Data notification sent by the Publisher in response to requests to
      * Subscription.request(long).
      *
-     * @param dependentAccountRelationshipDto the element signaled
+     * @param dependentAccountRelationship the element signaled
      */
     @Override
-    public void onNext(DependentAccountRelationshipDto dependentAccountRelationshipDto) {
+    public void onNext(DependentAccountRelationship dependentAccountRelationship) {
 
         log.info(ENROLLMENT_LOG_PREFIX + "Saving next");
     }
