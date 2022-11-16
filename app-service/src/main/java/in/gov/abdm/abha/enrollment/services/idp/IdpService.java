@@ -3,8 +3,8 @@ package in.gov.abdm.abha.enrollment.services.idp;
 import in.gov.abdm.abha.enrollment.client.IDPClient;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
-import in.gov.abdm.abha.enrollment.model.idp.IdpSendOtpRequest;
-import in.gov.abdm.abha.enrollment.model.idp.IdpSendOtpResponse;
+import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
+import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
@@ -55,7 +55,7 @@ public class IdpService {
         Mono<TransactionDto> createTransactionRes = transactionService.createTransactionEntity(transactionDto);
        // return Mono.just(mobileOrEmailOtpResponseDto);
 
-        return createTransactionRes.flatMap(res -> mobileOrEmailOtpResponse(res, transactionDto));
+        return createTransactionRes.flatMap(res -> mobileOrEmailOtpResponse(res));
     }
 
     /**
@@ -63,9 +63,9 @@ public class IdpService {
      *
      * @param transactionDto
      */
-    private Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtpResponse(TransactionDto createTransactionRes, TransactionDto transactionDto) {
-        if (!StringUtils.isEmpty(createTransactionRes.getAadharNo())) {
-            log.info("Transaction Id: "+createTransactionRes.getId()+" transaction : "+createTransactionRes.getTxnId());
+    private Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtpResponse(TransactionDto transactionDto) {
+        if (!StringUtils.isEmpty(transactionDto.getMobile())) {
+            log.info("Transaction Id: "+transactionDto.getId()+" transaction : "+transactionDto.getTxnId());
             return Mono.just(MobileOrEmailOtpResponseDto.builder()
                     .txnId(transactionDto.getTxnId().toString())
                     .message(OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING + Common.hidePhoneNumber(transactionDto.getMobile()))

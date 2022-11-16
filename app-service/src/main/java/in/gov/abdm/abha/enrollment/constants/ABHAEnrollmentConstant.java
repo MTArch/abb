@@ -7,6 +7,9 @@ public interface ABHAEnrollmentConstant {
     String ENROL_ENDPOINT = BASE_URI + "/enrol";
     String MOBILE_OR_EMAIL_TOP_ENDPOINT = "/mobileOrEmailOtp";
     String BY_AADHAAR_ENDPOINT = "/byAadhaar";
+    String AUTH_BYABDM_BASE_URI = "abha/v3";
+
+    String AUTH_BYABDM = "/auth/byAbdm";
 
 
 //    DB URIS
@@ -29,4 +32,5 @@ public interface ABHAEnrollmentConstant {
 
     String IDP_BASE_URI = "/api/v3/identity";
     String IDP_SEND_OTP_URI = AADHAAR_BASE_URI + "/authentication";
+    String IDP_VERIFY_OTP_URI  = IDP_BASE_URI+"/verify";
 }
