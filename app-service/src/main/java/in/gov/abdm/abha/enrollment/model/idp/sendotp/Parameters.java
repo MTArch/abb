@@ -1,5 +1,6 @@
-package in.gov.abdm.abha.enrollment.model.idp;
+package in.gov.abdm.abha.enrollment.model.idp.sendotp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,9 +15,11 @@ public class Parameters {
     /**
      * It is Key
      */
+    @JsonProperty("key")
     private String key;
     /**
      * It is value
      */
+    @JsonProperty("value")
     private String value;
 }
