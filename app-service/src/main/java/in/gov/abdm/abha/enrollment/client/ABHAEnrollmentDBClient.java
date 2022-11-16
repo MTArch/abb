@@ -60,7 +60,7 @@ public class ABHAEnrollmentDBClient<T> {
                 });
     }
 
-    private Flux<T> fluxPostDatabase(Class<T> t, String uri, T row) {
+    private Mono<T> fluxPostDatabase(Class<T> t, String uri, T row) {
         return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .post()
@@ -68,7 +68,7 @@ public class ABHAEnrollmentDBClient<T> {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(row), t)
                 .retrieve()
-                .bodyToFlux(t)
+                .bodyToMono(t)
                 .onErrorResume(error -> {
                     throw new DatabaseConstraintFailedException("Exception occurred , Postgres Database Constraint Failed");
                 });
@@ -97,11 +97,11 @@ public class ABHAEnrollmentDBClient<T> {
         return Mono.empty();
     }
 
-    public Flux<T> addFluxEntity(Class<T> t, T row) {
+    public Mono<T> addFluxEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "DependentAccountRelationshipDto":
                 return fluxPostDatabase(t,ABHAEnrollmentConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
         }
-        return Flux.empty();
+        return Mono.empty();
     }
 }

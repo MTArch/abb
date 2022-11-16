@@ -1,11 +1,12 @@
 package in.gov.abdm.abha.enrollment.validators;
+
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -26,7 +27,8 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * Constant for 10-digit mobile number pattern matching
      */
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "(0/91)?[7-9]\\d{9}";
-
+    private static final String ABHA_NO_17_DIGIT_REGEX_PATTERN = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\\\.[A-Za-z0-9]+)))$";
+    private static final String ABHA_NO_REGEX_PATTERN = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.
      */
@@ -39,37 +41,36 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * If otp system is abdm , login id will be mobile number and perform mobile regex validations
      *
      * @param mobileOrEmailOtpRequestDto object to validate
-     * @param context context in which the constraint is evaluated
-     *
+     * @param context                    context in which the constraint is evaluated
      * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 
-        if(mobileOrEmailOtpRequestDto.getLoginId()!=null
-                && !StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId()))
-        {
-            if(isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId()) && isValidInput(mobileOrEmailOtpRequestDto.getLoginId()))
-            {
-                if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==10)
-                {
-                    return mobileOrEmailOtpRequestDto.getOtpSystem()!=null
+        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())) {
+            if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId()) && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
+                String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+                if (loginId.length() == 10) {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem() != null
                             && !mobileOrEmailOtpRequestDto.getOtpSystem().isEmpty()
                             && !mobileOrEmailOtpRequestDto.getOtpSystem().equals("")
                             && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM.getValue())
                             && isValidMobile(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
-                }
-                else if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).length()==12) {
-                    return mobileOrEmailOtpRequestDto.getOtpSystem()!=null
+                } else if (loginId.length() == 12) {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem() != null
                             && !mobileOrEmailOtpRequestDto.getOtpSystem().isEmpty()
                             && !mobileOrEmailOtpRequestDto.getOtpSystem().equals("")
                             && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())
                             && isValidAadhaar(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
+                } else if (loginId.length() == 17) {
+                    return mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM.getValue())
+                            && isValidAbha(loginId);
                 }
             }
         }
         return false;
     }
+
     private boolean isValidInput(String loginId) {
         return !Pattern.compile("[0-9]+").matcher(loginId).matches()
                 && !Pattern.compile("[a-zA-Z]+").matcher(loginId).matches();
@@ -84,9 +85,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
         try {
             new String(Base64.getDecoder().decode(loginId));
             return true;
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -108,7 +107,16 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * @param aadhaar
      * @return
      */
-    private boolean isValidAadhaar(String aadhaar){
+    private boolean isValidAadhaar(String aadhaar) {
         return VerhoeffAlgorithm.validateVerhoeff(aadhaar);
+    }
+
+    /**
+     * @param abha
+     * @return
+     * @apiNote
+     */
+    private boolean isValidAbha(String abha) {
+        return true; //TODO
     }
 }

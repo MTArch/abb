@@ -1,4 +1,9 @@
 package in.gov.abdm.abha.enrollment.services.link.parent.impl;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -10,14 +15,9 @@ import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDt
 import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponseDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.dependent.account.relationship.DependentAccountRelationshipService;
-import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Service
 public class LinkParentServiceImpl implements LinkParentService {
@@ -77,15 +77,17 @@ public class LinkParentServiceImpl implements LinkParentService {
                 if(value!=null)
                 {
                     List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService.prepareDependentAccount(linkParentRequestDto,value);
-                    Flux<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
+                    Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
                     return dependentAccountRelationshipDtoFlux.flatMap(accountRelationshipDto->
                     {
                         if(accountRelationshipDto!=null && accountRelationshipDto.getId()!=null)
                         {
-                            return handleDependentAccountResponse(value,linkParentRequestDto,accountRelationshipDto);
+                            return handleDependentAccountResponse(value,linkParentRequestDto);
                         }
                         return Mono.empty();
-                    });
+                    }).switchIfEmpty(Mono.defer(() -> {
+                    	return handleDependentAccountResponse(value,linkParentRequestDto);
+                    }));
                 }
                 return Mono.empty();
             });
@@ -122,17 +124,17 @@ public class LinkParentServiceImpl implements LinkParentService {
 //        });
 //    }
 
-    private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto, DependentAccountRelationshipDto accountRelationshipDto) {
+    private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto) {
         return Mono.just(LinkParentResponseDto.builder()
                 .txnId(linkParentRequestDto.getTxnId())
-                .abhaProfileDto(mapAccountToProfile(accountDto,accountRelationshipDto))
+                .abhaProfileDto(mapAccountToProfile(accountDto))
                 .build()
         );
     }
 
-    private ABHAProfileDto mapAccountToProfile(AccountDto accountDto,DependentAccountRelationshipDto accountRelationshipDto) {
+    private ABHAProfileDto mapAccountToProfile(AccountDto accountDto) {
         return ABHAProfileDto.builder()
-                .abhaNumber(accountRelationshipDto.getDependentHealthIdNumber())
+                .abhaNumber(accountDto.getHealthIdNumber())
                 .abhaStatus(AccountStatus.ACTIVE)
                 .ABHAType(AbhaType.CHILD)
                 .abhaStatusReasonCode(StringConstants.EMPTY)

@@ -1,25 +1,22 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
-import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
-import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponseDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
-import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
-import java.util.Collections;
-import java.util.UUID;
 
 @RestController
 @CrossOrigin
