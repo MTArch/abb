@@ -16,7 +16,7 @@ public class HidPhrAddressController {
     HidPhrAddressService hidPhrAddressService;
 
     @PostMapping
-    public ResponseEntity<?> createHidPhrAddress(@RequestBody HidPhrAddressDto hidPhrAddressDto) {
+    public ResponseEntity<?>  createHidPhrAddress(@RequestBody HidPhrAddressDto hidPhrAddressDto) {
         return ResponseEntity.ok(hidPhrAddressService.addHidPhrAddress(hidPhrAddressDto));
     }
 

@@ -1,5 +1,12 @@
 package in.gov.abdm.abha.enrollment.services.idp;
 
+
+import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.client.IDPClient;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -10,14 +17,8 @@ import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
-import static in.gov.abdm.abha.enrollment.services.otp_request.impl.OtpRequestServiceImpl.OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING;
 @Slf4j
 @Service
 /**
@@ -27,23 +28,26 @@ public class IdpService {
 
     public static final String SCOPE = "OTP";
     public static final String MESSAGE = "OTP is sent to Aadhaar/ABHA registered mobile ending xxx3604";
+
+    public static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile ending ";
+
     @Autowired
     IDPClient idpClient;
+
     @Autowired
     TransactionService transactionService;
 
-    public Mono<MobileOrEmailOtpResponseDto> sendOtpByIDP(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
-        if(mobileOrEmailOtpRequestDto.getLoginHint().equalsIgnoreCase(LoginHint.ABHA_NUMBER.getValue())){
-            IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
-            idpSendOtpRequest.setScope(SCOPE);
+    public Mono<MobileOrEmailOtpResponseDto> sendMobileOtpByIDP(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+
+        if (mobileOrEmailOtpRequestDto.getLoginHint().equalsIgnoreCase(String.valueOf(LoginHint.MOBILE))) {
+
+            IdpSendOtpRequest idpMobileSendOtpRequest = new IdpSendOtpRequest();
+            idpMobileSendOtpRequest.setScope(SCOPE);
             TransactionDto transactionDto = new TransactionDto();
             transactionDto.setTxnId(UUID.randomUUID());
-            Mono<IdpSendOtpResponse> idpSendOtpResponse = idpClient.sendOtp(idpSendOtpRequest);
-            System.out.println("Inside IDPService.sendOtpByIDP if Condition");
-            return idpSendOtpResponse.flatMap(idpSendOtpRes->HandleIdpSendOtpResponse(idpSendOtpRes, transactionDto));
+            Mono<IdpSendOtpResponse> idpMobileSendOtpResponse = idpClient.sendOtp(idpMobileSendOtpRequest);
+            return idpMobileSendOtpResponse.flatMap(res -> HandleIdpSendOtpResponse(res, transactionDto));
         }
-
-        System.out.println("Inside IDPService.sendOtpByIDP if Condition");
         return null;
     }
 
@@ -51,15 +55,13 @@ public class IdpService {
         MobileOrEmailOtpResponseDto mobileOrEmailOtpResponseDto = new MobileOrEmailOtpResponseDto();
         mobileOrEmailOtpResponseDto.setTxnId("");
         mobileOrEmailOtpResponseDto.setMessage(MESSAGE);
-        System.out.println("Inside IDPService.HandleIdpSendOtpResponse");
         Mono<TransactionDto> createTransactionRes = transactionService.createTransactionEntity(transactionDto);
-       // return Mono.just(mobileOrEmailOtpResponseDto);
 
         return createTransactionRes.flatMap(res -> mobileOrEmailOtpResponse(res));
     }
-
+    
     /**
-     * update transaction details into database by calling abha db service
+     * update transaction details into database
      *
      * @param transactionDto
      */
@@ -74,6 +76,18 @@ public class IdpService {
             return Mono.empty();
         }
     }
+    
+    public Mono<MobileOrEmailOtpResponseDto> sendOtpByIDP(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
+        if(mobileOrEmailOtpRequestDto.getLoginHint().equalsIgnoreCase(LoginHint.ABHA_NUMBER.getValue())){
+            IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
+            idpSendOtpRequest.setScope(SCOPE);
+            TransactionDto transactionDto = new TransactionDto();
+            transactionDto.setTxnId(UUID.randomUUID());
+            Mono<IdpSendOtpResponse> idpSendOtpResponse = idpClient.sendOtp(idpSendOtpRequest);
+            return idpSendOtpResponse.flatMap(idpSendOtpRes->HandleIdpSendOtpResponse(idpSendOtpRes, transactionDto));
+        }
 
+        return null;
+    }
 
 }
