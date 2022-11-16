@@ -292,5 +292,7 @@ public class AccountDto {
     public AccountDto(@DefaultValue("Standard") AbhaType type){
         this.type=type;
     }
+
+    private String preferredAbhaAddress;
     
 }
