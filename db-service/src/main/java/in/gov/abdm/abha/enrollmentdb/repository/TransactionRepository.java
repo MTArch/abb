@@ -18,4 +18,5 @@ public interface TransactionRepository extends ReactiveCrudRepository<Transectio
 	@Query("SELECT * FROM transection t where t.txn_id = :txnId")
 	public Mono<Transection> findByTxnId(@Param("txnId") String txnId);
 
+
 }

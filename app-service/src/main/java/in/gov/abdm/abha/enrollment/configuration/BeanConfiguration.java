@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-public class beanConfiguration {
+public class BeanConfiguration {
 
     @Autowired
     NotificationDBClient<Templates> notificationDBClient;
@@ -29,6 +29,8 @@ public class beanConfiguration {
         notificationDBClient.getAll(Templates.class).collectList().doOnError(throwable -> {
             templates.addAll(Common.loadDummyTemplates());
         }).subscribe(templates::addAll);
+        //TODO remove
+        templates.addAll(Common.loadDummyTemplates());
         return templates;
     }
 }

@@ -69,7 +69,7 @@ public class OtpRequestService {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
-        transactionDtoMono.flatMap(transactionDto -> {
+        return transactionDtoMono.flatMap(transactionDto -> {
             Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
                     phoneNumber,
                     OTP_SUBJECT,
@@ -79,18 +79,18 @@ public class OtpRequestService {
                 if (response.getStatus().equals(SENT)) {
                     transactionDto.setOtp(Argon2.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                    transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
+                    return transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
                                     .message(OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
                                     .build()));
+                }else{
+                    throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
                 }
-                throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
             });
         }).switchIfEmpty(Mono.defer(() -> {
             throw new GenericExceptionMessage(TRANSACTION_DETAILS_NOT_FOUND);
         }));
-        throw new GenericExceptionMessage(FAILED_TO_SEND_OTP);
     }
 
 

@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -37,7 +37,7 @@ public class AbhaDBClient<T> {
 
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl("http://abha2dev.abdm.gov.internal")
+                 baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .get()
                 .uri(uri)
@@ -47,7 +47,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -61,7 +61,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> fluxPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -75,7 +75,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> monoPatchDatabase(Class<T> t, String uri, T row, String id) {
-        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .patch()
                 .uri(uri,id)
@@ -92,9 +92,9 @@ public class AbhaDBClient<T> {
     public Mono<T> getEntityById(Class<T> t, String id) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
-                return GetMonoDatabase(t, EnrollConstant.DB_GET_TRANSACTION_BY_TXN_ID + id);
+                return GetMonoDatabase(t, URIConstant.DB_GET_TRANSACTION_BY_TXN_ID + id);
             case "AccountDto":
-                return GetMonoDatabase(t, EnrollConstant.DB_GET_ACCOUNT_BY_XML_UID + id);
+                return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_XML_UID + id);
         }
         return Mono.empty();
     }
@@ -102,11 +102,11 @@ public class AbhaDBClient<T> {
     public Mono<T> addEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
-                return monoPostDatabase(t, EnrollConstant.DB_ADD_TRANSACTION_URI, row);
+                return monoPostDatabase(t, URIConstant.DB_ADD_TRANSACTION_URI, row);
             case "AccountDto":
-                return monoPostDatabase(t, EnrollConstant.DB_ADD_ACCOUNT_URI, row);
+                return monoPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_URI, row);
             case "DependentAccountRelationshipDto":
-                return monoPostDatabase(t,EnrollConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+                return monoPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
         }
         return Mono.empty();
     }
@@ -114,7 +114,7 @@ public class AbhaDBClient<T> {
     public Mono<T> updateEntity(Class<T> t, T row, String id) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
-                return monoPatchDatabase(t, EnrollConstant.DB_UPDATE_TRANSACTION_URI, row, id);
+                return monoPatchDatabase(t, URIConstant.DB_UPDATE_TRANSACTION_URI, row, id);
         }
         return Mono.empty();
     }
@@ -122,7 +122,7 @@ public class AbhaDBClient<T> {
     public Mono<T> addFluxEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "DependentAccountRelationshipDto":
-                return fluxPostDatabase(t,EnrollConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+                return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
         }
         return Mono.empty();
     }

@@ -29,6 +29,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
+import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     TransactionService transactionService;
     @Autowired
     AadhaarClient aadhaarClient;
+    @Autowired
+    RSAUtil rsaUtil;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
@@ -76,10 +79,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         handleAadhaarExceptions(aadhaarResponseDto);
 
         transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-//TODO should not encode and check
-        Base64.Encoder encoder = Base64.getEncoder();
-        String encodedXmluid = encoder.encodeToString(aadhaarResponseDto.getAadhaarUserKycDto().getSignature().getBytes());
-        return accountService.findByXmlUid(encodedXmluid)
+        String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
+        return accountService.findByXmlUid(encodedXmlUid)
                 .flatMap(existingAccount -> {
                     return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
                 })
@@ -119,24 +120,23 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .flatMap(verifyDemographicResponse -> {
                         if (verifyDemographicResponse.isVerified()) {
                             accountDto.setMobile(userEnteredPhoneNumber);
+                            abhaProfileDto.setMobile(userEnteredPhoneNumber);
                         }
                         //update transaction table and create account in account table
                         //account status is active
-                        return updateTransactionEntity(transactionDto, abhaProfileDto)
-                                .flatMap(transactionResponse-> accountService.createAccountEntity(accountDto))
+                        return accountService.createAccountEntity(accountDto)
                                 .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                     });
         } else {
             //update transaction table and create account in account table
             //account status is active
-            return updateTransactionEntity(transactionDto, abhaProfileDto)
-                    .flatMap(transactionResponse-> accountService.createAccountEntity(accountDto))
+            return accountService.createAccountEntity(accountDto)
                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
         }
     }
 
     private Mono<EnrolByAadhaarResponseDto> updateTransactionEntity(TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
-        Mono<TransactionDto> transactionDtoMono = transactionService.updateTransactionEntity(transactionDto,transactionDto.getTxnId().toString());
+        Mono<TransactionDto> transactionDtoMono = transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString());
         return transactionDtoMono.flatMap(response -> handleUpdateTransactionResponse(response, abhaProfileDto));
     }
 
@@ -172,10 +172,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private VerifyDemographicRequest prepareVerifyDemographicRequest(AccountDto accountDto, TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         return VerifyDemographicRequest.builder()
-                .aadhaarNumber(transactionDto.getAadharNo())
+                .aadhaarNumber(rsaUtil.decrypt(transactionDto.getAadharNo()))
                 .name(accountDto.getName())
                 .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
-                .gender(accountDto.getGender())
                 .build();
     }
 
@@ -199,10 +198,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private Mono<AuthByAadhaarResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
         handleAadhaarExceptions(aadhaarResponseDto);
 
-        Base64.Encoder encoder = Base64.getEncoder();
-        String encodedXmluid = encoder.encodeToString(aadhaarResponseDto.getAadhaarUserKycDto().getSignature().getBytes());
-
-        return accountService.findByXmlUid(encodedXmluid)
+        String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
+        return accountService.findByXmlUid(encodedXmlUid)
                 .flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
                 .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono)))
                 .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));

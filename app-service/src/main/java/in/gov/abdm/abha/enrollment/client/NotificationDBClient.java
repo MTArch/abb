@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,7 +14,7 @@ public class NotificationDBClient<T> {
     private WebClient.Builder webClient;
 
     private Flux<T> fluxGetDatabase(Class<T> t, String uri) {
-        return webClient.baseUrl(EnrollConstant.NOTIFICATION_DB_ENDPOINT_URI)
+        return webClient.baseUrl(URIConstant.NOTIFICATION_DB_ENDPOINT_URI)
                 .build()
                 .get()
                 .uri(uri)
@@ -26,7 +26,7 @@ public class NotificationDBClient<T> {
     public Flux<T> getAll(Class<T> t) {
         switch (t.getSimpleName()) {
             case "Template":
-                return fluxGetDatabase(t, EnrollConstant.NOTIFICATION_DB_GET_ALL_TEMPLATES_URI);
+                return fluxGetDatabase(t, URIConstant.NOTIFICATION_DB_GET_ALL_TEMPLATES_URI);
         }
         return Flux.empty();
     }

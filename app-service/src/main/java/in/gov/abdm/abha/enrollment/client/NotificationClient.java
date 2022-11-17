@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationRequestDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import org.apache.http.HttpHeaders;
@@ -17,10 +17,10 @@ public class NotificationClient {
     private WebClient.Builder webClient;
 
     public Mono<NotificationResponseDto> sendOtp(NotificationRequestDto notificationRequestDto) {
-        return webClient.baseUrl(EnrollConstant.NOTIFICATION_ENDPOINT_URI)
+        return webClient.baseUrl(URIConstant.NOTIFICATION_ENDPOINT_URI)
                 .build()
                 .post()
-                .uri(EnrollConstant.NOTIFICATION_SEND_OTP_URI)
+                .uri(URIConstant.NOTIFICATION_SEND_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(BodyInserters.fromValue(notificationRequestDto))
                 .retrieve()
