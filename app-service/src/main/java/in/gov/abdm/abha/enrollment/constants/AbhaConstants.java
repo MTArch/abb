@@ -31,25 +31,35 @@ public interface AbhaConstants {
     String AADHAAR_NUMBER_INVALID = "Invalid Aadhaar Number";
     String PATTERN_MISMATCHED = "Pattern Mismatched for Year of Birth";
     String MOBILE_NUMBER_MISSMATCH = "Invalid Mobile Number";
-    String ABHA_ID= "ABHA_ID";
+    String ABHA_ID = "ABHA_ID";
     String INVALID_NAME_FORMAT = "Invalid Name format";
-    String VALIDATION_ERROR_GENDER_FIELD= "Invalid Gender";
+    String VALIDATION_ERROR_GENDER_FIELD = "Invalid Gender";
 
-    String VALIDATION_EMPTY_AUTHMETHOD= "AuthMethod cannot be null or empty";
+    String VALIDATION_EMPTY_AUTHMETHOD = "AuthMethod cannot be null or empty";
 
-    String VALIDATION_ERROR_AUTHMETHOD= "Invalid AuthMethod";
-    String VALIDATION_ERROR_TIMESTAMP_FIELD= "Invalid Timestamp";
-    String VALIDATION_ERROR_OTP_VALUE_FIELD= "Invalid OTP Value";
+    String VALIDATION_ERROR_AUTHMETHOD = "Invalid AuthMethod";
+    String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
+    String VALIDATION_ERROR_OTP_VALUE_FIELD = "Invalid OTP Value";
 
-    String VALIDATION_ERROR_CONSENT_FIELD= "Consent cannot be null or empty";
-    String VALIDATION_ERROR_CONSENT_CODE_FIELD= "Invalid Consent Code";
-    String VALIDATION_ERROR_CONSENT_VERSION_FIELD= "Invalid Consent Version";
-    String VALIDATION_ERROR_OTP_OBJECT= "otp cannot be null or empty OR timeStamp ,txnId or otpValue cannot be null or empty";
+    String VALIDATION_ERROR_CONSENT_FIELD = "Consent cannot be null or empty";
+    String VALIDATION_ERROR_CONSENT_CODE_FIELD = "Invalid Consent Code";
+    String VALIDATION_ERROR_CONSENT_VERSION_FIELD = "Invalid Consent Version";
+    String VALIDATION_ERROR_OTP_OBJECT = "otp cannot be null or empty OR timeStamp ,txnId or otpValue cannot be null or empty";
 
-    String VALIDATION_ERROR_DEMO_OBJECT= "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";
+    String VALIDATION_ERROR_DEMO_OBJECT = "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";
 
-    String VALIDATION_ERROR_BIO_OBJECT= "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
-    String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE="No account found with aadhaar number.Please,create account by clicking create account link";
+    String VALIDATION_ERROR_BIO_OBJECT = "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
+    String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with aadhaar number.Please,create account by clicking create account link";
+
+    String VALIDATION_ERROR_PARENT_ABHA_REQUEST_DEMO_OBJECT = "ParentAbhaRequest cannot be null or empty OR ABHANumber ,yearOfBirth,name,gender,email,relationship,document,or mobile cannot be null or empty";
+
+    String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
+
+    String VALIDATION_NULL_ABHA_NUMBER = " Abha Number can not be null";
+
+    String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
+
+    String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
 
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";

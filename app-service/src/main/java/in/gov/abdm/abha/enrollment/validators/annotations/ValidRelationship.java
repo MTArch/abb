@@ -1,7 +1,8 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.validators.OtpValidator;
+import in.gov.abdm.abha.enrollment.validators.RelationshipValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -11,20 +12,14 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/**
- * Annotated interface for otp validation
- */
 @Retention(RUNTIME)
-@Constraint(validatedBy = OtpValidator.class)
+@Constraint(validatedBy = RelationshipValidator.class)
 @Target({TYPE})
-public @interface Otp {
-    String message() default AbhaConstants.VALIDATION_ERROR_OTP_OBJECT;
+public @interface ValidRelationship {
 
-    Class<?>[] groups() default {};
+    public String message() default AbhaConstants.VALIDATION_ERROR_RELATIONSHIP_FIELD;
 
-    Class<? extends Payload>[] payload() default {};
+    public Class<?>[] groups() default {};
 
-    boolean encrypted() default false;
-
-    boolean required() default true;
+    public Class<? extends Payload>[] payload() default {};
 }
