@@ -11,5 +11,5 @@ public interface TransactionService {
 
     Mono<TransactionDto> getTransactionByTxnId(String txnId);
 
-    Mono<Transection> updateTransactionById(TransactionDto var1, Long var2);
+    Mono<Transection> updateTransactionById(TransactionDto var1, String var2);
 }

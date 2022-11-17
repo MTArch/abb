@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class AuthByAadhaarRequestDto {
 
     @JsonProperty("scope")
-    ArrayList<ScopeEnum> scope;
+    ArrayList<Scopes> scope;
 
     @JsonProperty("authData")
     AuthData authData;

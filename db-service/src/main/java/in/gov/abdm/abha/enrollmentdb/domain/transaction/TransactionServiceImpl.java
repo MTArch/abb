@@ -50,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<Transection> updateTransactionById(TransactionDto transactionDto, Long id) {
+    public Mono<Transection> updateTransactionById(TransactionDto transactionDto, String id) {
         Transection transaction = modelMapper.map(transactionDto, Transection.class);
         return transactionRepository.save(transaction);
     }

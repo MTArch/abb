@@ -3,7 +3,7 @@ package in.gov.abdm.abha.enrollment.exception.aadhaar.helper;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.model.ErrorCode;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.model.UidaiErrorCode;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
