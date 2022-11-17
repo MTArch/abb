@@ -1,9 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
-import in.gov.abdm.abha.enrollment.model.authbyabdm.AuthByAbdmResponse;
-import in.gov.abdm.abha.enrollment.model.authbyabdm.AuthData;
-import in.gov.abdm.abha.enrollment.model.authbyabdm.Otp;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
@@ -20,13 +17,6 @@ public class IDPClient<T> {
 
     @Autowired
     private WebClient.Builder webClient;
-    @Autowired
-    AuthByAbdmResponse authByAbdmResponse;
-    @Autowired
-    AuthData authData;
-    @Autowired
-    Otp otp;
-
     //call to IDP service
     public Mono<IdpSendOtpResponse> sendOtp(IdpSendOtpRequest idpSendOtpRequest) {
         //global2dev.abdm.gov.internal/api/v3/identity/authentication

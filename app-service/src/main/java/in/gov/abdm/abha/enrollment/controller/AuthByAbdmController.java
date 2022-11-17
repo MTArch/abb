@@ -17,13 +17,13 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
-@RequestMapping(ABHAEnrollmentConstant.AUTH_BY_ABDM_BASE_URI)
+@RequestMapping(ABHAEnrollmentConstant.AUTH_BYABDM_BASE_URI)
 public class AuthByAbdmController {
 	
     @Autowired
     AuthByAbdmService authByAbdmService;
 
-    @PostMapping(ABHAEnrollmentConstant.AUTH_BY_ABDM)
+    @PostMapping(ABHAEnrollmentConstant.AUTH_BYABDM)
     public Mono<AuthByAbdmResponse> authByAbdm(@Valid @RequestBody AuthByAbdmRequest authByAbdmRequest){
       return authByAbdmService.verifyOtp();
     }

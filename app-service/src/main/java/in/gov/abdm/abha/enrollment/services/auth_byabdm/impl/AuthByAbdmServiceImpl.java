@@ -11,8 +11,7 @@ import reactor.core.publisher.Mono;
 public class AuthByAbdmServiceImpl<T> implements AuthByAbdmService<T> {
     @Autowired
     IDPClient idpClient;
-    @Autowired
-    IdpVerifyOtpResponse idpVerifyOtpResponse;
+
 
     @Override
     public Mono<IdpVerifyOtpResponse> verifyOtp() {
