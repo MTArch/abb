@@ -2,12 +2,14 @@ package in.gov.abdm.abha.enrollment.model.link.parent.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.link.parent.Relationship;
 import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,7 +25,7 @@ public class ParentAbhaRequestDto {
 
 
     @JsonProperty("ABHANumber")
-    @NotNull(message = AbhaConstants.ABHA_ID)
+    @NotNull(message = AbhaConstants.VALIDATION_NULL_ABHA_NUMBER)
     private String ABHANumber;
 
     @JsonProperty("name")
@@ -47,7 +49,7 @@ public class ParentAbhaRequestDto {
 
     @JsonProperty("relationship")
     @NotNull
-    private String relationship;
+    private List<Relationship> relationship;
 
     @JsonProperty("document")
     @NotNull

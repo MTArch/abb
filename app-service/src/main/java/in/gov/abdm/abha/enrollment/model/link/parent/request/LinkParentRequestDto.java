@@ -2,11 +2,11 @@ package in.gov.abdm.abha.enrollment.model.link.parent.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.link.parent.ParentScope;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidChildAbhaRequest;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidParentAbhaRequest;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidParentScope;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ValidTransactionId
-@ValidScope
+@ValidParentScope
 @ValidParentAbhaRequest
 @ValidChildAbhaRequest
 
@@ -33,7 +33,7 @@ public class LinkParentRequestDto {
 
     @JsonProperty("scope")
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
-    private List<ScopeEnum> scope;
+    private List<ParentScope> scope;
 
     //    @JsonProperty("ParentAbha")
 //    private ParentAbhaRequestDto parentAbhaRequestDto;
