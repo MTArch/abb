@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,5 +23,5 @@ public class IdpSendOtpRequest {
      * It is a Parameters
      */
     @JsonProperty("parameters")
-    private ArrayList<Parameters> parameters;
+    private List<Parameters> parameters;
 }

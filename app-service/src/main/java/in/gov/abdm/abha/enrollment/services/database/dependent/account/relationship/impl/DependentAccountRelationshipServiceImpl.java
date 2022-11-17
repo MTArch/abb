@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.database.dependent.account.relationship.impl;
 
-import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.text.DateFormat;
@@ -32,7 +31,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
     @Autowired
-    ABHAEnrollmentDBClient abhaEnrollmentDBClient;
+    AbhaDBClient abhaDBClient;
 
 //    @Override
 //    public DependentAccountRelationshipDto prepareDependentAccount(LinkParentRequestDto linkParentRequestDto, AccountDto accountDto) {
@@ -76,7 +75,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 
 //    @Override
     public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
-        return abhaEnrollmentDBClient.addFluxEntity(DependentAccountRelationshipDto.class, dependentAccountRelationshipList);
+        return abhaDBClient.addFluxEntity(DependentAccountRelationshipDto.class, dependentAccountRelationshipList);
     }
 
 //    @Override

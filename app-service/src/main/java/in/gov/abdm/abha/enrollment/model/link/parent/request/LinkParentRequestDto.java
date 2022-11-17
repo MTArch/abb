@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.link.parent.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +17,7 @@ public class LinkParentRequestDto {
     private String txnId;
 
     @JsonProperty("scope")
-    private List<ScopeEnum> scope;
+    private List<Scopes> scope;
 
 //    @JsonProperty("ParentAbha")
 //    private ParentAbhaRequestDto parentAbhaRequestDto;

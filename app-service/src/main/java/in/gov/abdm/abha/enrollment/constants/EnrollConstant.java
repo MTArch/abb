@@ -1,0 +1,62 @@
+package in.gov.abdm.abha.enrollment.constants;
+
+public interface EnrollConstant {
+    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";
+
+    String API_VERSION = "/v3";
+    String BASE_URI = "/api" + API_VERSION;
+
+    //enrol endpoints
+    String ENROL_ENDPOINT = BASE_URI + "/enrollment";
+    String BY_ENROL_AADHAAR_ENDPOINT = ENROL_ENDPOINT + "/byAadhaar";
+
+    //request endpoints
+    String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
+    String MOBILE_OR_EMAIL_TOP_ENDPOINT = "/mobileOrEmailOtp";
+
+    //auth endpoints
+    String AUTH_ENDPOINT = BASE_URI + "/auth";
+    String AUTH_BY_ABDM_ENDPOINT = "/byAbdm";
+    String AUTH_BY_AADHAAR_ENDPOINT = "/auth/byAadhaar";
+
+    //profile endpoints
+    String PROFILE_ENDPOINT = BASE_URI + "/profile";
+    String LINK_PARENT_ENDPOINT = "/link/parent";
+
+    //    DB URIS
+    String DB_BASE_URI = "/api/v3";
+
+    String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
+    String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
+    String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
+
+    String DB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/";
+
+    String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
+
+    String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
+
+//    Aadhaar Service URI
+
+    String AADHAAR_BASE_URI = "/api/v3/aadhaar/";
+    String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
+    String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
+
+
+    // IDP Service URI
+    String IDP_BASE_URI = "/api/v3/identity";
+    String IDP_SEND_OTP_URI = IDP_BASE_URI + "/authentication";
+    String IDP_VERIFY_OTP_URI = IDP_BASE_URI + "/verify";
+
+    //    Notification Service
+
+    String NOTIFICATION_ENDPOINT_URI = "http://global2dev.abdm.gov.internal";
+    String NOTIFICATION_BASE_URI = "/api/v3/notification";
+    String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
+
+//    Notification DB Service
+
+    String NOTIFICATION_DB_ENDPOINT_URI = "http://global2dev.abdm.gov.internal";
+    String NOTIFICATION_DB_BASE_URI = "/api/v3/notification";
+    String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/message";
+}

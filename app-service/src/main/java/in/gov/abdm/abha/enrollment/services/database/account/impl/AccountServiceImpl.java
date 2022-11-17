@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
@@ -11,7 +11,6 @@ import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -38,11 +37,11 @@ public class AccountServiceImpl implements AccountService {
     private WebClient webClient;
 
     @Autowired
-    ABHAEnrollmentDBClient abhaEnrollmentDBClient;
+    AbhaDBClient abhaDBClient;
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
-        return abhaEnrollmentDBClient.getEntityById(AccountDto.class, xmlUid);
+        return abhaDBClient.getEntityById(AccountDto.class, xmlUid);
     }
 
     @Override
@@ -290,6 +289,6 @@ public class AccountServiceImpl implements AccountService {
 
         accountDto.setNewAccount(true);
 
-        return abhaEnrollmentDBClient.addEntity(AccountDto.class, accountDto);
+        return abhaDBClient.addEntity(AccountDto.class, accountDto);
     }
 }

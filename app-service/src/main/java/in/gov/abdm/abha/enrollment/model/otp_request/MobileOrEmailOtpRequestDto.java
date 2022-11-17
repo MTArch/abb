@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.otp_request;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,7 +39,7 @@ public class MobileOrEmailOtpRequestDto {
      * Scope will be abha-enrol for abha creation using aadhaar
      */
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
-    private List<ScopeEnum> scope;
+    private List<Scopes> scope;
 
     /**
      * refers to the way user logs in to the system

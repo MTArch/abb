@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.model.aadhaar;
+package in.gov.abdm.abha.enrollment.model.aadhaar.otp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
