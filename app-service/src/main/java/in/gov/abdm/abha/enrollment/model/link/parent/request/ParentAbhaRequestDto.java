@@ -47,9 +47,10 @@ public class ParentAbhaRequestDto {
     @JsonProperty("email")
     private String email;
 
+    
     @JsonProperty("relationship")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_RELATIONSHIP_FIELD)
-    private List<Relationship> relationship;
+    private Relationship relationship;
 
     @JsonProperty("document")
     @NotNull

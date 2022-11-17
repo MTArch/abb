@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 @ValidParentScope
 @ValidParentAbhaRequest
 @ValidChildAbhaRequest
-
 public class LinkParentRequestDto {
 
     @JsonProperty("txnId")
@@ -37,8 +36,6 @@ public class LinkParentRequestDto {
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
     private List<Scopes> scope;
 
-    //    @JsonProperty("ParentAbha")
-//    private ParentAbhaRequestDto parentAbhaRequestDto;
     @JsonProperty("ParentAbha")
     @Valid
     private List<ParentAbhaRequestDto> parentAbhaRequestDtoList;

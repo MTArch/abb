@@ -74,12 +74,6 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 //    }
 
 
-    @Override
-    public AccountDto prepareUpdateAccount(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto) {
-        return AccountDto.builder()
-                .status(TransactionStatus.ACTIVE.toString())
-                .build();
-    }
 
     //    @Override
     public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
@@ -94,7 +88,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
             for (int i = 0; i < linkParentRequestDto.getParentAbhaRequestDtoList().size(); i++) {
                 dependentAccountDto.setParentHealthIdNumber(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getABHANumber());
                 dependentAccountDto.setDependentHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
-                dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship());
+                dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship().getValue());
                 dependentAccountDto.setRelationshipProofDocumentLocation(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getDocument());
                 dependentAccountDto.setCreatedBy("anchal");
                 dependentAccountDto.setUpdatedBy("anchal");

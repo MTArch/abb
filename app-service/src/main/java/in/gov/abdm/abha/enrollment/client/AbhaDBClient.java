@@ -50,7 +50,7 @@ public class AbhaDBClient<T> {
 
     /** To revert url after testing **/
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
+        return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .post()
                 .uri(uri)
@@ -64,7 +64,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> fluxPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
+        return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .post()
                 .uri(uri)

@@ -12,7 +12,6 @@ import java.util.List;
 public interface DependentAccountRelationshipService {
 
 //    AccountDto prepareUpdateAccount(TransactionDto transactionDto, LinkParentRequestDto linkParentRequestDto);
-    AccountDto prepareUpdateAccount(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto);
 
 //    Mono<DependentAccountRelationshipDto> createDependentAccountEntity(DependentAccountRelationshipDto dependentAccountRelationshipDto);
     Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList);
