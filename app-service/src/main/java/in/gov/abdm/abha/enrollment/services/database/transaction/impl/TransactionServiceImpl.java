@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.database.transaction.impl;
 
-import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarUserKycDto;
+import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -26,7 +26,7 @@ public class TransactionServiceImpl implements TransactionService {
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     @Autowired
-    ABHAEnrollmentDBClient abhaEnrollmentDBClient;
+    AbhaDBClient abhaDBClient;
 
     @Override
     public void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType) {
@@ -95,11 +95,16 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto) {
-        return abhaEnrollmentDBClient.addEntity(TransactionDto.class, transactionDto);
+        return abhaDBClient.addEntity(TransactionDto.class, transactionDto);
     }
 
     @Override
     public Mono<TransactionDto> findTransactionDetailsFromDB(String txnId) {
-        return abhaEnrollmentDBClient.getEntityById(TransactionDto.class, txnId);
+        return abhaDBClient.getEntityById(TransactionDto.class, txnId);
+    }
+
+    @Override
+    public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId){
+        return abhaDBClient.updateEntity(TransactionDto.class, transactionDto, transactionId);
     }
 }

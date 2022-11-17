@@ -31,4 +31,6 @@ public class OtpDto {
 
     @JsonProperty("otpValue")
     private String otpValue;
+
+    private String mobile;
 }

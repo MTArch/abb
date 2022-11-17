@@ -1,18 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.aadhaar.impl;
 
-import in.gov.abdm.abha.enrollment.client.ABHAEnrollmentDBClient;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarOtpRequestDto;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
-import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarService;
-import org.apache.http.HttpHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @Service
 public class AadhaarServiceImpl  {

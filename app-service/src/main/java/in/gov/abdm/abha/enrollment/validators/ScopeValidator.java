@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
 
@@ -27,7 +27,6 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
                 && !mobileOrEmailOtpRequestDto.getScope().isEmpty()
                 && mobileOrEmailOtpRequestDto.getScope().get(0) != null
                 && !mobileOrEmailOtpRequestDto.getScope().get(0).equals("")
-                && !mobileOrEmailOtpRequestDto.getScope().contains(ScopeEnum.EMPTY)
-                && !mobileOrEmailOtpRequestDto.getScope().contains(ScopeEnum.WRONG);
+                && !mobileOrEmailOtpRequestDto.getScope().contains(Scopes.WRONG);
     }
 }
