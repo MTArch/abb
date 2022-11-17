@@ -16,7 +16,7 @@ public class TemplatesHelper {
     List<Templates> templates;
 
     public String prepareUpdateMobileMessage(String otp) {
-        return MessageFormat.format(templates.stream().filter(res-> res.equals("1007164725434022866")).findAny().get().getMessage(), otp);
+        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(1007164181681962323L)).findAny().get().getMessage(), otp);
     }
 
     public static String getUpdateMobileTemplateId() {

@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping(EnrollConstant.OTP_REQUEST_ENDPOINT)
+@RequestMapping(URIConstant.OTP_REQUEST_ENDPOINT)
 public class OtpRequestController {
 
     private static final String FAILED_TO_SEND_OTP = "Failed to send OTP";
@@ -30,7 +30,7 @@ public class OtpRequestController {
      * @param mobileOrEmailOtpRequestDto
      * @return txnId and success or failed message as part of responseDto
      */
-    @PostMapping(EnrollConstant.MOBILE_OR_EMAIL_TOP_ENDPOINT)
+    @PostMapping(URIConstant.MOBILE_OR_EMAIL_TOP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         //filter scope

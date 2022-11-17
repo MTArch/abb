@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
@@ -24,7 +24,7 @@ public class IdpClient {
         return webClient.baseUrl("http://global2dev.abdm.gov.internal")
                 .build()
                 .post()
-                .uri(EnrollConstant.IDP_SEND_OTP_URI)
+                .uri(URIConstant.IDP_SEND_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(BodyInserters.fromValue(idpSendOtpRequest))
                 .retrieve()
@@ -35,7 +35,7 @@ public class IdpClient {
         return webClient.baseUrl("http://global2dev.abdm.gov.internal")
                 .build()
                 .post()
-                .uri(EnrollConstant.IDP_VERIFY_OTP_URI)
+                .uri(URIConstant.IDP_VERIFY_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.AUTHORIZATION, authorization)
                 .header("xTransactionId",xTransactionId)

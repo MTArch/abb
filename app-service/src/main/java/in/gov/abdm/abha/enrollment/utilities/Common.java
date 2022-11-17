@@ -19,10 +19,7 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @UtilityClass
 @Slf4j
@@ -97,7 +94,7 @@ public class Common {
     }
 
     public boolean isPhoneNumberMatching(String value1, String value2) {
-        return value1.substring(6).equals(value2.substring(6));
+        return value1.substring(6).equals(value2.replace("*",""));
     }
 
     public boolean isAllScopesAvailable(List<Scopes> scopes, List<Scopes> scopesToMatch) {
@@ -114,6 +111,10 @@ public class Common {
 
     public boolean isOtpSystem(String otpSystem, OtpSystem otpSystemToMatch) {
         return otpSystem.equals(otpSystemToMatch.getValue());
+    }
+
+    public String base64Encode(String value){
+        return Base64.getEncoder().encodeToString(value.getBytes());
     }
 
     public List<Templates> loadDummyTemplates() {

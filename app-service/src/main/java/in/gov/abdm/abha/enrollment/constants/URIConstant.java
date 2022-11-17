@@ -1,14 +1,15 @@
 package in.gov.abdm.abha.enrollment.constants;
 
-public interface EnrollConstant {
-    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";
+public interface URIConstant {
+    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";//"http://localhost:9292"
+    String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188";
 
     String API_VERSION = "/v3";
     String BASE_URI = "/api" + API_VERSION;
 
     //enrol endpoints
     String ENROL_ENDPOINT = BASE_URI + "/enrollment";
-    String BY_ENROL_AADHAAR_ENDPOINT = ENROL_ENDPOINT + "/byAadhaar";
+    String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
 
     //request endpoints
     String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
@@ -45,6 +46,7 @@ public interface EnrollConstant {
     String AADHAAR_BASE_URI = "/api/v3/aadhaar/";
     String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
     String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
+    String AADHAAR_VERIFY_DEMOGRAPHIC = AADHAAR_BASE_URI + "/verifyDemographic";
 
 
     // IDP Service URI

@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.controller;
 
 import javax.validation.Valid;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollConstant;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
-@RequestMapping(EnrollConstant.AUTH_ENDPOINT)
+@RequestMapping(URIConstant.AUTH_ENDPOINT)
 public class AuthController {
 	
     @Autowired
@@ -28,12 +28,12 @@ public class AuthController {
     @Autowired
     EnrolUsingAadhaarService enrolUsingAadhaarService;
 
-    @PostMapping(EnrollConstant.AUTH_BY_ABDM_ENDPOINT)
+    @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
     public Mono<AuthByAbdmResponse> authByABDM(@Valid @RequestBody AuthByAbdmRequest authByAbdmRequest){
       return authByAbdmService.verifyOtp();
     }
 
-    @PostMapping(EnrollConstant.AUTH_BY_AADHAAR_ENDPOINT)
+    @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
     public Mono<AuthByAadhaarResponseDto> authByAadhaar(@RequestBody AuthByAadhaarRequestDto authByAadhaarRequestDto){
         return enrolUsingAadhaarService.verifyOtpChildAbha(authByAadhaarRequestDto);
     }
