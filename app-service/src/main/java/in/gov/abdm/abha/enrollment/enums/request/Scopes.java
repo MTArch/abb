@@ -12,24 +12,24 @@ import lombok.ToString;
 @Getter
 @AllArgsConstructor
 @ToString
-public enum ScopeEnum {
+public enum Scopes {
     ABHA_ENROL("abha-enrol"),
     MOBILE_UPDATE("mobile-update"),
     MOBILE_VERIFY("mobile-verify"),
     EMAIL_UPDATE("email-update"),
-    EMPTY(""),
     CHILD_ABHA_ENROL("child-abha-enrol"),
     PARENT_ABHA_LINK("parent-abha-link"),
     WRONG("wrong");
+
     private final String value;
 
     @JsonCreator
-    public static ScopeEnum fromText(String text){
-        for(ScopeEnum scopeEnum : ScopeEnum.values()){
-            if(scopeEnum.getValue().equals(text)){
-                return scopeEnum;
+    public static Scopes fromText(String text){
+        for(Scopes scopes : Scopes.values()){
+            if(scopes.getValue().equals(text)){
+                return scopes;
             }
         }
-        return ScopeEnum.WRONG;
+        return Scopes.WRONG;
     }
 }

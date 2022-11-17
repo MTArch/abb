@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarUserKycDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import lombok.experimental.UtilityClass;

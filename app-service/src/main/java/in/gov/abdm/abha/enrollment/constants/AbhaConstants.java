@@ -5,6 +5,8 @@ public interface AbhaConstants {
     String VALIDATION_EMPTY_LOGIN_ID_FIELD = "LoginId cannot be null or Empty";
     String VALIDATION_EMPTY_OTP_SYSTEM_FIELD = "Otp System cannot be null or Empty";
     String VALIDATION_NULL_LOGIN_HINT_FIELD = "Login Hint cannot not be null";
+    String VALIDATION_EMPTY_KEY_FIELD = "Key cannot be null or empty";
+    String VALIDATION_EMPTY_VALUE_FIELD = "Value cannot be null or empty";
 
     String VALIDATION_ERROR_TRANSACTION_FIELD = "Invalid Transaction Id";
     String VALIDATION_ERROR_SCOPE_FIELD = "Invalid Scope";
@@ -59,4 +61,6 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
 
+
+    String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
 }

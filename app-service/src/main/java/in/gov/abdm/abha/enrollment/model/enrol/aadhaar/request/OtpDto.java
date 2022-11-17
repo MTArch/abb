@@ -37,4 +37,7 @@ public class OtpDto {
     @JsonProperty("otpValue")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
     private String otpValue;
+
+    @JsonProperty("mobile")
+    private String mobile;
 }

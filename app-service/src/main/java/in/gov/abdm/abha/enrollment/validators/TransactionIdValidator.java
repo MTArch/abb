@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 
-import in.gov.abdm.abha.enrollment.enums.request.ScopeEnum;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
 import in.gov.abdm.abha.enrollment.validators.request.HelperUtil;
@@ -50,7 +50,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
 //        }
 
 
-        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(ScopeEnum.ABHA_ENROL)))
+        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(Scopes.ABHA_ENROL)))
         {
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 mobileOrEmailOtpRequestDto.setTxnId("");
