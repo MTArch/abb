@@ -61,37 +61,62 @@ public class LinkParentServiceImpl implements LinkParentService {
 //    }
 
 
+//    @Override
+//    public Mono<LinkParentResponseDto> linkDependentAccount(LinkParentRequestDto linkParentRequestDto) {
+//
+//        Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(linkParentRequestDto.getTxnId());
+//
+//        return transactionDtoMono.flatMap(res->
+//        {
+//            AccountDto accountDto = dependentAccountRelationshipService.prepareUpdateAccount(res,linkParentRequestDto);
+//            accountDto.setHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
+//            accountDto.setXmlUID(null); /**FOR testing**/
+//            Mono<AccountDto> accountDtoResponse = accountService.createAccountEntity(accountDto);
+//            return accountDtoResponse.flatMap(value->
+//            {
+//                if(value!=null)
+//                {
+//                    List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService.prepareDependentAccount(linkParentRequestDto,value);
+//                    Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
+//                    return dependentAccountRelationshipDtoFlux.flatMap(accountRelationshipDto->
+//                    {
+//                        if(accountRelationshipDto!=null && accountRelationshipDto.getId()!=null)
+//                        {
+//                            return handleDependentAccountResponse(value,linkParentRequestDto);
+//                        }
+//                        return Mono.empty();
+//                    }).switchIfEmpty(Mono.defer(() -> {
+//                    	return handleDependentAccountResponse(value,linkParentRequestDto);
+//                    }));
+//                }
+//                return Mono.empty();
+//            });
+//        });
+//    }
+
     @Override
     public Mono<LinkParentResponseDto> linkDependentAccount(LinkParentRequestDto linkParentRequestDto) {
+        List<DependentAccountRelationshipDto> dependentAccountList =
+                dependentAccountRelationshipService.prepareDependentAccount(linkParentRequestDto);
 
-        Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(linkParentRequestDto.getTxnId());
+        Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoMono =
+                dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
 
-        return transactionDtoMono.flatMap(res->
+        dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto ->
         {
-            AccountDto accountDto = dependentAccountRelationshipService.prepareUpdateAccount(res,linkParentRequestDto);
-            accountDto.setHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
-            accountDto.setXmlUID(null); /**FOR testing**/
-            Mono<AccountDto> accountDtoResponse = accountService.createAccountEntity(accountDto);
-            return accountDtoResponse.flatMap(value->
-            {
-                if(value!=null)
-                {
-                    List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService.prepareDependentAccount(linkParentRequestDto,value);
-                    Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoFlux = dependentAccountRelationshipService.createDependentAccountEntity(dependentAccountList);
-                    return dependentAccountRelationshipDtoFlux.flatMap(accountRelationshipDto->
-                    {
-                        if(accountRelationshipDto!=null && accountRelationshipDto.getId()!=null)
-                        {
-                            return handleDependentAccountResponse(value,linkParentRequestDto);
-                        }
-                        return Mono.empty();
-                    }).switchIfEmpty(Mono.defer(() -> {
-                    	return handleDependentAccountResponse(value,linkParentRequestDto);
-                    }));
-                }
-                return Mono.empty();
-            });
-        });
+            return Mono.empty();
+
+        }).switchIfEmpty(Mono.defer(() ->
+                accountService.getAccountByHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber())
+                        .flatMap(res -> accountService.updateAccountByHealthIdNumber(dependentAccountRelationshipService.prepareUpdateAccount(res, linkParentRequestDto), linkParentRequestDto.getChildAbhaRequestDto().getABHANumber())
+                                .flatMap(result ->
+                                {
+                                    if (result != null) {
+                                        return handleDependentAccountResponse(result, linkParentRequestDto);
+                                    }
+                                    return Mono.empty();
+                                }))));
+        return Mono.empty();
     }
 
 

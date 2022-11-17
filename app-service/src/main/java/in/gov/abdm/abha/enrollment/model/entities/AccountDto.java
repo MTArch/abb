@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 
+import lombok.Builder;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
  * Data Transfer Object for Account
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountDto {
