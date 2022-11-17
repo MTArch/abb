@@ -55,7 +55,6 @@ public class OtpRequestServiceImpl implements OtpRequestService {
         if (mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR.getValue())) {
             return sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
-
         return null;
     }
 

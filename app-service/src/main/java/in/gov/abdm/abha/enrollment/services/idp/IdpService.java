@@ -39,7 +39,7 @@ public class IdpService {
 
     public Mono<MobileOrEmailOtpResponseDto> sendMobileOtpByIDP(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
-        if (mobileOrEmailOtpRequestDto.getLoginHint().equalsIgnoreCase(String.valueOf(LoginHint.MOBILE))) {
+        if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE.getValue())) {
 
             IdpSendOtpRequest idpMobileSendOtpRequest = new IdpSendOtpRequest();
             idpMobileSendOtpRequest.setScope(SCOPE);
@@ -78,7 +78,7 @@ public class IdpService {
     }
     
     public Mono<MobileOrEmailOtpResponseDto> sendOtpByIDP(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
-        if(mobileOrEmailOtpRequestDto.getLoginHint().equalsIgnoreCase(LoginHint.ABHA_NUMBER.getValue())){
+        if(mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER.getValue())){
             IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
             idpSendOtpRequest.setScope(SCOPE);
             TransactionDto transactionDto = new TransactionDto();

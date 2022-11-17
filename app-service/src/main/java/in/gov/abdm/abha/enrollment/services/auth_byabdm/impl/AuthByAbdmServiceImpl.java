@@ -9,11 +9,10 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class AuthByAbdmServiceImpl<T> implements AuthByAbdmService<T> {
+	
     @Autowired
     IDPClient idpClient;
-    @Autowired
-    IdpVerifyOtpResponse idpVerifyOtpResponse;
-
+    
     @Override
     public Mono<IdpVerifyOtpResponse> verifyOtp() {
         Class<T> t; String authorization; String xTransactionId; String hipRequestId; String requestId;
