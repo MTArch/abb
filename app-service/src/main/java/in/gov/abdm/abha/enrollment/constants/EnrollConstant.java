@@ -36,6 +36,10 @@ public interface EnrollConstant {
 
     String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 
+    String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
+
+    String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
+
 //    Aadhaar Service URI
 
     String AADHAAR_BASE_URI = "/api/v3/aadhaar/";

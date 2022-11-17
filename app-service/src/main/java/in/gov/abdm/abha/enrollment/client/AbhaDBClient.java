@@ -35,9 +35,10 @@ public class AbhaDBClient<T> {
 //                .bodyToFlux(t);
 //    }
 
+    /** To revert url to ->  http://abha2dev.abdm.gov.internal    after testing **/
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl("http://abha2dev.abdm.gov.internal")
+                 baseUrl("http://localhost:9188")
                 .build()
                 .get()
                 .uri(uri)
@@ -46,6 +47,7 @@ public class AbhaDBClient<T> {
                 .bodyToMono(t);
     }
 
+    /** To revert url after testing **/
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
         return webClient.baseUrl("http://localhost:9188")
                 .build()
@@ -74,8 +76,9 @@ public class AbhaDBClient<T> {
                 });
     }
 
+    /** To revert url after testing **/
     private Mono<T> monoPatchDatabase(Class<T> t, String uri, T row, String id) {
-        return webClient.baseUrl("http://abha2dev.abdm.gov.internal")
+        return webClient.baseUrl("http://localhost:9188")
                 .build()
                 .patch()
                 .uri(uri,id)
@@ -99,6 +102,14 @@ public class AbhaDBClient<T> {
         return Mono.empty();
     }
 
+    public Mono<T> getAccountEntityById(Class<T> t, String id) {
+        switch (t.getSimpleName()) {
+            case "AccountDto":
+                return GetMonoDatabase(t, EnrollConstant.DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER + id);
+        }
+        return Mono.empty();
+    }
+
     public Mono<T> addEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
@@ -115,6 +126,8 @@ public class AbhaDBClient<T> {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return monoPatchDatabase(t, EnrollConstant.DB_UPDATE_TRANSACTION_URI, row, id);
+            case "AccountDto":
+                return monoPatchDatabase(t, EnrollConstant.DB_UPDATE_ACCOUNT_URI, row, id);
         }
         return Mono.empty();
     }

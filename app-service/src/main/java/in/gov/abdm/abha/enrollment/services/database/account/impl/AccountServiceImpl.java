@@ -231,6 +231,16 @@ public class AccountServiceImpl implements AccountService {
         return accountDto == null || accountDto.getName() == null;
     }
 
+    @Override
+    public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
+        return abhaDBClient.getAccountEntityById(AccountDto.class,healthIdNumber);
+    }
+
+    @Override
+    public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
+        return abhaDBClient.updateEntity(AccountDto.class,accountDto,healthIdNumber);
+    }
+
     private void breakName(AccountDto accountDto) {
 
         String firstName = "";

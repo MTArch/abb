@@ -15,4 +15,8 @@ public interface AccountService {
 
     boolean isItNewUser(AccountDto accountDto);
 
+    Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber);
+
+    Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber);
+
 }
