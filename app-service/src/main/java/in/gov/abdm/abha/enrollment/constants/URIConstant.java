@@ -1,31 +1,31 @@
 package in.gov.abdm.abha.enrollment.constants;
 
 public interface URIConstant {
-    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";//"http://localhost:9292"
-    String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188";
+    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";//"http://localhost:9292"; //
+    String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188"; //
 
     String API_VERSION = "/v3";
-    String BASE_URI = "/api" + API_VERSION;
+    String BASE_URI = "/api" + API_VERSION +"/enrollment";
 
     //enrol endpoints
-    String ENROL_ENDPOINT = BASE_URI + "/enrollment";
+    String ENROL_ENDPOINT = BASE_URI + "/enrol";
     String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
 
     //request endpoints
     String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
-    String MOBILE_OR_EMAIL_TOP_ENDPOINT = "/mobileOrEmailOtp";
+    String MOBILE_OR_EMAIL_OTP_ENDPOINT = "/otp";
 
     //auth endpoints
     String AUTH_ENDPOINT = BASE_URI + "/auth";
     String AUTH_BY_ABDM_ENDPOINT = "/byAbdm";
-    String AUTH_BY_AADHAAR_ENDPOINT = "/auth/byAadhaar";
+    String AUTH_BY_AADHAAR_ENDPOINT = "/byAadhaar";
 
     //profile endpoints
     String PROFILE_ENDPOINT = BASE_URI + "/profile";
     String LINK_PARENT_ENDPOINT = "/link/parent";
 
     //    DB URIS
-    String DB_BASE_URI = "/api/v3";
+    String DB_BASE_URI = "/api/v3/enrollmentdb";
 
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";

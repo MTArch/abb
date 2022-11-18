@@ -22,9 +22,6 @@ public class AadhaarClient {
     @Autowired
     private WebClient.Builder webClient;
 
-    @Value("${abdm.aadhaar.service}")
-    private String aadhaarService;
-
     public Mono<AadhaarResponseDto> sendOtp(AadhaarOtpRequestDto aadhaarOtpRequestDto) {
         return webClient.baseUrl(URIConstant.GLOBAL_SERVICE_BASE_URI)
                 .build()

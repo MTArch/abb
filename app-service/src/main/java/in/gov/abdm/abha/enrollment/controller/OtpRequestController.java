@@ -30,7 +30,7 @@ public class OtpRequestController {
      * @param mobileOrEmailOtpRequestDto
      * @return txnId and success or failed message as part of responseDto
      */
-    @PostMapping(URIConstant.MOBILE_OR_EMAIL_TOP_ENDPOINT)
+    @PostMapping(URIConstant.MOBILE_OR_EMAIL_OTP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         //filter scope

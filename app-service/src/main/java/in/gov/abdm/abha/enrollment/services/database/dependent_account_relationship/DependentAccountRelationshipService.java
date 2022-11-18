@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.services.database.dependent.account.relationship;
+package in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship;
 
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.DependentAccountRelationshipDto;
