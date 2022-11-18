@@ -5,6 +5,6 @@ spring:
     name: ${ENROLLMENT_DB_SERVICE_NAME}
 
   r2dbc:
-    url: r2dbc:postgresql://${ENROLLMENT_DB_HOST}:${ENROLLMENT_DB_PORT}/ndhm_beta
+    url: r2dbc:postgresql://${ENROLLMENT_DB_HOST}:${ENROLLMENT_DB_PORT}/ndhm_dev
     username: ${ENROLLMENT_DB_USER_NAME}
     password: ${ENROLLMENT_DB_PASSWORD}
