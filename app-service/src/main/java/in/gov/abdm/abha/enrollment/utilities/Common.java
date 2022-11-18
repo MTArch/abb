@@ -1,6 +1,10 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.model.notification.template.TemplateType;
+import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.services.common.HealthIdContextHolder;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +17,9 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.*;
 
 @UtilityClass
 @Slf4j
@@ -25,6 +31,11 @@ public class Common {
     public static final String EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG = "Exception occurred while reading file: {} Error Msg : ";
     public static final String YYYY_MM_DD_T_HH_MM_SS_MMM = "YYYY-MM-dd'T'HH:MM:ss.mmm";
     public static final String YYYY_MM_DD_HH_MM_SS = "YYYYMMddHHMMss";
+
+    private static final long SMS_TEMPLATE_ID = 1007164181681962323L;
+    private static final String ABHA = "ABHA";
+    private static final String MESSAGE = "OTP for creating your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, National Health Authority";
+    private static final String SUBJECT = "OTP verification";
 
     @Autowired
     HealthIdContextHolder healthIdContextHolder;
@@ -75,5 +86,46 @@ public class Common {
     public String getIpAddress() {
         //TODO
         return HealthIdContextHolder.clientIp();
+    }
+
+    public int calculateYearDifference(String startYear, String startMonth, String startDay) {
+        LocalDate startDate = LocalDate.of(Integer.parseInt(startYear), Integer.parseInt(startMonth), Integer.parseInt(startDay));
+        return Period.between(startDate, LocalDate.now()).getYears();
+    }
+
+    public boolean isPhoneNumberMatching(String value1, String value2) {
+        return value1.substring(6).equals(value2.replace("*",""));
+    }
+
+    public boolean isAllScopesAvailable(List<Scopes> scopes, List<Scopes> scopesToMatch) {
+        return new HashSet<>(scopes).containsAll(scopesToMatch);
+    }
+
+    public boolean isScopeAvailable(List<Scopes> scopes, Scopes scopesToMatch) {
+        return new HashSet<>(scopes).contains(scopesToMatch);
+    }
+
+    public boolean isExactScopesMatching(List<Scopes> scopes, List<Scopes> scopesToMatch) {
+        return scopes.equals(scopesToMatch);
+    }
+
+    public boolean isOtpSystem(String otpSystem, OtpSystem otpSystemToMatch) {
+        return otpSystem.equals(otpSystemToMatch.getValue());
+    }
+
+    public String base64Encode(String value){
+        return Base64.getEncoder().encodeToString(value.getBytes());
+    }
+
+    public List<Templates> loadDummyTemplates() {
+        List<Templates> templates = new ArrayList<>();
+        templates.add(new Templates(
+                SMS_TEMPLATE_ID,
+                ABHA,
+                MESSAGE,
+                SUBJECT,
+                TemplateType.SMS_OTP));
+        //OTP for updating the mobile number linked with your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, NHA##1007164725434022866
+        return templates;
     }
 }

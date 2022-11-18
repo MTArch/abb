@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.exception.aadhaar;
 
 import in.gov.abdm.abha.enrollment.exception.aadhaar.helper.UidaiErrorHelper;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.model.ErrorCode;
-import in.gov.abdm.abha.enrollment.model.aadhaar.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 
 /**
  * parent handler for uidai exceptions

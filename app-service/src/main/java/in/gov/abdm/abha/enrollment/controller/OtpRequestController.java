@@ -1,24 +1,25 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import in.gov.abdm.abha.enrollment.constants.ABHAEnrollmentConstant;
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping(ABHAEnrollmentConstant.OTP_REQUEST_ENDPOINT)
+@RequestMapping(URIConstant.OTP_REQUEST_ENDPOINT)
 public class OtpRequestController {
+
+    private static final String FAILED_TO_SEND_OTP = "Failed to send OTP";
 
     @Autowired
     OtpRequestService otpRequestService;
@@ -29,8 +30,34 @@ public class OtpRequestController {
      * @param mobileOrEmailOtpRequestDto
      * @return txnId and success or failed message as part of responseDto
      */
-    @PostMapping(ABHAEnrollmentConstant.MOBILE_OR_EMAIL_TOP_ENDPOINT)
-    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
-        return otpRequestService.sendOtp(mobileOrEmailOtpRequestDto);
+    @PostMapping(URIConstant.MOBILE_OR_EMAIL_OTP_ENDPOINT)
+    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+
+        //filter scope
+        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+        String otpSystem = mobileOrEmailOtpRequestDto.getOtpSystem();
+        // If scope -abha-enrol and mobile-verify and otpSystem -abdm
+        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
+                && Common.isOtpSystem(otpSystem, OtpSystem.ABDM)) {
+            return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
+        }
+        // If scope -abha-enrol and otpSystem -aadhaar
+        else if (Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
+                && Common.isOtpSystem(otpSystem, OtpSystem.AADHAAR)) {
+            return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
+        }
+        // If scope -child-abha-enrol and otpSystem -aadhaar
+        else if (Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)
+                && Common.isOtpSystem(otpSystem, OtpSystem.AADHAAR)) {
+        	 return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
+        }
+        // If scope -child-abha-enrol
+        else if(Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)){
+            return otpRequestService.sendIdpOtp(mobileOrEmailOtpRequestDto);
+        }
+        // other case
+        else{
+            throw new GenericExceptionMessage(FAILED_TO_SEND_OTP);
+        }
     }
 }

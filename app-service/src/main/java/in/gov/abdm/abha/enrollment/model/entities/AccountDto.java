@@ -1,15 +1,24 @@
 package in.gov.abdm.abha.enrollment.model.entities;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.FIELD_BLANK_ERROR_MSG;
+
+import java.time.LocalDateTime;
+
+import javax.validation.constraints.NotNull;
+
+import lombok.Builder;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for Account
  */
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountDto {
@@ -274,5 +283,18 @@ public class AccountDto {
      * isNewTemplate of boolean type that stores the state of an entity object.
      */
 	private boolean isNewAccount;
+
+    /**
+     * Type of account
+     */
+
+    @NotNull(message = FIELD_BLANK_ERROR_MSG)
+    private AbhaType type;
+
+    public AccountDto(@DefaultValue("Standard") AbhaType type){
+        this.type=type;
+    }
+
+    private String preferredAbhaAddress;
     
 }

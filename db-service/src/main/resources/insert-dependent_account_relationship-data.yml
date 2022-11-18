@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 122
+      author: Nayana
+      changes:
+        - insert:
+            columns:
+              - column:
+                  name: id
+                  value:
+              - column:
+                  name: parent_health_id_number
+                  value: ""
+              - column:
+                  name: dependent_health_id_number
+                  value: ""
+              - column:
+                  name: related_as
+                  value: ""
+              - column:
+                  name: relationship_proof_document_location
+                  value: ""
+              - column:
+                  name: createdBy
+                  value: ""
+              - column:
+                  name: updatedBy
+                  value: ""
+              - column:
+                  name: createdAt
+                  value: ""
+              - column:
+                  name: updatedAt
+                  value: ""
+
+            dbms: 'postgresql'
+            tableName: dependent_account_relationship

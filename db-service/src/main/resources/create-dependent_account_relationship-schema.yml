@@ -1,0 +1,70 @@
+databaseChangeLog:
+  -  changeSet:
+       id:  121
+       author: Nayana
+       changes:
+         -  createTable:
+              columns:
+                -  column:
+                     name: id
+                     type: bigint
+                     defaultOnNull: false
+                     generationType: ALWAYS
+                     incrementBy: 1
+                     startWith: 1
+                     constraints:
+                       nullable: "false"
+                       primaryKey: "true"
+                       primaryKeyName: "dependent_account_relationship_id_pk"
+                - column:
+                    name: parent_health_id_number
+                    type:  varchar(30)
+                    constraints:
+                      nullable: "false"
+                      foreignKey: "true"
+                      foreignKeyName: "parent_health_id_number_fk"
+                      referencedColumnNames: health_id_number
+                      referencedTableName: accounts
+                - column:
+                    name: dependent_health_id_number
+                      type: varchar(30)
+                      constraints:
+                        nullable: "false"
+                        foreignKey: "true"
+                        foreignKeyName: "dependent_health_id_number_fk"
+                        referencedColumnNames: health_id_number
+                        referencedTableName: accounts
+                - column:
+                    name: related_as
+                    type: varchar(50)
+                    constraints:
+                      nullable: "false"
+                - column:
+                    name: relationship_proof_document_location
+                    type: varchar(50)
+                    constraints:
+                      nullable: "false"
+                - column:
+                    name: createdBy
+                    type: varchar(50)
+                    constraints:
+                      nullable: "false"
+                - column:
+                    name: updatedBy
+                    type: varchar(50)
+                    constraints:
+                      nullable: "false"
+
+                - column:
+                    name: created_date
+                    type: timestamp
+                    constraints:
+                      nullable: "false"
+                - column:
+                    name: updated_date
+                    type: timestamp
+                    constraints:
+                    nullable: "false"
+                -
+              remarks:   dependent_account_relationship table for testing purpose.
+              tableName:  dependent_account_relationship

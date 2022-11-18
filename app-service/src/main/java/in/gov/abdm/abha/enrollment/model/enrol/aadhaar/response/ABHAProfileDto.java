@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class ABHAProfileDto {
     private String pinCode;
     private String qrCode;
     private String pdfData;
+    private AbhaType ABHAType;
     private ArrayList<BenefitInfoDto> benefitInfo;
 
 }

@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 
@@ -21,7 +22,8 @@ public class AccountController {
 
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_HEALTH_ID_NUMBER)
     public ResponseEntity<?> getAccountByHealthIdNumber(@PathVariable("healthIdNumber") String healthIdNumber) {
-        return ResponseEntity.ok(accountService.getAccountByHealthIdNumber(healthIdNumber));
+        return ResponseEntity.ok(accountService.getAccountByHealthIdNumber(healthIdNumber)
+                .switchIfEmpty(Mono.empty()));
     }
 
     @PostMapping

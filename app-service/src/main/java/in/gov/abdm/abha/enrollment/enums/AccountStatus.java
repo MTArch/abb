@@ -1,9 +1,19 @@
 package in.gov.abdm.abha.enrollment.enums;
 
-public enum AccountStatus {
-	ACTIVE("ACTIVE"), BLOCKED("BLOCKED"), LOCKED("LOCKED"), CONSENTPENDING("CONSENTPENDING"), 
-	DEACTIVATED("DEACTIVATED"), DELETED("DELETED"), DELINKED("DELINKED");
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public enum AccountStatus {
+	ACTIVE("ACTIVE"),IN_ACTIVE("IN_ACTIVE"), BLOCKED("BLOCKED"), LOCKED("LOCKED"), CONSENT_PENDING("CONSENT_PENDING"), 
+	DEACTIVATED("DEACTIVATED"), DELETED("DELETED"), DELINKED("DELINKED"),
+	PARENT_LINKING_PENDING("PARENT_LINKING_PENDING");
+
+	private final String value;
+	
 	public static boolean isValid(String status) {
 		AccountStatus[] values = AccountStatus.values();
 		for (AccountStatus auth : values) {
@@ -13,15 +23,14 @@ public enum AccountStatus {
 		}
 		return false;
 	}
-
-	private String value;
-
-	private AccountStatus(String value) {
-		this.value = value;
-	}
-
-	@Override
-	public String toString() {
-		return this.value;
+	
+	@JsonCreator
+	public static AccountStatus fromText(String text){
+	    for(AccountStatus accountStatus : AccountStatus.values()){
+	        if(accountStatus.getValue().equals(text)){
+	            return accountStatus;
+	        }
+	    }
+	    return AccountStatus.IN_ACTIVE;
 	}
 }

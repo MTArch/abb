@@ -36,7 +36,7 @@ public class AccountSubscriberImpl implements AccountSubscriber {
 	 * Data notification sent by the Publisher in response to requests to
 	 * Subscription.request(long).
 	 * 
-	 * @param accountDto the element signaled
+	 * @param accounts the element signaled
 	 */
 	@Override
 	public void onNext(Accounts accounts) {

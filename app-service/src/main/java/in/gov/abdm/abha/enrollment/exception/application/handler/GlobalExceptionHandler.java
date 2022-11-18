@@ -1,7 +1,10 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
+import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,8 +30,11 @@ public class GlobalExceptionHandler {
     /**
      * Constants for logging
      */
-    public static final String RESPONSE_TIMESTAMP = "timestamp";
-    public static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "WebExchangeBindException :{}";
+    private static final String RESPONSE_TIMESTAMP = "timestamp";
+    private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
+    private static final String SEND_NOTIFICATION_EXCEPTION = "send notification Exception : ";
+    private static final String EXCEPTIONS = "Exceptions : ";
+    public static final String MESSAGE = "Message";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     /**
@@ -38,6 +44,7 @@ public class GlobalExceptionHandler {
      * This method returns BindingResult from WebExchangeBindException and then
      * compose list of error messages based on all rejected fields
      * </p>
+     *
      * @param ex
      * @return list of error messages after analysis of binding and validation errors.
      */
@@ -56,20 +63,48 @@ public class GlobalExceptionHandler {
                 }
             });
         }
-
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
 
-
     /**
      * handle exception on failing of database constraints
+     *
      * @param ex
      * @return status code and error message
      */
     @ExceptionHandler(DatabaseConstraintFailedException.class)
     public ResponseEntity<ErrorResponse> dbConstraintFailed(DatabaseConstraintFailedException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
+    }
+
+    @ExceptionHandler(FailedToSendNotificationException.class)
+    public Map<String, Object> notificationExceptionHandler(FailedToSendNotificationException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(MESSAGE, ex.getMessage());
+        log.info(SEND_NOTIFICATION_EXCEPTION, errorMap);
+        errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+        return errorMap;
+    }
+
+    @ExceptionHandler(GenericExceptionMessage.class)
+    public Map<String, Object> runtimeGenericExceptionHandler(GenericExceptionMessage ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, errorMap);
+        errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+        return errorMap;
+    }
+
+    /**
+     * handling exception to show error message incase account doesn't exists with the xmluid
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
