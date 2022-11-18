@@ -25,7 +25,7 @@ public interface URIConstant {
     String LINK_PARENT_ENDPOINT = "/link/parent";
 
     //    DB URIS
-    String DB_BASE_URI = "/api/v3";
+    String DB_BASE_URI = "/api/v3/enrollmentdb";
 
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
