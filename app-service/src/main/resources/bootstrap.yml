@@ -6,8 +6,16 @@ spring:
 
 enrollment:
   gateway:
-    db:
-      baseurl: ${ENROLLMENT_GATEWAY_DB_BASEURL}
+    aadhaar:
+      baseuri: ${AADHAAR_SERVICE_BASE_URI}
+    enrollmentdb:
+      baseuri: ${ENROLLMENT_DB_BASE_URI}
+    idp:
+      baseuri: ${IDP_SERVICE_BASE_URI}
+    notification:
+      baseuri: ${NOTIFICATION_SERVICE_BASE_URI}
+    notificationdb:
+      baseuri: ${NOTIFICATION_DB_BASE_URI}
 
 
 rsa:

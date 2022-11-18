@@ -1,19 +1,26 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import reactor.core.publisher.Flux;
 
 @Component
 public class NotificationDBClient<T> {
+	
     @Autowired
     private WebClient.Builder webClient;
+    
+    @Value("${enrollment.gateway.notificationdb.baseuri}")
+    private String NOTIFICATION_DB_BASE_URI;
 
     private Flux<T> fluxGetDatabase(Class<T> t, String uri) {
+    	//http://global2dev.abdm.gov.internal
         return webClient.baseUrl(URIConstant.NOTIFICATION_DB_ENDPOINT_URI)
                 .build()
                 .get()

@@ -1,15 +1,15 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -18,13 +18,13 @@ public class AbhaDBClient<T> {
     @Autowired
     private WebClient.Builder webClient;
 
-    @Value("${enrollment.gateway.db.baseurl}")
-    private String ABHA_DB_BASE_URI;
+    @Value("${enrollment.gateway.enrollmentdb.baseuri}")
+    private String ENROLLMENT_DB_BASE_URI;
 
     /** To revert url to ->  http://abha2dev.abdm.gov.internal    after testing **/
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl(ABHA_DB_BASE_URI)
+                 baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .get()
                 .uri(uri)
@@ -35,7 +35,7 @@ public class AbhaDBClient<T> {
 
     /** To revert url after testing **/
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl(ABHA_DB_BASE_URI)
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -49,7 +49,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> fluxPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl(ABHA_DB_BASE_URI)
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -64,7 +64,7 @@ public class AbhaDBClient<T> {
 
     /** To revert url after testing **/
     private Mono<T> monoPatchDatabase(Class<T> t, String uri, T row, String id) {
-        return webClient.baseUrl(ABHA_DB_BASE_URI)
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .patch()
                 .uri(uri,id)

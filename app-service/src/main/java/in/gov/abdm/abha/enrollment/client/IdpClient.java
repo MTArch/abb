@@ -1,15 +1,17 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
-import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
-import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
-import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
+import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
+import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -18,10 +20,13 @@ public class IdpClient {
     @Autowired
     private WebClient.Builder webClient;
 
+    @Value("${enrollment.gateway.idp.baseuri}")
+    private String IDP_SERVICE_BASE_URI;
+
     //call to IDP service
     public Mono<IdpSendOtpResponse> sendOtp(IdpSendOtpRequest idpSendOtpRequest) {
-        //global2dev.abdm.gov.internal/api/v3/identity/authentication
-        return webClient.baseUrl("http://global2dev.abdm.gov.internal")
+    	// http://global2dev.abdm.gov.internal
+        return webClient.baseUrl(IDP_SERVICE_BASE_URI)
                 .build()
                 .post()
                 .uri(URIConstant.IDP_SEND_OTP_URI)
@@ -31,8 +36,7 @@ public class IdpClient {
                 .bodyToMono(IdpSendOtpResponse.class);
     }
     public Mono<IdpVerifyOtpResponse> verifyOtp(String authorization, String xTransactionId, String hipRequestId, String requestId) {
-        //http://global2dev.abdm.gov.internal/api/v3/identity/verify
-        return webClient.baseUrl("http://global2dev.abdm.gov.internal")
+        return webClient.baseUrl(IDP_SERVICE_BASE_URI)
                 .build()
                 .post()
                 .uri(URIConstant.IDP_VERIFY_OTP_URI)
