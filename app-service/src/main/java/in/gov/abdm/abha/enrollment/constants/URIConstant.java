@@ -63,6 +63,6 @@ public interface URIConstant {
 //    Notification DB Service
 
     String NOTIFICATION_DB_ENDPOINT_URI = "http://global2dev.abdm.gov.internal";
-    String NOTIFICATION_DB_BASE_URI = "/api/v3/notification";
+    String NOTIFICATION_DB_BASE_URI = "/api/v3/notificationdb";
     String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/message";
 }
