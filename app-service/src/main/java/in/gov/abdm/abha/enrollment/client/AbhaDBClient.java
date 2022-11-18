@@ -14,31 +14,13 @@ import reactor.core.publisher.Mono;
 @Component
 public class AbhaDBClient<T> {
 
-    /**
-     *
-     */
     @Autowired
     private WebClient.Builder webClient;
-
-
-//    private Flux<T> fluxGetDatabase(Class<T> t, String uri) {
-//        return webClient.
-//                baseUrl(
-//                        this.getDBURI()
-//                                .isPresent() ?
-//                                this.getDBURI().get().toString() : "NA")
-//                .build()
-//                .get()
-//                .uri(uri)
-//                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .retrieve()
-//                .bodyToFlux(t);
-//    }
 
     /** To revert url to ->  http://abha2dev.abdm.gov.internal    after testing **/
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl("http://localhost:9188")
+                 baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 // baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .get()
@@ -50,7 +32,7 @@ public class AbhaDBClient<T> {
 
     /** To revert url after testing **/
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -64,7 +46,7 @@ public class AbhaDBClient<T> {
     }
 
     private Mono<T> fluxPostDatabase(Class<T> t, String uri, T row) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .post()
                 .uri(uri)
@@ -79,7 +61,7 @@ public class AbhaDBClient<T> {
 
     /** To revert url after testing **/
     private Mono<T> monoPatchDatabase(Class<T> t, String uri, T row, String id) {
-        return webClient.baseUrl("http://localhost:9188")
+        return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
         //return webClient.baseUrl(URIConstant.ABHA_DB_BASE_URI)
                 .build()
                 .patch()

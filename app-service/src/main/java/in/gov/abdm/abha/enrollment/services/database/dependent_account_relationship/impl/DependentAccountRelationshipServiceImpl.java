@@ -1,14 +1,11 @@
-package in.gov.abdm.abha.enrollment.services.database.dependent.account.relationship.impl;
+package in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
-import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
-import in.gov.abdm.abha.enrollment.enums.AccountStatus;
-import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
+import in.gov.abdm.abha.enrollment.enums.link.parent.Relationship;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.DependentAccountRelationshipDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
-import in.gov.abdm.abha.enrollment.services.database.dependent.account.relationship.DependentAccountRelationshipService;
+import in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.DependentAccountRelationshipService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +27,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
+    public static final String ABHA_APP = "ABHA_APP";
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
     @Autowired
     AbhaDBClient abhaDBClient;
@@ -90,8 +88,8 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
                 dependentAccountDto.setDependentHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
                 dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship().getValue());
                 dependentAccountDto.setRelationshipProofDocumentLocation(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getDocument());
-                dependentAccountDto.setCreatedBy("anchal");
-                dependentAccountDto.setUpdatedBy("anchal");
+                dependentAccountDto.setCreatedBy(ABHA_APP);
+                dependentAccountDto.setUpdatedBy(ABHA_APP);
                 dependentAccountDto.setCreatedDate(LocalDateTime.now());
                 dependentAccountDto.setUpdatedDate(LocalDateTime.now());
                 list.add(dependentAccountDto);
