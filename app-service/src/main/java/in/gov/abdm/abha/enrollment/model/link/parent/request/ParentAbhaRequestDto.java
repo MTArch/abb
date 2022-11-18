@@ -20,7 +20,7 @@ import java.util.List;
 @Mobile
 @ValidRelationship
 @ValidDocument
-@AbhaId
+@AbhaNumber
 public class ParentAbhaRequestDto {
 
 
@@ -52,7 +52,7 @@ public class ParentAbhaRequestDto {
     private List<Relationship> relationship;
 
     @JsonProperty("document")
-    @NotNull
+    @NotNull(message = AbhaConstants.VALIDATION_ERROR_DOCUMENT_FIELD)
     private String document;
 
 }
