@@ -43,7 +43,7 @@ public interface URIConstant {
 
 //    Aadhaar Service URI
 
-    String AADHAAR_BASE_URI = "/api/v3/aadhaar/";
+    String AADHAAR_BASE_URI = "/api/v3/aadhaar";
     String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
     String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
     String AADHAAR_VERIFY_DEMOGRAPHIC = AADHAAR_BASE_URI + "/verifyDemographic";

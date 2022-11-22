@@ -147,7 +147,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .responseTokensDto(new ResponseTokensDto())
                     .build());
         } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED);
+            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
         }
     }
 
@@ -159,7 +159,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .responseTokensDto(new ResponseTokensDto())
                     .build());
         } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED);
+            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
         }
     }
 
