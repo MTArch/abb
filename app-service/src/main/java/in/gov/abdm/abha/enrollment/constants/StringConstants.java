@@ -11,6 +11,7 @@ public interface StringConstants {
     String HASH = "#";
     String A = "A";
     String SUCCESS = "success";
+    String FAILED = "Failed";
     String Y = "Y";
     String DASH = "-";
     String AT = "@";

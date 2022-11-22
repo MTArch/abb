@@ -1,9 +1,11 @@
 package in.gov.abdm.abha.enrollment.services.auth_byabdm;
 
-import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
-import org.springframework.stereotype.Service;
+import in.gov.abdm.abha.enrollment.model.authbyabdm.AuthByAbdmRequest;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import reactor.core.publisher.Mono;
-@Service
-public interface AuthByAbdmService<T> {
-    public Mono<IdpVerifyOtpResponse> verifyOtp();
+
+public interface AuthByAbdmService {
+    Mono<AuthResponseDto> verifyOtp(AuthByAbdmRequest authByAbdmRequest);
+
+    Mono<AuthResponseDto> verifyOtpViaNotification(AuthByAbdmRequest authByAbdmRequest);
 }

@@ -15,16 +15,6 @@ import java.util.List;
 public class NotificationRequestDto {
 
     /**
-     * id to identify request uniquely
-     */
-    private String requestId;
-
-    /**
-     * timestamp of incoming request
-     */
-    private String timestamp;
-
-    /**
      * type of content otp/info/promo
      */
     private String origin;

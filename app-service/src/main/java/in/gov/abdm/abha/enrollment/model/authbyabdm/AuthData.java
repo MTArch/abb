@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.model.authbyabdm;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @AuthMethod
 @in.gov.abdm.abha.enrollment.validators.annotations.Otp
 public class AuthData {
@@ -27,7 +27,7 @@ public class AuthData {
      */
     @JsonProperty("authMethods")
     @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD)
-    public ArrayList<String> authMethods;
+    private ArrayList<AuthMethods> authMethods;
     /**
      * It is otp
      */

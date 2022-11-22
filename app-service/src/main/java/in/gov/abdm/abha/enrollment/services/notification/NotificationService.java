@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    public static final String ORIGIN = "ABHA";
+    public static final String ORIGIN = "abha";
     public static final String SENDER = "NHASMS";
     public static final String MOBILE_KEY = "mobile";
     public static final String TEMPLATE_ID = "templateId";
