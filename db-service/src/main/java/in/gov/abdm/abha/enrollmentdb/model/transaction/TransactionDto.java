@@ -280,4 +280,9 @@ public class TransactionDto {
 	 */
 	private String loginModeType;
 
+	/**
+	 * transaction response - captures list of healthIdnumbers
+	 */
+	private String txnResponse;
+
 }

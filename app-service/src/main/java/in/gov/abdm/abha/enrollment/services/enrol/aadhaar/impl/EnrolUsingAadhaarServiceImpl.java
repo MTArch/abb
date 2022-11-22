@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -192,16 +193,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         .build());
 
         return aadhaarResponseDtoMono
-                .flatMap(res -> HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res));
+                .flatMap(res -> HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<AuthByAadhaarResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
+    private Mono<AuthByAadhaarResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
         handleAadhaarExceptions(aadhaarResponseDto);
 
         String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
         return accountService.findByXmlUid(encodedXmlUid)
                 .flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
-                .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono)))
+                .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
                 .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -217,14 +218,27 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .build());
     }
 
-    private Mono<AuthByAadhaarResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthByAadhaarResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
+
+        List<String> healthIdNumbers = accountDtoList.stream()
+                .map(AccountResponseDto::getABHANumber)
+                .collect(Collectors.toList());
+
+        return transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
+                .flatMap(transactionResDto -> {
+                    transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
+                    return transactionService.updateTransactionEntity(transactionDto, authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
+                            .flatMap(response -> AccountResponse(authByAadhaarRequestDto,accountDtoList));
+                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private Mono<AuthByAadhaarResponseDto> AccountResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
             return Mono.just(AuthByAadhaarResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
                     .accounts(accountDtoList)
                     .build());
-        } else {
-            return Mono.empty();
         }
+        return Mono.empty();
     }
 }

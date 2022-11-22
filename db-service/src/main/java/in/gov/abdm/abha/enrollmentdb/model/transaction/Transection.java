@@ -285,6 +285,11 @@ public class Transection implements Persistable<Long> {
      * document code
      */
     private String loginModeType;
+
+    /**
+     * transaction response - captures list of healthIdnumbers
+     */
+    private String txnResponse;
     
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.
