@@ -109,10 +109,6 @@ public class Common {
         return new HashSet<>(scopes).contains(scopesToMatch);
     }
     
-    public boolean isScopeAvailable(List<Scopes> scopes, List<Scopes> scopesToMatch) {
-        return new HashSet<>(scopes).contains(scopesToMatch);
-    }
-
     public boolean isExactScopesMatching(List<Scopes> scopes, List<Scopes> scopesToMatch) {
         return scopes.equals(scopesToMatch);
     }

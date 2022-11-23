@@ -104,6 +104,8 @@ public class AbhaDBClient<T> {
                 return monoPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_URI, row);
             case "DependentAccountRelationshipDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+            case "HidPhrAddressDto":
+                return monoPostDatabase(t, URIConstant.DB_ADD_HID_PHR_ADDRESS_URI, row);
         }
         return Mono.empty();
     }

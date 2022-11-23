@@ -43,7 +43,8 @@ public class OtpRequestController {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
         // If scope -abha-enrol or -child-abha-enrol abd  otpSystem -aadhaar
-        else if (Common.isScopeAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.CHILD_ABHA_ENROL) )
+        else if ((Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
+        		||Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
             return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
