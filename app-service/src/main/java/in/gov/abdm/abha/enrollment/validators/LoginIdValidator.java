@@ -31,7 +31,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * $1-$2-$3-$4 
      * Starting from 91
      */
-    private static final String ABHA_NO_REGEX_PATTERN = "^91[\\-]\\d{4}[\\-]\\d{4}[\\-]\\d{4}";
+    private static final String ABHA_NO_REGEX_PATTERN = "^91-\\d{4}-\\d{4}-\\d{4}";
     
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.
@@ -45,7 +45,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * If otp system is abdm , login id will be mobile number and perform mobile regex validations
      *
      * @param mobileOrEmailOtpRequestDto object to validate
-     * @param context                    context in which the constraint is evaluated
+     * @param context in which the constraint is evaluated
      * @return
      */
     @Override
@@ -54,8 +54,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 				&& mobileOrEmailOtpRequestDto.getLoginId() != null) {
 
 			if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
-					&& isValidInput(mobileOrEmailOtpRequestDto.getLoginId())
-					&& mobileOrEmailOtpRequestDto.getLoginHint() != null) {
+					&& isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
 
 				String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
 				if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
@@ -64,7 +63,9 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 					return isValidAadhaar(loginId);
 				} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
 					return isValidAbha(loginId);
-				}
+				} else {
+                    return true;
+                }
 			}
 		}
 		return false;

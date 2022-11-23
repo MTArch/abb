@@ -1,15 +1,16 @@
 package in.gov.abdm.abha.enrollment.validators;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Validates scope attribute from the provided list of scopes against the pre-decided value ie. abha-enrol
@@ -33,6 +34,6 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
                     return !name.equals(Scopes.WRONG);
                 })
                 .collect(Collectors.toList());
-        return Common.isAllScopesAvailable(enumNames, requestScopes);
+        return requestScopes != null &&  !requestScopes.isEmpty() && Common.isAllScopesAvailable(enumNames, requestScopes);
     }
 }

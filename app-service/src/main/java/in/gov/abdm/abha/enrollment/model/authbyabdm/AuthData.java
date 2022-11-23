@@ -1,17 +1,18 @@
 package in.gov.abdm.abha.enrollment.model.authbyabdm;
 
+import java.util.ArrayList;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 
 /**
  * It is a Pojo class Authdata
@@ -22,12 +23,14 @@ import java.util.ArrayList;
 @AuthMethod
 @in.gov.abdm.abha.enrollment.validators.annotations.Otp
 public class AuthData {
+	
     /**
      * It is authMethods
      */
     @JsonProperty("authMethods")
     @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD)
     private ArrayList<AuthMethods> authMethods;
+    
     /**
      * It is otp
      */

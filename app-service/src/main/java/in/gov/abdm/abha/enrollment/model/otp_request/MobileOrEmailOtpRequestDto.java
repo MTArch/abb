@@ -1,17 +1,18 @@
 package in.gov.abdm.abha.enrollment.model.otp_request;
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import java.util.List;
+
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.validators.annotations.*;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginHint;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidOtpSystem;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Entity class which enables OTP auth/verfication using either Aadhaar or ABDM OTP systems.
@@ -33,7 +34,6 @@ public class MobileOrEmailOtpRequestDto {
     /**
      * field to log transaction
      */
-    @NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
     private String txnId;
 
     /**
@@ -41,7 +41,6 @@ public class MobileOrEmailOtpRequestDto {
      * Existing scopes : abha-enrol,mobile-update,mobile-verify,email-update
      * Scope will be abha-enrol for abha creation using aadhaar
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
     private List<Scopes> scope;
 
     /**
@@ -49,20 +48,17 @@ public class MobileOrEmailOtpRequestDto {
      * Existing loginHint values: abha-number or mobile or phr-address
      * LoginHint will be empty for abha creation using aadhaar
      */
-    @NotNull(message = AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD)
     private LoginHint loginHint;
 
     /**
      * refers to the way user logs in to the system
      * Possible login id values : aadhaar number or mobile number
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_LOGIN_ID_FIELD)
     private String loginId;
 
     /**
      * refers to the system used to send verification otp
      * Possible values : aadhaar or abdm
      */
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD)
     private OtpSystem otpSystem;
 }
