@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.services.otp_request;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
@@ -12,6 +14,7 @@ import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
+import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -103,14 +106,30 @@ public class OtpRequestService {
      * @return
      */
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setState(TransactionStatus.ACTIVE.toString());
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
+        transactionDto.setTxnId(UUID.randomUUID());
+
+        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
+                && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR))
+        {
+            Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
+            transactionDtoMono.flatMap(res1->{
+                if(res1.getHealthIdNumber()!=null)
+                    transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
+                return Mono.just(transactionDto);
+            });
+        }
 
         Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
-        return aadhaarResponseDto.flatMap(res -> handleAadhaarOtpResponse(res, transactionDto));
+        return aadhaarResponseDto.flatMap(res ->
+                {
+                    return handleAadhaarOtpResponse(res, transactionDto);
+                }
+        );
     }
 
     private Mono<MobileOrEmailOtpResponseDto> handleAadhaarOtpResponse(AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
@@ -122,6 +141,7 @@ public class OtpRequestService {
 
         Mono<TransactionDto> createTransactionResponse = transactionService.createTransactionEntity(transactionDto);
         return createTransactionResponse.flatMap(res -> mobileOrEmailOtpResponse(res, transactionDto));
+
     }
 
     /**

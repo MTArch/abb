@@ -71,13 +71,18 @@ public class LinkParentServiceImpl implements LinkParentService {
                         .map(ParentAbhaRequestDto:: getABHANumber)
                         .collect(Collectors.toList());
 
-                boolean flag = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
-                if(!flag) {
+                boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
+                boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
+                if(!flag1 && !flag2) {
                     throw new DatabaseConstraintFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
                 }
             }
             return Mono.just(true);
         }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {
+        return healthIdNumberFromTxn.equals(healthIdNumberFromRequest);
     }
 
     public boolean isParentValid(List<String> txnResponseHealthIdNumbers,List<String> parentHealthIdNumbers)

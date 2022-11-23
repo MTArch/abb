@@ -285,4 +285,10 @@ public class TransactionDto {
 	 */
 	private String txnResponse;
 
+	/**
+	 * abha id
+	 * 14-digit unique number
+	 */
+	private String healthIdNumber;
+
 }

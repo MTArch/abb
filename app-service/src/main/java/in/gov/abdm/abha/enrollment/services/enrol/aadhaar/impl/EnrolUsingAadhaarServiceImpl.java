@@ -90,10 +90,19 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
-        return Mono.just(EnrolByAadhaarResponseDto.builder()
-                .txnId(transactionDto.getTxnId().toString())
-                .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto))
-                .build());
+
+        return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
+                .flatMap(transactionDtoResponse->
+                {
+                    transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
+                    return transactionService.updateTransactionEntity(transactionDtoResponse, String.valueOf(transactionDto.getId()))
+                            .flatMap(res-> {
+                                return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                        .txnId(transactionDto.getTxnId().toString())
+                                        .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto))
+                                        .build());
+                            }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
@@ -109,6 +118,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         }
 
         String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+        transactionDto.setHealthIdNumber(newAbhaNumber);
         accountDto.setHealthIdNumber(newAbhaNumber);
         ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
         //TODO update phr address in db
@@ -124,13 +134,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         }
                         //update transaction table and create account in account table
                         //account status is active
-                        return accountService.createAccountEntity(accountDto)
+                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                                 .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                     });
         } else {
             //update transaction table and create account in account table
             //account status is active
-            return accountService.createAccountEntity(accountDto)
+            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
         }
     }
