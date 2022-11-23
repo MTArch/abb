@@ -34,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
-    public Mono<AuthByAadhaarResponseDto> authByAadhaar(@RequestBody AuthByAadhaarRequestDto authByAadhaarRequestDto){
+    public Mono<AuthByAadhaarResponseDto> authByAadhaar(@Valid @RequestBody AuthByAadhaarRequestDto authByAadhaarRequestDto){
         return enrolUsingAadhaarService.verifyOtpChildAbha(authByAadhaarRequestDto);
     }
 }
