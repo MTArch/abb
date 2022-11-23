@@ -18,7 +18,6 @@ import java.util.Date;
 @NoArgsConstructor
 @ToString
 @ValidTransactionId
-@OtpValue
 @TimestampOtp
 /**
  * It is Otp class
@@ -39,6 +38,7 @@ public class Otp {
     /**
      * It is otpValue
      */
+    @OtpValue
     @JsonProperty("otpValue")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
     public String otpValue;

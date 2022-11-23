@@ -21,7 +21,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
     /**
      * Constant for transaction id pattern matching
      */
-    private static final String TRANSACTION_ID_REGEX_PATTERN = "[0-9abcdef-]{36}";
+    private static final String TRANSACTION_ID_REGEX_PATTERN = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
 
     /**
@@ -36,39 +36,18 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 
-//        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(ScopeEnum.ABHA_ENROL))) {
-//            if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-//                mobileOrEmailOtpRequestDto.setTxnId("");
-//            }
-//            return true;
-//        } else {
-//            if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-//                return false;
-//            }else{
-//                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
-//            }
-//        }
-
-
-        if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(Scopes.ABHA_ENROL)))
-        {
-            if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-                mobileOrEmailOtpRequestDto.setTxnId("");
-                return false;
-            }
-            else if(StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId()))
-            {
-                return true;
-            }
-        }
-        else {
-            if(!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
-            }else{
-                // return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId()).matches();
-                return true;
-            }
-        }
+		if (HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto, Collections.singletonList(Scopes.ABHA_ENROL))) {
+			if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+				return false;
+			} else if (StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+				return true;
+			}
+		} else {
+			if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+				return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
+						.matches();
+			}
+		}
         return false;
     }
 }

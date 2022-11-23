@@ -104,13 +104,13 @@ public class Common {
     public boolean isScopeAvailable(List<Scopes> scopes, Scopes scopesToMatch) {
         return new HashSet<>(scopes).contains(scopesToMatch);
     }
+    
+    public boolean isScopeAvailable(List<Scopes> scopes, List<Scopes> scopesToMatch) {
+        return new HashSet<>(scopes).contains(scopesToMatch);
+    }
 
     public boolean isExactScopesMatching(List<Scopes> scopes, List<Scopes> scopesToMatch) {
         return scopes.equals(scopesToMatch);
-    }
-
-    public boolean isOtpSystem(String otpSystem, OtpSystem otpSystemToMatch) {
-        return otpSystem.equals(otpSystemToMatch.getValue());
     }
 
     public String base64Encode(String value){

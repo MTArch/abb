@@ -1,18 +1,19 @@
 package in.gov.abdm.abha.enrollment.validators;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.OtpDto;
-import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
-import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.util.Base64;
 import java.util.regex.Pattern;
+
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
 
 /**
  * Validating otp value should be valid 6-digit number and must be encrypted
  */
-public class OtpValueValidator implements ConstraintValidator<OtpValue, OtpDto> {
+public class OtpValueValidator implements ConstraintValidator<OtpValue, String> {
 
     @Autowired
     RSAUtil rsaUtil;
@@ -23,22 +24,13 @@ public class OtpValueValidator implements ConstraintValidator<OtpValue, OtpDto> 
     private static final String OTP_REGEX_PATTERN = "[0-9]{6}";
 
     @Override
-    public boolean isValid(OtpDto otpDto, ConstraintValidatorContext context) {
-        if(!StringUtils.isEmpty(otpDto)
-                && otpDto!=null && otpValueNotNullorEmpty(otpDto)) {
-            if (isValidInput(otpDto.getOtpValue()) && isRSAEncrypted(otpDto.getOtpValue())) {
-                String otp = rsaUtil.decrypt(otpDto.getOtpValue());
-                return Pattern.compile(OTP_REGEX_PATTERN).matcher(otp).matches();
-            } else
-                return false;
-        }
-        return true;
-    }
+	public boolean isValid(String otp, ConstraintValidatorContext context) {
+		if (otp != null && !otp.isEmpty() && isValidInput(otp) && isRSAEncrypted(otp)) {
+			return Pattern.compile(OTP_REGEX_PATTERN).matcher(rsaUtil.decrypt(otp)).matches();
+		}
+		return false;
+	}
 
-    private boolean otpValueNotNullorEmpty(OtpDto otpDto) {
-        return otpDto.getOtpValue()!=null
-                && !otpDto.getOtpValue().isEmpty();
-    }
 
     private boolean isValidInput(String otp) {
         return !Pattern.compile("[0-9]+").matcher(otp).matches()

@@ -12,8 +12,6 @@ import javax.validation.constraints.NotNull;
  * It is Data Transfer Object for Otp
  */
 @TimestampOtp
-@Uuid
-@OtpValue
 @Data
 public class OtpDto {
     /**
@@ -28,14 +26,15 @@ public class OtpDto {
      */
     @JsonProperty("txnId")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
+    @Uuid
     private String txnId;
 
     /**
      * It is otpvalue
      */
-
     @JsonProperty("otpValue")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
+    @OtpValue
     private String otpValue;
 
     @JsonProperty("mobile")

@@ -1,5 +1,7 @@
 package in.gov.abdm.abha.enrollment.model.otp_request;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.LoginHint;
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 @ValidScope
 @ValidLoginHint
 @ValidLoginId
+@ValidOtpSystem
 @ToString
 public class MobileOrEmailOtpRequestDto {
 
@@ -47,7 +50,7 @@ public class MobileOrEmailOtpRequestDto {
      * LoginHint will be empty for abha creation using aadhaar
      */
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD)
-    private String loginHint;
+    private LoginHint loginHint;
 
     /**
      * refers to the way user logs in to the system
@@ -61,6 +64,5 @@ public class MobileOrEmailOtpRequestDto {
      * Possible values : aadhaar or abdm
      */
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD)
-    @ValidOtpSystem
-    private String otpSystem;
+    private OtpSystem otpSystem;
 }
