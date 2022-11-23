@@ -6,6 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 /**
  * It is General Utils class
  */
@@ -26,8 +31,20 @@ public class GeneralUtils {
         return StringUtils.isEmpty(str) ? str : str.trim();
     }
 
-    public String generateRandomOTP(){
+    public String generateRandomOTP() {
         return RandomStringUtils.randomNumeric(6);
+    }
+
+    public static Long getCurrentTime() {
+        return System.currentTimeMillis() + (1000);
+    }
+
+    public boolean isOtpExpired(LocalDateTime currentDateTime, long expireTimeMin) {
+        boolean isOTPExpire = false;
+        if (Objects.nonNull(currentDateTime)) {
+            isOTPExpire = expireTimeMin < TimeUnit.MILLISECONDS.toMinutes(getCurrentTime() - Common.dateOf(currentDateTime).getTime());
+        }
+        return isOTPExpire;
     }
 }
 

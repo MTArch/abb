@@ -14,7 +14,7 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthByAadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,7 +148,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .responseTokensDto(new ResponseTokensDto())
                     .build());
         } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED);
+            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
         }
     }
 
@@ -161,7 +160,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .responseTokensDto(new ResponseTokensDto())
                     .build());
         } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED);
+            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
         }
     }
 
@@ -180,12 +179,12 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     @Override
-    public Mono<AuthByAadhaarResponseDto> verifyOtpChildAbha(AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+    public Mono<AuthResponseDto> verifyOtpChildAbha(AuthByAadhaarRequestDto authByAadhaarRequestDto) {
         Mono<TransactionDto> txnResponseDto = transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
         return txnResponseDto.flatMap(res -> verifyAadhaarOtpChildAbha(res, authByAadhaarRequestDto));
     }
 
-    private Mono<AuthByAadhaarResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+    private Mono<AuthResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthByAadhaarRequestDto authByAadhaarRequestDto) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarClient.verifyOtp(
                 AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
                         .aadhaarTransactionId(transactionDto.getAadharTxn())
@@ -196,7 +195,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(res -> HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<AuthByAadhaarResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
         handleAadhaarExceptions(aadhaarResponseDto);
 
         String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
@@ -218,7 +217,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .build());
     }
 
-    private Mono<AuthByAadhaarResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
 
         List<String> healthIdNumbers = accountDtoList.stream()
                 .map(AccountResponseDto::getABHANumber)
@@ -232,9 +231,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthByAadhaarResponseDto> AccountResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthResponseDto> AccountResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
-            return Mono.just(AuthByAadhaarResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
+            return Mono.just(AuthResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
                     .accounts(accountDtoList)
                     .build());
