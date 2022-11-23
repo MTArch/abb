@@ -25,9 +25,8 @@ public class TransactionController {
         return transactionService.createTransaction(transactionDto);
     }
 
-    //TODO Update Transaction BY TXN id
-    @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_TRANSACTION_BY_TXN_ID)
-    public Mono<Transection> updateTransactionByTxnId(@RequestBody TransactionDto transactionDto, @PathVariable("id") String id) {
+    @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_TRANSACTION_BY_ID)
+    public Mono<Transection> updateTransactionById(@RequestBody TransactionDto transactionDto, @PathVariable("id") String id) {
         return transactionService.updateTransactionById(transactionDto, id);
     }
 }

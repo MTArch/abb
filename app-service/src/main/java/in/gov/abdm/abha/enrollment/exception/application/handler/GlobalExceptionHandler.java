@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
     public Map<String, Object> runtimeGenericExceptionHandler(GenericExceptionMessage ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(MESSAGE, ex.getMessage());
-        log.info(EXCEPTIONS, errorMap);
+        log.info(EXCEPTIONS, ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
