@@ -5,9 +5,10 @@ import javax.validation.ConstraintValidatorContext;
 
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidDocument;
 
-public class ValidDocumentValidator implements ConstraintValidator<ValidDocument, String> {
+public class DocumentValidator implements ConstraintValidator<ValidDocument, String> {
+	
 	@Override
-	public boolean isValid(String value, ConstraintValidatorContext context) {
-		return value != null && !value.isEmpty();
+	public boolean isValid(String document, ConstraintValidatorContext context) {
+		return document != null && !document.isEmpty();
 	}
 }

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ChildAbhaRequestDto {
 
     @JsonProperty("ABHANumber")
-    @NotEmpty(message = AbhaConstants.VALIDATION_NULL_ABHA_NUMBER)
+    @NotEmpty(message = AbhaConstants.INVALID_ABHA_NUMBER)
     @AbhaNumber
     private String ABHANumber;
 }

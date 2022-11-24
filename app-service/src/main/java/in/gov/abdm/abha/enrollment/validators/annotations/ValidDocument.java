@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.validators.ValidDocumentValidator;
+import in.gov.abdm.abha.enrollment.validators.DocumentValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -12,7 +12,7 @@ import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
-@Constraint(validatedBy = ValidDocumentValidator.class)
+@Constraint(validatedBy = DocumentValidator.class)
 @Target({FIELD})
 public @interface ValidDocument {
 

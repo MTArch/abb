@@ -25,7 +25,7 @@ public class ParentAbhaRequestDto {
 
 
     @JsonProperty("ABHANumber")
-    @NotNull(message = AbhaConstants.VALIDATION_NULL_ABHA_NUMBER)
+    @NotNull(message = AbhaConstants.INVALID_ABHA_NUMBER)
     @AbhaNumber
     private String ABHANumber;
 

@@ -29,7 +29,10 @@ public enum ClassLevelExceptionConstants {
     yob(AbhaConstants.PATTERN_MISMATCHED),
     mobile(AbhaConstants.MOBILE_NUMBER_MISSMATCH),
     aadhaarNumber(AbhaConstants.AADHAAR_NUMBER_INVALID),
-    otpSystem(AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD);
+    otpSystem(AbhaConstants.VALIDATION_ERROR_OTP_SYSTEM_FIELD),
+    abhaNumber(AbhaConstants.INVALID_ABHA_NUMBER),
+    relationship(AbhaConstants.VALIDATION_ERROR_RELATIONSHIP_FIELD),
+    document(AbhaConstants.VALIDATION_ERROR_DOCUMENT_FIELD);
     private final String value;
 
 

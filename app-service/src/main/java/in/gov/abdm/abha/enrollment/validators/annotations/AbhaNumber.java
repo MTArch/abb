@@ -7,7 +7,7 @@ import javax.validation.Payload;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.VALIDATION_NULL_ABHA_NUMBER;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_ABHA_NUMBER;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -16,11 +16,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({FIELD})
 public @interface AbhaNumber {
 
-    String message() default VALIDATION_NULL_ABHA_NUMBER;
+    String message() default INVALID_ABHA_NUMBER;
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-    
-    boolean optional() default false;
 }

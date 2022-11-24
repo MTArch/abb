@@ -55,7 +55,7 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
 
-    String VALIDATION_NULL_ABHA_NUMBER = " Abha Number can not be null";
+    String INVALID_ABHA_NUMBER = "Invalid Abha Number";
 
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
