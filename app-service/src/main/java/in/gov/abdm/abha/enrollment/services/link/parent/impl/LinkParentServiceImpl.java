@@ -83,7 +83,7 @@ public class LinkParentServiceImpl implements LinkParentService {
     }
 
     private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {
-        return healthIdNumberFromTxn.equals(healthIdNumberFromRequest);
+        return healthIdNumberFromTxn!=null && healthIdNumberFromTxn.equals(healthIdNumberFromRequest);
     }
 
     public boolean isParentValid(List<String> txnResponseHealthIdNumbers,List<String> parentHealthIdNumbers)

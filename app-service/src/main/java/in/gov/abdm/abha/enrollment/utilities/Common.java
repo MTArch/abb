@@ -28,6 +28,7 @@ import java.util.*;
 @Slf4j
 public class Common {
 
+	
     public static final String EXCEPTION_OCCURRED_WHILE_CONVERTING_XML_TO_JSON_STRING = "Exception occurred while converting xml to json String";
     public static final String HIDDEN_DIGIT = "******";
     public static final String FILE_LOADED_SUCCESSFULLY = "{} file loaded successfully";
@@ -109,6 +110,10 @@ public class Common {
         return new HashSet<>(scopes).contains(scopesToMatch);
     }
     
+    public boolean isOtpSystem(OtpSystem otpSystem, OtpSystem otpSystemToMatch) {
+        return otpSystem.equals(otpSystemToMatch.getValue());
+    }
+    
     public boolean isExactScopesMatching(List<Scopes> scopes, List<Scopes> scopesToMatch) {
         return scopes.equals(scopesToMatch);
     }
@@ -136,4 +141,5 @@ public class Common {
     public Date dateOf(LocalDateTime date){
         return Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
     }
+
 }
