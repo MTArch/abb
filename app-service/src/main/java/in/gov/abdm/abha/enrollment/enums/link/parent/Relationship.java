@@ -24,15 +24,17 @@ public enum Relationship {
 
     private final String value;
 
-    public static boolean isValid(String value) {
-        Relationship[] values = Relationship.values();
-        for (Relationship relationship : values) {
-            if (relationship.toString().equals(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public static boolean isValid(String value) {
+
+		Relationship[] values = Relationship.values();
+		for (Relationship relationship : values) {
+//			if (relationship.toString().equals(value) && value != "wrong") {
+				if (relationship.toString().equals(value)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     @JsonCreator
     public static Relationship fromText(String text) {

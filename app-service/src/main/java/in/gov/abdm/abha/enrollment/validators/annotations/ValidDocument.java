@@ -8,12 +8,12 @@ import javax.validation.Payload;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Constraint(validatedBy = ValidDocumentValidator.class)
-@Target({TYPE})
+@Target({FIELD})
 public @interface ValidDocument {
 
     public String message() default AbhaConstants.VALIDATION_ERROR_DOCUMENT_FIELD;
@@ -21,4 +21,6 @@ public @interface ValidDocument {
     public Class<?>[] groups() default {};
 
     public Class<? extends Payload>[] payload() default {};
+    
+    boolean optional() default false;
 }

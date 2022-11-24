@@ -11,10 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidChildAbhaRequest;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidParentAbhaRequest;
+import in.gov.abdm.abha.enrollment.validators.annotations.Uuid;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidParentScope;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,14 +20,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ValidTransactionId
 @ValidParentScope
-@ValidParentAbhaRequest
-@ValidChildAbhaRequest
 public class LinkParentRequestDto {
 
     @JsonProperty("txnId")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
+    @Uuid
     private String txnId;
 
     @JsonProperty("scope")
@@ -45,7 +41,6 @@ public class LinkParentRequestDto {
     private ChildAbhaRequestDto childAbhaRequestDto;
 
     @JsonProperty("consent")
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_CONSENT_CODE_FIELD)
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_CONSENT_VERSION_FIELD)
+    @Valid
     private ConsentDto consentDto;
 }

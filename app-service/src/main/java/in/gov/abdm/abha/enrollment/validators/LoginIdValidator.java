@@ -31,7 +31,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * $1-$2-$3-$4 
      * Starting from 91
      */
-    private static final String ABHA_NO_REGEX_PATTERN = "^91-\\d{4}-\\d{4}-\\d{4}";
+    private static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
     
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.

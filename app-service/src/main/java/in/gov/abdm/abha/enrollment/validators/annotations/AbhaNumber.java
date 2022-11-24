@@ -13,7 +13,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Constraint(validatedBy = AbhaNumberValidator.class)
-@Target({TYPE, FIELD, PARAMETER})
+@Target({FIELD})
 public @interface AbhaNumber {
 
     String message() default VALIDATION_NULL_ABHA_NUMBER;
@@ -21,4 +21,6 @@ public @interface AbhaNumber {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+    
+    boolean optional() default false;
 }
