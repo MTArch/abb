@@ -99,7 +99,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(transactionDtoResponse->
                 {
                     transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
-                    return transactionService.updateTransactionEntity(transactionDtoResponse, String.valueOf(transactionDto.getId()))
+                    return transactionService.updateTransactionEntity(transactionDtoResponse, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(res-> {
                                 return Mono.just(EnrolByAadhaarResponseDto.builder()
                                         .txnId(transactionDto.getTxnId().toString())
@@ -138,14 +138,14 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         }
                         //update transaction table and create account in account table
                         //account status is active
-                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                 .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                                 .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                     });
         } else {
             //update transaction table and create account in account table
             //account status is active
-            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
         }
