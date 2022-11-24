@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.OTP_REQUEST_ENDPOINT)
@@ -31,25 +33,20 @@ public class OtpRequestController {
      * @return txnId and success or failed message as part of responseDto
      */
     @PostMapping(URIConstant.MOBILE_OR_EMAIL_OTP_ENDPOINT)
-    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
-        String otpSystem = mobileOrEmailOtpRequestDto.getOtpSystem();
         // If scope -abha-enrol and mobile-verify and otpSystem -abdm
         if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
-                && Common.isOtpSystem(otpSystem, OtpSystem.ABDM)) {
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
-        // If scope -abha-enrol and otpSystem -aadhaar
-        else if (Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
-                && Common.isOtpSystem(otpSystem, OtpSystem.AADHAAR)) {
+        // If scope -abha-enrol or -child-abha-enrol abd  otpSystem -aadhaar
+        else if ((Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
+        		||Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
             return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
-        }
-        // If scope -child-abha-enrol and otpSystem -aadhaar
-        else if (Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)
-                && Common.isOtpSystem(otpSystem, OtpSystem.AADHAAR)) {
-        	 return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
         // If scope -child-abha-enrol
         else if(Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)){

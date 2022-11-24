@@ -17,8 +17,8 @@ public class ConsentDto {
      * It is code
      */
     @JsonProperty("code")
-    @ConsentCode
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_CONSENT_CODE_FIELD)
+    @ConsentCode
     private String code;
 
     /**

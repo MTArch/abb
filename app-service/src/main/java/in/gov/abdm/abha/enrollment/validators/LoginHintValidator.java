@@ -1,5 +1,10 @@
 package in.gov.abdm.abha.enrollment.validators;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -23,13 +28,13 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
 	 */
 	@Override
 	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		if (mobileOrEmailOtpRequestDto != null)
-			return (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
-					|| mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)
-					|| mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)
-					|| mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.EMPTY));
-		else
-			return false;
+	        List<LoginHint> enumNames = Stream.of(LoginHint.values())
+	                .filter(name -> {
+	                    return !name.equals(LoginHint.WRONG);
+	                })
+	                .collect(Collectors.toList());
+	        return new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getLoginHint());
+		
 
 	}
 }

@@ -21,8 +21,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -49,6 +51,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Autowired
     AccountService accountService;
+    @Autowired
+    HidPhrAddressService hidPhrAddressService;
     @Autowired
     TransactionService transactionService;
     @Autowired
@@ -165,15 +169,20 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
-        if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {
-            return Mono.just(EnrolByAadhaarResponseDto.builder()
-                    .txnId(transactionDto.getTxnId().toString())
-                    .abhaProfileDto(abhaProfileDto)
-                    .responseTokensDto(new ResponseTokensDto())
-                    .build());
-        } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
-        }
+    	
+    	HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(transactionDto, accountDtoResponse, abhaProfileDto);
+    	
+		return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(response -> {
+			if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {
+				return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+						.abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+			} else {
+				throw new DatabaseConstraintFailedException(
+						EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
+			}
+		});
+    	
+        
     }
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {

@@ -1,11 +1,16 @@
 package in.gov.abdm.abha.enrollment.validators;
 
-import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
+import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
 
 /**
  * Validates scope attribute from the provided list of scopes against the pre-decided value ie. abha-enrol
@@ -23,10 +28,12 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        return mobileOrEmailOtpRequestDto.getScope()!=null
-                && !mobileOrEmailOtpRequestDto.getScope().isEmpty()
-                && mobileOrEmailOtpRequestDto.getScope().get(0) != null
-                && !mobileOrEmailOtpRequestDto.getScope().get(0).equals("")
-                && !mobileOrEmailOtpRequestDto.getScope().contains(Scopes.WRONG);
+        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+        List<Scopes> enumNames = Stream.of(Scopes.values())
+                .filter(name -> {
+                    return !name.equals(Scopes.WRONG);
+                })
+                .collect(Collectors.toList());
+        return requestScopes != null &&  !requestScopes.isEmpty() && Common.isAllScopesAvailable(enumNames, requestScopes);
     }
 }

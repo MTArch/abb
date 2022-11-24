@@ -19,16 +19,6 @@ public enum OtpSystem {
 
     private final String value;
 
-    public static boolean isValid(String value) {
-        OtpSystem[] values = OtpSystem.values();
-        for (OtpSystem otpSystem : values) {
-            if (otpSystem.toString().equals(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @JsonCreator
     public static OtpSystem fromText(String text){
         for(OtpSystem otpSystem : OtpSystem.values()){

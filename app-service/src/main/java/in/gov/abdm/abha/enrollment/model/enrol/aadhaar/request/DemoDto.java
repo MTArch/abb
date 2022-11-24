@@ -5,9 +5,6 @@ import lombok.Data;
 
 @TimestampDemo
 @AadhaarNumberDemo
-@Name
-@Gender
-@YOB
 @Mobile
 @Data
 public class DemoDto {
@@ -28,6 +25,7 @@ public class DemoDto {
      * It is a Persons Name
      */
     @JsonProperty("name")
+    @Name
     private String name;
 
     /**
@@ -40,12 +38,14 @@ public class DemoDto {
      * It is gender Male/Female
      */
     @JsonProperty("gender")
+    @Gender
     private String gender;
 
     /**
      * It is year of birth
      */
     @JsonProperty("yob")
+    @YOB
     private String yob;
 
     /**
