@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.services.otp_request;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
+import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
@@ -12,13 +14,14 @@ import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
+import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.notification.TemplatesHelper;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
-import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2;
+import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +51,7 @@ public class OtpRequestService {
     private static final String FAILED_TO_SEND_OTP = "Failed to send OTP";
     private static final String MESSAGE = "OTP is sent to Aadhaar/ABHA registered mobile ending xxx3604";
     private static final String FAILED_TO_CALL_IDP_SERVICE = "Failed to call IDP service";
+    private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
 
     /**
      * transaction service to helps to prepare transaction entity details
@@ -77,9 +81,10 @@ public class OtpRequestService {
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {
-                    transactionDto.setOtp(Argon2.encode(newOtp));
+                    transactionDto.setMobile(phoneNumber);
+                    transactionDto.setOtp(Argon2Util.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                    return transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
+                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
                                     .message(OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
@@ -101,14 +106,36 @@ public class OtpRequestService {
      * @return
      */
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setState(TransactionStatus.ACTIVE.toString());
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
+        transactionDto.setTxnId(UUID.randomUUID());
 
-        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
-        return aadhaarResponseDto.flatMap(res -> handleAadhaarOtpResponse(res, transactionDto));
+        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
+                && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR))
+        {
+            return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
+            .flatMap(res1->{
+                if(res1.getHealthIdNumber()!=null)
+                    transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
+                Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+                return aadhaarResponseDto.flatMap(res ->
+                        {
+                            return handleAadhaarOtpResponse(res, transactionDto);
+                        }
+                );
+            });
+        }
+        else {
+            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+            return aadhaarResponseDto.flatMap(res ->
+                    {
+                        return handleAadhaarOtpResponse(res, transactionDto);
+                    }
+            );
+        }
     }
 
     private Mono<MobileOrEmailOtpResponseDto> handleAadhaarOtpResponse(AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
@@ -120,6 +147,7 @@ public class OtpRequestService {
 
         Mono<TransactionDto> createTransactionResponse = transactionService.createTransactionEntity(transactionDto);
         return createTransactionResponse.flatMap(res -> mobileOrEmailOtpResponse(res, transactionDto));
+
     }
 
     /**
@@ -154,6 +182,7 @@ public class OtpRequestService {
                     aadhaarResponseDto.getReason());
             throw new UidaiException(aadhaarResponseDto);
         }
+        log.info(SENT_AADHAAR_OTP);
     }
 
     public Mono<MobileOrEmailOtpResponseDto> sendIdpOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {

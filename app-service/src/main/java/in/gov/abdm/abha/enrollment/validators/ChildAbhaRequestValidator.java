@@ -8,8 +8,8 @@ import javax.validation.ConstraintValidatorContext;
 
 public class ChildAbhaRequestValidator implements ConstraintValidator<ValidChildAbhaRequest, LinkParentRequestDto> {
 
-    @Override
-    public boolean isValid(LinkParentRequestDto value, ConstraintValidatorContext context) {
-        return false;
-    }
+	@Override
+	public boolean isValid(LinkParentRequestDto linkParentRequestDto, ConstraintValidatorContext context) {
+		return linkParentRequestDto.getChildAbhaRequestDto() != null;
+	}
 }

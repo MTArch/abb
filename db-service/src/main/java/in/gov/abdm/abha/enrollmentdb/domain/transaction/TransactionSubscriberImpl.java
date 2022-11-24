@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
-import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
+import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +35,10 @@ public class TransactionSubscriberImpl implements TransactionSubscriber {
 	 * Data notification sent by the Publisher in response to requests to
 	 * Subscription.request(long).
 	 * 
-	 * @param transactionDto the element signaled
+	 * @param transection the element signaled
 	 */
 	@Override
-	public void onNext(TransactionDto transactionDto) {
+	public void onNext(Transection transection) {
 		log.info(ENROLLMENT_LOG_PREFIX + "Saving next");
 	}
 

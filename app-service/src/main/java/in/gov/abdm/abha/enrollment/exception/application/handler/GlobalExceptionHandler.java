@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.exception.application.handler;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
@@ -93,7 +94,7 @@ public class GlobalExceptionHandler {
     public Map<String, Object> runtimeGenericExceptionHandler(GenericExceptionMessage ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(MESSAGE, ex.getMessage());
-        log.info(EXCEPTIONS, errorMap);
+        log.info(EXCEPTIONS, ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
@@ -106,6 +107,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+    }
+
+    /**
+     * handling exception to show error message incase validation fails while linking parent
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(ParentLinkingFailedException.class)
+    public ResponseEntity<ErrorResponse> parentLinkingFailed(ParentLinkingFailedException ex) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
         return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
 }

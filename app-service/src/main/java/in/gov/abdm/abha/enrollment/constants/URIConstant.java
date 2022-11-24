@@ -40,10 +40,12 @@ public interface URIConstant {
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
 
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
+    
+    String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
 
 //    Aadhaar Service URI
 
-    String AADHAAR_BASE_URI = "/api/v3/aadhaar/";
+    String AADHAAR_BASE_URI = "/api/v3/aadhaar";
     String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
     String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
     String AADHAAR_VERIFY_DEMOGRAPHIC = AADHAAR_BASE_URI + "/verifyDemographic";

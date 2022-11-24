@@ -10,7 +10,7 @@ public class ParentAbhaRequestValidator implements ConstraintValidator<ValidPare
 
 
     @Override
-    public boolean isValid(LinkParentRequestDto value, ConstraintValidatorContext context) {
-        return false;
-    }
+	public boolean isValid(LinkParentRequestDto linkParentRequestDto, ConstraintValidatorContext context) {
+		return linkParentRequestDto.getParentAbhaRequestDtoList() != null && !linkParentRequestDto.getParentAbhaRequestDtoList().isEmpty();
+	}
 }

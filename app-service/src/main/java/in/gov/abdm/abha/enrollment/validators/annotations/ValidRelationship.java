@@ -22,4 +22,6 @@ public @interface ValidRelationship {
     public Class<?>[] groups() default {};
 
     public Class<? extends Payload>[] payload() default {};
+    
+    boolean optional() default false;
 }

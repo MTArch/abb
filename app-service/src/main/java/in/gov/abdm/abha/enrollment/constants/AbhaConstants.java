@@ -55,7 +55,7 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
 
-    String VALIDATION_NULL_ABHA_NUMBER = " Abha Number can not be null";
+    String INVALID_ABHA_NUMBER = "Invalid Abha Number";
 
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
@@ -63,4 +63,8 @@ public interface AbhaConstants {
 
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
+
+    String DETAILS_NOT_FOUND_EXCEPTION_MESSAGE = "DETAILS NOT PRESENT";
+
+    String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
 }

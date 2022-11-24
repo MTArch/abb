@@ -16,20 +16,15 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @ValidTransactionId
-@OtpValue
 @TimestampOtp
-/**
- * It is Otp class
- */
 public class Otp {
     /**
      * It is timeStamp
      */
     @JsonProperty("timeStamp")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD)
-    public Date timeStamp;
+    public String timeStamp;
     /**
      * It is txnId
      */
@@ -39,6 +34,7 @@ public class Otp {
     /**
      * It is otpValue
      */
+    @OtpValue
     @JsonProperty("otpValue")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
     public String otpValue;
