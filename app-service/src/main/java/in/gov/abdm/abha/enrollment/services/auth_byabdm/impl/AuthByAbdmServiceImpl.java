@@ -46,7 +46,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 throw new GenericExceptionMessage(OTP_EXPIRED_RESEND_OTP_AND_RETRY);
             } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
                 //todo instead getOidcRedirectUrl need to access health id
-                return accountService.getAccountByHealthIdNumber(transactionDto.getOidcRedirectUrl())
+                return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
                         .flatMap(accountDto -> updatePhoneNumberInAccountEntity(accountDto, transactionDto));
             } else {
                 return prepareAuthByAdbmResponse(transactionDto, false);
@@ -71,7 +71,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         if (status) {
             accountResponseDto = AccountResponseDto.builder()
                     //TODO get Health id number instead of getOidcRedirectUrl
-                    .ABHANumber(transactionDto.getOidcRedirectUrl())
+                    .ABHANumber(transactionDto.getHealthIdNumber())
                     .name(transactionDto.getName())
                     .build();
         }

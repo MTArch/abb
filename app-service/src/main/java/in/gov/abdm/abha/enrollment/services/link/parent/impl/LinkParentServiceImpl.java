@@ -1,7 +1,14 @@
 package in.gov.abdm.abha.enrollment.services.link.parent.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
+import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,17 +38,57 @@ public class LinkParentServiceImpl implements LinkParentService {
 
     @Override
     public Mono<LinkParentResponseDto> linkDependentAccount(LinkParentRequestDto linkParentRequestDto) {
-        List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService
-                .prepareDependentAccount(linkParentRequestDto);
 
-        Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoMono = dependentAccountRelationshipService
-                .createDependentAccountEntity(dependentAccountList);
+        return validateLinkRequest(linkParentRequestDto)
+                .flatMap(exists->{
+                    if(exists)
+                    {
+                        List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService
+                                .prepareDependentAccount(linkParentRequestDto);
 
-        return dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto -> {
-            return updateDependentAccount(linkParentRequestDto);
-        }).switchIfEmpty(Mono.defer(() -> {
-            return updateDependentAccount(linkParentRequestDto);
-        }));
+                        Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoMono = dependentAccountRelationshipService
+                                .createDependentAccountEntity(dependentAccountList);
+
+                        return dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto -> {
+                            return updateDependentAccount(linkParentRequestDto);
+                        }).switchIfEmpty(Mono.defer(() -> {
+                            return updateDependentAccount(linkParentRequestDto);
+                        }));
+                    }
+                    else {
+                        throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                    }
+                });
+    }
+
+    private Mono<Boolean> validateLinkRequest(LinkParentRequestDto linkParentRequestDto) {
+        return transactionService.findTransactionDetailsFromDB(linkParentRequestDto.getTxnId()).flatMap(transactionDto->{
+            if(transactionDto!=null && transactionDto.getTxnResponse()!=null) {
+
+                List<String> txnResponseHealthIdNumbers = Stream.of(transactionDto.getTxnResponse().split(","))
+                        .collect(Collectors.toList());
+
+                List<String> parentHealthIdNumbers = linkParentRequestDto.getParentAbhaRequestDtoList().stream()
+                        .map(ParentAbhaRequestDto:: getABHANumber)
+                        .collect(Collectors.toList());
+
+                boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
+                boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
+                if(!flag1 || !flag2) {
+                    throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                }
+            }
+            return Mono.just(true);
+        }).switchIfEmpty(Mono.error(new ParentLinkingFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {
+        return healthIdNumberFromTxn.equals(healthIdNumberFromRequest);
+    }
+
+    public boolean isParentValid(List<String> txnResponseHealthIdNumbers,List<String> parentHealthIdNumbers)
+    {
+        return new HashSet<>(txnResponseHealthIdNumbers).containsAll(parentHealthIdNumbers);
     }
 
     private Mono<LinkParentResponseDto> updateDependentAccount(LinkParentRequestDto linkParentRequestDto) {

@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
         //
         //userDetailsComponent.validateMaxAccountsByMobile(transactionDto.getMobile());
         //TODO(check) no need to check KYC verified again
-//        if (StringUtils.isEmpty(transactionDto.getOIDCRedirectUrl())) {
+//        if (StringUtils.isEmpty(transactionDto.getHealthIdNumber())) {
 //            if (!StringUtils.isEmpty(transactionDto.getKycType()) && !KycAuthType.FINGERSCAN.name().equals(transactionDto.getKycType()) && !transactionDto.isMobileVerified()) {
 //                throw new MobileNotVerifiedException();
 //            }

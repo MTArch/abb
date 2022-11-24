@@ -280,4 +280,15 @@ public class TransactionDto {
 	 */
 	private String loginModeType;
 
+	/**
+	 * transaction response - captures list of healthIdnumbers
+	 */
+	private String txnResponse;
+
+	/**
+	 * abha id
+	 * 14-digit unique number
+	 */
+	private String healthIdNumber;
+
 }
