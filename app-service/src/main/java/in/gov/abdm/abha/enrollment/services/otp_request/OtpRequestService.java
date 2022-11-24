@@ -116,20 +116,26 @@ public class OtpRequestService {
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
                 && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR))
         {
-            Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
-            transactionDtoMono.flatMap(res1->{
+            return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
+            .flatMap(res1->{
                 if(res1.getHealthIdNumber()!=null)
                     transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
-                return Mono.just(transactionDto);
+                Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+                return aadhaarResponseDto.flatMap(res ->
+                        {
+                            return handleAadhaarOtpResponse(res, transactionDto);
+                        }
+                );
             });
         }
-
-        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
-        return aadhaarResponseDto.flatMap(res ->
-                {
-                    return handleAadhaarOtpResponse(res, transactionDto);
-                }
-        );
+        else {
+            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+            return aadhaarResponseDto.flatMap(res ->
+                    {
+                        return handleAadhaarOtpResponse(res, transactionDto);
+                    }
+            );
+        }
     }
 
     private Mono<MobileOrEmailOtpResponseDto> handleAadhaarOtpResponse(AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {

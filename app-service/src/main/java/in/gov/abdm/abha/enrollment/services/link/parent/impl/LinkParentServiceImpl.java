@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                         }));
                     }
                     else {
-                        throw new DatabaseConstraintFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                        throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
                     }
                 });
     }
@@ -73,12 +74,12 @@ public class LinkParentServiceImpl implements LinkParentService {
 
                 boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
                 boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
-                if(!flag1 && !flag2) {
-                    throw new DatabaseConstraintFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                if(!flag1 || !flag2) {
+                    throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
                 }
             }
             return Mono.just(true);
-        }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+        }).switchIfEmpty(Mono.error(new ParentLinkingFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {
