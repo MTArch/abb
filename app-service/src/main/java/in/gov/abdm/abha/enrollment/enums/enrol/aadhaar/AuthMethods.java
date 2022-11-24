@@ -12,10 +12,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public enum AuthMethods {
+	
     OTP("otp"),
     PI("pi"),
-    WRONG("wrong"),
-    EMPTY("");
+    WRONG("wrong");
     private final String value;
 
     @JsonCreator
