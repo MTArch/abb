@@ -111,7 +111,7 @@ public class Common {
     }
     
     public boolean isOtpSystem(OtpSystem otpSystem, OtpSystem otpSystemToMatch) {
-        return otpSystem.equals(otpSystemToMatch.getValue());
+        return otpSystem.equals(otpSystemToMatch);
     }
     
     public boolean isExactScopesMatching(List<Scopes> scopes, List<Scopes> scopesToMatch) {
