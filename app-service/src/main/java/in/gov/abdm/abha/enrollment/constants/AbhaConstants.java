@@ -50,7 +50,6 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_BIO_OBJECT = "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
     String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with aadhaar number.Please,create account by clicking create account link";
-
     String VALIDATION_ERROR_PARENT_ABHA_REQUEST_DEMO_OBJECT = "ParentAbhaRequest cannot be null or empty OR ABHANumber ,yearOfBirth,name,gender,email,relationship,document,or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
@@ -64,7 +63,10 @@ public interface AbhaConstants {
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
 
-    String DETAILS_NOT_FOUND_EXCEPTION_MESSAGE = "DETAILS NOT PRESENT";
+    String TRANSACTION_DETAILS_NOT_FOUND_EXCEPTION_MESSAGE = "TRANSACTION DETAILS NOT FOUND";
 
     String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
+
+    String ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE = "No account found with abha number.Please,create account by clicking create account link";
+    String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
 }

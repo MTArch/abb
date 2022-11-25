@@ -24,22 +24,28 @@ public class IdpClient {
     private String IDP_SERVICE_BASE_URI;
 
     //call to IDP service
-    public Mono<IdpSendOtpResponse> sendOtp(IdpSendOtpRequest idpSendOtpRequest) {
+    public Mono<IdpSendOtpResponse> sendOtp(IdpSendOtpRequest idpSendOtpRequest,String authorization,String timestamp,String hipRequestId,String requestId) {
     	// http://global2dev.abdm.gov.internal
         return webClient.baseUrl(IDP_SERVICE_BASE_URI)
                 .build()
                 .post()
                 .uri(URIConstant.IDP_SEND_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, authorization)
+                .header("timestamp",timestamp)
+                .header("hipRequestId",hipRequestId)
+                .header("requestId", requestId)
                 .body(BodyInserters.fromValue(idpSendOtpRequest))
                 .retrieve()
                 .bodyToMono(IdpSendOtpResponse.class);
     }
-    public Mono<IdpVerifyOtpResponse> verifyOtp(String authorization, String xTransactionId, String hipRequestId, String requestId) {
+    public Mono<IdpVerifyOtpResponse> verifyOtp(String otp,String authorization, String xTransactionId, String hipRequestId, String requestId) {
         return webClient.baseUrl(IDP_SERVICE_BASE_URI)
                 .build()
                 .post()
-                .uri(URIConstant.IDP_VERIFY_OTP_URI)
+                .uri(uriBuilder -> uriBuilder.path(URIConstant.IDP_VERIFY_OTP_URI)
+                        .queryParam("otp",otp)
+                        .build())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.AUTHORIZATION, authorization)
                 .header("xTransactionId",xTransactionId)

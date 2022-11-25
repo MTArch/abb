@@ -4,23 +4,18 @@ import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.authbyabdm.AuthByAbdmRequest;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.services.auth_byabdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
-import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +31,9 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, resend OTP and retry";
     private static final int OTP_EXPIRE_TIME = 10;
+    private static final String AUTHORIZATION="1233";
+    private static final String HIP_REQUEST_ID = "22222";
+    private static final String REQUEST_ID = "1111";
     
     @Autowired
     IdpClient idpClient;
@@ -101,25 +99,19 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     }
 
     private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthByAbdmRequest authByAbdmRequest) {
-
-        String authorization="1233";
+        String otp=authByAbdmRequest.getAuthData().getOtp().getOtpValue();
         String xTransactionId=String.valueOf(transactionDto.getTxnId());
-        String hipRequestId="22222";
-        String requestId="1111";
-
-        Mono<IdpVerifyOtpResponse> idpVerifyOtpResponse = idpClient.verifyOtp(authorization,xTransactionId,hipRequestId,requestId);
-
-        return idpVerifyOtpResponse
-                .flatMap(res -> HandleIdpOtpResponse(authByAbdmRequest, res, transactionDto));
+        return idpClient.verifyOtp(otp,AUTHORIZATION,xTransactionId,HIP_REQUEST_ID,REQUEST_ID)
+        .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 
-    private Mono<AuthResponseDto> HandleIdpOtpResponse(AuthByAbdmRequest authByAbdmRequest, IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthByAbdmRequest authByAbdmRequest, IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
-        handleAadhaarExceptions(idpVerifyOtpResponse);
+        handleIdpServiceExceptions(idpVerifyOtpResponse);
         return accountService.getAccountByHealthIdNumber(idpVerifyOtpResponse.getKyc().getAbhaNumber())
                 .flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
                 .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAbdmRequest, Collections.singletonList(accountResponseDtoMono), transactionDto))
-                .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));
+                .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE)));
     }
 
 
@@ -146,7 +138,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                     transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
                     return transactionService.updateTransactionEntity(transactionDto, authByAbdmRequest.getAuthData().getOtp().getTxnId())
                             .flatMap(response -> AccountResponse(authByAbdmRequest,accountDtoList));
-                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.TRANSACTION_DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<AuthResponseDto> AccountResponse(AuthByAbdmRequest authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
@@ -159,10 +151,10 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return Mono.empty();
     }
 
-    //TODO -handle idp exceptions
-    private void handleAadhaarExceptions(IdpVerifyOtpResponse idpVerifyOtpResponse) {
+    //TODO -handle idp service exceptions
+    private void handleIdpServiceExceptions(IdpVerifyOtpResponse idpVerifyOtpResponse) {
         if (idpVerifyOtpResponse.getResponse()==null) {
-            throw new GenericExceptionMessage("FAILED TO VERIFY OTP FROM IDP SERVICE");
+            throw new GenericExceptionMessage(AbhaConstants.OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE);
         }
     }
 }
