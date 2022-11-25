@@ -34,10 +34,9 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddress> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
 
-        if (StringUtils.isEmpty(hidPhrAddressDto.getPhrAddress())) {
-            hidPhrAddressDto.setPhrAddress(PhrAddressGenerator.generateDefaultPhrAddress(String.valueOf(hidPhrAddressDto.getHealthIdNumber())));
-        }
+
         HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
+        hidPhrAddress.setAsNew();
         return hidPhrAddressRepository.save(hidPhrAddress);
     }
 
