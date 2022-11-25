@@ -191,22 +191,38 @@ public class OtpRequestService {
                         .flatMap(res->sendIdpOtpAndUpdateTransaction(mobileOrEmailOtpRequestDto, res));
     }
 
+//    private Mono<MobileOrEmailOtpResponseDto> sendIdpOtpAndUpdateTransaction(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, TransactionDto transactionDto) {
+//        return idpService.sendOtp(mobileOrEmailOtpRequestDto)
+//                .flatMap(idpSendOtpResponse -> {
+//                    if(!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())){
+//                        String oldTransactionId = transactionDto.getTxnId().toString();
+//                        transactionDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
+//                        transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
+//                                .flatMap(res->{
+//                                    MobileOrEmailOtpResponseDto mobileOrEmailOtpResponseDto = new MobileOrEmailOtpResponseDto();
+//                                    mobileOrEmailOtpResponseDto.setTxnId(res.getTxnId().toString());
+//                                    //TODO get mobile number from IDP
+//                                    mobileOrEmailOtpResponseDto.setMessage(MESSAGE);
+//                                    return Mono.just(mobileOrEmailOtpResponseDto);
+//                                });
+//                    }
+//                    throw new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE);
+//                });
+//    }
+
+
+
     private Mono<MobileOrEmailOtpResponseDto> sendIdpOtpAndUpdateTransaction(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, TransactionDto transactionDto) {
         return idpService.sendOtp(mobileOrEmailOtpRequestDto)
                 .flatMap(idpSendOtpResponse -> {
-                    if(!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())){
-                        String oldTransactionId = transactionDto.getTxnId().toString();
-                        transactionDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
-                        transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
-                                .flatMap(res->{
-                                    MobileOrEmailOtpResponseDto mobileOrEmailOtpResponseDto = new MobileOrEmailOtpResponseDto();
-                                    mobileOrEmailOtpResponseDto.setTxnId(res.getTxnId().toString());
-                                    //TODO get mobile number from IDP
-                                    mobileOrEmailOtpResponseDto.setMessage(MESSAGE);
-                                    return Mono.just(mobileOrEmailOtpResponseDto);
-                                });
+                    if(idpSendOtpResponse.getTransactionId()!=null)
+                    {
+                        return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                .txnId(idpSendOtpResponse.getTransactionId())
+                                .message(MESSAGE)
+                                .build());
                     }
-                    throw new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE);
+                    return Mono.empty();
                 });
     }
 }

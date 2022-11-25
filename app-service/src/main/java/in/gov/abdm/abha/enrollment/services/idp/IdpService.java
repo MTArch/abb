@@ -31,7 +31,7 @@ public class IdpService {
     public Mono<IdpSendOtpResponse> sendOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
         Parameters parameters = new Parameters();
-        if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER.getValue())) {
+        if (mobileOrEmailOtpRequestDto.getLoginHint().getValue().equals(LoginHint.ABHA_NUMBER.getValue())) {
             parameters.setKey(ABHA_NUMBER_KEY);
         } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE.getValue())) {
             parameters.setKey(MOBILE_NUMBER_KEY);
