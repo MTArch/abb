@@ -31,7 +31,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 		return HidPhrAddressDto.builder()
 				.healthIdNumber(abhaProfileDto.getAbhaNumber())
 				.phrAddress(abhaProfileDto.getPhrAddress().get(0))
-				.status(abhaProfileDto.getAbhaStatus().getValue())
+				.status("ACTIVE")
 				.preferred(1)
 				.lastModifiedBy(accountDto.getLstUpdatedBy())
 				.hasMigrated("N")
