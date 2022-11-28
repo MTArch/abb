@@ -3,9 +3,9 @@ package in.gov.abdm.abha.enrollment.services.auth_byabdm.impl;
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.model.authbyabdm.AuthByAbdmRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
@@ -13,15 +13,16 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthR
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
 import in.gov.abdm.abha.enrollment.services.auth_byabdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -108,41 +109,41 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthByAbdmRequest authByAbdmRequest, IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
         handleIdpServiceExceptions(idpVerifyOtpResponse);
-        return accountService.getAccountByHealthIdNumber(idpVerifyOtpResponse.getKyc().getAbhaNumber())
-                .flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
-                .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAbdmRequest, Collections.singletonList(accountResponseDtoMono), transactionDto))
-                .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE)));
+
+        if(idpVerifyOtpResponse.getKyc()!=null && !idpVerifyOtpResponse.getKyc().isEmpty()) {
+            List<AccountResponseDto> accountResponseDtoList = prepareResponse(idpVerifyOtpResponse.getKyc());
+            return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
+        }
+        return Mono.empty();
     }
 
-
-    private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto) {
-        return Mono.just(AccountResponseDto.builder()
-                .ABHANumber(accountDto.getHealthIdNumber())
-                .name(accountDto.getName())
-                .preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
-                .yearOfBirth(accountDto.getYearOfBirth())
-                .gender(accountDto.getGender())
-                .mobile(accountDto.getMobile())
-                .email(accountDto.getEmail())
-                .build());
+    private List<AccountResponseDto> prepareResponse(List<Kyc> kycList) {
+            return kycList.stream()
+                    .filter(kyc -> kyc != null)
+                    .map(kyc -> MapperUtils.mapKycToAccountResponse(kyc))
+                    .collect(Collectors.toList());
     }
 
     private Mono<AuthResponseDto> handleAccountListResponse(AuthByAbdmRequest authByAbdmRequest, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
 
-        List<String> healthIdNumbers = accountDtoList.stream()
-                .map(AccountResponseDto::getABHANumber)
-                .collect(Collectors.toList());
+        if(accountDtoList!=null && !accountDtoList.isEmpty()) {
+            List<String> healthIdNumbers = accountDtoList.stream()
+                    .map(AccountResponseDto::getABHANumber)
+                    .collect(Collectors.toList());
 
-        return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionResDto -> {
-                    transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
-                    return transactionService.updateTransactionEntity(transactionDto, authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                            .flatMap(response -> AccountResponse(authByAbdmRequest,accountDtoList));
-                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+            return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
+                    .flatMap(transactionResDto -> {
+                        transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
+                        return transactionService.updateTransactionEntity(transactionDto, authByAbdmRequest.getAuthData().getOtp().getTxnId())
+                                .flatMap(response -> AccountResponse(authByAbdmRequest, accountDtoList))
+                                .switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
+                    }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+        }
+        return Mono.empty();
     }
 
     private Mono<AuthResponseDto> AccountResponse(AuthByAbdmRequest authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
-        if (accountDtoList != null && !accountDtoList.isEmpty()) {
+        if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size()>0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
                     .accounts(accountDtoList)
