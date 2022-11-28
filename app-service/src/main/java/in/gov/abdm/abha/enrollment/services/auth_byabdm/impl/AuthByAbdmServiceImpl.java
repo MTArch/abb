@@ -138,7 +138,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                     transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
                     return transactionService.updateTransactionEntity(transactionDto, authByAbdmRequest.getAuthData().getOtp().getTxnId())
                             .flatMap(response -> AccountResponse(authByAbdmRequest,accountDtoList));
-                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.TRANSACTION_DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<AuthResponseDto> AccountResponse(AuthByAbdmRequest authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
