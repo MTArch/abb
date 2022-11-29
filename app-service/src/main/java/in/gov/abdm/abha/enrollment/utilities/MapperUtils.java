@@ -2,8 +2,10 @@ package in.gov.abdm.abha.enrollment.utilities;
 
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -28,4 +30,17 @@ public class MapperUtils {
         abhaProfileDto.setABHAType(accountDto.getType());
         return abhaProfileDto;
     }
+
+    public AccountResponseDto mapKycToAccountResponse(Kyc kyc) {
+        return AccountResponseDto.builder()
+                .ABHANumber(kyc.getAbhaNumber())
+                .name(kyc.getName())
+                .preferredAbhaAddress(kyc.getAbhaAddress())
+                .yearOfBirth(kyc.getYearOfBirth())
+                .gender(kyc.getGender())
+                .mobile(kyc.getMobile())
+                .email(kyc.getEmail())
+                .build();
+    }
+
 }
