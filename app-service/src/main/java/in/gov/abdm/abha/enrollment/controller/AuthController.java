@@ -29,7 +29,7 @@ public class AuthController {
     RSAUtil rsaUtil;
 
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
-    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthByAbdmRequest authByAbdmRequest){
+    public Mono<AuthResponseDto> authByABDM(@RequestBody AuthByAbdmRequest authByAbdmRequest){
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
         if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);

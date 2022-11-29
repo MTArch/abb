@@ -29,6 +29,7 @@ public class AuthData {
      */
     @JsonProperty("authMethods")
     @NotEmpty(message = AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD)
+    @NotNull(message = AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD)
     private ArrayList<AuthMethods> authMethods;
     
     /**

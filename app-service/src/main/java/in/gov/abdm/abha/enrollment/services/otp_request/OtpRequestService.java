@@ -1,12 +1,15 @@
 package in.gov.abdm.abha.enrollment.services.otp_request;
 
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
@@ -197,16 +200,16 @@ public class OtpRequestService {
                     if(!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())){
                         String oldTransactionId = transactionDto.getTxnId().toString();
                         transactionDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
-                        transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
+                        return transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
                                 .flatMap(res->{
-                                    MobileOrEmailOtpResponseDto mobileOrEmailOtpResponseDto = new MobileOrEmailOtpResponseDto();
-                                    mobileOrEmailOtpResponseDto.setTxnId(res.getTxnId().toString());
                                     //TODO get mobile number from IDP
-                                    mobileOrEmailOtpResponseDto.setMessage(MESSAGE);
-                                    return Mono.just(mobileOrEmailOtpResponseDto);
-                                });
+                                     return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                    .txnId(res.getTxnId().toString())
+                                    .message(MESSAGE)
+                                    .build());
+                                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
                     }
-                    throw new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE);
-                });
+                    return Mono.empty();
+                }).switchIfEmpty(Mono.error(new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE)));
     }
 }
