@@ -10,9 +10,10 @@ import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
@@ -64,7 +65,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         return transactionService
                 .findTransactionDetailsFromDB(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyAadhaarOtp(transactionDto, enrolByAadhaarRequestDto));
+                .flatMap(transactionDto -> verifyAadhaarOtp(transactionDto, enrolByAadhaarRequestDto))
+                .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<EnrolByAadhaarResponseDto> verifyAadhaarOtp(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
@@ -105,8 +107,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         .txnId(transactionDto.getTxnId().toString())
                                         .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto))
                                         .build());
-                            }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
-                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+                            }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+                }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
@@ -200,12 +202,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     @Override
-    public Mono<AuthResponseDto> verifyOtpChildAbha(AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+    public Mono<AuthResponseDto> verifyOtpChildAbha(AuthRequestDto authByAadhaarRequestDto) {
         Mono<TransactionDto> txnResponseDto = transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
-        return txnResponseDto.flatMap(res -> verifyAadhaarOtpChildAbha(res, authByAadhaarRequestDto));
+        return txnResponseDto.flatMap(res -> verifyAadhaarOtpChildAbha(res, authByAadhaarRequestDto))
+        		.switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthByAadhaarRequestDto authByAadhaarRequestDto) {
+    private Mono<AuthResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthRequestDto authByAadhaarRequestDto) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarClient.verifyOtp(
                 AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
                         .aadhaarTransactionId(transactionDto.getAadharTxn())
@@ -216,29 +219,29 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(res -> HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<AuthResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
         handleAadhaarExceptions(aadhaarResponseDto);
 
         String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
         return accountService.findByXmlUid(encodedXmlUid)
-                .flatMap(accountDtoMono -> prepareResponse(accountDtoMono))
+                .flatMap(accountDtoMono -> prepareResponse(accountDtoMono, transactionDto))
                 .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
                 .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto) {
-        return Mono.just(AccountResponseDto.builder()
-                .ABHANumber(accountDto.getHealthIdNumber())
-                .name(accountDto.getName())
-                .preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
-                .yearOfBirth(accountDto.getYearOfBirth())
-                .gender(accountDto.getGender())
-                .mobile(accountDto.getMobile())
-                .email(accountDto.getEmail())
-                .build());
-    }
+	private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto, TransactionDto transactionDto) {
+		int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
+				accountDto.getDayOfBirth());
+		if (age >= 18 && !accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber())) {
+			return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
+					.name(accountDto.getName()).preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
+					.yearOfBirth(accountDto.getYearOfBirth()).gender(accountDto.getGender())
+					.mobile(accountDto.getMobile()).email(accountDto.getEmail()).build());
+		}
+		throw new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE);
+	}
 
-    private Mono<AuthResponseDto> handleAccountListResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
 
         List<String> healthIdNumbers = accountDtoList.stream()
                 .map(AccountResponseDto::getABHANumber)
@@ -249,10 +252,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
                     return transactionService.updateTransactionEntity(transactionDto, authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                             .flatMap(response -> AccountResponse(authByAadhaarRequestDto,accountDtoList));
-                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+                }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthByAadhaarRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 }
             }
             return Mono.just(true);
-        }).switchIfEmpty(Mono.error(new ParentLinkingFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {

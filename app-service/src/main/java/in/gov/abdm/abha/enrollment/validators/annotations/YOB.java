@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = YearOfBirthValidator.class)
 @Target({FIELD})
 public @interface YOB {
-    String message() default AbhaConstants.PATTERN_MISMATCHED;
+    String message() default AbhaConstants.YEAR_OF_BIRTH_INVALID;
 
     Class<?>[] groups() default {};
 

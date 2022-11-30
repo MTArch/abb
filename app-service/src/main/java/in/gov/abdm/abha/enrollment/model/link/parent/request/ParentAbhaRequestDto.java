@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ValidRelationship
 public class ParentAbhaRequestDto {
 
 
@@ -35,7 +34,7 @@ public class ParentAbhaRequestDto {
     private String name;
 
     @JsonProperty("yearOfBirth")
-    @NotNull(message = AbhaConstants.PATTERN_MISMATCHED)
+    @NotNull(message = AbhaConstants.YEAR_OF_BIRTH_INVALID)
     @YOB
     private String yearOfBirth;
 
@@ -52,9 +51,9 @@ public class ParentAbhaRequestDto {
     @JsonProperty("email")
     private String email;
 
-    
     @JsonProperty("relationship")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_RELATIONSHIP_FIELD)
+    @ValidRelationship
     private Relationship relationship;
 
     @JsonProperty("document")

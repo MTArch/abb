@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
@@ -107,6 +108,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+    }
+    
+    /**
+     * handling exception to show error message in case transaction doesn't exists 
+     * or if it is expired
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> transactionNotFound(TransactionNotFoundException ex) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
         return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
 

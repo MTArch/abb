@@ -1,41 +1,41 @@
-package in.gov.abdm.abha.enrollment.model.authbyabdm;
+package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
 import in.gov.abdm.abha.enrollment.validators.annotations.TimestampOtp;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
-import lombok.AllArgsConstructor;
+import in.gov.abdm.abha.enrollment.validators.annotations.Uuid;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-import javax.validation.constraints.NotNull;
-import java.util.Date;
-
+/**
+ * It is Data Transfer Object for Otp
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ValidTransactionId
-@TimestampOtp
-public class Otp {
+public class OtpDto {
     /**
-     * It is timeStamp
+     * It is date
      */
     @JsonProperty("timeStamp")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD)
-    public String timeStamp;
+    @TimestampOtp
+    private String timeStamp;
+
     /**
-     * It is txnId
+     * It is Transection Id for validation
      */
     @JsonProperty("txnId")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
-    public String txnId;
+    @Uuid
+    private String txnId;
+
     /**
-     * It is otpValue
+     * It is otpvalue
      */
-    @OtpValue
     @JsonProperty("otpValue")
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
-    public String otpValue;
+    @OtpValue
+    private String otpValue;
+
 }

@@ -1,5 +1,0 @@
-spring:
-  r2dbc:
-    url: r2dbc:postgresql://100.96.1.9:5022/ndhm_dev
-    username: postgres
-    password: TAta12#$

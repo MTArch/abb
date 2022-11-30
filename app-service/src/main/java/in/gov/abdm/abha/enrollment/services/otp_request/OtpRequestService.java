@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
@@ -96,9 +97,7 @@ public class OtpRequestService {
                     throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
                 }
             });
-        }).switchIfEmpty(Mono.defer(() -> {
-            throw new GenericExceptionMessage(TRANSACTION_DETAILS_NOT_FOUND);
-        }));
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
 
@@ -129,7 +128,7 @@ public class OtpRequestService {
                             return handleAadhaarOtpResponse(res, transactionDto);
                         }
                 );
-            });
+            }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
         }
         else {
             Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
@@ -191,7 +190,8 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendIdpOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         mobileOrEmailOtpRequestDto.setLoginId(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
         return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
-                        .flatMap(res->sendIdpOtpAndUpdateTransaction(mobileOrEmailOtpRequestDto, res));
+                        .flatMap(res->sendIdpOtpAndUpdateTransaction(mobileOrEmailOtpRequestDto, res))
+                        .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<MobileOrEmailOtpResponseDto> sendIdpOtpAndUpdateTransaction(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, TransactionDto transactionDto) {
