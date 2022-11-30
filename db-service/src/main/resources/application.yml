@@ -1,0 +1,10 @@
+server:
+  port: ${ENROLLMENT_DB_SERVICE_PORT}
+spring:
+  application:
+    name: ${ENROLLMENT_DB_SERVICE_NAME}
+    
+  r2dbc:
+    password: ${DB_PASSWORD}
+    url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
+    username: ${DB_USERNAME}
