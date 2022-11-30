@@ -25,10 +25,7 @@ public class DependentAccountRelationship implements Persistable<BigInteger> {
     /**
      *  it is Id and Primary key
      */
-
     @Id
-    @Generated
-    //@GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
     /**

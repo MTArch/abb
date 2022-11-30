@@ -57,14 +57,10 @@ public interface URIConstant {
     String IDP_VERIFY_OTP_URI = IDP_BASE_URI + "/verify";
 
     //    Notification Service
-
-    String NOTIFICATION_ENDPOINT_URI = "http://global2dev.abdm.gov.internal";
-    String NOTIFICATION_BASE_URI = "/api/v3/notification";
+    String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
 
 //    Notification DB Service
-
-    String NOTIFICATION_DB_ENDPOINT_URI = "http://global2dev.abdm.gov.internal";
-    String NOTIFICATION_DB_BASE_URI = "/api/v3/notificationdb";
+    String NOTIFICATION_DB_BASE_URI = "/internal/v3/notificationdb";
     String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/message";
 }

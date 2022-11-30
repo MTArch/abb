@@ -33,10 +33,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
     @Override
     public Mono<HidPhrAddress> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
-
-
-        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
-        hidPhrAddress.setAsNew();
+        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
         return hidPhrAddressRepository.save(hidPhrAddress);
     }
 

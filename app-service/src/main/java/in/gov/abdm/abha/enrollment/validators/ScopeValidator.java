@@ -8,14 +8,13 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
 
 /**
  * Validates scope attribute from the provided list of scopes against the pre-decided value ie. abha-enrol
  */
-public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrEmailOtpRequestDto> {
+public class ScopeValidator implements ConstraintValidator<ValidScope, List<Scopes>> {
 
     /**
      * Implements the validation for scope field
@@ -27,8 +26,7 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, MobileOrE
      * @return
      */
     @Override
-    public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+    public boolean isValid(List<Scopes> requestScopes, ConstraintValidatorContext context) {
         List<Scopes> enumNames = Stream.of(Scopes.values())
                 .filter(name -> {
                     return !name.equals(Scopes.WRONG);
