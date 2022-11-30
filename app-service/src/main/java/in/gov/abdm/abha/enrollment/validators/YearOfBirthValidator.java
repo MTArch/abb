@@ -18,22 +18,19 @@ public class YearOfBirthValidator implements ConstraintValidator<YOB, String> {
 
 	private static final String YOB_REGEX_PATTERN = "^(\\d{4})$";
 	private String DATE_TIME_FORMATTER = "yyyy";
-	DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
-
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 	@Override
 	public boolean isValid(String yob, ConstraintValidatorContext context) {
 		try {
-			if( yob != null && !yob.isEmpty())
-				return true;
-			
-			int currentYear = LocalDateTime.now().getYear();
+			if (yob != null && !yob.isEmpty()){
+				int currentYear = LocalDateTime.now().getYear();
+				//return yob != null && !yob.isEmpty() && yob !="0000" && Pattern.compile(YOB_REGEX_PATTERN).matcher(yob).matches();
+			}
 
-			return yob != null && !yob.isEmpty() && Integer.parseInt(yob) <= currentYear
-					&& Pattern.compile(YOB_REGEX_PATTERN).matcher(yob).matches();
-		} catch (Exception ex) {
-			return false;
+		}catch (Exception e){
+			e.printStackTrace();
 		}
-
+		return yob != null && !yob.isEmpty() && yob !="0000" && Pattern.compile(YOB_REGEX_PATTERN).matcher(yob).matches();
 	}
 
 }

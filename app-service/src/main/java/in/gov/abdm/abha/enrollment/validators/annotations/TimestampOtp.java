@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
@@ -17,7 +18,7 @@ import in.gov.abdm.abha.enrollment.validators.TimestampOtpValidator;
  */
 @Retention(RUNTIME)
 @Constraint(validatedBy = TimestampOtpValidator.class)
-@Target({ FIELD })
+@Target({ TYPE, FIELD })
 public @interface TimestampOtp {
 
 	String message() default AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD;
