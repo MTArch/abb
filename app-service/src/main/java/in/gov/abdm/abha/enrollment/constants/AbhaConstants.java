@@ -69,4 +69,8 @@ public interface AbhaConstants {
 
     String ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE = "No account found with abha number.Please,create account by clicking create account link";
     String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
+
+    String INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE = "Invald OTP,Please try again.";
+
+    String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired,Please try again.";
 }

@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarOtpException;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
@@ -49,6 +50,11 @@ import java.util.stream.Collectors;
 public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     public static final String FAILED_TO_VERIFY_AADHAAR_OTP = "Failed to Verify Aadhaar OTP";
+
+    public static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
+
+    public static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
+
 
     @Autowired
     AccountService accountService;
@@ -188,8 +194,19 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
-        if (!aadhaarResponseDto.isSuccessful()) {
-            throw new UidaiException(aadhaarResponseDto);
+        if(!aadhaarResponseDto.isSuccessful())
+        {
+            if(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode().equals(AADHAAR_OTP_INCORRECT_ERROR_CODE))
+            {
+                throw new AadhaarOtpException(AbhaConstants.INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE);
+            }
+            else if(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode().equals(AADHAAR_OTP_EXPIRED_ERROR_CODE))
+            {
+                throw new AadhaarOtpException(AbhaConstants.AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE);
+            }
+            else {
+                throw new UidaiException(aadhaarResponseDto);
+            }
         }
     }
 
