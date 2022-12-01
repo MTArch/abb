@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +21,7 @@ public class OtpDto {
 	 * It is date
 	 */
 	@JsonProperty("timeStamp")
-	@NotNull(message = AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD)
+	@NotEmpty(message = AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD)
 	@TimestampOtp
 	private String timeStamp;
 
@@ -28,7 +29,7 @@ public class OtpDto {
 	 * It is Transection Id for validation
 	 */
 	@JsonProperty("txnId")
-	@NotNull(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
+	@NotEmpty(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
 	@Uuid
 	private String txnId;
 
@@ -36,11 +37,12 @@ public class OtpDto {
 	 * It is otpvalue
 	 */
 	@JsonProperty("otpValue")
-	@NotNull(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
+	@NotEmpty(message = AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD)
 	@OtpValue
 	private String otpValue;
 
 	@JsonProperty("mobile")
+	@NotEmpty(message = AbhaConstants.MOBILE_NUMBER_MISSMATCH)
 	@Mobile
 	private String mobile;
 }
