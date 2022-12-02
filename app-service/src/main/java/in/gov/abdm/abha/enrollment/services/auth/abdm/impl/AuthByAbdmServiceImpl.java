@@ -1,9 +1,10 @@
-package in.gov.abdm.abha.enrollment.services.auth_byabdm.impl;
+package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,6 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
-import in.gov.abdm.abha.enrollment.services.auth_byabdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;

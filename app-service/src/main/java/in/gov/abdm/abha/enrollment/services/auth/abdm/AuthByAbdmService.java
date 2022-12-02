@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.services.auth_byabdm;
+package in.gov.abdm.abha.enrollment.services.auth.abdm;
 
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;

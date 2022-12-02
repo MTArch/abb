@@ -15,5 +15,6 @@ public class AuthResponseDto {
 
     private String txnId;
     private String authResult;
+    private String message;
     private List<AccountResponseDto> accounts;
 }
