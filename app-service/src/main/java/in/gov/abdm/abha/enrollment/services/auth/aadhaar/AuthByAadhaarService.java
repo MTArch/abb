@@ -3,7 +3,6 @@ package in.gov.abdm.abha.enrollment.services.auth.aadhaar;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarOtpException;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -60,7 +59,7 @@ public class AuthByAadhaarService {
 
     private Mono<AuthResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
         AuthResponseDto authResponseDto = handleAadhaarExceptions(aadhaarResponseDto, transactionDto.getTxnId().toString());
-        if(authResponseDto != null){
+        if (authResponseDto != null) {
             return Mono.just(authResponseDto);
         }
 
@@ -68,7 +67,7 @@ public class AuthByAadhaarService {
         return accountService.findByXmlUid(encodedXmlUid)
                 .flatMap(accountDtoMono -> prepareResponse(accountDtoMono, transactionDto))
                 .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
-                .switchIfEmpty(Mono.error(new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE)));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS, AbhaConstants.NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER, Collections.emptyList()))));
     }
 
 
@@ -111,7 +110,7 @@ public class AuthByAadhaarService {
     private AuthResponseDto handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto, String transactionId) {
         String errorCode = aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode();
         if (!aadhaarResponseDto.isSuccessful()) {
-            switch (errorCode){
+            switch (errorCode) {
                 case AADHAAR_OTP_INCORRECT_ERROR_CODE:
                     return prepareAuthResponse(transactionId, StringConstants.FAILED, AbhaConstants.INVALID_AADHAAR_OTP, Collections.emptyList());
                 case AADHAAR_OTP_EXPIRED_ERROR_CODE:
