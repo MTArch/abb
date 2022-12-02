@@ -6,7 +6,7 @@ import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarOtpException;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -187,19 +187,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
-        if(!aadhaarResponseDto.isSuccessful())
-        {
-            if(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode().equals(AADHAAR_OTP_INCORRECT_ERROR_CODE))
-            {
-                throw new AadhaarOtpException(AbhaConstants.INVALID_AADHAAR_OTP);
-            }
-            else if(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode().equals(AADHAAR_OTP_EXPIRED_ERROR_CODE))
-            {
-                throw new AadhaarOtpException(AbhaConstants.AADHAAR_OTP_EXPIRED);
-            }
-            else {
-                throw new UidaiException(aadhaarResponseDto);
-            }
+        if (!aadhaarResponseDto.isSuccessful()) {
+            throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
         }
     }
 

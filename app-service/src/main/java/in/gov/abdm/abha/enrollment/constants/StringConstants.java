@@ -17,4 +17,5 @@ public interface StringConstants {
     String AT = "@";
     String X_REQUEST_ID = "X-REQUEST-ID";
     String TIMESTAMP = "TIMESTAMP";
+    String MESSAGE = "Message";
 }

@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.auth.aadhaar;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -116,7 +117,7 @@ public class AuthByAadhaarService {
                 case AADHAAR_OTP_EXPIRED_ERROR_CODE:
                     return prepareAuthResponse(transactionId, StringConstants.FAILED, AbhaConstants.AADHAAR_OTP_EXPIRED, Collections.emptyList());
                 default:
-                    throw new UidaiException(aadhaarResponseDto);
+                    throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
             }
         }
         return null;
