@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
 import java.time.LocalDateTime;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import in.gov.abdm.abha.enrollmentdb.repository.TransactionRepository;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 	
 	private int minusMinutes = 20;

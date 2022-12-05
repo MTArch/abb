@@ -1,8 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.database.constraint.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import in.gov.abdm.abha.enrollment.validators.annotations.Gender;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;

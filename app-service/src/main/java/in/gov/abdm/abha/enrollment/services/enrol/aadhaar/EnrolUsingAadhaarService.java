@@ -10,6 +10,4 @@ public interface EnrolUsingAadhaarService {
 
     Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto);
 
-    Mono<AuthResponseDto> verifyOtpChildAbha(AuthRequestDto authByAadhaarRequestDto);
-
 }
