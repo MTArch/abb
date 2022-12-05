@@ -68,6 +68,16 @@ public interface AbhaConstants {
 
     String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
 
+    String INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE = "Invalid OTP, Please try again.";
+
+    String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired, Please try again.";
+
+    String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent Abha Number";
+    
+    String INVALID_CHILD_ABHA_NUMBER = "Invalid Child Abha Number";
+
+    String INVALID_EMAIL_ID = "Invalid Email Id";
+
     String INVALID_AADHAAR_OTP = "Invalid Aadhaar OTP";
 
     String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";

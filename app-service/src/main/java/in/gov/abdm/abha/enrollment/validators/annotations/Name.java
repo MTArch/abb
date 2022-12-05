@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_NAME_FORMAT;
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
@@ -16,7 +17,7 @@ import in.gov.abdm.abha.enrollment.validators.NameValidator;
  */
 @Retention(RUNTIME)
 @Constraint(validatedBy = NameValidator.class)
-@Target({FIELD})
+@Target({TYPE,FIELD})
 public @interface Name {
     String message() default INVALID_NAME_FORMAT;
 
