@@ -4,7 +4,7 @@ import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
+import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
@@ -31,6 +31,7 @@ public class AuthByAadhaarService {
 
     private static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
+    private static final String CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER_OR_CHILD_ABHA_NUMBER = "Cannot link same ABHA Number/CHILD ABHA Number";
 
     @Autowired
     AccountService accountService;
@@ -62,26 +63,26 @@ public class AuthByAadhaarService {
         AuthResponseDto authResponseDto = handleAadhaarExceptions(aadhaarResponseDto, transactionDto.getTxnId().toString());
         if (authResponseDto != null) {
             return Mono.just(authResponseDto);
+        } else {
+            String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
+            return accountService.findByXmlUid(encodedXmlUid)
+                    .flatMap(accountDtoMono -> prepareResponse(accountDtoMono, transactionDto))
+                    .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
+                    .switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS, AbhaConstants.NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER, Collections.emptyList()))));
         }
-
-        String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
-        return accountService.findByXmlUid(encodedXmlUid)
-                .flatMap(accountDtoMono -> prepareResponse(accountDtoMono, transactionDto))
-                .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
-                .switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS, AbhaConstants.NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER, Collections.emptyList()))));
     }
 
 
     private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto, TransactionDto transactionDto) {
         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
                 accountDto.getDayOfBirth());
-        if (age >= 18 && !accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber())) {
-            return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
-                    .name(accountDto.getName()).preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
-                    .yearOfBirth(accountDto.getYearOfBirth()).gender(accountDto.getGender())
-                    .mobile(accountDto.getMobile()).email(accountDto.getEmail()).build());
+        if (age <= 18 || accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber())) {
+            throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER_OR_CHILD_ABHA_NUMBER);
         }
-        throw new AccountNotFoundException(AbhaConstants.ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE);
+        return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
+                .name(accountDto.getName()).preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
+                .yearOfBirth(accountDto.getYearOfBirth()).gender(accountDto.getGender())
+                .mobile(accountDto.getMobile()).email(accountDto.getEmail()).build());
     }
 
     private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
@@ -109,9 +110,8 @@ public class AuthByAadhaarService {
     }
 
     private AuthResponseDto handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto, String transactionId) {
-        String errorCode = aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode();
         if (!aadhaarResponseDto.isSuccessful()) {
-            switch (errorCode) {
+            switch (aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode()) {
                 case AADHAAR_OTP_INCORRECT_ERROR_CODE:
                     return prepareAuthResponse(transactionId, StringConstants.FAILED, AbhaConstants.INVALID_AADHAAR_OTP, Collections.emptyList());
                 case AADHAAR_OTP_EXPIRED_ERROR_CODE:
