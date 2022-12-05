@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
@@ -182,7 +183,7 @@ public class OtpRequestService {
             log.error(FAILED_TO_GENERATE_AADHAAR_OTP_TRANSACTION_REASON,
                     transactionDto.getTxnId(),
                     aadhaarResponseDto.getReason());
-            throw new UidaiException(aadhaarResponseDto);
+            throw new AadhaarExceptions(aadhaarResponseDto.getErrorCode());
         }
         log.info(SENT_AADHAAR_OTP);
     }

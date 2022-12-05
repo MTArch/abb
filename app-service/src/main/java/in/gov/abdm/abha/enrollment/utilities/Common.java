@@ -56,6 +56,10 @@ public class Common {
         return sdf.format(now);
     }
 
+    public String timeStampWithT(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
+    }
+
     public static String loadFileData(String fileName) {
         String content = null;
         try {

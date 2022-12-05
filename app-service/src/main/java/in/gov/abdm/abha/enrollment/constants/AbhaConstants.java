@@ -38,7 +38,6 @@ public interface AbhaConstants {
     String VALIDATION_EMPTY_AUTHMETHOD = "AuthMethod cannot be null or empty";
 
     String VALIDATION_ERROR_AUTH_DATA_FIELD = "Auth data cannot be null or empty";
-    String VALIDATION_ERROR_AUTHMETHOD = "Invalid AuthMethod";
     String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
     String VALIDATION_ERROR_OTP_VALUE_FIELD = "Invalid OTP Value";
 
@@ -56,7 +55,7 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
 
-    String INVALID_ABHA_NUMBER = "Invalid Abha Number";
+    String INVALID_ABHA_NUMBER = "Invalid ABHA Number";
 
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
@@ -67,10 +66,11 @@ public interface AbhaConstants {
 
     String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
 
-    String ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE = "No account found with abha number.Please,create account by clicking create account link";
     String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
 
-    String INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE = "Invald OTP,Please try again.";
+    String INVALID_AADHAAR_OTP = "Invalid Aadhaar OTP";
 
-    String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired,Please try again.";
+    String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
+
+    String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 }
