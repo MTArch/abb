@@ -8,7 +8,6 @@ import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -19,7 +18,6 @@ import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
-import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -48,7 +46,8 @@ public class OtpRequestService {
      * Content for logs
      */
     private static final String FAILED_TO_GENERATE_AADHAAR_OTP_TRANSACTION_REASON = "Failed to Generate Aadhaar OTP : Transaction : {} : Reason : {}";
-    private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile ending ";
+    private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with";
+    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with";
     private static final String OTP_SUBJECT = "mobile verification";
     private static final String SENT = "sent";
     private static final String FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION = "Failed to Send OTP for Mobile verification";
@@ -92,9 +91,9 @@ public class OtpRequestService {
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                    .message(OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
+                                    .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
                                     .build()));
-                }else{
+                } else {
                     throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
                 }
             });
@@ -117,21 +116,19 @@ public class OtpRequestService {
         transactionDto.setTxnId(UUID.randomUUID());
 
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
-                && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR))
-        {
+                && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR)) {
             return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
-            .flatMap(res1->{
-                if(res1.getHealthIdNumber()!=null)
-                    transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
-                Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
-                return aadhaarResponseDto.flatMap(res ->
-                        {
-                            return handleAadhaarOtpResponse(res, transactionDto);
-                        }
-                );
-            }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-        }
-        else {
+                    .flatMap(res1 -> {
+                        if (res1.getHealthIdNumber() != null)
+                            transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
+                        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+                        return aadhaarResponseDto.flatMap(res ->
+                                {
+                                    return handleAadhaarOtpResponse(res, transactionDto);
+                                }
+                        );
+                    }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+        } else {
             Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
             return aadhaarResponseDto.flatMap(res ->
                     {
@@ -191,23 +188,23 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendIdpOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         mobileOrEmailOtpRequestDto.setLoginId(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()));
         return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
-                        .flatMap(res->sendIdpOtpAndUpdateTransaction(mobileOrEmailOtpRequestDto, res))
-                        .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+                .flatMap(res -> sendIdpOtpAndUpdateTransaction(mobileOrEmailOtpRequestDto, res))
+                .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<MobileOrEmailOtpResponseDto> sendIdpOtpAndUpdateTransaction(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, TransactionDto transactionDto) {
         return idpService.sendOtp(mobileOrEmailOtpRequestDto)
                 .flatMap(idpSendOtpResponse -> {
-                    if(!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())){
+                    if (!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())) {
                         String oldTransactionId = transactionDto.getTxnId().toString();
                         transactionDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
                         return transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
-                                .flatMap(res->{
+                                .flatMap(res -> {
                                     //TODO get mobile number from IDP
-                                     return Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                    .txnId(res.getTxnId().toString())
-                                    .message(MESSAGE)
-                                    .build());
+                                    return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                            .txnId(res.getTxnId().toString())
+                                            .message(MESSAGE)
+                                            .build());
                                 }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
                     }
                     return Mono.empty();

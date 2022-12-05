@@ -9,7 +9,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidOtpSystem;
 
 /**
@@ -32,6 +34,12 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 			return !name.equals(OtpSystem.WRONG);
 		}).collect(Collectors.toList());
 		
-		return new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getOtpSystem());
+		boolean validOtpSystem =  new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getOtpSystem());
+
+		if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.MOBILE_VERIFY)
+				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+			validOtpSystem = false;
+		}
+		return validOtpSystem;
 	}
 }
