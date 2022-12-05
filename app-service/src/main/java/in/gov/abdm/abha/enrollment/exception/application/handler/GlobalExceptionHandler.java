@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
@@ -7,6 +8,7 @@ import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFa
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,7 +38,6 @@ public class GlobalExceptionHandler {
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String SEND_NOTIFICATION_EXCEPTION = "send notification Exception : ";
     private static final String EXCEPTIONS = "Exceptions : ";
-    public static final String MESSAGE = "Message";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     /**
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler {
             });
         }
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
-        errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 
@@ -85,7 +86,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FailedToSendNotificationException.class)
     public Map<String, Object> notificationExceptionHandler(FailedToSendNotificationException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put(MESSAGE, ex.getMessage());
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(SEND_NOTIFICATION_EXCEPTION, errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
@@ -94,14 +95,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GenericExceptionMessage.class)
     public Map<String, Object> runtimeGenericExceptionHandler(GenericExceptionMessage ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put(MESSAGE, ex.getMessage());
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(EXCEPTIONS, ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
 
     /**
-     * handling exception to show error message incase account doesn't exists with the xmluid
+     * handling exception to show error message in case account doesn't exist with the xmluid
      * @param ex
      * @return
      */

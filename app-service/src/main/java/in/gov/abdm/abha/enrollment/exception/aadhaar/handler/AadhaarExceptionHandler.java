@@ -1,22 +1,22 @@
 package in.gov.abdm.abha.enrollment.exception.aadhaar.handler;
 
-import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarOtpException;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.BusinessException;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.helper.ExceptionHelper;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.model.ApiError;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,7 +36,6 @@ public class AadhaarExceptionHandler {
 	private static final String RESPONSE_TIMESTAMP = "timestamp";
 
 	private static final String STATUS = "status";
-	DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
 	/**
 	 * exception responding helper
@@ -52,20 +51,25 @@ public class AadhaarExceptionHandler {
 	 * @param request
 	 * @return
 	 */
-	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<Mono<ApiError>> handleBusinessException(BusinessException busExp, ServerHttpRequest request) {
-		log.error(EXCEPTION_MSG_FORMAT + RESPONSE_BLOCK, BUSINESS, busExp.getMessage());
-		return ResponseEntity.unprocessableEntity().body(Mono.just(helper.apiError(busExp, LocaleContextHolder.getLocale())));
-	}
+	//TODO Remove Aadhaar UIDAI_EXCEPTION Handling once our regeneration testing is done
+//	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+//	@ExceptionHandler(BusinessException.class)
+//	public Mono<Map<String, Object>> handleBusinessException(BusinessException busExp, ServerHttpRequest request) {
+//		log.error(EXCEPTION_MSG_FORMAT + RESPONSE_BLOCK, BUSINESS, busExp.getMessage());
+//		return Mono.just(helper.apiError(busExp, LocaleContextHolder.getLocale()));
+//	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	@ExceptionHandler(AadhaarOtpException.class)
-	public Map<String, Object> handleAadhaarOtpException(AadhaarOtpException ex) {
+	@ExceptionHandler(AadhaarExceptions.class)
+	public Map<String, Object> handleAadhaarOtpException(AadhaarExceptions ex) {
 		Map<String, Object> errorMap = new LinkedHashMap<>();
-		errorMap.put(MESSAGE, ex.getMessage());
+		if(Arrays.stream(AadhaarErrorCodes.values()).anyMatch(v->v.toString().equals("E_"+ex.getMessage()))){
+			errorMap.put(MESSAGE, AadhaarErrorCodes.valueOf("E_"+ex.getMessage()).getValue());
+		}else {
+			errorMap.put(MESSAGE, AadhaarErrorCodes.valueOf("OTHER_ERROR").getValue());
+		}
 		log.info(EXCEPTIONS, ex.getMessage());
-		errorMap.put(STATUS, HttpStatus.BAD_REQUEST);
-		errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+		errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
 		return errorMap;
 	}
 }

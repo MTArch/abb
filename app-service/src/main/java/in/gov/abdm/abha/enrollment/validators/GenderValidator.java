@@ -12,7 +12,9 @@ public class GenderValidator implements ConstraintValidator<Gender, String> {
     
     @Override
 	public boolean isValid(String gender, ConstraintValidatorContext context) {
-		return gender != null && !gender.isEmpty()
-				&& in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.Gender.isValidByCode(gender);
+		if(gender != null && !gender.isEmpty())
+			return in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.Gender.isValidByCode(gender);
+		else
+			return true;
 	}
 }
