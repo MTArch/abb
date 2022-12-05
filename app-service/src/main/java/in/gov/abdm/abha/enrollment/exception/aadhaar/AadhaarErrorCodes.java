@@ -14,7 +14,7 @@ public enum AadhaarErrorCodes {
     E_330("Biometrics locked by Aadhaar holder."),
     E_400("Invalid Aadhaar OTP value."),
     E_402("“txn” value did not match with “txn” value used in Request OTP API."),
-    E_403("Invalid or expired Aadhaar OTP."),
+    E_403("Maximum number of attempts for OTP match is exceeded or OTP is not generated. Please generate a fresh OTP and try to authenticate again"),
     E_500("Invalid encryption of session key."),
     E_501("Invalid certificate identifier in “ci” attribute of “Skey”."),
     E_502("Invalid encryption of PID."),
