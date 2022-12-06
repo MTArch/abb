@@ -12,8 +12,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.Accou
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
+import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import in.gov.abdm.abha.enrollment.services.auth_byabdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
@@ -22,6 +24,7 @@ import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +37,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String AUTHORIZATION="1233";
     private static final String HIP_REQUEST_ID = "22222";
-    private static final String REQUEST_ID = "1111";
+    private static final String REQUEST_ID = "abha_2fb2a88d-8702-415a-9254-91b9a3f22311";
     
     @Autowired
     IdpClient idpClient;
@@ -100,9 +103,11 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     }
 
     private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthByAbdmRequest authByAbdmRequest) {
-        String otp=authByAbdmRequest.getAuthData().getOtp().getOtpValue();
         String xTransactionId=String.valueOf(transactionDto.getTxnId());
-        return idpClient.verifyOtp(otp,AUTHORIZATION,xTransactionId,HIP_REQUEST_ID,REQUEST_ID)
+        IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
+        idpVerifyOtpRequest.setTxnId(String.valueOf(transactionDto.getTxnId()));
+        idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
+        return idpClient.verifyOtp(idpVerifyOtpRequest,AUTHORIZATION,xTransactionId,HIP_REQUEST_ID,REQUEST_ID)
         .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 
@@ -111,6 +116,14 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         handleIdpServiceExceptions(idpVerifyOtpResponse);
 
         if(idpVerifyOtpResponse.getKyc()!=null && !idpVerifyOtpResponse.getKyc().isEmpty()) {
+
+            List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
+                    .map(Kyc:: getAbhaNumber)
+                    .collect(Collectors.toList());
+
+            Flux<AccountDto> accountDtoFlux = accountService.getAccountsByHealthIdNumbers(healthIdNumbers);
+
+
             List<AccountResponseDto> accountResponseDtoList = prepareResponse(idpVerifyOtpResponse.getKyc());
             return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
         }

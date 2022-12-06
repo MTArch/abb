@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.text.DateFormat;
@@ -239,6 +240,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         return abhaDBClient.updateEntity(AccountDto.class,accountDto,healthIdNumber);
+    }
+
+    @Override
+    public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
+        return abhaDBClient.getFluxEntity(AccountDto.class,healthIdNumbers);
     }
 
     private void breakName(AccountDto accountDto) {

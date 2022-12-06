@@ -42,4 +42,11 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAccountByXmlUid(new String(Base64.getDecoder().decode(xmluid))));
     }
 
+
+    @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_HEALTH_ID_NUMBER)
+    public ResponseEntity<?> getAccountsByHealthIdNumbers(@PathVariable("healthIdNumber") String healthIdNumber) {
+        return ResponseEntity.ok(accountService.getAccountByHealthIdNumber(healthIdNumber)
+                .switchIfEmpty(Mono.empty()));
+    }
+
 }

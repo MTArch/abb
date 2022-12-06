@@ -43,6 +43,8 @@ public interface URIConstant {
     
     String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
 
+    String DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST = DB_BASE_URI + "/account/";
+
 //    Aadhaar Service URI
 
     String AADHAAR_BASE_URI = "/api/v3/aadhaar";
