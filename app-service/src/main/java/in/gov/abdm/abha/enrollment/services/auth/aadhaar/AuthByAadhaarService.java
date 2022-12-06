@@ -32,6 +32,7 @@ public class AuthByAadhaarService {
     private static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
     private static final String CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER_OR_CHILD_ABHA_NUMBER = "Cannot link same ABHA Number/CHILD ABHA Number";
+    public static final String OTP_VERIFIED_SUCCESSFULLY = "OTP verified successfully";
 
     @Autowired
     AccountService accountService;
@@ -103,6 +104,7 @@ public class AuthByAadhaarService {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
+                    .message(OTP_VERIFIED_SUCCESSFULLY)
                     .accounts(accountDtoList)
                     .build());
         }

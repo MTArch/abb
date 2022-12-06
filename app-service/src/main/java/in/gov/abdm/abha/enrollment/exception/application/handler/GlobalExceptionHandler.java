@@ -83,12 +83,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
 
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(FailedToSendNotificationException.class)
     public Map<String, Object> notificationExceptionHandler(FailedToSendNotificationException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(SEND_NOTIFICATION_EXCEPTION, errorMap);
-        errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 
@@ -97,7 +98,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(EXCEPTIONS, ex.getMessage());
-        errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 

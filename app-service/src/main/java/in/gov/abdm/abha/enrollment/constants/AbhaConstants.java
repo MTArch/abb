@@ -72,9 +72,9 @@ public interface AbhaConstants {
 
     String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired, Please try again.";
 
-    String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent Abha Number";
+    String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     
-    String INVALID_CHILD_ABHA_NUMBER = "Invalid Child Abha Number";
+    String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
 
     String INVALID_EMAIL_ID = "Invalid Email Id";
 

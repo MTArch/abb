@@ -21,7 +21,7 @@ public class AadhaarExceptionHandler {
     private static final String MESSAGE = "Message";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(AadhaarExceptions.class)
     public Map<String, Object> handleAadhaarOtpException(AadhaarExceptions ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();

@@ -102,13 +102,14 @@ public enum AadhaarErrorCodes {
     E_941("Unspecified ASA channel."),
     E_950("OTP store related technical error."),
     E_951("Biometric lock related technical error."),
+    E_952("You have requested multiple OTPs in this transaction. Please try again in 30 minutes."),
+    E_953("You have requested multiple OTPs in this transaction. Please try again in 30 minutes."),
     E_980("Unsupported option."),
     E_995("Aadhaar suspended by competent authority."),
     E_996("Aadhaar cancelled (Aadhaar is no in authenticable status)."),
     E_997("Aadhaar suspended (Aadhaar is not in authenticatable status)."),
     E_998("Invalid Aadhaar Number."),
     E_999("Unknown error."),
-    E_1204("Aadhaar number does not have mobile number."),
 
     OTHER_ERROR("Please try again in some time.");
     private final String value;
