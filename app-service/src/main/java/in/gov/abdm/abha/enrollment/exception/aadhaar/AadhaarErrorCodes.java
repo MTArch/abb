@@ -6,6 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum AadhaarErrorCodes {
+    E_111("Aadhaar number does not have mobile number."),
     E_312("FMR and FIR cannot be used in same transaction."),
     E_313("Single FIR record contains more than one finger."),
     E_314("Number of FMR/FIR should not exceed 10."),
@@ -107,6 +108,7 @@ public enum AadhaarErrorCodes {
     E_997("Aadhaar suspended (Aadhaar is not in authenticatable status)."),
     E_998("Invalid Aadhaar Number."),
     E_999("Unknown error."),
+    E_1204("Aadhaar number does not have mobile number."),
 
     OTHER_ERROR("Please try again in some time.");
     private final String value;

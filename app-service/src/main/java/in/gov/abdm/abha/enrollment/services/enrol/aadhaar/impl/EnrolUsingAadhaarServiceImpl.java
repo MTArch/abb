@@ -7,7 +7,6 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.UidaiException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
