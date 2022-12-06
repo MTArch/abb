@@ -56,7 +56,12 @@ public class Common {
         return sdf.format(now);
     }
 
+    /**
+     * Do not change date format, it is getting used in multiple places and required same format
+     * @return
+     */
     public String timeStampWithT(){
+        //Don't change date format
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
     }
 
