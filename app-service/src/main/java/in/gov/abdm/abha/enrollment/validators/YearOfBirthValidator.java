@@ -19,7 +19,7 @@ public class YearOfBirthValidator implements ConstraintValidator<YOB, String> {
 		try {
 			if (yob != null && !yob.isEmpty()){
 				return !yob.equals("0000") && Pattern.compile(YOB_REGEX_PATTERN).matcher(yob).matches()
-						&& Integer.valueOf(yob) < LocalDateTime.now().getYear();
+						&& Integer.valueOf(yob) <= LocalDateTime.now().getYear();
 			}
 		}
 		catch (Exception e){

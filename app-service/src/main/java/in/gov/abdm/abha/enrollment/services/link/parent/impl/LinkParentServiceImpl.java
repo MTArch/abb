@@ -1,5 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.link.parent.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +26,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.DependentAccountRelationshipService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
+import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -127,7 +130,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 .mobile(accountDto.getMobile())
                 .email(accountDto.getEmail())
                 //TODO get phr address from phr table
-                //.phrAddress()
+                .phrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(accountDto.getHealthIdNumber()))))
                 .addressLine1(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())

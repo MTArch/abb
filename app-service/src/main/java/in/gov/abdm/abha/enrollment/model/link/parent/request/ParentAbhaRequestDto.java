@@ -26,6 +26,7 @@ public class ParentAbhaRequestDto {
 
     @JsonProperty("yearOfBirth")
     @NotNull(message = AbhaConstants.YEAR_OF_BIRTH_INVALID)
+    @NotEmpty(message = AbhaConstants.YEAR_OF_BIRTH_INVALID)
     @YOB
     private String yearOfBirth;
 
