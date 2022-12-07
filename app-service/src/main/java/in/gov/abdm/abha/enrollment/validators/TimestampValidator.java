@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class TimestampValidator implements ConstraintValidator<Timestamp, String> {
 
-    private String DATE_TIME_FORMATTER = "dd-MM-yyyy HH:mm:ss";
+    private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 
     @Override

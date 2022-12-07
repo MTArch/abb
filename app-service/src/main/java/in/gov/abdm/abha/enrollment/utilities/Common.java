@@ -41,7 +41,6 @@ public class Common {
     private static final String MESSAGE = "OTP for creating your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, National Health Authority";
     private static final String SUBJECT = "OTP verification";
 
-    private String DATE_TIME_FORMATTER = "dd-MM-yyyy HH:mm:ss";
     @Autowired
     HealthIdContextHolder healthIdContextHolder;
 
@@ -141,10 +140,6 @@ public class Common {
                 TemplateType.SMS_OTP));
         //OTP for updating the mobile number linked with your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, NHA##1007164725434022866
         return templates;
-    }
-
-    public Date dateOf(String date){
-        return Date.from(LocalDateTime.parse(date, DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)).atZone(ZoneId.systemDefault()).toInstant());
     }
 
     public Date dateOf(LocalDateTime date){
