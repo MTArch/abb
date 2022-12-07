@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String SEND_NOTIFICATION_EXCEPTION = "send notification Exception : ";
     private static final String EXCEPTIONS = "Exceptions : ";
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * <p>
