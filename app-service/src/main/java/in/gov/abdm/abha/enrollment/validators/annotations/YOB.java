@@ -12,9 +12,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Constraint(validatedBy = YearOfBirthValidator.class)
-@Target({FIELD})
+@Target({TYPE,FIELD})
 public @interface YOB {
-    String message() default AbhaConstants.PATTERN_MISMATCHED;
+    String message() default AbhaConstants.YEAR_OF_BIRTH_INVALID;
 
     Class<?>[] groups() default {};
 

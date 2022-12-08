@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
  * Validating timestamp should not be greater than current date
  */
 public class TimestampBioValidator implements ConstraintValidator<TimestampBio, BioDto> {
-    private String DATE_TIME_FORMATTER = "dd-MM-yyyy HH:mm:ss";
+    private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 
     @Override

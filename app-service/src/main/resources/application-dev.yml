@@ -1,0 +1,30 @@
+#server:
+#  port: 7102
+#spring:
+#  application:
+#    name: abha-enrollment-app
+#
+#enrollment:
+#  gateway:
+#    aadhaar:
+##     baseuri: http://localhost:9292
+#      baseuri: http://global2dev.abdm.gov.internal
+#    enrollmentdb:
+#      baseuri: http://localhost:9188
+##     baseuri: http://abha2dev.abdm.gov.internal
+#    idp:
+#      baseuri: http://global2dev.abdm.gov.internal
+#    notification:
+#      baseuri: http://global2dev.abdm.gov.internal
+#    notificationdb:
+#      baseuri: http://global2dev.abdm.gov.internal
+#
+#
+#rsa:
+#  algorithm: RSA
+#  transformation:
+#    algorithm: RSA/ECB/PKCS1Padding
+#  private:
+#    key: nha_rsa_private_key.pem
+#  public:
+#    key: nha_rsa_public_key.pem

@@ -24,7 +24,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ValidTransactionId
-@ValidScope
 @ValidLoginHint
 @ValidLoginId
 @ValidOtpSystem
@@ -41,6 +40,7 @@ public class MobileOrEmailOtpRequestDto {
      * Existing scopes : abha-enrol,mobile-update,mobile-verify,email-update
      * Scope will be abha-enrol for abha creation using aadhaar
      */
+    @ValidScope
     private List<Scopes> scope;
 
     /**

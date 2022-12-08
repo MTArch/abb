@@ -1,5 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.link.parent.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +10,7 @@ import java.util.stream.Stream;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.DependentAccountRelationshipService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
+import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -79,7 +83,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 }
             }
             return Mono.just(true);
-        }).switchIfEmpty(Mono.error(new ParentLinkingFailedException(AbhaConstants.DETAILS_NOT_FOUND_EXCEPTION_MESSAGE)));
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private boolean isChildValid(String healthIdNumberFromTxn,String healthIdNumberFromRequest) {
@@ -126,7 +130,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 .mobile(accountDto.getMobile())
                 .email(accountDto.getEmail())
                 //TODO get phr address from phr table
-                //.phrAddress()
+                .phrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(accountDto.getHealthIdNumber()))))
                 .addressLine1(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())

@@ -1,19 +1,24 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
-import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
-import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
-import in.gov.abdm.abha.enrollmentdb.repository.TransactionRepository;
+import java.time.LocalDateTime;
+
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+
+import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
+import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
+import in.gov.abdm.abha.enrollmentdb.repository.TransactionRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
-
+	
+	private int minusMinutes = 20;
+	private int plusMinutes = 10;
+	
     @Autowired
     TransactionRepository transactionRepository;
 
@@ -28,12 +33,6 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Transection> createTransaction(TransactionDto transactionDto) {
         Transection transaction = modelMapper.map(transactionDto, Transection.class);
         transaction.setAsNew();
-        Mono<Long> i = transactionRepository.getMaxTransactionId();
-        return i.flatMap(k -> handle(transaction, k));
-    }
-
-    private Mono<Transection> handle(Transection transaction, Long id) {
-        transaction.setId(id + 1);
         return transactionRepository.save(transaction);
     }
 
@@ -44,10 +43,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<TransactionDto> getTransactionByTxnId(String txnId) {
-        return transactionRepository.findByTxnId(txnId)
-                .map(transaction -> modelMapper.map(transaction, TransactionDto.class));
-    }
+	public Mono<TransactionDto> getTransactionByTxnId(String txnId) {
+		return transactionRepository
+				.findByTxnId(txnId, LocalDateTime.now().minusMinutes(minusMinutes),
+						LocalDateTime.now().plusMinutes(plusMinutes))
+				.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
+	}
 
     @Override
     public Mono<Transection> updateTransactionById(TransactionDto transactionDto, String id) {

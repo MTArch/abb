@@ -17,8 +17,10 @@ public class MobileFieldValidator implements ConstraintValidator<Mobile, String>
 
 	@Override
 	public boolean isValid(String mobile, ConstraintValidatorContext constraintValidatorContext) {
-		return mobile != null && !mobile.isEmpty()
-				&& Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(mobile).matches();
+		if(mobile!=null && !mobile.isEmpty())
+			return Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(mobile).matches();
+		else
+			return true;
 	}
 
 }

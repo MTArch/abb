@@ -21,7 +21,7 @@ public class NotificationDBClient<T> {
 
     private Flux<T> fluxGetDatabase(Class<T> t, String uri) {
     	//http://global2dev.abdm.gov.internal
-        return webClient.baseUrl(URIConstant.NOTIFICATION_DB_ENDPOINT_URI)
+        return webClient.baseUrl(NOTIFICATION_DB_BASE_URI)
                 .build()
                 .get()
                 .uri(uri)

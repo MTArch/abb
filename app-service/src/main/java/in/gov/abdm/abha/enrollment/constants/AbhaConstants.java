@@ -29,7 +29,7 @@ public interface AbhaConstants {
     String SUCCESS_MESSAGE = "Entered Input is Valid";
 
     String AADHAAR_NUMBER_INVALID = "Invalid Aadhaar Number";
-    String PATTERN_MISMATCHED = "Pattern Mismatched for Year of Birth";
+    String YEAR_OF_BIRTH_INVALID = "Invalid Year of birth";
     String MOBILE_NUMBER_MISSMATCH = "Invalid Mobile Number";
     String ABHA_ID = "ABHA_ID";
     String INVALID_NAME_FORMAT = "Invalid Name format";
@@ -37,7 +37,7 @@ public interface AbhaConstants {
 
     String VALIDATION_EMPTY_AUTHMETHOD = "AuthMethod cannot be null or empty";
 
-    String VALIDATION_ERROR_AUTHMETHOD = "Invalid AuthMethod";
+    String VALIDATION_ERROR_AUTH_DATA_FIELD = "Auth data cannot be null or empty";
     String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
     String VALIDATION_ERROR_OTP_VALUE_FIELD = "Invalid OTP Value";
 
@@ -49,12 +49,13 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_DEMO_OBJECT = "demo cannot be null or empty OR timeStamp ,aadhaar,name,nameMatchStrategy,gender,yob or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_BIO_OBJECT = "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
-    String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with aadhaar number.Please,create account by clicking create account link";
+    String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with AADHAAR Number.Please,create an account by clicking Click here to Create ABHA Number link.";
+    String TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid transaction, either the transaction is expired or not found";
     String VALIDATION_ERROR_PARENT_ABHA_REQUEST_DEMO_OBJECT = "ParentAbhaRequest cannot be null or empty OR ABHANumber ,yearOfBirth,name,gender,email,relationship,document,or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
 
-    String INVALID_ABHA_NUMBER = "Invalid Abha Number";
+    String INVALID_ABHA_NUMBER = "Invalid ABHA Number";
 
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
@@ -63,10 +64,23 @@ public interface AbhaConstants {
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
 
-    String DETAILS_NOT_FOUND_EXCEPTION_MESSAGE = "TRANSACTION DETAILS NOT FOUND";
-
     String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
 
-    String ACCOUNT_NOT_FOUND_WITH_ABHA_NUMBER_EXCEPTION_MESSAGE = "No account found with abha number.Please,create account by clicking create account link";
     String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
+
+    String INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE = "Invalid OTP, Please try again.";
+
+    String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired, Please try again.";
+
+    String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
+    
+    String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
+
+    String INVALID_EMAIL_ID = "Invalid Email Id";
+
+    String INVALID_AADHAAR_OTP = "Invalid Aadhaar OTP";
+
+    String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
+
+    String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 }
