@@ -63,4 +63,7 @@ public interface URIConstant {
 //    Notification DB Service
     String NOTIFICATION_DB_BASE_URI = "/internal/v3/notificationdb";
     String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/message";
+
+    //LGD service
+    String LGD_BASE_URI = "/internal/v3/abdm/lgd";
 }

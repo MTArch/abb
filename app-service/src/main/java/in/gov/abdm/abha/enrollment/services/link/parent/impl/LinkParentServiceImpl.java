@@ -8,14 +8,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
@@ -119,7 +117,6 @@ public class LinkParentServiceImpl implements LinkParentService {
                 .abhaNumber(accountDto.getHealthIdNumber())
                 .abhaStatus(AccountStatus.ACTIVE)
                 .ABHAType(accountDto.getType())
-                .abhaStatusReasonCode(StringConstants.EMPTY)
                 .firstName(accountDto.getFirstName())
                 .middleName(accountDto.getMiddleName())
                 .lastName(accountDto.getLastName())
@@ -131,7 +128,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 .email(accountDto.getEmail())
                 //TODO get phr address from phr table
                 .phrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(accountDto.getHealthIdNumber()))))
-                .addressLine1(accountDto.getAddress())
+                .address(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())
                 .pinCode(accountDto.getPincode())

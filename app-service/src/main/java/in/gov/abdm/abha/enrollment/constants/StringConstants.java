@@ -5,6 +5,7 @@ package in.gov.abdm.abha.enrollment.constants;
  */
 public interface StringConstants {
     String EMPTY = "";
+    String SPACE = " ";
     String COLON = " : ";
     String SLASH_N = "\n";
     String SLASH_R = "\r";
@@ -18,4 +19,6 @@ public interface StringConstants {
     String X_REQUEST_ID = "X-REQUEST-ID";
     String TIMESTAMP = "TIMESTAMP";
     String MESSAGE = "Message";
+    String UNKNOWN = "Unknown";
+    String COMMA_SPACE = ", ";
 }

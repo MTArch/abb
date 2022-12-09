@@ -6,12 +6,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import in.gov.abdm.abha.enrollment.client.LGDClient;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,9 +36,6 @@ public class AccountServiceImpl implements AccountService {
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     @Autowired
-    private WebClient webClient;
-
-    @Autowired
     AbhaDBClient abhaDBClient;
 
     @Override
@@ -48,7 +44,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountDto prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<AccountDto> prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<LgdDistrictResponse> lgdDistrictResponses) {
         // AccountEntity searchedUserByMobile = null;
         AccountDto newUser = new AccountDto();
         // UserDto user = new UserDto();
@@ -70,8 +66,6 @@ public class AccountServiceImpl implements AccountService {
 //        }
         //UserKycData kycData = transactionEnitityToUserKycData.apply(transactionDto);
         //TODO user should not create multiple accounts
-        //TODO search user by xmlUID
-//        UserEntity searchedUser = userRepository.findByXmlUID(transactionDto.getXmlUID());
         //TODO search user by some demographic details
 //        if (!StringUtils.isEmpty(transactionDto.getMobile())) {
 //            searchedUserByMobile = fuzzySearchService.findByFuzzySearch(transactionDto.getMobile(), transactionDto.getName(), transactionDto.getGender(), transactionDto.getYearOfBirth());
@@ -82,38 +76,10 @@ public class AccountServiceImpl implements AccountService {
 //            }
 //
 //        }
-        //TODO handle existing users
-//        boolean isNewAccount = true;
-//
-//        if (accountEntity != null) {
-//            newUser = accountEntity;
-//            log.warn("found User by Aadhaar search while creating account: " + accountEntity.getHealthIdNumber());
-//            if (!StringUtils.isBlank(transactionDto.getMobile())) {
-//                accountEntity.setMobile(transactionDto.getMobile());
-//                accountEntity.getAccountAuthMethods().add(AccountAuthMethods.MOBILE_OTP);
-//                accountEntity = updateReKYC(searchedUser, transactionDto, kycData);
-//                accountEntity = userService.save(searchedUser);
-//            }
-//            user.setNew(false);
-//            isNewAccount = false;
-//        } else if (searchedUserByMobile != null) {
-//            if (transactionDto.isKycVerified() && searchedUserByMobile.getXmlUID() != null && !searchedUserByMobile.getXmlUID().equals(transactionDto.getXmlUID())) {
-//                isNewAccount = true;
-//            } else {
-//                newUser = searchedUserByMobile;
-//                log.warn("found User by Mobile search while creating account by Aadhaar: " + searchedUserByMobile.getHealthIdNumber());
-//
-//                searchedUserByMobile = updateReKYC(searchedUserByMobile, transactionDto, kycData);
-//                userService.save(searchedUserByMobile);
-//
-//                user.setNew(false);
-//                isNewAccount = false;
-//            }
-//        }
 
         AccountDto accountDto = findUserAlreadyExist(transactionDto);
         if (isItNewUser(accountDto)) {
-            newUser.setAddress(transactionDto.getLoc());
+            newUser.setAddress(transactionDto.getAddress());
             newUser.setName(transactionDto.getName());
             newUser.setGender(transactionDto.getGender());
             // Stor storing kycPhoto.
@@ -127,16 +93,30 @@ public class AccountServiceImpl implements AccountService {
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
             newUser.setStateName(transactionDto.getStateName());
+
             //TODO LGD service implementation
-            //StatesDTO state = lgdService.getStateByCodeOrName(transactionDto.getStateName());
-//            if (!Objects.isNull(state)) {
-//                newUser.setStateCode(state.getCode());
-//                newUser.setStateName(state.getName());
-//                districtDTO = lgdService.getDistrictByCodeOrName(state.getCode(), transactionDto.getDistrictName());
-//                newUser.setDistrictCode(Objects.nonNull(districtDTO) ? districtDTO.getCode() : "");
-//            } else {
-//                log.warn("State %s not found in LGD service.", transactionDto.getStateName());
-//            }
+            LgdDistrictResponse lgdDistrictResponse = null;
+            try {
+                lgdDistrictResponse = lgdDistrictResponses.stream()
+                        .filter(lgd -> lgd.getDistrictCode() != null)
+                        .findAny().get();
+            } catch (NoSuchElementException noSuchElementException) {
+                if (!lgdDistrictResponses.isEmpty()) {
+                    lgdDistrictResponse = lgdDistrictResponses.get(0);
+                }
+            }
+            if (lgdDistrictResponse != null) {
+                String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
+                String districtName = lgdDistrictResponse.getDistrictName() != null ? lgdDistrictResponse.getDistrictName() : StringConstants.UNKNOWN;
+
+                newUser.setDistrictCode(districtCode);
+                newUser.setDistrictName(districtName);
+                newUser.setStateCode(lgdDistrictResponse.getStateCode());
+                newUser.setStateName(lgdDistrictResponse.getStateName());
+            }
+
+
+
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
             newUser.setTownName(transactionDto.getTownName());
             newUser.setXmlUID(transactionDto.getXmluid());
@@ -192,20 +172,6 @@ public class AccountServiceImpl implements AccountService {
             newUser.setKycVerified(true);
             newUser.setStatus(AccountStatus.ACTIVE.toString());
             breakName(newUser);
-            //user.setNew(true);
-            //TODO create phr address
-//            String healthId = null;
-//            if (!isBlank(transactionDto.getPhrAddress())) {
-//                healthId = transactionDto.getPhrAddress().toLowerCase();
-//                newUser = phrAddressComponent.addPhrAddress(newUser, healthId);
-//            } else if (!isBlank(accountRequest.getHealthId())) {
-//                healthId = accountRequest.getHealthId().toLowerCase();
-//            }
-//            if (!StringUtils.isEmpty(healthId)) {
-//                newUser = phrAddressComponent.addPhrAddress(newUser, healthId);
-//            }
-
-            //userService.save(newUser);
         }
 //        fetchDefaultPhrAddress(newUser.getHealthIdNumber());
 //        BeanUtils.copyProperties(newUser, user);
@@ -218,14 +184,10 @@ public class AccountServiceImpl implements AccountService {
 //        user.setHealthId(phrAddressService.fetchPhrAdress(newUser.getHealthIdNumber()));
         //TODO notify user with sms
         //smsService.sendHealthIdSuccessNotification(user);
-        //TODO delete transaction
-        //authTransactionService.delete(transactionDto);
-        // return user;
+
 
         newUser.setCreatedDate(LocalDateTime.now());
-
-
-        return newUser;
+        return Mono.just(newUser);
     }
 
     @Override
@@ -236,12 +198,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
-        return abhaDBClient.getAccountEntityById(AccountDto.class,healthIdNumber);
+        return abhaDBClient.getAccountEntityById(AccountDto.class, healthIdNumber);
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
-        return abhaDBClient.updateEntity(AccountDto.class,accountDto,healthIdNumber);
+        return abhaDBClient.updateEntity(AccountDto.class, accountDto, healthIdNumber);
     }
 
     private void breakName(AccountDto accountDto) {
