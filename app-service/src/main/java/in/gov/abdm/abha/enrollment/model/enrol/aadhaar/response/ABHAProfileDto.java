@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,7 +31,7 @@ public class ABHAProfileDto {
     private byte[] photo;
     private String mobile;
     private String email;
-    private ArrayList<String> phrAddress;
+    private List<String> phrAddress;
     private String addressLine1;
     private String districtCode;
     private String stateCode;
@@ -38,6 +39,6 @@ public class ABHAProfileDto {
     private String qrCode;
     private String pdfData;
     private AbhaType ABHAType;
-    private ArrayList<BenefitInfoDto> benefitInfo;
+    private List<BenefitInfoDto> benefitInfo;
 
 }

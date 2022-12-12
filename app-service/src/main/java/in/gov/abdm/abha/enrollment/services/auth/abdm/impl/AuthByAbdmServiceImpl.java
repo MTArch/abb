@@ -1,7 +1,9 @@
 package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +22,16 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRe
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
@@ -40,9 +45,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String AUTHORIZATION = "1233";
     private static final String HIP_REQUEST_ID = "22222";
-    private static final String REQUEST_ID = "abha_2fb2a88d-8702-415a-9254-91b9a3f22311";
-    
-    // private static final String REQUEST_ID = "1111";
+
     private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
     private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "OTP value did not match, please try again.";
     public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
@@ -53,6 +56,9 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     TransactionService transactionService;
     @Autowired
     AccountService accountService;
+    
+    @Autowired
+    HidPhrAddressService hidPhrAddressService;
 
 
     @Override
@@ -112,60 +118,121 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     }
 
-    private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthRequestDto authByAbdmRequest) {
-        String xTransactionId=String.valueOf(transactionDto.getTxnId());
-        IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
-        idpVerifyOtpRequest.setTxnId(String.valueOf(transactionDto.getTxnId()));
-        idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-        return idpClient.verifyOtp(idpVerifyOtpRequest,AUTHORIZATION,xTransactionId,HIP_REQUEST_ID,REQUEST_ID)
-        .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
-    }
+	private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthRequestDto authByAbdmRequest) {
+		String xTransactionId = String.valueOf(transactionDto.getTxnId());
+		String requestId = "abha_".concat(UUID.randomUUID().toString());
+		IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
+		idpVerifyOtpRequest.setTxnId(String.valueOf(transactionDto.getTxnId()));
+		idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
+		return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, xTransactionId, HIP_REQUEST_ID, requestId)
+				.flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
+	}
 
-    private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest, IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
+	private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
+			IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
-        handleIdpServiceExceptions(idpVerifyOtpResponse);
+		handleIdpServiceExceptions(idpVerifyOtpResponse);
 
-        if(idpVerifyOtpResponse.getKyc()!=null && !idpVerifyOtpResponse.getKyc().isEmpty()) {
+		if (idpVerifyOtpResponse.getKyc() != null && !idpVerifyOtpResponse.getKyc().isEmpty()) {
 
-            List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
-                    .map(Kyc:: getAbhaNumber)
-                    .collect(Collectors.toList());
+			List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
+					.filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber()))
+					.map(Kyc::getAbhaNumber).collect(Collectors.toList());
+			
+			Flux<AccountDto> accountDtoFlux = accountService.getAccountsByHealthIdNumbers(healthIdNumbers);
 
-            Flux<AccountDto> accountDtoFlux = accountService.getAccountsByHealthIdNumbers(healthIdNumbers);
+			return accountDtoFlux.collectList().flatMap(Mono::just).flatMap(accountDtoList -> {
+			
+				Flux<HidPhrAddressDto> fluxPhrAaddress = hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(
+						healthIdNumbers, new ArrayList<>(Collections.singleton(1)));
+				
+	    		
+	    		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList ->  {
+	    			
+	    				return handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers, transactionDto);
+	    			}).switchIfEmpty(Mono.defer(() -> {
+	    				return Mono.empty();
+	    			}));    	
+			
+//				List<AccountResponseDto> accountResponseDtoList = prepareAuthReponse(accountDtoList, transactionDto);
+//				return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
+			}).switchIfEmpty(Mono.defer(() -> {
+				return Mono.empty();
+				// TODO    
+//				List<AccountResponseDto> accountResponseDtoList = prepareAuthReponse(null, transactionDto);
+//				return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
+			}));
 
+			
+//			List<AccountResponseDto> accountResponseDtoList = prepareResponse(idpVerifyOtpResponse.getKyc());
+//			return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
+		}
+		return Mono.empty();
+	}
 
-            List<AccountResponseDto> accountResponseDtoList = prepareResponse(idpVerifyOtpResponse.getKyc());
-            return handleAccountListResponse(authByAbdmRequest, accountResponseDtoList, transactionDto);
-        }
-        return Mono.empty();
-    }
+    private List<AccountResponseDto> prepareAuthReponse(List<AccountDto> accDtos, TransactionDto transactionDto) {
+    
+    	return accDtos.stream()
+    	.filter(accountDto -> Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
+				accountDto.getDayOfBirth()) >= 18
+				&& accountDto.getHealthIdNumber() != transactionDto.getHealthIdNumber())
+    	.map(acc -> {
+//    		Flux<String> fluxPhrAaddress = hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(
+//    				new ArrayList<>(Collections.singleton(acc.getHealthIdNumber())),
+//    				new ArrayList<>(Collections.singleton(1))).map(h -> h.getPhrAddress());
+//    		
+//    		return fluxPhrAaddress.next().flatMap(r ->  {
+//    				return Mono.just(MapperUtils.mapAccountDtoToAccountResponse(acc, r));
+//    			}).switchIfEmpty(Mono.defer(() -> {
+//    				return Mono.just(AccountResponseDto.builder().build());
+//    			}));    			
+    		return MapperUtils.mapAccountDtoToAccountResponse(acc, "");
+    	}).collect(Collectors.toList());
+    	
+    	
+    	
+//		return Mono.just(AuthResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+//                .authResult(StringConstants.SUCCESS)
+//                .accounts(a)
+//                .build());
+	}
 
-    private List<AccountResponseDto> prepareResponse(List<Kyc> kycList) {
+	private List<AccountResponseDto> prepareResponse(List<Kyc> kycList) {
         return kycList.stream()
                 .filter(kyc -> kyc != null)
                 .map(kyc -> MapperUtils.mapKycToAccountResponse(kyc))
                 .collect(Collectors.toList());
     }
 
-    private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAbdmRequest, List<AccountDto> accountDtoList, List<HidPhrAddressDto> phrAddressList, List<String> healthIdNumbers, TransactionDto transactionDto) {
+    	if (accountDtoList != null && !accountDtoList.isEmpty()) {
+    		transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
 
-        if (accountDtoList != null && !accountDtoList.isEmpty()) {
-            List<String> healthIdNumbers = accountDtoList.stream()
-                    .map(AccountResponseDto::getABHANumber)
-                    .collect(Collectors.toList());
+    		List<AccountResponseDto> accountResponseDtoList = prepareAccountResponseDtoList(accountDtoList,phrAddressList);
 
-            return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                    .flatMap(transactionResDto -> {
-                        transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
-                        return transactionService.updateTransactionEntity(transactionDto, authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                                .flatMap(response -> AccountResponse(authByAbdmRequest, accountDtoList))
-                                .switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
-                    }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-        }
+			return transactionService
+					.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+					.flatMap(response -> AccountResponse(authByAbdmRequest, accountResponseDtoList))
+					.switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(
+							EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
+		}
         return Mono.empty();
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
+    private List<AccountResponseDto> prepareAccountResponseDtoList(List<AccountDto> accountDtoList,
+			List<HidPhrAddressDto> phrAddressList) {
+    	List<AccountResponseDto> accountResponseDtos = new ArrayList<>();
+    	for (AccountDto accDto : accountDtoList) {
+    		String phrAddress = phrAddressList.stream()
+    				.filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(accDto.getHealthIdNumber()))
+    				.map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).toString();
+    				
+    		accountResponseDtos.add(MapperUtils.mapAccountDtoToAccountResponse(accDto, phrAddress));
+		}
+    	return accountResponseDtos;
+	}
+
+	private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)

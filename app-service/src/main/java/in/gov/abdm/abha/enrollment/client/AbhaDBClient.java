@@ -140,7 +140,7 @@ public class AbhaDBClient<T> {
         return Flux.empty();
     }
 
-    private Flux<T> GetFluxDatabase(Class<T> t, String uri) {
+    public Flux<T> GetFluxDatabase(Class<T> t, String uri) {
         return webClient.
                 baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()

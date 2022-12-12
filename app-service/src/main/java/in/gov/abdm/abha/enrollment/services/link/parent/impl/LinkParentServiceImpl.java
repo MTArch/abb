@@ -7,26 +7,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
-import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.DependentAccountRelationshipDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
+import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponseDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.DependentAccountRelationshipService;
+import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
-import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -34,12 +34,16 @@ public class LinkParentServiceImpl implements LinkParentService {
 
     @Autowired
     TransactionService transactionService;
+    
     @Autowired
     AccountService accountService;
 
     @Autowired
     DependentAccountRelationshipService dependentAccountRelationshipService;
 
+    @Autowired
+    HidPhrAddressService hidPhrAddressService;
+    
     @Override
     public Mono<LinkParentResponseDto> linkDependentAccount(LinkParentRequestDto linkParentRequestDto) {
 
@@ -95,49 +99,61 @@ public class LinkParentServiceImpl implements LinkParentService {
         return new HashSet<>(txnResponseHealthIdNumbers).containsAll(parentHealthIdNumbers);
     }
 
-    private Mono<LinkParentResponseDto> updateDependentAccount(LinkParentRequestDto linkParentRequestDto) {
-        return accountService.getAccountByHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber())
-                .flatMap(res -> {
-                    res.setStatus(AccountStatus.ACTIVE.getValue());
-                    return accountService.updateAccountByHealthIdNumber(
-                            res, res.getHealthIdNumber()).flatMap(result -> {
-                        if (result != null) {
-                            return handleDependentAccountResponse(result, linkParentRequestDto);
-                        }
-                        return Mono.empty();
-                    });
-                });
-    }
+	private Mono<LinkParentResponseDto> updateDependentAccount(LinkParentRequestDto linkParentRequestDto) {
+		return accountService.getAccountByHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber())
+				.flatMap(res -> {
+					res.setStatus(AccountStatus.ACTIVE.getValue());
+					return accountService.updateAccountByHealthIdNumber(res, res.getHealthIdNumber())
+							.flatMap(result -> {
+								if (result != null) {
+									return handleDependentAccountResponse(result, linkParentRequestDto);
+								}
+								return Mono.empty();
+							});
+				});
+	}
 
-    private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto, LinkParentRequestDto linkParentRequestDto) {
-        return Mono.just(LinkParentResponseDto.builder().txnId(linkParentRequestDto.getTxnId())
-                .abhaProfileDto(mapAccountToProfile(accountDto)).build());
-    }
+	private Mono<LinkParentResponseDto> handleDependentAccountResponse(AccountDto accountDto,
+			LinkParentRequestDto linkParentRequestDto) {
+		Flux<String> fluxPhrAaddress = hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(
+				new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),
+				new ArrayList<>(Collections.singleton(1))).map(h -> h.getPhrAddress());
 
-    private ABHAProfileDto mapAccountToProfile(AccountDto accountDto) {
-        return ABHAProfileDto.builder()
-                .abhaNumber(accountDto.getHealthIdNumber())
-                .abhaStatus(AccountStatus.ACTIVE)
-                .ABHAType(accountDto.getType())
-                .abhaStatusReasonCode(StringConstants.EMPTY)
-                .firstName(accountDto.getFirstName())
-                .middleName(accountDto.getMiddleName())
-                .lastName(accountDto.getLastName())
-                .dob(accountDto.getKycDob())
-                .gender(accountDto.getGender())
-                //TODO get photo
-                //.photo(accountDto.get)
-                .mobile(accountDto.getMobile())
-                .email(accountDto.getEmail())
-                //TODO get phr address from phr table
-                .phrAddress(new ArrayList<>(Collections.singleton(AbhaAddressGenerator.generateDefaultAbhaAddress(accountDto.getHealthIdNumber()))))
-                .addressLine1(accountDto.getAddress())
-                .districtCode(accountDto.getDistrictCode())
-                .stateCode(accountDto.getStateCode())
-                .pinCode(accountDto.getPincode())
-                //TODO
-                //.qrCode(null)
-                //.pdfData(null)
-                .build();
-    }
+		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(result -> {
+			return mapAccountToProfile(result, accountDto, linkParentRequestDto);
+		}).switchIfEmpty(Mono.defer(() -> {
+			return mapAccountToProfile(null, accountDto, linkParentRequestDto);
+		}));
+	}
+
+	private Mono<LinkParentResponseDto> mapAccountToProfile(List<String> phrAddress, AccountDto accountDto,
+			LinkParentRequestDto linkParentRequestDto) {
+		return Mono.just(LinkParentResponseDto.builder()
+				.txnId(linkParentRequestDto.getTxnId())
+				.abhaProfileDto(ABHAProfileDto.builder()
+						.abhaNumber(accountDto.getHealthIdNumber())
+						.abhaStatus(AccountStatus.ACTIVE)
+						.ABHAType(accountDto.getType())
+						.abhaStatusReasonCode(StringConstants.EMPTY)
+						.firstName(accountDto.getFirstName())
+						.middleName(accountDto.getMiddleName())
+						.lastName(accountDto.getLastName())
+						.dob(accountDto.getKycdob())
+						.gender(accountDto.getGender())
+						// TODO
+//						.photo(accountDto.getPhoto())
+						.mobile(accountDto.getMobile())
+						.email(accountDto.getEmail())
+						.phrAddress(phrAddress)
+						.addressLine1(accountDto.getAddress())
+						.districtCode(accountDto.getDistrictCode())
+						.stateCode(accountDto.getStateCode())
+						.pinCode(accountDto.getPincode())
+						// TODO
+						// .qrCode(null)
+						// .pdfData(null)
+						.build())
+				.build());
+	}
+
 }

@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
@@ -122,6 +123,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<ErrorResponse> transactionNotFound(TransactionNotFoundException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
+        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+    }
+    
+    /**
+     * handling exception to show error message in case request body is un-expected 
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> invalidRequest(InvalidRequestException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
     }
 

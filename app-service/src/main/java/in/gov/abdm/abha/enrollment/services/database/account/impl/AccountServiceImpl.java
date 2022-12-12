@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
@@ -124,7 +128,7 @@ public class AccountServiceImpl implements AccountService {
             if (!StringUtils.isBlank(transactionDto.getPincode())) {
                 newUser.setPincode(transactionDto.getPincode());
             }
-            newUser.setKycDob(transactionDto.getKycdob());
+            newUser.setKycdob(transactionDto.getKycdob());
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
             newUser.setStateName(transactionDto.getStateName());
@@ -247,7 +251,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
-        return abhaDBClient.getFluxEntity(AccountDto.class,healthIdNumbers);
+        
+        StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_ACCOUNT_URI)
+				.append(StringConstants.QUESTION)
+				.append("healthIdNumber")
+				.append(StringConstants.EQUAL)
+				.append(healthIdNumbers.stream().collect(Collectors.joining(",")));
+
+		return abhaDBClient.GetFluxDatabase(AccountDto.class, sb.toString());
     }
 
     private void breakName(AccountDto accountDto) {

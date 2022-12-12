@@ -1,14 +1,16 @@
 package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
 
 
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
-import in.gov.abdm.abha.enrollmentdb.utilities.phr_address_generator.PhrAddressGenerator;
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -32,27 +34,34 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     private HidPhrAddressSubscriber hidPhrAddressSubscriber;
 
     @Override
-    public Mono<HidPhrAddress> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
-        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
-        return hidPhrAddressRepository.save(hidPhrAddress);
-    }
+	public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
+		HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
+		return hidPhrAddressRepository.save(hidPhrAddress)
+				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+	}
 
     @Override
-    public Mono<HidPhrAddress> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
-        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
-        return hidPhrAddressRepository.save(hidPhrAddress);
-    }
+	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
+		HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
+		return hidPhrAddressRepository.save(hidPhrAddress)
+				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+	}
 
     @Override
     public Mono<HidPhrAddressDto> getHidPhrAddressById(Long hidPhrAddressId) {
-
         return hidPhrAddressRepository.findById(hidPhrAddressId).
                 map(HidPhrAddress -> modelMapper.map(HidPhrAddress, HidPhrAddressDto.class));
     }
 
     @Override
-    public Mono deleteHidPhrAddressById(Long hidPhrAddressId) {
-
+    public Mono<Void> deleteHidPhrAddressById(Long hidPhrAddressId) {
         return hidPhrAddressRepository.deleteById(hidPhrAddressId);
     }
+
+	@Override
+	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
+			List<Integer> preferred) {
+		return hidPhrAddressRepository.findByHealthIdNumberInAndPreferredIn(healthIdNumbers, preferred)
+				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+	}
 }

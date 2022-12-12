@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -196,14 +197,21 @@ public class OtpRequestService {
         return idpService.sendOtp(mobileOrEmailOtpRequestDto)
                 .flatMap(idpSendOtpResponse -> {
                     if (!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())) {
-                        String oldTransactionId = transactionDto.getTxnId().toString();
-                        transactionDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
-                        return transactionService.updateTransactionEntity(transactionDto, oldTransactionId)
+                    	TransactionDto trDto = transactionDto;
+                    	trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
+                        return transactionService.createTransactionEntity(transactionDto)
                                 .flatMap(res -> {
-                                    //TODO get mobile number from IDP
+                                	String message = MESSAGE;
+                					if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
+                						message = OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING
+                								.concat(idpSendOtpResponse.getOtpSentTo());
+                					} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
+                						message = OTP_IS_SENT_TO_MOBILE_ENDING.concat(idpSendOtpResponse.getOtpSentTo());
+                					}
+                                	
                                     return Mono.just(MobileOrEmailOtpResponseDto.builder()
                                             .txnId(res.getTxnId().toString())
-                                            .message(MESSAGE)
+                                            .message(message)
                                             .build());
                                 }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
                     }

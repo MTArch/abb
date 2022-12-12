@@ -31,7 +31,8 @@ public class AuthByAadhaarService {
 
     private static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
-    private static final String CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER_OR_CHILD_ABHA_NUMBER = "Cannot link same ABHA Number/CHILD ABHA Number";
+    private static final String CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER = "Cannot link with same ABHA Number";
+    private static final String CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER = "Cannot link with CHILD ABHA Number";
     public static final String OTP_VERIFIED_SUCCESSFULLY = "OTP verified successfully";
 
     @Autowired
@@ -77,9 +78,11 @@ public class AuthByAadhaarService {
     private Mono<AccountResponseDto> prepareResponse(AccountDto accountDto, TransactionDto transactionDto) {
         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
                 accountDto.getDayOfBirth());
-        if (age <= 18 || accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber())) {
-            throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER_OR_CHILD_ABHA_NUMBER);
-        }
+        if (age < 18 )
+        	throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER);
+        if(accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber()))
+        	throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER);
+        
         return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
                 .name(accountDto.getName()).preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
                 .yearOfBirth(accountDto.getYearOfBirth()).gender(accountDto.getGender())

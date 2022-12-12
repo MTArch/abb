@@ -4,6 +4,10 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,4 +39,11 @@ public class HidPhrAddressController {
     public ResponseEntity<?> deleteHidPhrAddress(@PathVariable("hidPhrAddressId") Long hidPhrAddressId) {
         return ResponseEntity.ok(hidPhrAddressService.deleteHidPhrAddressById(hidPhrAddressId));
     }
+    
+	@GetMapping
+	public ResponseEntity<?> getHidPhrAddressByHealthIdNumbersAndPreferredIn(
+			@RequestParam("healthIdNumber") List<String> healthIdNumbers,
+			@RequestParam("preferred") List<Integer> preferred) {
+		return ResponseEntity.ok(hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers, preferred));
+	}
 }

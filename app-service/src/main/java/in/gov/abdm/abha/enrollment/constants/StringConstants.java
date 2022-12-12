@@ -15,6 +15,9 @@ public interface StringConstants {
     String Y = "Y";
     String DASH = "-";
     String AT = "@";
+    String QUESTION = "?";
+    String EQUAL = "=";
+    String AMPERSAND = "&";
     String X_REQUEST_ID = "X-REQUEST-ID";
     String TIMESTAMP = "TIMESTAMP";
     String MESSAGE = "Message";

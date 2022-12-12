@@ -4,9 +4,14 @@ import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountSubscriber;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
+
+import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -42,6 +47,12 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public Mono<AccountDto> getAccountByXmlUid(String xmluid) {
 		return accountRepository.findByXmluid(xmluid).map(account -> modelMapper.map(account,AccountDto.class));
+	}
+
+	@Override
+	public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
+		return accountRepository.findByHealthIdNumberIn(healthIdNumbers)
+				.map(account -> modelMapper.map(account, AccountDto.class));
 	}
 
 }

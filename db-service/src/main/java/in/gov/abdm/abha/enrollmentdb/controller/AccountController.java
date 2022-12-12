@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Base64;
+import java.util.List;
 
 /**
  *
@@ -43,10 +44,9 @@ public class AccountController {
     }
 
 
-    @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_HEALTH_ID_NUMBER)
-    public ResponseEntity<?> getAccountsByHealthIdNumbers(@PathVariable("healthIdNumber") String healthIdNumber) {
-        return ResponseEntity.ok(accountService.getAccountByHealthIdNumber(healthIdNumber)
-                .switchIfEmpty(Mono.empty()));
+    @GetMapping
+    public ResponseEntity<?> getAccountsByHealthIdNumbers(@RequestParam("healthIdNumber") List<String> healthIdNumbers) {
+        return ResponseEntity.ok(accountService.getAccountsByHealthIdNumbers(healthIdNumbers));
     }
 
 }

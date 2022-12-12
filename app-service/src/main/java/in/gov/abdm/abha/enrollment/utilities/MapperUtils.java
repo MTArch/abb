@@ -42,5 +42,17 @@ public class MapperUtils {
                 .email(kyc.getEmail())
                 .build();
     }
+    
+    public AccountResponseDto mapAccountDtoToAccountResponse(AccountDto accDto, String phrAddress) {
+        return AccountResponseDto.builder()
+                .ABHANumber(accDto.getHealthIdNumber())
+                .name(accDto.getName())
+                .preferredAbhaAddress(phrAddress)
+                .yearOfBirth(accDto.getYearOfBirth())
+                .gender(accDto.getGender())
+                .mobile(accDto.getMobile())
+                .email(accDto.getEmail())
+                .build();
+    }
 
 }

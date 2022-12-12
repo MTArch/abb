@@ -12,14 +12,23 @@ import lombok.NoArgsConstructor;
  *It is an POJO class IdpSendOtpResponse
  */
 public class IdpSendOtpResponse {
+	
     /**
      * It is a TransactionId
      */
     @JsonProperty("transactionId")
     private String transactionId;
+    
+    /**
+     * Where otp is sent
+     */
+    @JsonProperty("otpSentTo")
+    private String otpSentTo;
+    
     /**
      * It is a Response
      */
     @JsonProperty("response")
     private Response response;
+    
 }

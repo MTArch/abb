@@ -83,4 +83,6 @@ public interface AbhaConstants {
     String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
 
     String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
+    
+    String INVALID_REQUEST = "Invalid request";
 }
