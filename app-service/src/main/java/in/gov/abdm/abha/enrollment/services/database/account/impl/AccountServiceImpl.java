@@ -123,8 +123,9 @@ public class AccountServiceImpl implements AccountService {
             newUser.setGender(transactionDto.getGender());
             // Stor storing kycPhoto.
 
-            //TODO update kyc photo in user entity
-            // newUser.setKycPhoto(transactionDto.getKycPhoto());
+            if (accountDto.getKycPhoto() == null) {
+                newUser.setKycPhoto(transactionDto.getKycPhoto());
+            }
             if (!StringUtils.isBlank(transactionDto.getPincode())) {
                 newUser.setPincode(transactionDto.getPincode());
             }

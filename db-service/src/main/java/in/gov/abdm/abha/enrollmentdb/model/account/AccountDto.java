@@ -280,5 +280,10 @@ public class AccountDto {
      * type of account
      */
     private AbhaType type;
+
+    /**
+     * kyc photo of abha user
+     */
+    private byte[] kycPhoto;
     
 }

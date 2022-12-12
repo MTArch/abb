@@ -30,8 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType) {
-        //TODO set kyc photo in transaction
-        //transactionDto.setKycPhoto(kycData.getPhoto() == null ? new byte[1] : kycData.getPhoto().getBytes());
+        transactionDto.setKycPhoto(kycData.getPhoto() == null ? new byte[1] : kycData.getPhoto().getBytes());
         if (!StringUtils.isBlank(kycData.getPincode())) {
             transactionDto.setPincode(kycData.getPincode());
         }

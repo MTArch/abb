@@ -91,10 +91,10 @@ public class Transection implements Persistable<Long> {
      */
     private String kycdob;
     
-//    /**
-//     * kyc photo of abha user
-//     */
-//    private byte[] kycPhoto;
+    /**
+     * kyc photo of abha user
+     */
+    private byte[] kycPhoto;
     
     /**
      * kyc reason

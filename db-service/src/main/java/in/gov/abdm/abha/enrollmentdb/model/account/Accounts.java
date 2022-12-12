@@ -94,14 +94,11 @@ public class Accounts implements Persistable<String>{
 	 */
 	private String kycdob;
 	
-//	/**
-//	 * kyc photo of abha user
-//	 */
-//	@Basic(fetch = LAZY)
-//	@Lob
-//	@Column(name = "kyc_photo")
-//	private byte[] kycPhoto;
-//	
+	/**
+	 * kyc photo of abha user
+	 */
+	private byte[] kycPhoto;
+
 	/**
      * kyc verified flag for user
      */

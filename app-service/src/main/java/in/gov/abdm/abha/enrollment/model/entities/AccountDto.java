@@ -296,5 +296,10 @@ public class AccountDto {
     }
 
     private String preferredAbhaAddress;
+
+    /**
+     * kyc photo of abha user
+     */
+    private byte[] kycPhoto;
     
 }
