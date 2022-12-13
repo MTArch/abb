@@ -37,7 +37,9 @@ public class AuthController {
     public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest){
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
         if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
-            return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
+            return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.TRUE);
+        }else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))){
+            return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.FALSE);
         }
       return authByAbdmService.verifyOtp(authByAbdmRequest);
     }

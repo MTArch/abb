@@ -57,6 +57,10 @@ public class OtpRequestService {
     private static final String FAILED_TO_CALL_IDP_SERVICE = "Failed to call IDP service";
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
 
+    private static final String EMAIL_OTP_SUBJECT = "email verification";
+
+    private static final String OTP_IS_SENT_TO_EMAIL_ENDING = "OTP is sent to email ending with ";
+
     /**
      * transaction service to helps to prepare transaction entity details
      */
@@ -209,5 +213,32 @@ public class OtpRequestService {
                     }
                     return Mono.empty();
                 }).switchIfEmpty(Mono.error(new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE)));
+    }
+
+    public Mono<MobileOrEmailOtpResponseDto> sendEmailOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+        String email = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+        String newOtp = GeneralUtils.generateRandomOTP();
+        Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
+        return transactionDtoMono.flatMap(transactionDto -> {
+            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(
+                    email,
+                    EMAIL_OTP_SUBJECT,
+                    templatesHelper.prepareUpdateMobileMessage(newOtp));
+
+            return notificationResponseDtoMono.flatMap(response -> {
+                if (response.getStatus().equals(SENT)) {
+                    transactionDto.setEmail(email);
+                    transactionDto.setOtp(Argon2Util.encode(newOtp));
+                    transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                            .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                    .txnId(mobileOrEmailOtpRequestDto.getTxnId())
+                                    .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hidePhoneNumber(email))
+                                    .build()));
+                } else {
+                    throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
+                }
+            });
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 }
