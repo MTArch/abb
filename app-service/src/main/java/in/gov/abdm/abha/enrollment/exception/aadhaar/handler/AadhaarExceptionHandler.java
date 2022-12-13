@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.aadhaar.handler;
 
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -20,6 +21,7 @@ public class AadhaarExceptionHandler {
     private static final String AADHAAR_EXCEPTION = "Aadhaar Exception : ";
     private static final String MESSAGE = "Message";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
+    private static final String aadhaarErrorPrefix = "UIDAI Error code : ";
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(AadhaarExceptions.class)
@@ -27,11 +29,11 @@ public class AadhaarExceptionHandler {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         String errorMessage;
         if (Arrays.stream(AadhaarErrorCodes.values()).anyMatch(v -> v.toString().equals("E_" + ex.getMessage()))) {
-            errorMessage = AadhaarErrorCodes.valueOf("E_" + ex.getMessage()).getValue();
+            errorMessage = aadhaarErrorPrefix + ex.getMessage() + StringConstants.COLON + AadhaarErrorCodes.valueOf("E_" + ex.getMessage()).getValue();
         } else {
-            errorMessage = AadhaarErrorCodes.valueOf("OTHER_ERROR").getValue();
+            errorMessage = aadhaarErrorPrefix + ex.getMessage() + StringConstants.COLON + AadhaarErrorCodes.valueOf("OTHER_ERROR").getValue();
         }
-        log.info(AADHAAR_EXCEPTION + ex.getMessage() + " : " + errorMessage);
+        log.info(errorMessage);
         errorMap.put(MESSAGE, errorMessage);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;

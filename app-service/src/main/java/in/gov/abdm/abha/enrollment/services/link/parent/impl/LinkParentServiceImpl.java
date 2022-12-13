@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -125,7 +124,7 @@ public class LinkParentServiceImpl implements LinkParentService {
 			return mapAccountToProfile(null, accountDto, linkParentRequestDto);
 		}));
 	}
-
+	
 	private Mono<LinkParentResponseDto> mapAccountToProfile(List<String> phrAddress, AccountDto accountDto,
 			LinkParentRequestDto linkParentRequestDto) {
 		return Mono.just(LinkParentResponseDto.builder()
@@ -134,7 +133,6 @@ public class LinkParentServiceImpl implements LinkParentService {
 						.abhaNumber(accountDto.getHealthIdNumber())
 						.abhaStatus(AccountStatus.ACTIVE)
 						.ABHAType(accountDto.getType())
-						.abhaStatusReasonCode(StringConstants.EMPTY)
 						.firstName(accountDto.getFirstName())
 						.middleName(accountDto.getMiddleName())
 						.lastName(accountDto.getLastName())
@@ -145,7 +143,7 @@ public class LinkParentServiceImpl implements LinkParentService {
 						.mobile(accountDto.getMobile())
 						.email(accountDto.getEmail())
 						.phrAddress(phrAddress)
-						.addressLine1(accountDto.getAddress())
+						.address(accountDto.getAddress())
 						.districtCode(accountDto.getDistrictCode())
 						.stateCode(accountDto.getStateCode())
 						.pinCode(accountDto.getPincode())

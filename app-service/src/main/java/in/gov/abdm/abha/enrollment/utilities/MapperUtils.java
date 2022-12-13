@@ -20,7 +20,7 @@ public class MapperUtils {
 
         abhaProfileDto.setAbhaNumber(accountDto.getHealthIdNumber());
         abhaProfileDto.setGender(accountDto.getGender());
-        abhaProfileDto.setAddressLine1(accountDto.getAddress());
+        abhaProfileDto.setAddress(accountDto.getAddress());
         abhaProfileDto.setFirstName(accountDto.getFirstName());
         abhaProfileDto.setLastName(accountDto.getLastName());
         abhaProfileDto.setMiddleName(accountDto.getMiddleName());

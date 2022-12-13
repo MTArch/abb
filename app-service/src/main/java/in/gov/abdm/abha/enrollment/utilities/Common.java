@@ -8,6 +8,7 @@ import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.services.common.HealthIdContextHolder;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -146,4 +147,11 @@ public class Common {
         return Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
     }
 
+    public String getStringIgnoreNull(String value) {
+        return StringUtils.isEmpty(value) ? StringConstants.EMPTY : value;
+    }
+
+    public String getByCommaIgnoreNull(String value){
+        return StringUtils.isEmpty(value) ? StringConstants.EMPTY : value + StringConstants.COMMA_SPACE;
+    }
 }

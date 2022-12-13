@@ -1,6 +1,8 @@
 package in.gov.abdm.abha.enrollment.services.database.transaction.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
@@ -53,16 +55,9 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
 
-        transactionDto.setAddress(kycData.getAddress());
         transactionDto.setName(kycData.getName());
         transactionDto.setGender(kycData.getGender());
-        transactionDto.setDistrictName(kycData.getDistrict());
-        transactionDto.setCo(kycData.getCareOf());
-        transactionDto.setHouse(kycData.getHouse());
-        transactionDto.setLoc(kycData.getLocality());
-        transactionDto.setVillageName(kycData.getVillageTownCity());
-        transactionDto.setStateName(kycData.getState());
-        transactionDto.setSubDistrictName(kycData.getSubDist());
+
         transactionDto.setTownName(kycData.getVillageTownCity());
         transactionDto.setXmluid(kycData.getSignature());
         transactionDto.setKycVerified(true);
@@ -70,6 +65,25 @@ public class TransactionServiceImpl implements TransactionService {
         transactionDto.setKycReason(kycData.getStatus());
         transactionDto.setResponseCode(kycData.getResponseCode());
         transactionDto.setKycType(kycType);
+
+        transactionDto.setCo(Common.getStringIgnoreNull(kycData.getCareOf()));
+        String house = !Common.getStringIgnoreNull(kycData.getHouse()).isEmpty() ? Common.getStringIgnoreNull(kycData.getHouse()) +StringConstants.COMMA_SPACE : StringConstants.EMPTY;
+        transactionDto.setHouse(house + Common.getStringIgnoreNull(kycData.getStreet()));
+        transactionDto.setLm(Common.getStringIgnoreNull(kycData.getLandmark()));
+        transactionDto.setLoc(Common.getStringIgnoreNull(kycData.getLocality()));
+        transactionDto.setVillageName(Common.getStringIgnoreNull(kycData.getVillageTownCity()));
+        transactionDto.setSubDistrictName(Common.getStringIgnoreNull(kycData.getSubDist()));
+        transactionDto.setDistrictName(Common.getStringIgnoreNull(kycData.getDistrict()));
+        transactionDto.setStateName(Common.getStringIgnoreNull(kycData.getState()));
+
+        transactionDto.setAddress( Common.getByCommaIgnoreNull(transactionDto.getHouse())
+                + Common.getByCommaIgnoreNull(transactionDto.getLm())
+                + Common.getByCommaIgnoreNull(transactionDto.getLoc())
+                + Common.getByCommaIgnoreNull(transactionDto.getVillageName())
+                + Common.getByCommaIgnoreNull(transactionDto.getSubDistrictName())
+                + Common.getByCommaIgnoreNull(transactionDto.getDistrictName())
+                + transactionDto.getStateName()
+        );
     }
 
     @Override
@@ -103,7 +117,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId){
+    public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
         return abhaDBClient.updateEntity(TransactionDto.class, transactionDto, transactionId);
     }
 }
