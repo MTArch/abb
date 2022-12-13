@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -221,15 +222,17 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     private List<AccountResponseDto> prepareAccountResponseDtoList(List<AccountDto> accountDtoList,
 			List<HidPhrAddressDto> phrAddressList) {
-    	List<AccountResponseDto> accountResponseDtos = new ArrayList<>();
-    	for (AccountDto accDto : accountDtoList) {
-    		String phrAddress = phrAddressList.stream()
-    				.filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(accDto.getHealthIdNumber()))
-    				.map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).toString();
-    				
-    		accountResponseDtos.add(MapperUtils.mapAccountDtoToAccountResponse(accDto, phrAddress));
-		}
-    	return accountResponseDtos;
+
+		List<AccountResponseDto> accountResponseDtos = accountDtoList.stream().map(p -> {
+			Optional<String> reducedValue = phrAddressList.stream()
+					.filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(p.getHealthIdNumber()))
+					.map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).reduce((first, next) -> first);
+
+			return MapperUtils.mapAccountDtoToAccountResponse(p,
+					reducedValue.isPresent() ? reducedValue.get() : StringConstants.EMPTY);
+		}).collect(Collectors.toList());
+
+		return accountResponseDtos;
 	}
 
 	private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
