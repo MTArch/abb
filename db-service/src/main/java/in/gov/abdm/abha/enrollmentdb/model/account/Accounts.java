@@ -17,7 +17,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
  * Account Entity
  */
@@ -94,10 +93,13 @@ public class Accounts implements Persistable<String>{
 	 */
 	private String kycdob;
 	
-	/**
-	 * kyc photo of abha user
-	 */
-	private byte[] kycPhoto;
+//	/**
+//	 * kyc photo of abha user
+//	 */
+//	@Basic(fetch = LAZY)
+//	@Lob
+//	@Type(type = "org.hibernate.type.BinaryType")
+//	private byte[] kycPhoto;
 
 	/**
      * kyc verified flag for user

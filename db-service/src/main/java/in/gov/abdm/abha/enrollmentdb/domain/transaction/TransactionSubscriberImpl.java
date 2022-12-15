@@ -1,13 +1,14 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
+
+import org.reactivestreams.Subscription;
+import org.springframework.stereotype.Component;
+
 import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.reactivestreams.Subscription;
-import org.springframework.stereotype.Component;
-
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
 
 @Data
 @AllArgsConstructor

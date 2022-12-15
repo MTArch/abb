@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Base64;
 
 @Service
 @Slf4j
@@ -32,8 +33,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType) {
-        transactionDto.setKycPhoto(kycData.getPhoto() == null ? new byte[1] : kycData.getPhoto().getBytes());
-        if (!StringUtils.isBlank(kycData.getPincode())) {
+		transactionDto.setKycPhoto((kycData.getPhoto() == null || kycData.getPhoto().isEmpty())
+				? Base64.getEncoder().encodeToString(new byte[1])
+				: kycData.getPhoto());
+		 if (!StringUtils.isBlank(kycData.getPincode())) {
             transactionDto.setPincode(kycData.getPincode());
         }
         if (!StringUtils.isBlank(kycData.getBirthdate())) {

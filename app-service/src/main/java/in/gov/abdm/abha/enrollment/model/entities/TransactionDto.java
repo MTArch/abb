@@ -88,7 +88,7 @@ public class TransactionDto {
     /**
      * kyc photo of abha user
      */
-    private byte[] kycPhoto;
+    private String kycPhoto;
 
 	/**
 	 * kyc reason

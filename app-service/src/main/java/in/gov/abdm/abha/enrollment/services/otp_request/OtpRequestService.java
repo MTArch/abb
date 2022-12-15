@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -115,6 +116,7 @@ public class OtpRequestService {
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
+        transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
 
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
                 && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR)) {
@@ -122,6 +124,8 @@ public class OtpRequestService {
                     .flatMap(res1 -> {
                         if (res1.getHealthIdNumber() != null)
                             transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
+                        
+                        transactionDto.setKycPhoto(res1.getKycPhoto());
                         Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
                                 {

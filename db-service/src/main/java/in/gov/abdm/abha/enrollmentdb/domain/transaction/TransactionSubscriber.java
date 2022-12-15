@@ -1,7 +1,8 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
-import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 import org.reactivestreams.Subscriber;
+
+import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 
 /**
  * Subscriber class for Transaction
