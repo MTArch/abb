@@ -10,6 +10,7 @@ public interface URIConstant {
     //enrol endpoints
     String ENROL_ENDPOINT = BASE_URI + "/enrol";
     String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
+    String ENROL_BY_DOCUMENT_ENDPOINT = "/byDocument";
 
     //request endpoints
     String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
