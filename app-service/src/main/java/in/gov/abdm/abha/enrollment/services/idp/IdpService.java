@@ -2,6 +2,8 @@ package in.gov.abdm.abha.enrollment.services.idp;
 
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +52,7 @@ public class IdpService {
 		parameters.setValue(mobileOrEmailOtpRequestDto.getLoginId());
 		idpSendOtpRequest.setScope(OTP_SCOPE);
 		idpSendOtpRequest.setParameters(List.of(parameters));
-		String timestamp = dateTimeFormatter.format(new Date());
+		String timestamp = LocalDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)).toString();
 		return idpClient.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
 	}
 }
