@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,7 +41,7 @@ public class AuthController {
 				.setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
 		if (Common.isExactScopesMatching(authByAbdmRequest.getScope(),
 				List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
-			return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
+			return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.TRUE);
 		} else if (Common.isScopeAvailable(authByAbdmRequest.getScope(), Scopes.CHILD_ABHA_ENROL)) {
 			return authByAbdmService.verifyOtp(authByAbdmRequest);
 		} else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))){
