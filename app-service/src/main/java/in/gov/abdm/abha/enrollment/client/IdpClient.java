@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +9,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
@@ -52,6 +52,9 @@ public class IdpClient {
                 .header("requestId", requestId)
                 .body(BodyInserters.fromValue(idpVerifyOtpRequest))
                 .retrieve()
-                .bodyToMono(IdpVerifyOtpResponse.class);
+                .bodyToMono(IdpVerifyOtpResponse.class)
+                .onErrorResume(error -> {
+                	return Mono.just(new IdpVerifyOtpResponse());
+                });
     }
 }

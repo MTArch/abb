@@ -30,7 +30,7 @@ public class IdpService {
 	public static final String OTP_SCOPE = "OTP";
 	public static final String ABHA_NUMBER_KEY = "abhaNumber";
 	public static final String MOBILE_NUMBER_KEY = "mobile";
-	private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+	private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss.SSS";
 	SimpleDateFormat dateTimeFormatter = new SimpleDateFormat(DATE_TIME_FORMATTER);
 
 	private static final String AUTHORIZATION = "123344";

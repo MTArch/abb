@@ -48,14 +48,12 @@ public class OtpRequestService {
      * Content for logs
      */
     private static final String FAILED_TO_GENERATE_AADHAAR_OTP_TRANSACTION_REASON = "Failed to Generate Aadhaar OTP : Transaction : {} : Reason : {}";
-    private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with";
-    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with";
+    private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with ";
+    private static final String OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING = "OTP is sent to ABHA registered mobile number ending with ";
+    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
     private static final String OTP_SUBJECT = "mobile verification";
     private static final String SENT = "sent";
     private static final String FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION = "Failed to Send OTP for Mobile verification";
-    private static final String TRANSACTION_DETAILS_NOT_FOUND = "Transaction details not found";
-    private static final String FAILED_TO_SEND_OTP = "Failed to send OTP";
-    private static final String MESSAGE = "OTP is sent to Aadhaar/ABHA registered mobile ending xxx3604";
     private static final String FAILED_TO_CALL_IDP_SERVICE = "Failed to call IDP service";
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
 
@@ -203,11 +201,13 @@ public class OtpRequestService {
                     if (!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())) {
                     	TransactionDto trDto = transactionDto;
                     	trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
-                        return transactionService.createTransactionEntity(transactionDto)
+                    	trDto.setAadharTxn(idpSendOtpResponse.getResponse().getRequestId());
+                    	trDto.setId(null);
+                        return transactionService.createTransactionEntity(trDto)
                                 .flatMap(res -> {
-                                	String message = MESSAGE;
+                                	String message = StringConstants.EMPTY;
                 					if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-                						message = OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING
+                						message = OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING
                 								.concat(idpSendOtpResponse.getOtpSentTo());
                 					} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
                 						message = OTP_IS_SENT_TO_MOBILE_ENDING.concat(idpSendOtpResponse.getOtpSentTo());

@@ -1,11 +1,18 @@
 package in.gov.abdm.abha.enrollment.services.auth.aadhaar;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
@@ -15,16 +22,12 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpR
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthByAadhaarService {
@@ -43,6 +46,8 @@ public class AuthByAadhaarService {
     AadhaarClient aadhaarClient;
     @Autowired
     RSAUtil rsaUtil;
+    @Autowired
+    HidPhrAddressService hidPhrAddressService;
 
     public Mono<AuthResponseDto> verifyOtpChildAbha(AuthRequestDto authByAadhaarRequestDto) {
         Mono<TransactionDto> txnResponseDto = transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
@@ -83,10 +88,23 @@ public class AuthByAadhaarService {
         if(accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber()))
         	throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER);
         
-        return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
-                .name(accountDto.getName()).preferredAbhaAddress(accountDto.getPreferredAbhaAddress())
-                .yearOfBirth(accountDto.getYearOfBirth()).gender(accountDto.getGender())
-                .mobile(accountDto.getMobile()).email(accountDto.getEmail()).build());
+        Flux<String> fluxPhrAaddress = hidPhrAddressService
+				.getHidPhrAddressByHealthIdNumbersAndPreferredIn(new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),
+						new ArrayList<>(Collections.singleton(1))).map(h -> h.getPhrAddress());
+
+		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+			return Mono.just(
+					AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber()).name(accountDto.getName())
+							.preferredAbhaAddress(phrAddressList.get(0)).yearOfBirth(accountDto.getYearOfBirth())
+							.gender(accountDto.getGender()).mobile(accountDto.getMobile()).email(accountDto.getEmail())
+							.kycPhoto(accountDto.getKycPhoto()).build());
+		}).switchIfEmpty(Mono.defer(() -> {
+			return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
+					.name(accountDto.getName()).preferredAbhaAddress(null).yearOfBirth(accountDto.getYearOfBirth())
+					.gender(accountDto.getGender()).mobile(accountDto.getMobile()).email(accountDto.getEmail())
+					.kycPhoto(accountDto.getKycPhoto()).build());
+		}));
+        
     }
 
     private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList, TransactionDto transactionDto) {

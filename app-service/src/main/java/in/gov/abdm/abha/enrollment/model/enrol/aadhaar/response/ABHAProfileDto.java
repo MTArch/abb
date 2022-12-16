@@ -26,7 +26,7 @@ public class ABHAProfileDto {
     private Object lastName;
     private String dob;
     private String gender;
-    private byte[] photo;
+    private String photo;
     private String mobile;
     private String email;
     private List<String> phrAddress;

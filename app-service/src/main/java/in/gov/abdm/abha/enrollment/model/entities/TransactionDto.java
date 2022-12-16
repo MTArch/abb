@@ -18,7 +18,7 @@ public class TransactionDto {
 	/**
 	 * sequence number
 	 */
-	private long id;
+	private Long id;
 
 	/**
 	 * aadhaar number of abha user
