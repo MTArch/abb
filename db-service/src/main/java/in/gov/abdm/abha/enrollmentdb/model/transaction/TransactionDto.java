@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
+
 /**
  * Data Transfer object for Transaction Entity
  */
@@ -18,7 +20,8 @@ public class TransactionDto {
 	/**
 	 * sequence number
 	 */
-	private long id;
+	@Id
+	private Long id;
 
 	/**
 	 * aadhaar number of abha user
@@ -85,10 +88,10 @@ public class TransactionDto {
 	 */
 	private String kycdob;
 
-//    /**
-//     * kyc photo of abha user
-//     */
-//    private byte[] kycPhoto;
+    /**
+     * kyc photo of abha user
+     */
+    private String kycPhoto;
 
 	/**
 	 * kyc reason
@@ -290,5 +293,10 @@ public class TransactionDto {
 	 * 14-digit unique number
 	 */
 	private String healthIdNumber;
+	
+	/**
+     * isNewTemplate of boolean type that stores the state of an entity object.
+     */
+	private boolean isNewTransaction;
 
 }

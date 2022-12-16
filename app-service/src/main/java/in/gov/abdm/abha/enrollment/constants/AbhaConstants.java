@@ -61,16 +61,13 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
 
-
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
 
     String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
 
-    String OTP_VERIFICATION_FAILED_FROM_IDP_EXCEPTION_MESSAGE = "OTP VERIFICATION FAILED FROM IDP SERVICE";
+    String INVALID_OTP = "Invalid OTP, Please try again.";
 
-    String INCORRECT_AADHAAR_OTP_EXCEPTION_MESSAGE = "Invalid OTP, Please try again.";
-
-    String AADHAAR_OTP_EXPIRED_EXCEPTION_MESSAGE = "OTP expired, Please try again.";
+    String EXPIRED_OTP = "OTP expired, Please try again.";
 
     String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     
@@ -83,4 +80,8 @@ public interface AbhaConstants {
     String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
 
     String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
+    
+    String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
+    
+    String INVALID_REQUEST = "Bad request, check request before retrying";
 }

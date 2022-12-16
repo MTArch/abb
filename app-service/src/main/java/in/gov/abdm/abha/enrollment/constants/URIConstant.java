@@ -43,6 +43,8 @@ public interface URIConstant {
     
     String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
 
+    String DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST = DB_BASE_URI + "/account/";
+
 //    Aadhaar Service URI
 
     String AADHAAR_BASE_URI = "/api/v3/aadhaar";
@@ -52,7 +54,7 @@ public interface URIConstant {
 
 
     // IDP Service URI
-    String IDP_BASE_URI = "/api/v3/identity";
+    String IDP_BASE_URI = "/internal/v3/identity";
     String IDP_SEND_OTP_URI = IDP_BASE_URI + "/authentication";
     String IDP_VERIFY_OTP_URI = IDP_BASE_URI + "/verify";
 

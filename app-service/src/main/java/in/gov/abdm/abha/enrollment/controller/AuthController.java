@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService;
@@ -34,13 +36,18 @@ public class AuthController {
     RSAUtil rsaUtil;
 
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
-    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest){
-        authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
-        if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
-            return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
-        }
-      return authByAbdmService.verifyOtp(authByAbdmRequest);
-    }
+	public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
+		authByAbdmRequest.getAuthData().getOtp()
+				.setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
+		if (Common.isExactScopesMatching(authByAbdmRequest.getScope(),
+				List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
+			return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
+		} else if (Common.isScopeAvailable(authByAbdmRequest.getScope(), Scopes.CHILD_ABHA_ENROL)) {
+			return authByAbdmService.verifyOtp(authByAbdmRequest);
+		} else {
+			throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+		}
+	}
 
     @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
     public Mono<AuthResponseDto> authByAadhaar(@Valid @RequestBody AuthRequestDto authByAadhaarRequestDto){

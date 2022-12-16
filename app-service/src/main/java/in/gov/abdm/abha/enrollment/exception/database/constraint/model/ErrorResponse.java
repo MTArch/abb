@@ -1,18 +1,20 @@
 package in.gov.abdm.abha.enrollment.exception.database.constraint.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
 public class ErrorResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date timestamp;
+    private LocalDateTime timestamp;
 
     private int code;
 
@@ -24,7 +26,7 @@ public class ErrorResponse {
 
 
     public ErrorResponse() {
-        timestamp = new Date();
+        timestamp = LocalDateTime.now();
     }
 
     public ErrorResponse(HttpStatus httpStatus, String message) {

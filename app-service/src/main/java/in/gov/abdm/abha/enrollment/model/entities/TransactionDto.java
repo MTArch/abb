@@ -18,7 +18,7 @@ public class TransactionDto {
 	/**
 	 * sequence number
 	 */
-	private long id;
+	private Long id;
 
 	/**
 	 * aadhaar number of abha user
@@ -85,10 +85,10 @@ public class TransactionDto {
 	 */
 	private String kycdob;
 
-//    /**
-//     * kyc photo of abha user
-//     */
-//    private byte[] kycPhoto;
+    /**
+     * kyc photo of abha user
+     */
+    private String kycPhoto;
 
 	/**
 	 * kyc reason

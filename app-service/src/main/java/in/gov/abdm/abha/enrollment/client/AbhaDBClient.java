@@ -10,7 +10,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 public class AbhaDBClient<T> {
@@ -126,5 +129,25 @@ public class AbhaDBClient<T> {
                 return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
         }
         return Mono.empty();
+    }
+
+
+    public Flux<T> getFluxEntity(Class<T> t, List<String> list) {
+        switch (t.getSimpleName()) {
+            case "AccountDto":
+                return GetFluxDatabase(t, URIConstant.DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST + list);
+        }
+        return Flux.empty();
+    }
+
+    public Flux<T> GetFluxDatabase(Class<T> t, String uri) {
+        return webClient.
+                baseUrl(ENROLLMENT_DB_BASE_URI)
+                .build()
+                .get()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToFlux(t);
     }
 }

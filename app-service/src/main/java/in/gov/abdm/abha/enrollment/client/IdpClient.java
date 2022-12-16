@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
@@ -39,19 +40,21 @@ public class IdpClient {
                 .retrieve()
                 .bodyToMono(IdpSendOtpResponse.class);
     }
-    public Mono<IdpVerifyOtpResponse> verifyOtp(String otp,String authorization, String xTransactionId, String hipRequestId, String requestId) {
+    public Mono<IdpVerifyOtpResponse> verifyOtp(IdpVerifyOtpRequest idpVerifyOtpRequest, String authorization, String xTransactionId, String hipRequestId, String requestId) {
         return webClient.baseUrl(IDP_SERVICE_BASE_URI)
                 .build()
                 .post()
-                .uri(uriBuilder -> uriBuilder.path(URIConstant.IDP_VERIFY_OTP_URI)
-                        .queryParam("otp",otp)
-                        .build())
+                .uri(URIConstant.IDP_VERIFY_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .header(HttpHeaders.AUTHORIZATION, authorization)
                 .header("xTransactionId",xTransactionId)
                 .header("hipRequestId",hipRequestId)
                 .header("requestId", requestId)
+                .body(BodyInserters.fromValue(idpVerifyOtpRequest))
                 .retrieve()
-                .bodyToMono(IdpVerifyOtpResponse.class);
+                .bodyToMono(IdpVerifyOtpResponse.class)
+                .onErrorResume(error -> {
+                	return Mono.just(new IdpVerifyOtpResponse());
+                });
     }
 }
