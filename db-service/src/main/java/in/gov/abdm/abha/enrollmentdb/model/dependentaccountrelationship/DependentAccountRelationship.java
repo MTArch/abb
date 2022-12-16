@@ -20,13 +20,13 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DependentAccountRelationship implements Persistable<BigInteger> {
+public class DependentAccountRelationship implements Persistable<Long> {
 
     /**
      *  it is Id and Primary key
      */
     @Id
-    private BigInteger id;
+    private Long id;
 
     /**
      * it is a parent_health_id_number it is a Foreign key

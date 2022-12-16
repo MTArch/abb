@@ -87,7 +87,7 @@ public class AccountDto {
 	/**
 	 * dob of abha user
 	 */
-	private String kycDob;
+	private String kycdob;
 	
 	/**
      * kyc verified flag for user
@@ -296,5 +296,10 @@ public class AccountDto {
     }
 
     private String preferredAbhaAddress;
+
+    /**
+     * kyc photo of abha user
+     */
+    private String kycPhoto;
     
 }

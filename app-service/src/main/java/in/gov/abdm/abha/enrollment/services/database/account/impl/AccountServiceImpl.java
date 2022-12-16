@@ -6,25 +6,31 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import in.gov.abdm.abha.enrollment.client.LGDClient;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -84,12 +90,13 @@ public class AccountServiceImpl implements AccountService {
             newUser.setGender(transactionDto.getGender());
             // Stor storing kycPhoto.
 
-            //TODO update kyc photo in user entity
-            // newUser.setKycPhoto(transactionDto.getKycPhoto());
+            if (accountDto.getKycPhoto() == null) {
+                newUser.setKycPhoto(transactionDto.getKycPhoto());
+            }
             if (!StringUtils.isBlank(transactionDto.getPincode())) {
                 newUser.setPincode(transactionDto.getPincode());
             }
-            newUser.setKycDob(transactionDto.getKycdob());
+            newUser.setKycdob(transactionDto.getKycdob());
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
             newUser.setStateName(transactionDto.getStateName());
@@ -204,6 +211,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         return abhaDBClient.updateEntity(AccountDto.class, accountDto, healthIdNumber);
+    }
+
+    @Override
+    public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
+        
+        StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_ACCOUNT_URI)
+				.append(StringConstants.QUESTION)
+				.append("healthIdNumber")
+				.append(StringConstants.EQUAL)
+				.append(healthIdNumbers.stream().collect(Collectors.joining(",")));
+
+		return abhaDBClient.GetFluxDatabase(AccountDto.class, sb.toString());
     }
 
     private void breakName(AccountDto accountDto) {

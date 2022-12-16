@@ -34,15 +34,20 @@ public class AuthController {
     RSAUtil rsaUtil;
 
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
-    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest){
-        authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
-        if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
-            return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.TRUE);
-        }else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))){
+	public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
+		authByAbdmRequest.getAuthData().getOtp()
+				.setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
+		if (Common.isExactScopesMatching(authByAbdmRequest.getScope(),
+				List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
+			return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
+		} else if (Common.isScopeAvailable(authByAbdmRequest.getScope(), Scopes.CHILD_ABHA_ENROL)) {
+			return authByAbdmService.verifyOtp(authByAbdmRequest);
+		} else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))){
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.FALSE);
-        }
-      return authByAbdmService.verifyOtp(authByAbdmRequest);
-    }
+        }else {
+			throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+		}
+	}
 
     @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
     public Mono<AuthResponseDto> authByAadhaar(@Valid @RequestBody AuthRequestDto authByAadhaarRequestDto){

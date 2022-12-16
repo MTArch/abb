@@ -7,11 +7,11 @@
 #enrollment:
 #  gateway:
 #    aadhaar:
-##     baseuri: http://localhost:9292
 #      baseuri: http://global2dev.abdm.gov.internal
+##      http://localhost:9292
 #    enrollmentdb:
 #      baseuri: http://localhost:9188
-##     baseuri: http://abha2dev.abdm.gov.internal
+##      http://abha2dev.abdm.gov.internal
 #    idp:
 #      baseuri: http://global2dev.abdm.gov.internal
 #    notification:

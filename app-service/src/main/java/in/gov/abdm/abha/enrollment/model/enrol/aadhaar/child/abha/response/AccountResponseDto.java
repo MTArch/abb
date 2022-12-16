@@ -30,4 +30,7 @@ public class AccountResponseDto {
 
     @JsonProperty("email")
     private String email;
+    
+    @JsonProperty("kycPhoto")
+    private String kycPhoto;
 }

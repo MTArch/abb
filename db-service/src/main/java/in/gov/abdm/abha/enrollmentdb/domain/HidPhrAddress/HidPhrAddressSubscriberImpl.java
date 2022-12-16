@@ -1,13 +1,14 @@
 package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
 
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
+
 import org.reactivestreams.Subscription;
 import org.springframework.stereotype.Component;
 
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @AllArgsConstructor
@@ -41,7 +42,7 @@ public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
      */
 
     @Override
-    public void onNext(HidPhrAddressDto hidPhrAddressDto) {
+    public void onNext(HidPhrAddress hidPhrAddressDto) {
 
         log.info(ENROLLMENT_LOG_PREFIX + "Saving next");
     }

@@ -302,6 +302,7 @@ public class Transection implements Persistable<Long> {
      */
 	@Transient
 	private boolean isNewTransaction;
+	
 
 	/**
 	 * When R2DBC repository executes the save method and isNew() method checks
@@ -312,7 +313,7 @@ public class Transection implements Persistable<Long> {
 	@Override
 	@Transient
 	public boolean isNew() {
-		return this.isNewTransaction || id == null;
+		return this.isNewTransaction;
 	}
 
 	/**

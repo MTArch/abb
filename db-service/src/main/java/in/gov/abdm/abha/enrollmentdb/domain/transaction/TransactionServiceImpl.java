@@ -1,8 +1,8 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,49 +10,59 @@ import org.springframework.stereotype.Service;
 import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
 import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 import in.gov.abdm.abha.enrollmentdb.repository.TransactionRepository;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
-	
+
 	private int minusMinutes = 20;
 	private int plusMinutes = 10;
-	
-    @Autowired
-    TransactionRepository transactionRepository;
 
-    @Autowired
-    private ModelMapper modelMapper;
+	@Autowired
+	TransactionRepository transactionRepository;
 
-    private Mono<TransactionDto> convertTransactionToTransactionDto(Transection transaction) {
-        return Mono.just(modelMapper.map(transaction, TransactionDto.class));
-    }
+	@Autowired
+	private ModelMapper modelMapper;
 
-    @Override
-    public Mono<Transection> createTransaction(TransactionDto transactionDto) {
-        Transection transaction = modelMapper.map(transactionDto, Transection.class);
-        transaction.setAsNew();
-        return transactionRepository.save(transaction);
-    }
+	@Override
+	public Mono<TransactionDto> createTransaction(TransactionDto transactionDto) {
+		Transection transaction = modelMapper.map(transactionDto, Transection.class).setAsNew();
+		return transactionRepository.save(transaction).flatMap(txn -> updatePic(transactionDto, txn));
+	}
 
-    @Override
-    public Mono<TransactionDto> getTransaction(Long id) {
-        return transactionRepository.findById(id)
-                .map(transaction -> modelMapper.map(transaction, TransactionDto.class));
-    }
+	private Mono<TransactionDto> updatePic(TransactionDto transactionDto, Transection transection) {
+		return transactionRepository.updateKycPhoto(transactionDto.getKycPhoto().getBytes(), transection.getId())
+				.switchIfEmpty(Mono.defer(() -> {
+					transactionDto.setId(transection.getId());
+					return Mono.just(transactionDto);
+				}));
+	}
 
-    @Override
+	@Override
+	public Mono<TransactionDto> getTransaction(Long id) {
+		return transactionRepository.findById(id).flatMap(txn -> getPic(id, txn));
+	}
+
+	private Mono<TransactionDto> getPic(Long id, Transection txn) {
+		return transactionRepository.getProfilePhoto(id).map(pic -> {
+			TransactionDto transactionDto = modelMapper.map(txn, TransactionDto.class);
+			transactionDto.setKycPhoto(new String(Base64.getDecoder().decode(pic.replace("\n", ""))));
+			return transactionDto;
+		}).switchIfEmpty(Mono.just(modelMapper.map(txn, TransactionDto.class)));
+	}
+
+	@Override
 	public Mono<TransactionDto> getTransactionByTxnId(String txnId) {
 		return transactionRepository
 				.findByTxnId(txnId, LocalDateTime.now().minusMinutes(minusMinutes),
-						LocalDateTime.now().plusMinutes(plusMinutes))
-				.map(transaction -> modelMapper.map(transaction, TransactionDto.class));
+						LocalDateTime.now().plusMinutes(plusMinutes)).flatMap(txn -> getPic(txn.getId(), txn));
 	}
 
-    @Override
-    public Mono<Transection> updateTransactionById(TransactionDto transactionDto, String id) {
-        Transection transaction = modelMapper.map(transactionDto, Transection.class);
-        return transactionRepository.save(transaction);
-    }
+	@Override
+	public Mono<TransactionDto> updateTransactionById(TransactionDto transactionDto, String id) {
+		Transection transaction = modelMapper.map(transactionDto, Transection.class);
+		return transactionRepository.save(transaction).flatMap(txn -> updatePic(transactionDto, txn));
+	}
 }
