@@ -196,7 +196,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
         if (!aadhaarResponseDto.isSuccessful()) {
-            throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
+            if(aadhaarResponseDto.getAadhaarAuthOtpDto() != null)
+                throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
+            else
+                throw new AadhaarExceptions(aadhaarResponseDto.getErrorCode());
         }
     }
 
