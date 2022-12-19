@@ -46,7 +46,7 @@ public class OtpRequestController {
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
-        else if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))
+        else if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)){
             return otpRequestService.sendEmailOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }

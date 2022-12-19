@@ -14,11 +14,10 @@ import lombok.ToString;
 @ToString
 public enum Scopes {
     ABHA_ENROL("abha-enrol"),
-    MOBILE_UPDATE("mobile-update"),
-    MOBILE_VERIFY("mobile-verify"),
-    EMAIL_UPDATE("email-update"),
     CHILD_ABHA_ENROL("child-abha-enrol"),
     PARENT_ABHA_LINK("parent-abha-link"),
+    MOBILE_VERIFY("mobile-verify"),
+    EMAIL_VERIFY("email-verify"),
     WRONG("wrong");
 
     private final String value;
