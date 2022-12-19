@@ -20,6 +20,8 @@ public class NotificationService {
     public static final String SUBJECT = "subject";
     public static final String CONTENT = "content";
 
+    public static final String EMAIL_KEY = "emailId";
+
     @Autowired
     NotificationClient notificationClient;
 
@@ -39,6 +41,30 @@ public class NotificationService {
         notificationRequestDto.setContentType(contentType);
         notificationRequestDto.setSender(SENDER);
         notificationRequestDto.setReceiver(Collections.singletonList(new KeyValue(MOBILE_KEY, phoneNumber)));
+        List<KeyValue> notification = new LinkedList<>();
+        notification.add(new KeyValue(TEMPLATE_ID, "1007164181681962323"));
+        notification.add(new KeyValue(SUBJECT, subject));
+        notification.add(new KeyValue(CONTENT, message));
+        notificationRequestDto.setNotification(notification);
+        return notificationRequestDto;
+    }
+
+    public Mono<NotificationResponseDto> sendEmailOtp(String email, String subject, String message) {
+        return notificationClient.sendOtp(
+                prepareEmailNotificationRequest(NotificationType.EMAIL,
+                        NotificationContentType.OTP.getValue(),
+                        email,
+                        subject,
+                        message));
+    }
+
+    private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {
+        NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
+        notificationRequestDto.setOrigin(ORIGIN);
+        notificationRequestDto.setType(Collections.singletonList(notificationType.getValue()));
+        notificationRequestDto.setContentType(contentType);
+        notificationRequestDto.setSender(SENDER);
+        notificationRequestDto.setReceiver(Collections.singletonList(new KeyValue(EMAIL_KEY, email)));
         List<KeyValue> notification = new LinkedList<>();
         notification.add(new KeyValue(TEMPLATE_ID, "1007164181681962323"));
         notification.add(new KeyValue(SUBJECT, subject));

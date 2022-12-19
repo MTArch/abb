@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono;
 public interface AuthByAbdmService {
     Mono<AuthResponseDto> verifyOtp(AuthRequestDto authByAbdmRequest);
 
-    Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest);
+    Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest,boolean isMobile);
 }

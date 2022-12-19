@@ -46,6 +46,10 @@ public class OtpRequestController {
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
+        else if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)){
+            return otpRequestService.sendEmailOtpViaNotificationService(mobileOrEmailOtpRequestDto);
+        }
         // If scope -abha-enrol or -child-abha-enrol abd  otpSystem -aadhaar
         else if ((Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
         		||Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
