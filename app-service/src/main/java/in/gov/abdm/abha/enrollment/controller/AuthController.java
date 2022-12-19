@@ -44,7 +44,7 @@ public class AuthController {
 			return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.TRUE);
 		} else if (Common.isScopeAvailable(authByAbdmRequest.getScope(), Scopes.CHILD_ABHA_ENROL)) {
 			return authByAbdmService.verifyOtp(authByAbdmRequest);
-		} else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_UPDATE))){
+		} else if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))){
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest,Boolean.FALSE);
         }else {
 			throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
