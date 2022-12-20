@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarRe
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.enrol_by_document.EnrolByDocumentValidatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -20,13 +21,17 @@ public class EnrollmentController {
     @Autowired
     EnrolUsingAadhaarService enrolUsingAadhaarService;
 
+    @Autowired
+    EnrolByDocumentValidatorService enrolByDocumentValidatorService;
+
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
-    public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto){
+    public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
     }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
-    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto){
+    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
         return Mono.empty();
     }
 }
