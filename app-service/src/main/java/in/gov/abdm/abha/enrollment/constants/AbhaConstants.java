@@ -81,10 +81,50 @@ public interface AbhaConstants {
 
     String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 
+<<<<<<< HEAD
     String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
 
     String INVALID_REQUEST = "Bad request, check request before retrying";
 
     String DRIVING_LICENCE = "DRIVING_LICENCE";
     String PROVISIONAL = "PROVISIONAL";
+=======
+    String VALIDATION_ERROR_TRANSACTION_ID_FIELD = "Transaction Id cannot be null or empty";
+
+    String VALIDATION_ERROR_DOCUMENT_TYPE_FIELD = "Document type cannot be null or empty";
+
+    String VALIDATION_ERROR_DOCUMENT_ID_FIELD = "Document Id cannot be null or empty";
+
+    String VALIDATION_ERROR_FIRST_NAME_FIELD = "First Name cannot be null or empty";
+
+    String VALIDATION_ERROR_MIDDLE_NAME_FIELD = "Middle Name cannot be null or empty";
+
+    String VALIDATION_ERROR_LAST_NAME_FIELD = "Last Name cannot be null or empty";
+
+    String VALIDATION_ERROR_DOB_FIELD = "Dob cannot be null or empty";
+
+    String VALIDATION_ERROR_OF_GENDER_FIELD = "Gender cannot be null or empty";
+
+    String VALIDATION_ERROR_FRONT_SIDE_PHOTO_FIELD = "Front side photo cannot be null or empty";
+
+    String VALIDATION_ERROR_BACK_SIDE_PHOTO_FIELD = "Back side photo cannot be null or empty";
+
+    String VALIDATION_ERROR_ADDRESS_FIELD = "Address cannot be null or empty";
+
+    String VALIDATION_ERROR_STATE_FIELD = "State cannot be null or empty";
+
+    String VALIDATION_ERROR_DISTRICT_FIELD = "District cannot be null or empty";
+
+    String VALIDATION_ERROR_PINCODE_FIELD = "Pincode cannot be null or empty";
+
+    String VALIDATION_DOCUMENT_TYPE_FIELD_ERROR = "Invalid Document Type";
+
+    String VALIDATION_TXN_ID_FIELD_ERROR = "Invalid Txn Id";
+
+    String VALIDATION_DOCUMENT_ID_FIELD_ERROR = "Invalid Document ID";
+
+    String VALIDATION_DOB_FIELD_ERROR = "Invalid Dob";
+
+    String VALIDATION_GENDER_FIELD_ERROR = "Invalid Gender";
+>>>>>>> d125c63 (subtask-abha-CAI-3-dl-validations completed.)
 }
