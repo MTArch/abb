@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.controller;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
