@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
      * @param ex
      * @return list of error messages after analysis of binding and validation errors.
      */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    /*@ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(WebExchangeBindException.class)
     public Map<String, Object> handleInvalidFieldException(WebExchangeBindException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
@@ -72,7 +72,35 @@ public class GlobalExceptionHandler {
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
+*/
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(WebExchangeBindException.class)
+    public Map<String, Object> handleInvalidFieldException(WebExchangeBindException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+
+        if (ex.getFieldErrorCount() != 0) {
+            ex.getBindingResult().getFieldErrors()
+                    .forEach(error -> errorMap.put(error.getField(), error.getDefaultMessage()));
+        }
+
+        if (!ex.getAllErrors().isEmpty()) {
+            ex.getAllErrors().forEach(error -> {
+                if (!errorMap.containsValue(error.getDefaultMessage())
+                        && Arrays.stream(ClassLevelExceptionConstants.values())
+                        .anyMatch(v -> v.getValue().equals(error.getDefaultMessage()))) {
+
+                    errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
+                            .filter(v -> v.getValue().equals(error.getDefaultMessage()))
+                            .findAny()
+                            .get().toString(), error.getDefaultMessage());
+                }
+            });
+        }
+        log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
     /**
      * handle exception on failing of database constraints
      *
