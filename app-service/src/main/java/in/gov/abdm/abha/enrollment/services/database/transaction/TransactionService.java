@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.database.transaction;
 
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface TransactionService {
@@ -15,4 +16,6 @@ public interface TransactionService {
     Mono<TransactionDto> findTransactionDetailsFromDB(String txnId);
 
     Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId);
+
+    Mono<ResponseEntity<Void>> deleteTransactionEntity(String transactionId);
 }

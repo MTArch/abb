@@ -1,23 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
@@ -28,10 +10,23 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -102,26 +97,12 @@ public class AccountServiceImpl implements AccountService {
             newUser.setStateName(transactionDto.getStateName());
 
             //TODO LGD service implementation
-            LgdDistrictResponse lgdDistrictResponse = null;
-            try {
-                lgdDistrictResponse = lgdDistrictResponses.stream()
-                        .filter(lgd -> lgd.getDistrictCode() != null)
-                        .findAny().get();
-            } catch (NoSuchElementException noSuchElementException) {
-                if (!lgdDistrictResponses.isEmpty()) {
-                    lgdDistrictResponse = lgdDistrictResponses.get(0);
-                }
-            }
-            if (lgdDistrictResponse != null) {
-                String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
-                String districtName = lgdDistrictResponse.getDistrictName() != null ? lgdDistrictResponse.getDistrictName() : StringConstants.UNKNOWN;
+            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
 
-                newUser.setDistrictCode(districtCode);
-                newUser.setDistrictName(districtName);
-                newUser.setStateCode(lgdDistrictResponse.getStateCode());
-                newUser.setStateName(lgdDistrictResponse.getStateName());
-            }
-
+            newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+            newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
+            newUser.setStateCode(lgdDistrictResponse.getStateCode());
+            newUser.setStateName(lgdDistrictResponse.getStateName());
 
 
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
@@ -214,8 +195,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
+        return abhaDBClient.getAccountEntityByDocumentCode(AccountDto.class, documentCode);
+    }
+
+    @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
-        
+
         StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_ACCOUNT_URI)
 				.append(StringConstants.QUESTION)
 				.append("healthIdNumber")

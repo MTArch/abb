@@ -41,8 +41,14 @@ public class OtpRequestController {
 
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+
+        // If scope -abha-enrol and mobile-verify and dl-flow and otpSystem -abdm - send otp for DL self registration
+        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+            return otpRequestService.sendOtpViaNotificationServiceDLFlow(mobileOrEmailOtpRequestDto);
+        }
         // If scope -abha-enrol and mobile-verify and otpSystem -abdm
-        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
+        else if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }

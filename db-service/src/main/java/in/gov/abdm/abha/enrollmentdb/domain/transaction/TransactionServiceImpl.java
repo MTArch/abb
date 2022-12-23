@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
 import in.gov.abdm.abha.enrollmentdb.model.transaction.Transection;
 import in.gov.abdm.abha.enrollmentdb.repository.TransactionRepository;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -65,4 +65,9 @@ public class TransactionServiceImpl implements TransactionService {
 		Transection transaction = modelMapper.map(transactionDto, Transection.class);
 		return transactionRepository.save(transaction).flatMap(txn -> updatePic(transactionDto, txn));
 	}
+
+    @Override
+    public Mono<Void> deleteTransactionByTxnId(String txnId) {
+        return transactionRepository.deleteByTxnId(txnId);
+    }
 }

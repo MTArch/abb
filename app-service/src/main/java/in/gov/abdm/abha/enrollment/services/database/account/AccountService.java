@@ -23,6 +23,8 @@ public interface AccountService {
 
     Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber);
 
+    Mono<AccountDto> getAccountByDocumentCode(String documentChecksum);
+
     Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers);
 
 }

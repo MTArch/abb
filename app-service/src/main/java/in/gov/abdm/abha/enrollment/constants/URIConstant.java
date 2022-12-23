@@ -5,7 +5,7 @@ public interface URIConstant {
     String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188"; //
 
     String API_VERSION = "/v3";
-    String BASE_URI = "/api" + API_VERSION +"/enrollment";
+    String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
     //enrol endpoints
     String ENROL_ENDPOINT = BASE_URI + "/enrol";
@@ -30,6 +30,7 @@ public interface URIConstant {
 
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
+    String DB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/";
     String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
 
     String DB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/";
@@ -40,8 +41,10 @@ public interface URIConstant {
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
 
+    String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/";
+
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
-    
+
     String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
 
     String DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST = DB_BASE_URI + "/account/";
@@ -63,10 +66,16 @@ public interface URIConstant {
     String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
 
-//    Notification DB Service
+    //    Notification DB Service
     String NOTIFICATION_DB_BASE_URI = "/internal/v3/notificationdb";
     String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/message";
 
     //LGD service
     String LGD_BASE_URI = "/internal/v3/abdm/lgd";
+
+    // Driving Licence
+    String DOCUMENT_BASE_URI = "/api/v3/document";
+    String DOCUMENT_DB_BASE_URI = "/api/v3/documentdb";
+    String DOCUMENT_VERIFY = DOCUMENT_BASE_URI + "/verify";
+    String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
 }
