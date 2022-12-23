@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
@@ -137,5 +138,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> parentLinkingFailed(ParentLinkingFailedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public Map<String, String> runtimeBadRequestHandler(BadRequestException ex) {
+        LinkedHashMap<String, String> errorMap = ex.getErrors();
+        log.info(EXCEPTIONS+ ex.getErrors());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
     }
 }

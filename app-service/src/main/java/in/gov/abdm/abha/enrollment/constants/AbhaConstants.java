@@ -86,4 +86,29 @@ public interface AbhaConstants {
 
     String DRIVING_LICENCE = "DRIVING_LICENCE";
     String PROVISIONAL = "PROVISIONAL";
+
+
+    String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
+
+    String INVALID_DOCUMENT_ID = "Invalid Document Id";
+
+    String INVALID_FIRST_NAME = "Invalid First Name";
+
+    String INVALID_MIDDLE_NAME = "Invalid Middle Name";
+
+    String INVALID_LAST_NAME = "Invalid Last Name";
+
+    String INVALID_DOB = "Invalid dob";
+
+    String INVALID_FRONT_SIDE_PHOTO = "Invalid Front side photo";
+
+    String INVALID_BACK_SIDE_PHOTO = "Invalid Back side photo";
+
+    String INVALID_ADDRESS = "Invalid address";
+
+    String INVALID_STATE = "Invalid state";
+
+    String INVALID_DISTRICT = "Invalid district";
+
+    String INVALID_PIN_CODE = "Invalid pinCode";
 }
