@@ -11,6 +11,7 @@ import java.util.*;
 import in.gov.abdm.abha.enrollment.client.LGDClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,26 +96,12 @@ public class AccountServiceImpl implements AccountService {
             newUser.setStateName(transactionDto.getStateName());
 
             //TODO LGD service implementation
-            LgdDistrictResponse lgdDistrictResponse = null;
-            try {
-                lgdDistrictResponse = lgdDistrictResponses.stream()
-                        .filter(lgd -> lgd.getDistrictCode() != null)
-                        .findAny().get();
-            } catch (NoSuchElementException noSuchElementException) {
-                if (!lgdDistrictResponses.isEmpty()) {
-                    lgdDistrictResponse = lgdDistrictResponses.get(0);
-                }
-            }
-            if (lgdDistrictResponse != null) {
-                String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
-                String districtName = lgdDistrictResponse.getDistrictName() != null ? lgdDistrictResponse.getDistrictName() : StringConstants.UNKNOWN;
+            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
 
-                newUser.setDistrictCode(districtCode);
-                newUser.setDistrictName(districtName);
-                newUser.setStateCode(lgdDistrictResponse.getStateCode());
-                newUser.setStateName(lgdDistrictResponse.getStateName());
-            }
-
+            newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+            newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
+            newUser.setStateCode(lgdDistrictResponse.getStateCode());
+            newUser.setStateName(lgdDistrictResponse.getStateName());
 
 
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
@@ -204,6 +191,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         return abhaDBClient.updateEntity(AccountDto.class, accountDto, healthIdNumber);
+    }
+
+    @Override
+    public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
+        return abhaDBClient.getAccountEntityByDocumentCode(AccountDto.class, documentCode);
     }
 
     private void breakName(AccountDto accountDto) {

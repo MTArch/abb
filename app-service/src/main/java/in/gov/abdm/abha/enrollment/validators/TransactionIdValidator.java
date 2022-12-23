@@ -19,7 +19,7 @@ import in.gov.abdm.abha.enrollment.validators.request.HelperUtil;
 
 /**
  * Validates Transaction id attribute
- *
+ * <p>
  * it should match transaction id regex pattern
  */
 public class TransactionIdValidator implements ConstraintValidator<ValidTransactionId, MobileOrEmailOtpRequestDto> {
@@ -36,27 +36,31 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
      * Validates txn id against regex pattern if scope not empty or null
      *
      * @param mobileOrEmailOtpRequestDto object to validate
-     * @param context in which the constraint is evaluated
+     * @param context                    in which the constraint is evaluated
      * @return
      */
     @Override
-	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
-		List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
-			return !name.equals(Scopes.WRONG);
-		}).collect(Collectors.toList());
-		if (requestScopes == null || requestScopes.isEmpty() || !Common.isAllScopesAvailable(enumNames, requestScopes))
-			return true;
+    public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
+        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+        List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
+            return !name.equals(Scopes.WRONG);
+        }).collect(Collectors.toList());
+        if (requestScopes == null || requestScopes.isEmpty() || !Common.isAllScopesAvailable(enumNames, requestScopes))
+            return true;
 
-		if (requestScopes.size() == 1 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
-				Collections.singletonList(Scopes.ABHA_ENROL))) {
-			return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
-		} else {
-			if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-				return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
-						.matches();
-			}
-		}
-		return false;
-	}
+        if (requestScopes.size() == 1 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
+                Collections.singletonList(Scopes.ABHA_ENROL))) {
+            return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
+        } else if (requestScopes.size() == 3 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
+                List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))) {
+            return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
+        } else if (requestScopes.size() == 2 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
+				List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
+            if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
+                        .matches();
+            }
+        }
+        return false;
+    }
 }

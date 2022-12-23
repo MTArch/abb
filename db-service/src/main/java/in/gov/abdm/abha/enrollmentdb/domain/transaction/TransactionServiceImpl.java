@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollmentdb.domain.transaction;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -54,5 +55,10 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Transection> updateTransactionById(TransactionDto transactionDto, String id) {
         Transection transaction = modelMapper.map(transactionDto, Transection.class);
         return transactionRepository.save(transaction);
+    }
+
+    @Override
+    public Mono<Void> deleteTransactionByTxnId(String txnId) {
+        return transactionRepository.deleteByTxnId(txnId);
     }
 }

@@ -39,7 +39,7 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
         boolean validLoginHint = new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getLoginHint());
 
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.MOBILE_VERIFY)
-                && !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
+                && (mobileOrEmailOtpRequestDto.getLoginHint() ==null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE))) {
 			validLoginHint = false;
         }
 		return validLoginHint;

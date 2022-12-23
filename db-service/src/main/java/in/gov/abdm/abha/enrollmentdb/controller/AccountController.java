@@ -42,4 +42,9 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAccountByXmlUid(new String(Base64.getDecoder().decode(xmluid))));
     }
 
+    @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_DOCUMENT_CODE)
+    public ResponseEntity<?> getAccountByDocumentCode(@PathVariable("documentCode") String documentCode) {
+        return ResponseEntity.ok(accountService.getAccountByDocumentCode(documentCode));
+    }
+
 }

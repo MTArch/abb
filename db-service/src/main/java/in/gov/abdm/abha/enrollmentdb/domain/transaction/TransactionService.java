@@ -12,4 +12,6 @@ public interface TransactionService {
     Mono<TransactionDto> getTransactionByTxnId(String txnId);
 
     Mono<Transection> updateTransactionById(TransactionDto var1, String var2);
+
+    Mono<Void> deleteTransactionByTxnId(String txnId);
 }

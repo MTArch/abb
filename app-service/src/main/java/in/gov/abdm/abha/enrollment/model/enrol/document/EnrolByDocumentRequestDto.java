@@ -21,4 +21,5 @@ public class EnrolByDocumentRequestDto {
     private String address;
     private String state;
     private String district;
+    private String pinCode;
 }

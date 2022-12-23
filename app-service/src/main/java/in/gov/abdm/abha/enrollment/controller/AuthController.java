@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 @CrossOrigin
 @RequestMapping(URIConstant.AUTH_ENDPOINT)
 public class AuthController {
-	
+
     @Autowired
     AuthByAbdmService authByAbdmService;
     @Autowired
@@ -34,16 +34,18 @@ public class AuthController {
     RSAUtil rsaUtil;
 
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
-    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest){
+    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
-        if(Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
+        if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.DL_FLOW, Scopes.MOBILE_VERIFY))) {
+            return authByAbdmService.verifyOtpViaNotificationDLFlow(authByAbdmRequest);
+        } else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest);
         }
-      return authByAbdmService.verifyOtp(authByAbdmRequest);
+        return authByAbdmService.verifyOtp(authByAbdmRequest);
     }
 
     @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
-    public Mono<AuthResponseDto> authByAadhaar(@Valid @RequestBody AuthRequestDto authByAadhaarRequestDto){
+    public Mono<AuthResponseDto> authByAadhaar(@Valid @RequestBody AuthRequestDto authByAadhaarRequestDto) {
         return authByAadhaarService.verifyOtpChildAbha(authByAadhaarRequestDto);
     }
 }

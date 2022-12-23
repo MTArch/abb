@@ -3,7 +3,9 @@ package in.gov.abdm.abha.enrollment.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -21,10 +23,12 @@ public class AbhaDBClient<T> {
     @Value("${enrollment.gateway.enrollmentdb.baseuri}")
     private String ENROLLMENT_DB_BASE_URI;
 
-    /** To revert url to ->  http://abha2dev.abdm.gov.internal    after testing **/
+    /**
+     * To revert url to ->  http://abha2dev.abdm.gov.internal    after testing
+     **/
     private Mono<T> GetMonoDatabase(Class<T> t, String uri) {
         return webClient.
-                 baseUrl(ENROLLMENT_DB_BASE_URI)
+                baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .get()
                 .uri(uri)
@@ -33,7 +37,9 @@ public class AbhaDBClient<T> {
                 .bodyToMono(t);
     }
 
-    /** To revert url after testing **/
+    /**
+     * To revert url after testing
+     **/
     private Mono<T> monoPostDatabase(Class<T> t, String uri, T row) {
         return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
@@ -62,12 +68,14 @@ public class AbhaDBClient<T> {
                 });
     }
 
-    /** To revert url after testing **/
+    /**
+     * To revert url after testing
+     **/
     private Mono<T> monoPatchDatabase(Class<T> t, String uri, T row, String id) {
         return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .patch()
-                .uri(uri,id)
+                .uri(uri, id)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(row), t)
                 .retrieve()
@@ -96,6 +104,10 @@ public class AbhaDBClient<T> {
         return Mono.empty();
     }
 
+    public Mono<T> getAccountEntityByDocumentCode(Class<T> t, String documentCode) {
+        return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_DOCUMENT_CODE + documentCode);
+    }
+
     public Mono<T> addEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
@@ -103,7 +115,7 @@ public class AbhaDBClient<T> {
             case "AccountDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_URI, row);
             case "DependentAccountRelationshipDto":
-                return monoPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+                return monoPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI, row);
             case "HidPhrAddressDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_HID_PHR_ADDRESS_URI, row);
         }
@@ -123,7 +135,24 @@ public class AbhaDBClient<T> {
     public Mono<T> addFluxEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "DependentAccountRelationshipDto":
-                return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI,row);
+                return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI, row);
+        }
+        return Mono.empty();
+    }
+
+    public Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
+                .build()
+                .delete()
+                .uri(uri)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    public Mono<ResponseEntity<Void>> deleteEntity(Class<T> t, String id) {
+        switch (t.getSimpleName()) {
+            case "TransactionDto":
+                return deleteDatabaseRow(t, URIConstant.DB_DELETE_TRANSACTION_URI + id);
         }
         return Mono.empty();
     }

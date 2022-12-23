@@ -19,6 +19,7 @@ public enum Scopes {
     EMAIL_UPDATE("email-update"),
     CHILD_ABHA_ENROL("child-abha-enrol"),
     PARENT_ABHA_LINK("parent-abha-link"),
+    DL_FLOW("dl-flow"),
     WRONG("wrong");
 
     private final String value;

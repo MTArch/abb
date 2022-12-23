@@ -43,5 +43,7 @@ public interface AccountService {
      */
     Mono<AccountDto> getAccountByXmlUid(String xmluid);
 
+    Mono<AccountDto> getAccountByDocumentCode(String documentCode);
+
 
 }

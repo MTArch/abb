@@ -37,23 +37,29 @@ public class OtpRequestController {
 
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+
+        // If scope -abha-enrol and mobile-verify and dl-flow and otpSystem -abdm - send otp for DL self registration
+        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+            return otpRequestService.sendOtpViaNotificationServiceDLFlow(mobileOrEmailOtpRequestDto);
+        }
         // If scope -abha-enrol and mobile-verify and otpSystem -abdm
-        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
-                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
+        else if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
         // If scope -abha-enrol or -child-abha-enrol abd  otpSystem -aadhaar
         else if ((Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
-        		||Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
+                || Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
             return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
         // If scope -child-abha-enrol
-        else if(Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)){
+        else if (Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)) {
             return otpRequestService.sendIdpOtp(mobileOrEmailOtpRequestDto);
         }
         // other case
-        else{
+        else {
             throw new GenericExceptionMessage(FAILED_TO_SEND_OTP);
         }
     }

@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.utilities;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.template.TemplateType;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.services.common.HealthIdContextHolder;
@@ -153,5 +154,30 @@ public class Common {
 
     public String getByCommaIgnoreNull(String value){
         return StringUtils.isEmpty(value) ? StringConstants.EMPTY : value + StringConstants.COMMA_SPACE;
+    }
+
+    public String removeSpecialChar(String str) {
+        return str.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+    }
+
+    public LgdDistrictResponse getLGDDetails(List<LgdDistrictResponse> lgdDistrictResponses){
+        LgdDistrictResponse lgdDistrictResponse = new LgdDistrictResponse();
+        try {
+            lgdDistrictResponse = lgdDistrictResponses.stream()
+                    .filter(lgd -> lgd.getDistrictCode() != null)
+                    .findAny().get();
+        } catch (NoSuchElementException noSuchElementException) {
+            if (!lgdDistrictResponses.isEmpty()) {
+                lgdDistrictResponse = lgdDistrictResponses.get(0);
+            }
+        }
+        if (lgdDistrictResponse != null) {
+            String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
+            String districtName = lgdDistrictResponse.getDistrictName() != null ? lgdDistrictResponse.getDistrictName() : StringConstants.UNKNOWN;
+
+            lgdDistrictResponse.setDistrictCode(districtCode);
+            lgdDistrictResponse.setDistrictName(districtName);
+        }
+        return lgdDistrictResponse;
     }
 }

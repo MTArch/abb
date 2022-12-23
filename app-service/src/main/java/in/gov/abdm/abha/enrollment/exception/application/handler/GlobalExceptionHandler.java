@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
                 }
             });
         }
-        log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
+        log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS + errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
@@ -104,35 +104,38 @@ public class GlobalExceptionHandler {
 
     /**
      * handling exception to show error message in case account doesn't exist with the xmluid
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
-    
+
     /**
-     * handling exception to show error message in case transaction doesn't exists 
+     * handling exception to show error message in case transaction doesn't exists
      * or if it is expired
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<ErrorResponse> transactionNotFound(TransactionNotFoundException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
 
     /**
      * handling exception to show error message incase validation fails while linking parent
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(ParentLinkingFailedException.class)
     public ResponseEntity<ErrorResponse> parentLinkingFailed(ParentLinkingFailedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
 }
