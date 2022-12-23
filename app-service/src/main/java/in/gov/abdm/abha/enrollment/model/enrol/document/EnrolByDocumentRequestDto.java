@@ -12,45 +12,45 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 public class EnrolByDocumentRequestDto {
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_ID_FIELD)
+    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD)
     private String txnId;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_DOCUMENT_TYPE_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_DOCUMENT_TYPE)
     private String documentType;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_DOCUMENT_ID_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_DOCUMENT_ID)
     private String documentId;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_FIRST_NAME_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
     private String firstName;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_MIDDLE_NAME_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_MIDDLE_NAME)
     private String middleName;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_LAST_NAME_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_LAST_NAME)
     private String lastName;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_DOB_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_DOB)
     private String dob;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_OF_GENDER_FIELD)
+    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_GENDER_FIELD)
     private String gender;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_FRONT_SIDE_PHOTO_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_FRONT_SIDE_PHOTO)
     private String frontSidePhoto;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_BACK_SIDE_PHOTO_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_BACK_SIDE_PHOTO)
     private String backSidePhoto;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_ADDRESS_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_ADDRESS)
     private String address;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_STATE_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_STATE)
     private String state;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_DISTRICT_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_DISTRICT)
     private String district;
 
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_PINCODE_FIELD)
+    @NotEmpty(message = AbhaConstants.INVALID_PIN_CODE)
     private String pinCode;
 }

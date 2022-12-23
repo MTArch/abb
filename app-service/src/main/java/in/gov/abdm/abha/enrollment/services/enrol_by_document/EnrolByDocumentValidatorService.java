@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollment.services.enrol_by_document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +28,16 @@ public class EnrolByDocumentValidatorService {
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         errors = new LinkedHashMap<>();
         if (!isValidTxnId(enrolByDocumentRequestDto)) {
-            errors.put(TXN_ID, AbhaConstants.VALIDATION_TXN_ID_FIELD_ERROR);
+            errors.put(TXN_ID, AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD);
         }
         if (!isValidDocumentType(enrolByDocumentRequestDto)) {
-            errors.put(DOCUMENT_TYPE, AbhaConstants.VALIDATION_DOCUMENT_TYPE_FIELD_ERROR);
+            errors.put(DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE);
         }
         if (!isValidDob(enrolByDocumentRequestDto)) {
-            errors.put(DOB, AbhaConstants.VALIDATION_DOB_FIELD_ERROR);
+            errors.put(DOB, AbhaConstants.INVALID_DOB);
         }
         if (!isValidGender(enrolByDocumentRequestDto)) {
-            errors.put(GENDER, AbhaConstants.VALIDATION_GENDER_FIELD_ERROR);
+            errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
 
         if (errors.size() != 0) {
