@@ -43,4 +43,8 @@ public class IdentityDocumentsDto {
     private String modifiedBy;
 
     private LocalDateTime modifiedDate;
+
+    private String verificationStatus;
+
+    private String verificationType;
 }

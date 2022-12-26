@@ -47,6 +47,7 @@ public class EnrolUsingDrivingLicence {
     private static final String NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB = "new enrollment account created and updated in DB";
     private static final String TRANSACTION_DELETED = "transaction deleted";
     private static final String DL_DOCUMENTS_STORED_IN_ADV_DB = "DL documents stored in ADV DB";
+    private static final String FAILED_TO_STORE_DOCUMENTS = "Failed to store Documents";
 
     @Autowired
     TransactionService transactionService;
@@ -105,6 +106,7 @@ public class EnrolUsingDrivingLicence {
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
                 .verificationStatus(AbhaConstants.PROVISIONAL)
+                .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
                 .middleName(enrolByDocumentRequestDto.getMiddleName())
                 .lastName(enrolByDocumentRequestDto.getLastName())
@@ -117,7 +119,8 @@ public class EnrolUsingDrivingLicence {
                 .type(AbhaType.STANDARD)
                 .pincode(enrolByDocumentRequestDto.getPinCode())
                 .kycVerified(false)
-                .status(AccountStatus.IN_ACTIVE.getValue())
+                .status(AccountStatus.ACTIVE.getValue())
+                .kycPhoto(StringConstants.EMPTY)
                 .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentId()))
                 .healthId(AbhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber))
                 .build();
@@ -130,20 +133,28 @@ public class EnrolUsingDrivingLicence {
                     return accountService.createAccountEntity(accountDto)
                             .flatMap(accountDtoResponse -> {
                                 log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
-                                return transactionService.deleteTransactionEntity(transactionDto.getTxnId().toString())
-                                        .flatMap(responseEntity -> {
-                                            if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-                                                log.warn(FAILED_TO_DELETE_TRANSACTION + transactionDto.getTxnId().toString());
-                                            } else {
-                                                log.info(TRANSACTION_DELETED);
+                                return addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByDocumentRequestDto)
+                                        .flatMap(idDocumentResponse -> {
+                                            if(idDocumentResponse != null) {
+                                                log.info(DL_DOCUMENTS_STORED_IN_ADV_DB);
+                                                return transactionService.deleteTransactionEntity(transactionDto.getTxnId().toString())
+                                                        .flatMap(responseEntity -> {
+                                                            if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+                                                                log.warn(FAILED_TO_DELETE_TRANSACTION + transactionDto.getTxnId().toString());
+                                                            } else {
+                                                                log.info(TRANSACTION_DELETED);
+                                                            }
+                                                            return prepareErolByDLResponse(accountDto);
+                                                        });
+                                            }else{
+                                                throw new GenericExceptionMessage(FAILED_TO_STORE_DOCUMENTS);
                                             }
-                                            return addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByDocumentRequestDto);
                                         });
                             });
                 });
     }
 
-    private Mono<EnrolByDocumentResponseDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+    private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
 
         IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
         identityDocumentsDto.setDocumentNumber(accountDto.getDocumentCode());
@@ -157,12 +168,10 @@ public class EnrolUsingDrivingLicence {
         identityDocumentsDto.setHealthIdNumber(accountDto.getHealthIdNumber());
         identityDocumentsDto.setPhoto(enrolByDocumentRequestDto.getFrontSidePhoto());
         identityDocumentsDto.setPhotoBack(enrolByDocumentRequestDto.getBackSidePhoto());
+        identityDocumentsDto.setVerificationStatus(accountDto.getVerificationStatus());
+        identityDocumentsDto.setVerificationType(AbhaConstants.DRIVING_LICENCE);
 
-        return documentClient.addIdentityDocuments(identityDocumentsDto)
-                .flatMap(identityDocumentsDtoResponse -> {
-                    log.info(DL_DOCUMENTS_STORED_IN_ADV_DB);
-                    return prepareErolByDLResponse(accountDto);
-                });
+        return documentClient.addIdentityDocuments(identityDocumentsDto);
     }
 
     private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto) {

@@ -264,6 +264,7 @@ public class OtpRequestService {
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setOtp(Argon2Util.encode(newOtp));
+        transactionDto.setKycPhoto(StringConstants.EMPTY);
 
         Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
                 phoneNumber,
