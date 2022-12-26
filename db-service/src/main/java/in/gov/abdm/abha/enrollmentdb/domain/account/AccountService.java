@@ -56,5 +56,7 @@ public interface AccountService {
 
     Mono<AccountDto> getAccountByDocumentCode(String documentCode);
 
+    Mono<AccountDto> getAccountByDocumentCode(String documentCode);
+
 
 }

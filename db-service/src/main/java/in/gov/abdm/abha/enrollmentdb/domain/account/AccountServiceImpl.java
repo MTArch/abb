@@ -75,4 +75,9 @@ public class AccountServiceImpl implements AccountService {
 		return accountRepository.findByDocumentCode(documentCode).map(account -> modelMapper.map(account,AccountDto.class));
 	}
 
+	@Override
+	public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
+		return accountRepository.findByDocumentCode(documentCode).map(account -> modelMapper.map(account,AccountDto.class));
+	}
+
 }
