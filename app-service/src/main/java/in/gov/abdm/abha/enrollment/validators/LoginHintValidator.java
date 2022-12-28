@@ -30,6 +30,9 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
+        if(mobileOrEmailOtpRequestDto.getScope() == null){
+            return false;
+        }
         List<LoginHint> enumNames = Stream.of(LoginHint.values())
                 .filter(name -> {
                     return !name.equals(LoginHint.WRONG);
@@ -38,7 +41,7 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
 
         boolean validLoginHint = new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getLoginHint());
 
-        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.MOBILE_VERIFY)
+        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
                 && !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
 			validLoginHint = false;
         }

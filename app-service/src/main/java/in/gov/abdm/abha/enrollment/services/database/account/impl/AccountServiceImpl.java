@@ -14,6 +14,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,8 @@ public class AccountServiceImpl implements AccountService {
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
             newUser.setStateName(transactionDto.getStateName());
+            newUser.setVerificationType(AbhaConstants.AADHAAR);
+            newUser.setVerificationStatus(AbhaConstants.VERIFIED);
 
             //TODO LGD service implementation
             LgdDistrictResponse lgdDistrictResponse = null;

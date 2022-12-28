@@ -84,4 +84,7 @@ public interface AbhaConstants {
     String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
     
     String INVALID_REQUEST = "Bad request, check request before retrying";
+
+    String AADHAAR = "AADHAAR";
+    String VERIFIED = "VERIFIED";
 }

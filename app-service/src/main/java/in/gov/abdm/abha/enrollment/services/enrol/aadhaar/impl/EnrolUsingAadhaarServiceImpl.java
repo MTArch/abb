@@ -33,9 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 @Service
@@ -104,10 +106,17 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
                     return transactionService.updateTransactionEntity(transactionDtoResponse, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(res -> {
-                                return Mono.just(EnrolByAadhaarResponseDto.builder()
-                                        .txnId(transactionDto.getTxnId().toString())
-                                        .abhaProfileDto(MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto))
-                                        .build());
+                                ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
+                                Flux<String> fluxPhrAddress = hidPhrAddressService
+                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+
+                                return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                                    abhaProfileDto.setPhrAddress(phrAddressList);
+                                    return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                            .txnId(transactionDto.getTxnId().toString())
+                                            .abhaProfileDto(abhaProfileDto)
+                                            .build());
+                                });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
@@ -129,7 +138,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionDto.setHealthIdNumber(newAbhaNumber);
             accountDto.setHealthIdNumber(newAbhaNumber);
             ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            //TODO update phr address in hid_phr_address table in db
             String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
             accountDto.setHealthId(defaultAbhaAddress);
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
@@ -196,7 +204,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
         if (!aadhaarResponseDto.isSuccessful()) {
-            if(aadhaarResponseDto.getAadhaarAuthOtpDto() != null)
+            if (aadhaarResponseDto.getAadhaarAuthOtpDto() != null)
                 throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
             else
                 throw new AadhaarExceptions(aadhaarResponseDto.getErrorCode());
