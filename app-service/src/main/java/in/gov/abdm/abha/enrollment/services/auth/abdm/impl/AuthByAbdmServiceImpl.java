@@ -151,7 +151,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
 		if (idpVerifyOtpResponse.getResponse() == null) {
 			return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.FAILED,
-					AbhaConstants.INVALID_OTP, Collections.emptyList()));
+					AbhaConstants.EXPIRED_OTP, Collections.emptyList()));
 		} else {
 			List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
 					.filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber()))
