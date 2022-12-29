@@ -9,6 +9,6 @@ import java.util.List;
 @UtilityClass
 public class HelperUtil {
     public boolean isScopeAvailable(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, List<Scopes> scope){
-        return mobileOrEmailOtpRequestDto.getScope()!=null && mobileOrEmailOtpRequestDto.getScope().stream().anyMatch(scope::contains);
+        return mobileOrEmailOtpRequestDto.getScope()!=null && mobileOrEmailOtpRequestDto.getScope().stream().distinct().anyMatch(scope::contains);
     }
 }

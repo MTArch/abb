@@ -87,6 +87,7 @@ public interface AbhaConstants {
     String INVALID_REQUEST = "Bad request, check request before retrying";
 
     String DRIVING_LICENCE = "DRIVING_LICENCE";
+
     String PROVISIONAL = "PROVISIONAL";
 
     String VALIDATION_ERROR_TRANSACTION_ID_FIELD = "Transaction Id cannot be null or empty";
@@ -122,4 +123,8 @@ public interface AbhaConstants {
     String INVALID_DISTRICT = "Invalid district";
 
     String INVALID_PIN_CODE = "Invalid pinCode";
+
+    String AADHAAR = "AADHAAR";
+    
+    String VERIFIED = "VERIFIED";
 }

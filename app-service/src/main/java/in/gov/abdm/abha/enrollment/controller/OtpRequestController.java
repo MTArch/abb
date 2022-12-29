@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -40,13 +41,14 @@ public class OtpRequestController {
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         //filter scope
-        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope();
+        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
 
         // If scope -abha-enrol and mobile-verify and dl-flow and otpSystem -abdm - send otp for DL self registration
         if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendOtpViaNotificationServiceDLFlow(mobileOrEmailOtpRequestDto);
         }
+       
         // If scope -abha-enrol and mobile-verify and otpSystem -abdm
         else if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {

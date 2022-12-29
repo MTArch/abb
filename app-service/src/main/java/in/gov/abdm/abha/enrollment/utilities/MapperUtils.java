@@ -14,7 +14,8 @@ public class MapperUtils {
 
         abhaProfileDto.setDob(aadhaarUserKycDto.getBirthdate());
         abhaProfileDto.setPhoto(aadhaarUserKycDto.getPhoto());
-        //abhaProfileDto.setStateCode(aadhaarUserKycDto.getState());
+        abhaProfileDto.setStateCode(accountDto.getStateCode());
+        abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
 
         abhaProfileDto.setAbhaNumber(accountDto.getHealthIdNumber());
         abhaProfileDto.setGender(accountDto.getGender());

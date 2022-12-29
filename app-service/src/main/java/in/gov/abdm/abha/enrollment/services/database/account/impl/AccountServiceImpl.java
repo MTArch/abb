@@ -1,5 +1,24 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
@@ -95,6 +114,8 @@ public class AccountServiceImpl implements AccountService {
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
             newUser.setStateName(transactionDto.getStateName());
+            newUser.setVerificationType(AbhaConstants.AADHAAR);
+            newUser.setVerificationStatus(AbhaConstants.VERIFIED);
 
             //TODO LGD service implementation
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
