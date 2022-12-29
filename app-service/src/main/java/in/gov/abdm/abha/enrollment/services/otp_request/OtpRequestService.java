@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -93,6 +94,7 @@ public class OtpRequestService {
                     transactionDto.setMobile(phoneNumber);
                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                    transactionDto.setCreatedDate(LocalDateTime.now());
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
