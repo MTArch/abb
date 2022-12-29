@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum AadhaarErrorCodes {
-    E_111("Aadhaar number does not have mobile number."),
+    E_111("Aadhaar number does not have a mobile number linked to it."),
     E_312("FMR and FIR cannot be used in same transaction."),
     E_313("Single FIR record contains more than one finger."),
     E_314("Number of FMR/FIR should not exceed 10."),

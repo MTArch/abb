@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * service for OTP Request coming from ui
@@ -120,7 +121,7 @@ public class OtpRequestService {
         transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
 
-        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope(), Scopes.CHILD_ABHA_ENROL)
+        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.CHILD_ABHA_ENROL)
                 && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR)) {
             return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
                     .flatMap(res1 -> {
