@@ -34,6 +34,5 @@ public class ABHAProfileDto {
     private String districtCode;
     private String stateCode;
     private String pinCode;
-    private String qrCode;
     private AbhaType ABHAType;
 }

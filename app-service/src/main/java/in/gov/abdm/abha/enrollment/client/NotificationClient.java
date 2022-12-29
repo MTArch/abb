@@ -34,7 +34,7 @@ public class NotificationClient {
                 .post()
                 .uri(URIConstant.NOTIFICATION_SEND_OTP_URI)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .header(StringConstants.X_REQUEST_ID, UUID.randomUUID().toString())
+                .header(StringConstants.REQUEST_ID, UUID.randomUUID().toString())
                 .header(StringConstants.TIMESTAMP, Common.timeStampWithT())
                 .body(BodyInserters.fromValue(notificationRequestDto))
                 .retrieve()

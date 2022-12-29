@@ -19,7 +19,7 @@ public interface StringConstants {
     String QUESTION = "?";
     String EQUAL = "=";
     String AMPERSAND = "&";
-    String X_REQUEST_ID = "X-REQUEST-ID";
+    String REQUEST_ID = "REQUEST_ID";
     String TIMESTAMP = "TIMESTAMP";
     String MESSAGE = "Message";
     String UNKNOWN = "Unknown";
