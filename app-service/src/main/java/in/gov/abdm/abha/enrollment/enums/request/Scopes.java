@@ -16,6 +16,7 @@ public enum Scopes {
     ABHA_ENROL("abha-enrol"),
     CHILD_ABHA_ENROL("child-abha-enrol"),
     PARENT_ABHA_LINK("parent-abha-link"),
+    DL_FLOW("dl-flow"),
     MOBILE_VERIFY("mobile-verify"),
     EMAIL_VERIFY("email-verify"),
     WRONG("wrong");

@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.transaction.TransactionService;
 import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping(ABHAEnrollmentDBConstant.TRANSACTION_ENDPOINT)
@@ -22,8 +25,9 @@ public class TransactionController {
 
     public static final String SEARCHING_FOR_TRANSACTION = "searching for transaction : ";
     public static final String CREATING_NEW_TRANSACTION = "creating new transaction : ";
+    public static final String DELETE_TRANSACTION_BY_TXN_ID = "Delete Transaction by Txn id :";
     public static final String UPDATING_TRANSACTION = "updating transaction : ";
-    
+
     @Autowired
     TransactionService transactionService;
 
@@ -43,5 +47,11 @@ public class TransactionController {
     public ResponseEntity<?> updateTransactionById(@RequestBody TransactionDto transactionDto, @PathVariable("id") String id) {
     	log.info(UPDATING_TRANSACTION +transactionDto.getTxnId());
     	return ResponseEntity.ok(transactionService.updateTransactionById(transactionDto, id));
+    }
+
+    @DeleteMapping(ABHAEnrollmentDBConstant.DELETE_TRANSACTION_BY_TXN_ID)
+    public Mono<Void> deleteTransactionByTxnId(@PathVariable("txnId") String txnId){
+        log.info(DELETE_TRANSACTION_BY_TXN_ID +txnId);
+        return transactionService.deleteTransactionByTxnId(txnId);
     }
 }

@@ -256,4 +256,35 @@ public class OtpRequestService {
             });
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
+
+    public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationServiceDLFlow(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+        String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+        String newOtp = GeneralUtils.generateRandomOTP();
+
+        TransactionDto transactionDto = new TransactionDto();
+        transactionDto.setState(TransactionStatus.ACTIVE.toString());
+        transactionDto.setMobile(phoneNumber);
+        transactionDto.setClientIp(Common.getIpAddress());
+        transactionDto.setTxnId(UUID.randomUUID());
+        transactionDto.setOtp(Argon2Util.encode(newOtp));
+        transactionDto.setKycPhoto(StringConstants.EMPTY);
+
+        Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
+                phoneNumber,
+                OTP_SUBJECT,
+                templatesHelper.prepareUpdateMobileMessage(newOtp));
+
+        return notificationResponseDtoMono.flatMap(response -> {
+            if (response.getStatus().equals(SENT)) {
+                transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                return transactionService.createTransactionEntity(transactionDto)
+                        .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                .txnId(transactionDto.getTxnId().toString())
+                                .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
+                                .build()));
+            } else {
+                throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
+            }
+        });
+    }
 }

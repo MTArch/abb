@@ -35,7 +35,19 @@ public enum ClassLevelExceptionConstants {
     document(AbhaConstants.VALIDATION_ERROR_DOCUMENT_FIELD),
     abhaNumber(AbhaConstants.INVALID_PARENT_ABHA_NUMBER),
     AbhaNumber(AbhaConstants.INVALID_CHILD_ABHA_NUMBER),
-    email(AbhaConstants.INVALID_EMAIL_ID);
+    documentType(AbhaConstants.INVALID_DOCUMENT_TYPE),
+    documentId(AbhaConstants.INVALID_DOCUMENT_ID),
+    email(AbhaConstants.INVALID_EMAIL_ID),
+    middleName(AbhaConstants.INVALID_MIDDLE_NAME),
+    lastName(AbhaConstants.INVALID_LAST_NAME),
+    dob(AbhaConstants.INVALID_DOB),
+    frontSidePhoto(AbhaConstants.INVALID_FRONT_SIDE_PHOTO),
+    backSidePhoto(AbhaConstants.INVALID_BACK_SIDE_PHOTO),
+    address(AbhaConstants.INVALID_ADDRESS),
+    state(AbhaConstants.INVALID_STATE),
+    district(AbhaConstants.INVALID_DISTRICT),
+    pinCode(AbhaConstants.INVALID_PIN_CODE),
+    firstName(AbhaConstants.INVALID_FIRST_NAME);
     private final String value;
 
 

@@ -61,6 +61,7 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
 
+
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
 
     String INVALID_LINK_REQUEST_EXCEPTION_MESSAGE = "INVALID REQUEST FOR PARENT LINKING";
@@ -80,11 +81,50 @@ public interface AbhaConstants {
     String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
 
     String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
-    
+
     String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
-    
+
     String INVALID_REQUEST = "Bad request, check request before retrying";
 
+    String DRIVING_LICENCE = "DRIVING_LICENCE";
+
+    String PROVISIONAL = "PROVISIONAL";
+
+    String VALIDATION_ERROR_TRANSACTION_ID_FIELD = "Transaction Id cannot be null or empty";
+
+    String VALIDATION_ERROR_DOCUMENT_TYPE_FIELD = "Document type cannot be null or empty";
+
+    String VALIDATION_ERROR_DOCUMENT_ID_FIELD = "Document Id cannot be null or empty";
+
+    String VALIDATION_ERROR_FIRST_NAME_FIELD = "First Name cannot be null or empty";
+
+    String VALIDATION_ERROR_MIDDLE_NAME_FIELD = "Middle Name cannot be null or empty";
+
+    String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
+
+    String INVALID_DOCUMENT_ID = "Invalid Document Id";
+
+    String INVALID_FIRST_NAME = "Invalid First Name";
+
+    String INVALID_MIDDLE_NAME = "Invalid Middle Name";
+
+    String INVALID_LAST_NAME = "Invalid Last Name";
+
+    String INVALID_DOB = "Invalid dob";
+
+    String INVALID_FRONT_SIDE_PHOTO = "Invalid Front side photo";
+
+    String INVALID_BACK_SIDE_PHOTO = "Invalid Back side photo";
+
+    String INVALID_ADDRESS = "Invalid address";
+
+    String INVALID_STATE = "Invalid state";
+
+    String INVALID_DISTRICT = "Invalid district";
+
+    String INVALID_PIN_CODE = "Invalid pinCode";
+
     String AADHAAR = "AADHAAR";
+    
     String VERIFIED = "VERIFIED";
 }
