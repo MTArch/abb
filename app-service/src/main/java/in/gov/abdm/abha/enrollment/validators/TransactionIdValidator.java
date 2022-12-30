@@ -54,8 +54,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
         } else if (requestScopes.size() == 3 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
                 List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))) {
             return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
-        } else if (requestScopes.size() == 2 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
-				List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))){
+        } else {
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
                         .matches();
