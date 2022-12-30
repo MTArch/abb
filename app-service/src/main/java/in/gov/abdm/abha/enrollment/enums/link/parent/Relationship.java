@@ -19,6 +19,7 @@ public enum Relationship {
     SISTER("sister"),
     BROTHER("brother"),
     GUARDIAN("guardian"),
+    OTHER("other"),
     WRONG("wrong");
 
 
