@@ -35,7 +35,7 @@ public interface AbhaConstants {
     String INVALID_NAME_FORMAT = "Invalid Name format";
     String VALIDATION_ERROR_GENDER_FIELD = "Invalid Gender";
 
-    String VALIDATION_EMPTY_AUTHMETHOD = "Invalid AuthMethod";
+    String VALIDATION_EMPTY_AUTH_METHOD = "Invalid Auth Method";
 
     String VALIDATION_ERROR_AUTH_DATA_FIELD = "Auth data cannot be null or empty";
     String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
