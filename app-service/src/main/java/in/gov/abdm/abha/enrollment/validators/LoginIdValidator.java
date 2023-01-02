@@ -1,11 +1,14 @@
 package in.gov.abdm.abha.enrollment.validators;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,7 +35,10 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * Starting from 91
      */
     private static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
-    
+
+    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
+
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.
      */
@@ -49,27 +55,39 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * @return
      */
     @Override
-	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())
-				&& mobileOrEmailOtpRequestDto.getLoginHint() != null) {
+    public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
+        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())
+                && mobileOrEmailOtpRequestDto.getLoginHint() != null) {
 
-			if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
-					&& isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
+            if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
+                    && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
 
-				String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
-				if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
-					return isValidMobile(loginId);
-				} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)) {
-					return isValidAadhaar(loginId);
-				} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-					return isValidAbha(loginId);
-				} else {
+                String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+                if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
+                    return isValidMobile(loginId);
+                }
+                else if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY)))
+                {
+                    return isValidEmail(loginId);
+                }
+                else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+                        && !Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
+                        && !Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
+                    return isValidAadhaar(loginId);
+                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
+                    return isValidAbha(loginId);
+                }
+                else {
                     return true;
                 }
-			}
-		}
-		return false;
-	}
+            }
+        }
+        return false;
+    }
+
+    private boolean isValidEmail(String email) {
+        return Pattern.compile(EMAIL_REGEX_PATTERN).matcher(email).matches();
+    }
 
     private boolean isValidInput(String loginId) {
         return !Pattern.compile("[0-9]+").matcher(loginId).matches()

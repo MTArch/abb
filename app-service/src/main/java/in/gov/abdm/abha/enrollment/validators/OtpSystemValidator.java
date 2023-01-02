@@ -36,11 +36,16 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 		List<OtpSystem> enumNames = Stream.of(OtpSystem.values()).filter(name -> {
 			return !name.equals(OtpSystem.WRONG);
 		}).collect(Collectors.toList());
-		
+
 		boolean validOtpSystem =  new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getOtpSystem());
 
 		if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
 				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+			validOtpSystem = false;
+		}
+		if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM))
+		{
 			validOtpSystem = false;
 		}
 		return validOtpSystem;
