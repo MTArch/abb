@@ -43,8 +43,13 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
 
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
                 && (mobileOrEmailOtpRequestDto.getLoginHint() ==null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE))) {
-			validLoginHint = false;
+            validLoginHint = false;
         }
-		return validLoginHint;
+        if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+                && !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.EMAIL))
+        {
+            validLoginHint = false;
+        }
+        return validLoginHint;
     }
 }
