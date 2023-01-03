@@ -211,6 +211,7 @@ public class OtpRequestService {
                     	trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
                     	trDto.setAadharTxn(idpSendOtpResponse.getResponse().getRequestId());
                     	trDto.setId(null);
+                        trDto.setCreatedDate(LocalDateTime.now());
                         return transactionService.createTransactionEntity(trDto)
                                 .flatMap(res -> {
                                 	String message = StringConstants.EMPTY;
@@ -278,6 +279,7 @@ public class OtpRequestService {
         return notificationResponseDtoMono.flatMap(response -> {
             if (response.getStatus().equals(SENT)) {
                 transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                transactionDto.setCreatedDate(LocalDateTime.now());
                 return transactionService.createTransactionEntity(transactionDto)
                         .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                 .txnId(transactionDto.getTxnId().toString())
