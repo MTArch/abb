@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.services.database.hidphraddress.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,24 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 				.healthIdNumber(abhaProfileDto.getAbhaNumber())
 				.phrAddress(abhaProfileDto.getPhrAddress().get(0))
 				.status("ACTIVE")
+				.preferred(1)
+				.lastModifiedBy(accountDto.getLstUpdatedBy())
+				.hasMigrated("N")
+				.createdBy(accountDto.getLstUpdatedBy())
+				.createdDate(accountDto.getCreatedDate())
+				.linked(1)
+				.cmMigrated(0)
+				.isNewHidPhrAddress(true)
+				.build();
+	}
+
+	@Override
+	public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto) {
+
+		return HidPhrAddressDto.builder()
+				.healthIdNumber(accountDto.getHealthIdNumber())
+				.phrAddress(accountDto.getHealthId())
+				.status(AccountStatus.ACTIVE.getValue())
 				.preferred(1)
 				.lastModifiedBy(accountDto.getLstUpdatedBy())
 				.hasMigrated("N")

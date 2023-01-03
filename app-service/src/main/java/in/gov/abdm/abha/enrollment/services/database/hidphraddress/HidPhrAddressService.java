@@ -10,20 +10,21 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface HidPhrAddressService {
-	
-	Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto);
-	
-	HidPhrAddressDto prepareNewHidPhrAddress(TransactionDto transactionDto, AccountDto accountDto, ABHAProfileDto abhaProfileDto);
-	    
-	/**
-	 * to fetch hid phr addresses by list of healthId numbers
-	 * and preferred values
-	 *
-	 * @param healthIdNumbers
-	 * @param preferred
-	 * 
-	 * @return Flux<HidPhrAddressDto>
-	 */
-	Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
-			List<Integer> preferred);
+
+    Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto);
+
+    HidPhrAddressDto prepareNewHidPhrAddress(TransactionDto transactionDto, AccountDto accountDto, ABHAProfileDto abhaProfileDto);
+
+    HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto);
+
+    /**
+     * to fetch hid phr addresses by list of healthId numbers
+     * and preferred values
+     *
+     * @param healthIdNumbers
+     * @param preferred
+     * @return Flux<HidPhrAddressDto>
+     */
+    Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
+                                                                           List<Integer> preferred);
 }
