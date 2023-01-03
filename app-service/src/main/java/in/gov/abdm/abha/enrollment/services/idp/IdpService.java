@@ -4,9 +4,7 @@ package in.gov.abdm.abha.enrollment.services.idp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +26,7 @@ import reactor.core.publisher.Mono;
 public class IdpService {
 
 	public static final String OTP_SCOPE = "OTP";
-	public static final String ABHA_NUMBER_KEY = "abhaNumber";
+	public static final String ABHA_NUMBER_KEY = "abha_number";
 	public static final String MOBILE_NUMBER_KEY = "mobile";
 	private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss.SSS";
 	SimpleDateFormat dateTimeFormatter = new SimpleDateFormat(DATE_TIME_FORMATTER);
@@ -43,15 +41,15 @@ public class IdpService {
 	public Mono<IdpSendOtpResponse> sendOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 		String requestId = "abha_".concat(UUID.randomUUID().toString());
 		IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
-		Parameters parameters = new Parameters();
+		Map<String,String> parameters = new HashMap<>();
 		if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-			parameters.setKey(ABHA_NUMBER_KEY);
+			parameters.put(ABHA_NUMBER_KEY,mobileOrEmailOtpRequestDto.getLoginId());
+
 		} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
-			parameters.setKey(MOBILE_NUMBER_KEY);
+			parameters.put(MOBILE_NUMBER_KEY,mobileOrEmailOtpRequestDto.getLoginId());
 		}
-		parameters.setValue(mobileOrEmailOtpRequestDto.getLoginId());
 		idpSendOtpRequest.setScope(OTP_SCOPE);
-		idpSendOtpRequest.setParameters(List.of(parameters));
+		idpSendOtpRequest.setParameters(parameters);
 		String timestamp = LocalDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)).toString();
 		return idpClient.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
 	}

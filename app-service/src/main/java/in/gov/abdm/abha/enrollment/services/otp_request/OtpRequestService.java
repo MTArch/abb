@@ -154,6 +154,7 @@ public class OtpRequestService {
 
         transactionDto.setMobile(aadhaarResponseDto.getAadhaarAuthOtpDto().getMobileNumber());
         transactionDto.setAadharTxn(aadhaarResponseDto.getAadhaarAuthOtpDto().getUidtkn());
+        transactionDto.setCreatedDate(LocalDateTime.now());
 
         Mono<TransactionDto> createTransactionResponse = transactionService.createTransactionEntity(transactionDto);
         return createTransactionResponse.flatMap(res -> mobileOrEmailOtpResponse(res, transactionDto));
