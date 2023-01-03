@@ -33,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -149,6 +150,7 @@ public class EnrolUsingDrivingLicence {
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
             accountDto.setStateCode(lgdDistrictResponse.getStateCode());
             accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+            accountDto.setCreatedDate(LocalDateTime.now());
             return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
                 log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
                 return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
