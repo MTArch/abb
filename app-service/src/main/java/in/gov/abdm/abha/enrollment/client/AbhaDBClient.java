@@ -1,17 +1,15 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -66,6 +64,21 @@ public class AbhaDBClient<T> {
                 .body(Mono.just(row), t)
                 .retrieve()
                 .bodyToMono(t)
+                .onErrorResume(error -> {
+                    throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                });
+    }
+
+    private Mono<List<T>> fluxPostDatabase(Class<T> t, String uri, List<T> rows) {
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
+                .build()
+                .post()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(rows), t)
+                .retrieve()
+                .bodyToFlux(t)
+                .collectList()
                 .onErrorResume(error -> {
                     throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
                 });
@@ -141,6 +154,10 @@ public class AbhaDBClient<T> {
                 return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI, row);
         }
         return Mono.empty();
+    }
+
+    public Mono<List<T>> addFluxEntity(Class<T> t, List<T> rows) {
+        return fluxPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT, rows);
     }
 
     public Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {

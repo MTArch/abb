@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.LGDClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
+import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -17,10 +18,12 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
+import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
@@ -39,6 +42,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -63,6 +67,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     RSAUtil rsaUtil;
     @Autowired
     private LGDClient lgdClient;
+    @Autowired
+    private AccountAuthMethodService accountAuthMethodService;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
@@ -191,15 +197,29 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
         return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(response -> {
             if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {
-                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                        .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+
+                List<AccountAuthMethodsDto> accountAuthMethodsDtos = new ArrayList<>();
+                accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_OTP.getValue()));
+                accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
+                accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
+                if (accountDtoResponse.getMobile() != null) {
+                    accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
+                }
+                return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)
+                        .flatMap(res -> {
+                            if (!res.isEmpty()) {
+                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+                            } else {
+                                throw new DatabaseConstraintFailedException(
+                                        EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                            }
+                        });
             } else {
                 throw new DatabaseConstraintFailedException(
                         EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
             }
         });
-
-
     }
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
@@ -218,6 +238,4 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
                 .build();
     }
-
-
 }
