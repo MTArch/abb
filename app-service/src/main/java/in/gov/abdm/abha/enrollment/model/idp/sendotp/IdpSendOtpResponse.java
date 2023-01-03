@@ -30,5 +30,8 @@ public class IdpSendOtpResponse {
      */
     @JsonProperty("response")
     private Response response;
+    private String abhaAddress;
+    private Boolean authenticated;
+    private ErrorResponse error;
     
 }
