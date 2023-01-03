@@ -69,5 +69,9 @@ public class AccountServiceImpl implements AccountService {
 		return accountRepository.findByHealthIdNumberIn(healthIdNumbers)
 				.flatMap(account -> getPic(account.getHealthIdNumber(), account));
 	}
+	@Override
+	public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
+		return accountRepository.findByDocumentCode(documentCode).map(account -> modelMapper.map(account,AccountDto.class));
+	}
 
 }

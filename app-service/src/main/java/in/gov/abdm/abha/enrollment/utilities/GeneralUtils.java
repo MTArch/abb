@@ -1,13 +1,12 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +44,10 @@ public class GeneralUtils {
             isOTPExpire = expireTimeMin < TimeUnit.MILLISECONDS.toMinutes(getCurrentTime() - Common.dateOf(currentDateTime).getTime());
         }
         return isOTPExpire;
+    }
+
+    public String documentChecksum(String documentId){
+        return DigestUtils.md5Hex(documentId);
     }
 }
 

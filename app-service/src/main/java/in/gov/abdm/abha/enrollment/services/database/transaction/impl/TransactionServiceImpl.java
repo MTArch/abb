@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollment.services.database.transaction.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
@@ -10,6 +9,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -122,5 +122,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
         return abhaDBClient.updateEntity(TransactionDto.class, transactionDto, transactionId);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> deleteTransactionEntity(String transactionId) {
+        return abhaDBClient.deleteEntity(TransactionDto.class, transactionId);
     }
 }

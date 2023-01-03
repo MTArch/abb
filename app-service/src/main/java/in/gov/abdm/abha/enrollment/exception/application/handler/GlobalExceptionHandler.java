@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler {
                 }
             });
         }
-        log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS, errorMap);
+        log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS + errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
@@ -105,25 +106,27 @@ public class GlobalExceptionHandler {
 
     /**
      * handling exception to show error message in case account doesn't exist with the xmluid
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> accountNotFound(AccountNotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
-    
+
     /**
-     * handling exception to show error message in case transaction doesn't exists 
+     * handling exception to show error message in case transaction doesn't exists
      * or if it is expired
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(TransactionNotFoundException.class)
     public ResponseEntity<ErrorResponse> transactionNotFound(TransactionNotFoundException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
     
     /**
@@ -139,12 +142,22 @@ public class GlobalExceptionHandler {
 
     /**
      * handling exception to show error message incase validation fails while linking parent
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(ParentLinkingFailedException.class)
     public ResponseEntity<ErrorResponse> parentLinkingFailed(ParentLinkingFailedException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public Map<String, String> runtimeBadRequestHandler(BadRequestException ex) {
+        LinkedHashMap<String, String> errorMap = ex.getErrors();
+        log.info(EXCEPTIONS+ ex.getErrors());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
     }
 }

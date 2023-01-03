@@ -18,6 +18,10 @@ enrollment:
       baseuri: ${NOTIFICATION_DB_BASE_URI}
     lgd:
       baseuri: ${LGD_SERVICE_BASE_URI}
+    document:
+      baseuri: ${DOCUMENT_SERVICE_BASE_URI}
+    documentdb:
+      baseuri: ${DOCUMENT_DB_BASE_URI}
 
 
 rsa:

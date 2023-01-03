@@ -21,7 +21,7 @@ import in.gov.abdm.abha.enrollment.validators.ChildAuthMethodsValidator;
 @Constraint(validatedBy = { AuthMethodValidator.class, ChildAuthMethodsValidator.class })
 @Target({ TYPE })
 public @interface AuthMethod {
-	String message() default AbhaConstants.VALIDATION_EMPTY_AUTHMETHOD;
+	String message() default AbhaConstants.VALIDATION_EMPTY_AUTH_METHOD;
 
 	Class<?>[] groups() default {};
 
