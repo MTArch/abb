@@ -24,7 +24,6 @@ public class EnrolByDocumentRequestDto {
     @NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
     private String firstName;
 
-    @NotEmpty(message = AbhaConstants.INVALID_MIDDLE_NAME)
     private String middleName;
 
     @NotEmpty(message = AbhaConstants.INVALID_LAST_NAME)
