@@ -32,6 +32,7 @@ public class IdpSendOtpResponse {
     private Response response;
     private String abhaAddress;
     private Boolean authenticated;
+    @JsonProperty("error")
     private ErrorResponse error;
     
 }

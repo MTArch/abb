@@ -43,7 +43,7 @@ public class IdpService {
 		IdpSendOtpRequest idpSendOtpRequest = new IdpSendOtpRequest();
 		Map<String,String> parameters = new HashMap<>();
 		if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-			parameters.put(ABHA_NUMBER_KEY,mobileOrEmailOtpRequestDto.getLoginId());
+			parameters.put(ABHA_NUMBER_KEY,mobileOrEmailOtpRequestDto.getLoginId().replace("-",""));
 
 		} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
 			parameters.put(MOBILE_NUMBER_KEY,mobileOrEmailOtpRequestDto.getLoginId());
