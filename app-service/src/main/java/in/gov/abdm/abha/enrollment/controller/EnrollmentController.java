@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.controller;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
@@ -39,7 +40,8 @@ public class EnrollmentController {
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
             return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
+        }else{
+            throw new GenericExceptionMessage(AbhaConstants.INVALID_DOCUMENT_TYPE);
         }
-        return Mono.empty();
     }
 }

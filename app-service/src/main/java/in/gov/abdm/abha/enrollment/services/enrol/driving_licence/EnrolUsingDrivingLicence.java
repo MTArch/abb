@@ -144,8 +144,6 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .build();
 
-        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
-
         return lgdClient.getLgdDistrictDetails(enrolByDocumentRequestDto.getPinCode()).flatMap(lgdDistrictResponses -> {
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
             accountDto.setStateCode(lgdDistrictResponse.getStateCode());
@@ -153,6 +151,7 @@ public class EnrolUsingDrivingLicence {
             accountDto.setCreatedDate(LocalDateTime.now());
             return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
                 log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
+                HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
                 return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
                     if (phrAddressDto != null) {
                         log.info(DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE);

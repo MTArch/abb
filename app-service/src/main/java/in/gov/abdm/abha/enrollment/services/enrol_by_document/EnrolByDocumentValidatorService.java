@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.enrol_by_document;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,8 +21,17 @@ public class EnrolByDocumentValidatorService {
     private static final String DOCUMENT_TYPE = "DocumentType";
     private static final String DOB = "Dob";
     private static final String GENDER = "Gender";
+    private static final String FIRST_NAME = "FirstName";
+    private static final String MIDDLE_NAME = "MiddleName";
+    private static final String LAST_NAME = "LastName";
+    private static final String PIN_CODE = "PinCode";
+    private static final String STATE = "State";
+    private static final String DISTRICT = "District";
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
+    private String alphabeticCharOnlyRegex = "^[A-Za-z']+$";
+    private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
+    private String onlyDigitRegex = "^[0-9]{6}$";
 
     private LinkedHashMap<String, String> errors;
 
@@ -39,10 +49,51 @@ public class EnrolByDocumentValidatorService {
         if (!isValidGender(enrolByDocumentRequestDto)) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
-
+        if(!isValidFirstName(enrolByDocumentRequestDto)){
+            errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
+        }
+        if(!isValidMiddleName(enrolByDocumentRequestDto)){
+            errors.put(MIDDLE_NAME, AbhaConstants.INVALID_MIDDLE_NAME);
+        }
+        if(!isValidLastName(enrolByDocumentRequestDto)){
+            errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
+        }
+        if(!isValidPinCode(enrolByDocumentRequestDto)){
+            errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
+        }
+        if(!isValidState(enrolByDocumentRequestDto)){
+            errors.put(STATE, AbhaConstants.INVALID_STATE);
+        }
+        if(!isValidDistrict(enrolByDocumentRequestDto)){
+            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+        }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidDistrict(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
+    }
+
+    private boolean isValidState(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getState().matches(alphabeticCharOnlyRegexWithSpace);
+    }
+
+    private boolean isValidPinCode(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getPinCode().matches(onlyDigitRegex);
+    }
+
+    private boolean isValidLastName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getLastName().matches(alphabeticCharOnlyRegex);
+    }
+
+    private boolean isValidMiddleName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) || enrolByDocumentRequestDto.getMiddleName().matches(alphabeticCharOnlyRegex);
+    }
+
+    private boolean isValidFirstName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getFirstName().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
