@@ -247,6 +247,7 @@ public class OtpRequestService {
                     transactionDto.setEmail(email);
                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                    transactionDto.setCreatedDate(LocalDateTime.now());
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
