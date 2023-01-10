@@ -25,9 +25,12 @@ public class EnrolByDocumentValidatorService {
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
     private static final String PIN_CODE = "PinCode";
+    private static final String STATE = "State";
+    private static final String DISTRICT = "District";
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
     private String alphabeticCharOnlyRegex = "^[A-Za-z']+$";
+    private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
 
     private LinkedHashMap<String, String> errors;
@@ -58,10 +61,23 @@ public class EnrolByDocumentValidatorService {
         if(!isValidPinCode(enrolByDocumentRequestDto)){
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
-
+        if(!isValidState(enrolByDocumentRequestDto)){
+            errors.put(STATE, AbhaConstants.INVALID_STATE);
+        }
+        if(!isValidDistrict(enrolByDocumentRequestDto)){
+            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+        }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidDistrict(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
+    }
+
+    private boolean isValidState(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return enrolByDocumentRequestDto.getState().matches(alphabeticCharOnlyRegexWithSpace);
     }
 
     private boolean isValidPinCode(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
