@@ -170,20 +170,24 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 		IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
 		idpVerifyOtpRequest.setTxnId(xTransactionId);
 		idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-		return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, xTransactionId, HIP_REQUEST_ID, requestId)
+		return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
 				.flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
 	}
 
 	private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
 			IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
-		if (idpVerifyOtpResponse.getResponse() == null) {
+		if (idpVerifyOtpResponse.getError()!= null) {
 			return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.FAILED,
 					AbhaConstants.INVALID_OTP, Collections.emptyList()));
 		} else {
 			List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
-					.filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber()))
-					.map(Kyc::getAbhaNumber).collect(Collectors.toList());
+					.filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber().replace("-","")))
+					.map(kyc->{
+                        return getHyphenAbhaNumber(kyc.getAbhaNumber());
+                    }).collect(Collectors.toList());
+
+
 
 			if (healthIdNumbers.size() == 0)
 				return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
@@ -263,4 +267,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 				.accounts(accounts)
 				.build();
 	}
+
+    public String getHyphenAbhaNumber(String abhaNumber){
+        return abhaNumber.replaceFirst("(\\d{2})(\\d{4})(\\d{4})", "$1-$2-$3-");
+    }
 }
