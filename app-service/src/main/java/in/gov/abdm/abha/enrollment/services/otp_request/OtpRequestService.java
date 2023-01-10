@@ -117,7 +117,7 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setState(TransactionStatus.ACTIVE.toString());
+        transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
@@ -264,7 +264,7 @@ public class OtpRequestService {
         String newOtp = GeneralUtils.generateRandomOTP();
 
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setState(TransactionStatus.ACTIVE.toString());
+        transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
         transactionDto.setMobile(phoneNumber);
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());

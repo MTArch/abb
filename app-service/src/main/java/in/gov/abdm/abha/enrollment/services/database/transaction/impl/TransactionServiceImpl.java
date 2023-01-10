@@ -65,7 +65,7 @@ public class TransactionServiceImpl implements TransactionService {
         transactionDto.setXmluid(kycData.getSignature());
         transactionDto.setKycVerified(true);
         transactionDto.setKycReason(kycData.getReason());
-        transactionDto.setKycReason(kycData.getStatus());
+        transactionDto.setKycStatus(kycData.getStatus());
         transactionDto.setResponseCode(kycData.getResponseCode());
         transactionDto.setKycType(kycType);
 
