@@ -41,13 +41,19 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
 
         boolean validLoginHint = new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getLoginHint());
 
-        if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
+        List<Scopes> scopesList = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
+
+        if (Common.isScopeAvailable(scopesList, Scopes.MOBILE_VERIFY)
                 && (mobileOrEmailOtpRequestDto.getLoginHint() ==null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE))) {
             validLoginHint = false;
         }
-        if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+        if(Common.isAllScopesAvailable(scopesList, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
                 && !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.EMAIL))
         {
+            validLoginHint = false;
+        }
+        if (scopesList.size() == 1 && Common.isScopeAvailable(scopesList, Scopes.ABHA_ENROL)
+                && (mobileOrEmailOtpRequestDto.getLoginHint() ==null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR))) {
             validLoginHint = false;
         }
         return validLoginHint;
