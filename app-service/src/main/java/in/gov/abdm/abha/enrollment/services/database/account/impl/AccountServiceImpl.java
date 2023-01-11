@@ -162,6 +162,7 @@ public class AccountServiceImpl implements AccountService {
 //            }
 
             newUser.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
+            newUser.setConsentDate(LocalDateTime.now());
 
             Set<AccountAuthMethods> accountAuthMethods = new HashSet<>();
             accountAuthMethods.add(AccountAuthMethods.AADHAAR_OTP);

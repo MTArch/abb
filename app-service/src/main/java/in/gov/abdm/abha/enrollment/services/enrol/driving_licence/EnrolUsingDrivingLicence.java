@@ -89,7 +89,14 @@ public class EnrolUsingDrivingLicence {
                         return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentId()))
                                 .flatMap(accountDto -> {
                                     log.info(FOUND_ACCOUNT + accountDto.getHealthIdNumber() + WITH_SAME_DL + enrolByDocumentRequestDto.getDocumentId() + CLOSING);
-                                    return prepareErolByDLResponse(accountDto);
+                                    return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> {
+                                        if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+                                            log.warn(FAILED_TO_DELETE_TRANSACTION + enrolByDocumentRequestDto.getTxnId());
+                                        } else {
+                                            log.info(TRANSACTION_DELETED);
+                                        }
+                                        return prepareErolByDLResponse(accountDto);
+                                    });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account
                                     log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
@@ -146,6 +153,8 @@ public class EnrolUsingDrivingLicence {
                 .kycVerified(false)
                 .status(AccountStatus.ACTIVE.getValue())
                 .kycPhoto(StringConstants.EMPTY)
+                .consentVersion(enrolByDocumentRequestDto.getConsent().getVersion())
+                .consentDate(LocalDateTime.now())
                 .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentId()))
                 .healthId(defaultAbhaAddress)
                 .build();
@@ -225,12 +234,12 @@ public class EnrolUsingDrivingLicence {
                 .address(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())
-                .abhaType(StringUtils.capitalize(accountDto.getType().getValue()))
+                .abhaType(StringUtils.upperCase(accountDto.getType().getValue()))
                 .pinCode(accountDto.getPincode())
                 .state(accountDto.getStateName())
                 .district(accountDto.getDistrictName())
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
-                .abhaStatus(StringUtils.capitalize(accountDto.getStatus()))
+                .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
         return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto));
     }

@@ -27,6 +27,7 @@ public class EnrolByDocumentValidatorService {
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
+    private static final String CONSENT = "Consent";
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
     private String alphabeticCharOnlyRegex = "^[A-Za-z']+$";
@@ -66,6 +67,9 @@ public class EnrolByDocumentValidatorService {
         }
         if(!isValidDistrict(enrolByDocumentRequestDto)){
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+        }
+        if(enrolByDocumentRequestDto.getConsent() == null){
+            errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
