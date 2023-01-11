@@ -29,7 +29,7 @@ public class EnrolByDocumentValidatorService {
     private static final String DISTRICT = "District";
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
-    private String alphabeticCharOnlyRegex = "^[A-Za-z']+$";
+    private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
 
@@ -105,23 +105,27 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidDob(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        if (Pattern.compile(Dob).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
-            LocalDate DOB = LocalDate.parse(enrolByDocumentRequestDto.getDob());
-            LocalDate today = LocalDate.now();
+        try {
+            if (Pattern.compile(Dob).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
+                LocalDate DOB = LocalDate.parse(enrolByDocumentRequestDto.getDob());
+                LocalDate today = LocalDate.now();
 
-            if (DOB.getYear() != 0) {
+                if (DOB.getYear() != 0) {
 
-                int diff = today.compareTo(DOB);
-                if (diff > 0 || diff == 0) {
-                    return true;
-                } else if (diff < 0) {
+                    int diff = today.compareTo(DOB);
+                    if (diff > 0 || diff == 0) {
+                        return true;
+                    } else if (diff < 0) {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
+                return true;
             } else {
                 return false;
             }
-            return true;
-        } else {
+        }catch (Exception e){
             return false;
         }
     }
