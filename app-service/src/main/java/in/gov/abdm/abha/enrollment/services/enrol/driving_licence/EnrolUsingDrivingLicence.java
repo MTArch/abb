@@ -28,6 +28,7 @@ import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -124,12 +125,17 @@ public class EnrolUsingDrivingLicence {
         String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
+                .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),
+                        enrolByDocumentRequestDto.getMiddleName(),
+                        enrolByDocumentRequestDto.getLastName()))
                 .verificationStatus(AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
                 .middleName(enrolByDocumentRequestDto.getMiddleName())
                 .lastName(enrolByDocumentRequestDto.getLastName())
-                .dayOfBirth(enrolByDocumentRequestDto.getDob())
+                .dayOfBirth(Common.getDayOfBirth(enrolByDocumentRequestDto.getDob()))
+                .monthOfBirth(Common.getMonthOfBirth(enrolByDocumentRequestDto.getDob()))
+                .yearOfBirth(Common.getYearOfBirth(enrolByDocumentRequestDto.getDob()))
                 .gender(enrolByDocumentRequestDto.getGender())
                 .mobile(transactionDto.getMobile())
                 .address(enrolByDocumentRequestDto.getAddress())
@@ -219,11 +225,12 @@ public class EnrolUsingDrivingLicence {
                 .address(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())
-                .abhaType(accountDto.getType().getValue())
+                .abhaType(StringUtils.capitalize(accountDto.getType().getValue()))
                 .pinCode(accountDto.getPincode())
                 .state(accountDto.getStateName())
                 .district(accountDto.getDistrictName())
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
+                .abhaStatus(StringUtils.capitalize(accountDto.getStatus()))
                 .build();
         return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto));
     }

@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import com.google.common.base.Joiner;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -179,5 +180,41 @@ public class Common {
             lgdDistrictResponse.setDistrictName(districtName);
         }
         return lgdDistrictResponse;
+    }
+
+    /**
+     * expecting list of first name middle name and last name and return joined name by space
+     * @param name
+     * @return
+     */
+    public String getName(String ...name){
+        return Joiner.on(" ").join(name);
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return dd
+     * @param dob
+     * @return
+     */
+    public String getDayOfBirth(String dob){
+        return dob.split("-")[2];
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return mm
+     * @param dob
+     * @return
+     */
+    public String getMonthOfBirth(String dob){
+        return dob.split("-")[1];
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return yyyy
+     * @param dob
+     * @return
+     */
+    public String getYearOfBirth(String dob){
+        return dob.split("-")[0];
     }
 }
