@@ -105,23 +105,27 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidDob(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        if (Pattern.compile(Dob).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
-            LocalDate DOB = LocalDate.parse(enrolByDocumentRequestDto.getDob());
-            LocalDate today = LocalDate.now();
+        try {
+            if (Pattern.compile(Dob).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
+                LocalDate DOB = LocalDate.parse(enrolByDocumentRequestDto.getDob());
+                LocalDate today = LocalDate.now();
 
-            if (DOB.getYear() != 0) {
+                if (DOB.getYear() != 0) {
 
-                int diff = today.compareTo(DOB);
-                if (diff > 0 || diff == 0) {
-                    return true;
-                } else if (diff < 0) {
+                    int diff = today.compareTo(DOB);
+                    if (diff > 0 || diff == 0) {
+                        return true;
+                    } else if (diff < 0) {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
+                return true;
             } else {
                 return false;
             }
-            return true;
-        } else {
+        }catch (Exception e){
             return false;
         }
     }
