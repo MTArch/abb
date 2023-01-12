@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class LGDClient {
     public static final String PIN_CODE = "pinCode";
     public static final String VIEW = "view";
     public static final String DISTRICT = "district";
+    public static final String FAILED_TO_COMMUNICATE_WITH_LGD_SERVICE = "Failed to Communicate with LGD service";
     @Autowired
     private WebClient.Builder webClient;
 
@@ -40,6 +42,7 @@ public class LGDClient {
                 .uri( URIConstant.LGD_BASE_URI+uri)
                 .retrieve()
                 .bodyToFlux(LgdDistrictResponse.class)
-                .collectList();
+                .collectList()
+                .onErrorResume(error -> {throw new GenericExceptionMessage(FAILED_TO_COMMUNICATE_WITH_LGD_SERVICE);});
     }
 }
