@@ -24,11 +24,16 @@ public interface ABHAEnrollmentDBConstant {
     String HID_PHR_ADDRESS_ENDPOINT = API_VERSION + "/hidphraddress";
 
     String GET_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+    String GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = "/byPhrAddress/{phrAddress}";
 
     String DELETE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
 
+    String GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = "/byHealthIdNumber/{healthIdNumber}";
+
     String UPDATE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
-    
+
+    String UPDATE_PREFERRED_FLAG_BY_HEALTH_ID_NUMBER = "/update/{healthIdNumber}";
+
     String GET_ACCOUNT_BY_XML_UID = "/getByXml/{xmluid}";
 
     String GET_ACCOUNT_BY_DOCUMENT_CODE = "/documentCode/{documentCode}";

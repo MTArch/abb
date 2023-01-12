@@ -21,7 +21,7 @@ public interface StringConstants {
     String AMPERSAND = "&";
     String REQUEST_ID = "REQUEST_ID";
     String TIMESTAMP = "TIMESTAMP";
-    String MESSAGE = "Message";
+    String MESSAGE = "message";
     String UNKNOWN = "Unknown";
     String COMMA_SPACE = ", ";
 }

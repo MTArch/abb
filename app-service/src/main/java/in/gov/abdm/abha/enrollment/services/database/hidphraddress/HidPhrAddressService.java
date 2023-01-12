@@ -1,7 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.hidphraddress;
-
 import java.util.List;
-
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
@@ -26,4 +24,12 @@ public interface HidPhrAddressService {
 	 */
 	Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
 			List<Integer> preferred);
+
+	Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress);
+
+	Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress);
+
+	Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber);
+	Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId);
+
 }

@@ -1,11 +1,8 @@
 package in.gov.abdm.abha.enrollment.services.database.hidphraddress.impl;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
@@ -63,6 +60,31 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 				.append(preferred.stream().map(n -> n.toString()).collect(Collectors.joining(",")));
 
 		return abhaDBClient.GetFluxDatabase(HidPhrAddressDto.class, sb.toString());
+	}
+
+	@Override
+	public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
+		StringBuilder sb = new StringBuilder(URIConstant.DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS_LIST)
+				.append(StringConstants.QUESTION)
+				.append("phrAddress")
+				.append(StringConstants.EQUAL)
+				.append(phrAddress.stream().collect(Collectors.joining(",")));
+
+		return abhaDBClient.GetFluxDatabase(HidPhrAddressDto.class, sb.toString());
+	}
+	@Override
+	public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
+		return abhaDBClient.getHidPhrAddressByPhrAddress(HidPhrAddressDto.class,phrAddress);
+	}
+
+	@Override
+	public Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber) {
+		return abhaDBClient.getEntityById(HidPhrAddressDto.class,healthIdNumber);
+	}
+
+	@Override
+	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
+		return abhaDBClient.updateEntity(HidPhrAddressDto.class,hidPhrAddressDto, String.valueOf(hidPhrAddressId));
 	}
 
 }

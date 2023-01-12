@@ -11,6 +11,9 @@ public interface URIConstant {
     String ENROL_ENDPOINT = BASE_URI + "/enrol";
     String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
     String ENROL_BY_DOCUMENT_ENDPOINT = "/byDocument";
+    String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion/{txnId}";
+
+    String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
 
     //request endpoints
     String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
@@ -49,6 +52,13 @@ public interface URIConstant {
 
     String DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST = DB_BASE_URI + "/account/";
 
+    String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS_LIST = DB_BASE_URI + "/hidphraddress/check/";
+
+    String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = DB_BASE_URI + "/hidphraddress/byPhrAddress/";
+
+    String DB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/";
+
+    String DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID = DB_BASE_URI + "/hidphraddress/{hidPhrAddressId}";
 //    Aadhaar Service URI
 
     String AADHAAR_BASE_URI = "/api/v3/aadhaar";

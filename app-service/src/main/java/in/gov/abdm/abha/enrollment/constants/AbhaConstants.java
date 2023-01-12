@@ -127,4 +127,12 @@ public interface AbhaConstants {
     String AADHAAR = "AADHAAR";
     
     String VERIFIED = "VERIFIED";
+
+
+    String VALIDATION_ERROR_ABHA_ADDRESS_FIELD = "Invalid Abha Address";
+
+    String VALIDATION_ERROR_PREFERRED_FLAG = "Invalid Preferred Flag";
+
+    String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
+
 }

@@ -47,7 +47,9 @@ public enum ClassLevelExceptionConstants {
     state(AbhaConstants.INVALID_STATE),
     district(AbhaConstants.INVALID_DISTRICT),
     pinCode(AbhaConstants.INVALID_PIN_CODE),
-    firstName(AbhaConstants.INVALID_FIRST_NAME);
+    firstName(AbhaConstants.INVALID_FIRST_NAME),
+    abhaAddress(AbhaConstants.VALIDATION_ERROR_ABHA_ADDRESS_FIELD),
+    preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
     private final String value;
 
 
