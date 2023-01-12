@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
-import com.google.common.base.Joiner;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -188,7 +187,7 @@ public class Common {
      * @return
      */
     public String getName(String ...name){
-        return Joiner.on(" ").join(name);
+        return String.join(" ", name);
     }
 
     /**
