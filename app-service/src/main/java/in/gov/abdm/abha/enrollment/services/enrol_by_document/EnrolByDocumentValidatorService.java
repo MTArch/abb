@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.enrol_by_document;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class EnrolByDocumentValidatorService {
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
     private static final String CONSENT = "Consent";
+    public static final int MAX_NAME_SIZE = 255;
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
     private String alphabeticCharOnlyRegex = "^[A-Za-z']+$";
@@ -50,25 +52,25 @@ public class EnrolByDocumentValidatorService {
         if (!isValidGender(enrolByDocumentRequestDto)) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
-        if(!isValidFirstName(enrolByDocumentRequestDto)){
+        if (!isValidFirstName(enrolByDocumentRequestDto)) {
             errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
         }
-        if(!isValidMiddleName(enrolByDocumentRequestDto)){
+        if (!isValidMiddleName(enrolByDocumentRequestDto)) {
             errors.put(MIDDLE_NAME, AbhaConstants.INVALID_MIDDLE_NAME);
         }
-        if(!isValidLastName(enrolByDocumentRequestDto)){
+        if (!isValidLastName(enrolByDocumentRequestDto)) {
             errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
         }
-        if(!isValidPinCode(enrolByDocumentRequestDto)){
+        if (!isValidPinCode(enrolByDocumentRequestDto)) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
-        if(!isValidState(enrolByDocumentRequestDto)){
+        if (!isValidState(enrolByDocumentRequestDto)) {
             errors.put(STATE, AbhaConstants.INVALID_STATE);
         }
-        if(!isValidDistrict(enrolByDocumentRequestDto)){
+        if (!isValidDistrict(enrolByDocumentRequestDto)) {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
-        if(enrolByDocumentRequestDto.getConsent() == null){
+        if (enrolByDocumentRequestDto.getConsent() == null) {
             errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
         }
         if (errors.size() != 0) {
@@ -89,15 +91,17 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidLastName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return enrolByDocumentRequestDto.getLastName().matches(alphabeticCharOnlyRegex);
+        return Common.validStringSize(enrolByDocumentRequestDto.getLastName(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getLastName().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidMiddleName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) || enrolByDocumentRequestDto.getMiddleName().matches(alphabeticCharOnlyRegex);
+        return StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName())
+                || (Common.validStringSize(enrolByDocumentRequestDto.getMiddleName(), MAX_NAME_SIZE)
+                && enrolByDocumentRequestDto.getMiddleName().matches(alphabeticCharOnlyRegex));
     }
 
     private boolean isValidFirstName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return enrolByDocumentRequestDto.getFirstName().matches(alphabeticCharOnlyRegex);
+        return Common.validStringSize(enrolByDocumentRequestDto.getFirstName(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getFirstName().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {

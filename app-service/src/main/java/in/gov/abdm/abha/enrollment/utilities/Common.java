@@ -217,4 +217,8 @@ public class Common {
     public String getYearOfBirth(String dob){
         return dob.split("-")[0];
     }
+
+    public boolean validStringSize(String value, int size){
+        return value.length() <= size;
+    }
 }
