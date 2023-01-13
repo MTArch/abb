@@ -180,4 +180,44 @@ public class Common {
         }
         return lgdDistrictResponse;
     }
+
+    /**
+     * expecting list of first name middle name and last name and return joined name by space
+     * @param name
+     * @return
+     */
+    public String getName(String ...name){
+        return String.join(" ", name);
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return dd
+     * @param dob
+     * @return
+     */
+    public String getDayOfBirth(String dob){
+        return dob.split("-")[2];
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return mm
+     * @param dob
+     * @return
+     */
+    public String getMonthOfBirth(String dob){
+        return dob.split("-")[1];
+    }
+
+    /**
+     * expecting yyyy-mm-dd and will return yyyy
+     * @param dob
+     * @return
+     */
+    public String getYearOfBirth(String dob){
+        return dob.split("-")[0];
+    }
+
+    public boolean validStringSize(String value, int size){
+        return value.length() <= size;
+    }
 }

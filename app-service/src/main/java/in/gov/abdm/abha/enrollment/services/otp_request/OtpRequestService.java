@@ -117,7 +117,7 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setState(TransactionStatus.ACTIVE.toString());
+        transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
@@ -154,6 +154,7 @@ public class OtpRequestService {
 
         transactionDto.setMobile(aadhaarResponseDto.getAadhaarAuthOtpDto().getMobileNumber());
         transactionDto.setAadharTxn(aadhaarResponseDto.getAadhaarAuthOtpDto().getUidtkn());
+        transactionDto.setCreatedDate(LocalDateTime.now());
 
         Mono<TransactionDto> createTransactionResponse = transactionService.createTransactionEntity(transactionDto);
         return createTransactionResponse.flatMap(res -> mobileOrEmailOtpResponse(res, transactionDto));
@@ -210,6 +211,7 @@ public class OtpRequestService {
                     	trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
                     	trDto.setAadharTxn(idpSendOtpResponse.getResponse().getRequestId());
                     	trDto.setId(null);
+                        trDto.setCreatedDate(LocalDateTime.now());
                         return transactionService.createTransactionEntity(trDto)
                                 .flatMap(res -> {
                                 	String message = StringConstants.EMPTY;
@@ -245,6 +247,7 @@ public class OtpRequestService {
                     transactionDto.setEmail(email);
                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                    transactionDto.setCreatedDate(LocalDateTime.now());
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                             .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                     .txnId(mobileOrEmailOtpRequestDto.getTxnId())
@@ -262,7 +265,7 @@ public class OtpRequestService {
         String newOtp = GeneralUtils.generateRandomOTP();
 
         TransactionDto transactionDto = new TransactionDto();
-        transactionDto.setState(TransactionStatus.ACTIVE.toString());
+        transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
         transactionDto.setMobile(phoneNumber);
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
@@ -277,6 +280,7 @@ public class OtpRequestService {
         return notificationResponseDtoMono.flatMap(response -> {
             if (response.getStatus().equals(SENT)) {
                 transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                transactionDto.setCreatedDate(LocalDateTime.now());
                 return transactionService.createTransactionEntity(transactionDto)
                         .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
                                 .txnId(transactionDto.getTxnId().toString())

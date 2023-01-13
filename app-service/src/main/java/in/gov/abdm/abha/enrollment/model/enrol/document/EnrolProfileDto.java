@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,11 +23,13 @@ public class EnrolProfileDto {
     private String gender;
     private String mobile;
     private String email;
-    private String emailVerified;
     private String address;
     private String districtCode;
+    private String district;
     private String stateCode;
-    @JsonProperty("ABHAType")
+    private String state;
     private String abhaType;
     private String pinCode;
+    private String abhaStatus;
+    private List<String> phrAddress;
 }

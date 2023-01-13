@@ -1,22 +1,20 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-
 
 @Component
 public class AbhaDBClient<T> {
@@ -38,7 +36,10 @@ public class AbhaDBClient<T> {
                 .uri(uri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .bodyToMono(t);
+                .bodyToMono(t)
+                .onErrorResume(error -> {
+                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                });
     }
 
     /**
@@ -54,7 +55,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
                 });
     }
 
@@ -68,7 +69,22 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                });
+    }
+
+    private Mono<List<T>> fluxPostDatabase(Class<T> t, String uri, List<T> rows) {
+        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
+                .build()
+                .post()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(rows), t)
+                .retrieve()
+                .bodyToFlux(t)
+                .collectList()
+                .onErrorResume(error -> {
+                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
                 });
     }
 
@@ -85,9 +101,10 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
+                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
                 });
     }
+
 
     public Mono<T> getEntityById(Class<T> t, String id) {
         switch (t.getSimpleName()) {
@@ -95,16 +112,6 @@ public class AbhaDBClient<T> {
                 return GetMonoDatabase(t, URIConstant.DB_GET_TRANSACTION_BY_TXN_ID + id);
             case "AccountDto":
                 return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_XML_UID + id);
-            case "HidPhrAddressDto":
-                return GetMonoDatabase(t, URIConstant.DB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER + id);
-        }
-        return Mono.empty();
-    }
-
-    public Mono<T> getHidPhrAddressByPhrAddress(Class<T> t, String id) {
-        switch (t.getSimpleName()) {
-            case "HidPhrAddressDto":
-                return GetMonoDatabase(t, URIConstant.DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS + id);
         }
         return Mono.empty();
     }
@@ -141,8 +148,6 @@ public class AbhaDBClient<T> {
                 return monoPatchDatabase(t, URIConstant.DB_UPDATE_TRANSACTION_URI, row, id);
             case "AccountDto":
                 return monoPatchDatabase(t, URIConstant.DB_UPDATE_ACCOUNT_URI, row, id);
-            case "HidPhrAddressDto":
-                return monoPatchDatabase(t,URIConstant.DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID,row,id);
         }
         return Mono.empty();
     }
@@ -153,6 +158,10 @@ public class AbhaDBClient<T> {
                 return fluxPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI, row);
         }
         return Mono.empty();
+    }
+
+    public Mono<List<T>> addFluxEntity(Class<T> t, List<T> rows) {
+        return fluxPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT, rows);
     }
 
     public Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {
@@ -191,5 +200,4 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToFlux(t);
     }
-
 }

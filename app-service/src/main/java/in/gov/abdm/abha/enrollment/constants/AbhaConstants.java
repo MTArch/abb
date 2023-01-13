@@ -110,19 +110,19 @@ public interface AbhaConstants {
 
     String INVALID_LAST_NAME = "Invalid Last Name";
 
-    String INVALID_DOB = "Invalid dob";
+    String INVALID_DOB = "Invalid DOB";
 
     String INVALID_FRONT_SIDE_PHOTO = "Invalid Front side photo";
 
     String INVALID_BACK_SIDE_PHOTO = "Invalid Back side photo";
 
-    String INVALID_ADDRESS = "Invalid address";
+    String INVALID_ADDRESS = "Invalid Address";
 
-    String INVALID_STATE = "Invalid state";
+    String INVALID_STATE = "Invalid State";
 
-    String INVALID_DISTRICT = "Invalid district";
+    String INVALID_DISTRICT = "Invalid District";
 
-    String INVALID_PIN_CODE = "Invalid pinCode";
+    String INVALID_PIN_CODE = "Invalid PinCode";
 
     String AADHAAR = "AADHAAR";
     

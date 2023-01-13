@@ -1,10 +1,12 @@
 package in.gov.abdm.abha.enrollment.model.enrol.document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 @Data
@@ -24,7 +26,6 @@ public class EnrolByDocumentRequestDto {
     @NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
     private String firstName;
 
-    @NotEmpty(message = AbhaConstants.INVALID_MIDDLE_NAME)
     private String middleName;
 
     @NotEmpty(message = AbhaConstants.INVALID_LAST_NAME)
@@ -53,4 +54,7 @@ public class EnrolByDocumentRequestDto {
 
     @NotEmpty(message = AbhaConstants.INVALID_PIN_CODE)
     private String pinCode;
+
+    @Valid
+    ConsentDto consent;
 }

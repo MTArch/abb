@@ -1,42 +1,41 @@
 package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.password4j.BadParametersException;
-
 import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
+import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
-import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.Kyc;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
 
@@ -67,11 +66,14 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     @Autowired
     HidPhrAddressService hidPhrAddressService;
 
+    @Autowired
+    private AccountAuthMethodService accountAuthMethodService;
+
 
     @Override
-    public Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest,boolean isMobile) {
+    public Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, boolean isMobile) {
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto,isMobile))
+                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto, isMobile))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -82,13 +84,19 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto,boolean isMobile) {
+    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto, boolean isMobile) {
         try {
             if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
             } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
                 return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
-                        .flatMap(accountDto -> updatePhoneNumberInAccountEntity(accountDto, transactionDto,isMobile));
+                        .flatMap(accountDto -> {
+                            if (isMobile) {
+                                return updatePhoneNumberInAccountEntity(accountDto, transactionDto);
+                            } else {
+                                return updateEmailInAccountEntity(accountDto, transactionDto);
+                            }
+                        });
             } else {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
@@ -97,13 +105,26 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
     }
 
+    private Mono<? extends AuthResponseDto> updateEmailInAccountEntity(AccountDto accountDto, TransactionDto transactionDto) {
+
+        transactionDto.setEmailVerified(Boolean.TRUE);
+        accountDto.setEmail(transactionDto.getEmail());
+        accountDto.setEmailVerified("Yes");
+        accountDto.setEmailVerificationDate(now());
+        accountDto.setUpdateDate(now());
+        
+        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
+                .flatMap(accountDto1 -> prepareAuthByAdbmResponse(transactionDto, true, EMAIL_LINKED_SUCCESSFULLY));
+    }
+
     private Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(String otp, TransactionDto transactionDto) {
         try {
             if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
             } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
                 transactionDto.setMobileVerified(true);
-                return transactionService.updateTransactionEntity(transactionDto,transactionDto.getTxnId().toString())
+                return transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
                         .flatMap(transactionDtoResponse -> {
                             return prepareAuthByAdbmResponse(transactionDto, true, OTP_VERIFIED_SUCCESSFULLY);
                         });
@@ -115,26 +136,20 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
     }
 
-    private Mono<AuthResponseDto> updatePhoneNumberInAccountEntity(AccountDto accountDto, TransactionDto transactionDto,boolean isMobile) {
-       String message=null;
-        if(isMobile){
-            transactionDto.setMobileVerified(Boolean.TRUE);
-            accountDto.setMobile(transactionDto.getMobile());
-            accountDto.setUpdateDate(now());
-            message=MOBILE_NUMBER_LINKED_SUCCESSFULLY;
-        }else{
-            transactionDto.setEmailVerified(Boolean.TRUE);
-            accountDto.setEmail(transactionDto.getEmail());
-            accountDto.setEmailVerified("Yes");
-            accountDto.setEmailVerificationDate(now());
-            accountDto.setUpdateDate(now());
-            message=EMAIL_LINKED_SUCCESSFULLY;
-        }
+    private Mono<AuthResponseDto> updatePhoneNumberInAccountEntity(AccountDto accountDto, TransactionDto transactionDto) {
 
-        String finalMessage = message;
+        transactionDto.setMobileVerified(Boolean.TRUE);
+        accountDto.setMobile(transactionDto.getMobile());
+        accountDto.setUpdateDate(now());
+
         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                 .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
-                .flatMap(accountDto1 -> prepareAuthByAdbmResponse(transactionDto, true, finalMessage));
+                .flatMap(accountDto1 -> updateAccountAuthMethodsWithMobileOtp(accountDto1.getHealthIdNumber()))
+                .flatMap(res -> prepareAuthByAdbmResponse(transactionDto, true, MOBILE_NUMBER_LINKED_SUCCESSFULLY));
+    }
+
+    private Mono<List<AccountAuthMethodsDto>> updateAccountAuthMethodsWithMobileOtp(String abhaNumber) {
+        return accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(abhaNumber, AccountAuthMethods.MOBILE_OTP.getValue())));
     }
 
     private Mono<AuthResponseDto> prepareAuthByAdbmResponse(TransactionDto transactionDto, boolean status, String message) {
@@ -164,87 +179,90 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     }
 
-	private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthRequestDto authByAbdmRequest) {
-		String xTransactionId = String.valueOf(transactionDto.getTxnId());
-		String requestId = transactionDto.getAadharTxn();
-		IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
-		idpVerifyOtpRequest.setTxnId(xTransactionId);
-		idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-		return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, xTransactionId, HIP_REQUEST_ID, requestId)
-				.flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
-	}
+    private Mono<AuthResponseDto> verifyMobileOtp(TransactionDto transactionDto, AuthRequestDto authByAbdmRequest) {
+        String xTransactionId = String.valueOf(transactionDto.getTxnId());
+        String requestId = transactionDto.getAadharTxn();
+        IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
+        idpVerifyOtpRequest.setTxnId(xTransactionId);
+        idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
+        return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
+                .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
+    }
 
-	private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
-			IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
+                                                             IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
-		if (idpVerifyOtpResponse.getResponse() == null) {
-			return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.FAILED,
-					AbhaConstants.INVALID_OTP, Collections.emptyList()));
-		} else {
-			List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
-					.filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber()))
-					.map(Kyc::getAbhaNumber).collect(Collectors.toList());
+        if (idpVerifyOtpResponse.getError() != null) {
+            return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.FAILED,
+                    AbhaConstants.INVALID_OTP, Collections.emptyList()));
+        } else {
+            List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
+                    .filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber().replace("-", "")))
+                    .map(kyc -> {
+                        return getHyphenAbhaNumber(kyc.getAbhaNumber());
+                    }).collect(Collectors.toList());
 
-			if (healthIdNumbers.size() == 0)
-				return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
-					AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
 
-			Flux<AccountDto> accountDtoFlux = accountService.getAccountsByHealthIdNumbers(healthIdNumbers);
+            if (healthIdNumbers.size() == 0)
+                return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
+                        AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
 
-			return accountDtoFlux.collectList().flatMap(Mono::just).flatMap(accountDtoList -> {
+            Flux<AccountDto> accountDtoFlux = accountService.getAccountsByHealthIdNumbers(healthIdNumbers);
 
-				Flux<HidPhrAddressDto> fluxPhrAaddress = hidPhrAddressService
-						.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers,
-								new ArrayList<>(Collections.singleton(1)));
+            return accountDtoFlux.collectList().flatMap(Mono::just).flatMap(accountDtoList -> {
 
-				return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                Flux<HidPhrAddressDto> fluxPhrAaddress = hidPhrAddressService
+                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers,
+                                new ArrayList<>(Collections.singleton(1)));
 
-					return handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
-							transactionDto);
-				}).switchIfEmpty(Mono.defer(() -> {
+                return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
 
-					return handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
-							healthIdNumbers, transactionDto);
-				}));
+                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
+                            transactionDto);
+                }).switchIfEmpty(Mono.defer(() -> {
 
-			}).switchIfEmpty(Mono.defer(() -> {
-				return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
-						AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
-			}));
-		}
-	}
+                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
+                            healthIdNumbers, transactionDto);
+                }));
+
+            }).switchIfEmpty(Mono.defer(() -> {
+                return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
+                        AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
+            }));
+        }
+    }
 
     private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAbdmRequest, List<AccountDto> accountDtoList, List<HidPhrAddressDto> phrAddressList, List<String> healthIdNumbers, TransactionDto transactionDto) {
-		if (accountDtoList != null && !accountDtoList.isEmpty()) {
-			transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
+        if (accountDtoList != null && !accountDtoList.isEmpty()) {
+            transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
 
-			List<AccountResponseDto> accountResponseDtoList = prepareAccountResponseDtoList(accountDtoList,
-					phrAddressList);
+            List<AccountResponseDto> accountResponseDtoList = prepareAccountResponseDtoList(accountDtoList,
+                    phrAddressList);
 
-			return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-					.flatMap(response -> AccountResponse(authByAbdmRequest, accountResponseDtoList))
-					.switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(
-							EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
-		}
+            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
+                    .flatMap(response -> AccountResponse(authByAbdmRequest, accountResponseDtoList))
+                    .switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(
+                            EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
+        }
         return Mono.empty();
     }
 
     private List<AccountResponseDto> prepareAccountResponseDtoList(List<AccountDto> accountDtoList,
-			List<HidPhrAddressDto> phrAddressList) {
+                                                                   List<HidPhrAddressDto> phrAddressList) {
 
-		List<AccountResponseDto> accountResponseDtos = accountDtoList.stream().map(accountDto -> {
-			Optional<String> reducedValue = phrAddressList.stream()
-					.filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(accountDto.getHealthIdNumber()))
-					.map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).reduce((first, next) -> first);
+        List<AccountResponseDto> accountResponseDtos = accountDtoList.stream().map(accountDto -> {
+            Optional<String> reducedValue = phrAddressList.stream()
+                    .filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(accountDto.getHealthIdNumber()))
+                    .map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).reduce((first, next) -> first);
 
-			return MapperUtils.mapAccountDtoToAccountResponse(accountDto,
-					reducedValue.isPresent() ? reducedValue.get() : StringConstants.EMPTY);
-		}).collect(Collectors.toList());
+            return MapperUtils.mapAccountDtoToAccountResponse(accountDto,
+                    reducedValue.isPresent() ? reducedValue.get() : StringConstants.EMPTY);
+        }).collect(Collectors.toList());
 
-		return accountResponseDtos;
-	}
+        return accountResponseDtos;
+    }
 
-	private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
@@ -254,13 +272,17 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return Mono.empty();
     }
 
-	private AuthResponseDto prepareAuthResponse(String transactionId, String authResult, String message,
-			List<AccountResponseDto> accounts) {
-		return AuthResponseDto.builder()
-				.txnId(transactionId)
-				.authResult(authResult)
-				.message(message)
-				.accounts(accounts)
-				.build();
-	}
+    private AuthResponseDto prepareAuthResponse(String transactionId, String authResult, String message,
+                                                List<AccountResponseDto> accounts) {
+        return AuthResponseDto.builder()
+                .txnId(transactionId)
+                .authResult(authResult)
+                .message(message)
+                .accounts(accounts)
+                .build();
+    }
+
+    public String getHyphenAbhaNumber(String abhaNumber) {
+        return abhaNumber.replaceFirst("(\\d{2})(\\d{4})(\\d{4})", "$1-$2-$3-");
+    }
 }

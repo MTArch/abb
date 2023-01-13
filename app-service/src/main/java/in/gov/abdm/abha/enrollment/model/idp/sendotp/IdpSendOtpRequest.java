@@ -1,6 +1,8 @@
 package in.gov.abdm.abha.enrollment.model.idp.sendotp;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -24,5 +26,5 @@ public class IdpSendOtpRequest {
      * It is a Parameters
      */
     @JsonProperty("parameters")
-    private List<Parameters> parameters;
+    private Map<String, String> parameters = new HashMap();
 }
