@@ -28,8 +28,8 @@ public class EnrolProfileDto {
     private String district;
     private String stateCode;
     private String state;
-    @JsonProperty("ABHAType")
     private String abhaType;
     private String pinCode;
+    private String abhaStatus;
     private List<String> phrAddress;
 }

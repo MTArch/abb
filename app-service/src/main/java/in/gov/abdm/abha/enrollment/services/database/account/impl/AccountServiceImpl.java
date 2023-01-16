@@ -162,14 +162,12 @@ public class AccountServiceImpl implements AccountService {
 //            }
 
             newUser.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
+            newUser.setConsentDate(LocalDateTime.now());
 
             Set<AccountAuthMethods> accountAuthMethods = new HashSet<>();
             accountAuthMethods.add(AccountAuthMethods.AADHAAR_OTP);
             accountAuthMethods.add(AccountAuthMethods.AADHAAR_BIO);
             accountAuthMethods.add(AccountAuthMethods.DEMOGRAPHICS);
-            if (!StringUtils.isBlank(newUser.getPassword())) {
-                accountAuthMethods.add(AccountAuthMethods.PASSWORD);
-            }
             if (transactionDto.isMobileVerified() && !StringUtils.isBlank(transactionDto.getMobile())) {
                 newUser.setMobile(transactionDto.getMobile());
                 accountAuthMethods.add(AccountAuthMethods.MOBILE_OTP);
