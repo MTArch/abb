@@ -7,13 +7,19 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 /**
- * Validating abha number should be valid
+ * Validating abha address should be valid
  */
 public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
-    String parttern = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
+    String pattern = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return StringUtils.isEmpty(value) || Pattern.compile(parttern).matcher(value).matches();
+        if(value!=null && !value.isEmpty()) {
+            if (StringUtils.hasLength(value) && value.contains("@")) {
+                value = value.split("@")[0];
+            }
+            return Pattern.compile(pattern).matcher(value).matches();
+        }
+        return false;
     }
 }

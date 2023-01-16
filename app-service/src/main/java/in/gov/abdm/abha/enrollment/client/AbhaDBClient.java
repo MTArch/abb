@@ -112,6 +112,16 @@ public class AbhaDBClient<T> {
                 return GetMonoDatabase(t, URIConstant.DB_GET_TRANSACTION_BY_TXN_ID + id);
             case "AccountDto":
                 return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_XML_UID + id);
+            case "HidPhrAddressDto":
+                return GetMonoDatabase(t, URIConstant.DB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER + id);
+        }
+        return Mono.empty();
+    }
+
+    public Mono<T> getHidPhrAddressByPhrAddress(Class<T> t, String id) {
+        switch (t.getSimpleName()) {
+            case "HidPhrAddressDto":
+                return GetMonoDatabase(t, URIConstant.DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS + id);
         }
         return Mono.empty();
     }
@@ -148,6 +158,8 @@ public class AbhaDBClient<T> {
                 return monoPatchDatabase(t, URIConstant.DB_UPDATE_TRANSACTION_URI, row, id);
             case "AccountDto":
                 return monoPatchDatabase(t, URIConstant.DB_UPDATE_ACCOUNT_URI, row, id);
+            case "HidPhrAddressDto":
+                return monoPatchDatabase(t,URIConstant.DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID,row,id);
         }
         return Mono.empty();
     }
