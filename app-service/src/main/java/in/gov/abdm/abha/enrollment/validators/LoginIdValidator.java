@@ -71,8 +71,8 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
                     return isValidEmail(loginId);
                 }
                 else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
-                        && !Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
-                        && !Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
+                        && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
+                        || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
                     return isValidAadhaar(loginId);
                 } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
                     return isValidAbha(loginId);

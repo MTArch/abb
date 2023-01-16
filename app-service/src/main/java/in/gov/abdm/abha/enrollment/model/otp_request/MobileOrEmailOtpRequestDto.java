@@ -24,7 +24,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ValidTransactionId
-@ValidLoginId
 @ValidLoginHint
 @ValidOtpSystem
 @ToString
@@ -54,6 +53,7 @@ public class MobileOrEmailOtpRequestDto {
      * refers to the way user logs in to the system
      * Possible login id values : aadhaar number or mobile number
      */
+
     private String loginId;
 
     /**
