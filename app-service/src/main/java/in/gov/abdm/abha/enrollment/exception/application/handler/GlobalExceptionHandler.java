@@ -23,6 +23,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -123,12 +124,16 @@ public class GlobalExceptionHandler {
      * @param ex
      * @return
      */
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(TransactionNotFoundException.class)
-    public ResponseEntity<ErrorResponse> transactionNotFound(TransactionNotFoundException ex) {
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
-        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
+    public Map<String,Object> transactionNotFound(TransactionNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
     }
-    
+
     /**
      * handling exception to show error message in case request body is un-expected 
      * @param ex

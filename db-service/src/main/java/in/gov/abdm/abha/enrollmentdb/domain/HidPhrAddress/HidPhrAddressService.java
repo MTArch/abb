@@ -2,7 +2,9 @@ package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
 
 
 import java.util.List;
+import java.util.Set;
 
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
 import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,17 +47,23 @@ public interface HidPhrAddressService {
      * @return
      */
     Mono<Void> deleteHidPhrAddressById(Long hidPhrAddressId);
-    
+
 	/**
 	 * to fetch hid phr addresses by list of healthId numbers
 	 * and preferred values
 	 *
 	 * @param healthIdNumbers
 	 * @param preferred
-	 * 
+	 *
 	 * @return Flux<HidPhrAddressDto>
 	 */
 	Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
 			List<Integer> preferred);
+
+	Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress);
+
+	Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress);
+
+	Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber);
 
 }

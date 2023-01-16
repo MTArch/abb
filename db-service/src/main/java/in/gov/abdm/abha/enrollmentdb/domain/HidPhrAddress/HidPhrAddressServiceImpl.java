@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
 
 
 import java.util.List;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,4 +65,21 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 		return hidPhrAddressRepository.findByHealthIdNumberInAndPreferredIn(healthIdNumbers, preferred)
 				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
 	}
+    @Override
+    public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
+        return hidPhrAddressRepository.findByPhrAddressIn(phrAddress)
+                .map(hidPhrAddress -> modelMapper.map(hidPhrAddress,HidPhrAddressDto.class));
+    }
+
+    @Override
+    public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
+        return hidPhrAddressRepository.getPhrAddressByPhrAddress(phrAddress)
+                .map(hidPhrAddress -> modelMapper.map(hidPhrAddress,HidPhrAddressDto.class));
+    }
+
+    @Override
+    public Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber) {
+        return hidPhrAddressRepository.findByByHealthIdNumber(healthIdNumber)
+                .map(hidPhrAddress -> modelMapper.map(hidPhrAddress,HidPhrAddressDto.class));
+    }
 }

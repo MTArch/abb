@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.validators.AbhaValidator;
 
 import javax.validation.Constraint;
@@ -18,7 +19,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = AbhaValidator.class)
 @Target({TYPE, FIELD, PARAMETER})
 public @interface AbhaId {
-    String message() default ABHA_ID;
+    String message() default AbhaConstants.VALIDATION_ERROR_ABHA_ADDRESS_FIELD;
 
     Class<?>[] groups() default {};
 

@@ -27,4 +27,11 @@ public interface HidPhrAddressService {
      */
     Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
                                                                            List<Integer> preferred);
+
+    Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress);
+
+    Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress);
+
+    Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber);
+    Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId);
 }
