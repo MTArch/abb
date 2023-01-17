@@ -173,20 +173,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     private Mono<AbhaAddressResponseDto> updateHidAbhaAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto,TransactionDto transactionDto)
     {
-        if(abhaAddressRequestDto.getPreferred()==0)
-        {
-            Mono<HidPhrAddressDto> hidPhrAddressDtoMono
-                    = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
-            return hidPhrAddressDtoMono.flatMap(hidPhrAddressDto ->
-            {
-               if(hidPhrAddressDto!=null)
-               {
-                   return handleCreateAbhaResponse(hidPhrAddressDto, transactionDto);
-               }
-                return Mono.empty();
-            });
-        }
-        else if (abhaAddressRequestDto.getPreferred()==1)
+        if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred()==1)
         {
             Mono<HidPhrAddressDto> hidPhrAddressDtoMono
                     = hidPhrAddressService.findByByHealthIdNumber(accountDto.getHealthIdNumber());
