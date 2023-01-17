@@ -44,10 +44,14 @@ public class VerhoeffAlgorithm {
 
     private static int[] StringToReversedIntArray(String num) {
         int[] myArray = new int[num.length()];
-        for (int i = 0; i < num.length(); i++) {
-            myArray[i] = Integer.parseInt(num.substring(i, i + 1));
+        try {
+            for (int i = 0; i < num.length(); i++) {
+                myArray[i] = Integer.parseInt(num.substring(i, i + 1));
+            }
+            myArray = Reverse(myArray);
+        }catch(NumberFormatException ex){
+           // myArray=new int[0];
         }
-        myArray = Reverse(myArray);
         return myArray;
     }
 
