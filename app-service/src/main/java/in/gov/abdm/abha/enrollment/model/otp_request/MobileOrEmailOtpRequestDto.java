@@ -26,6 +26,7 @@ import lombok.ToString;
 @ValidTransactionId
 @ValidLoginHint
 @ValidOtpSystem
+@ValidLoginId
 @ToString
 public class MobileOrEmailOtpRequestDto {
 
