@@ -41,6 +41,9 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
+        if(mobileOrEmailOtpRequestDto.getScope() == null){
+            return false;
+        }
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
 		List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
             return !name.equals(Scopes.WRONG);
@@ -58,8 +61,9 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
                         .matches();
+            }else{
+                return true;
             }
         }
-        return false;
     }
 }
