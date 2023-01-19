@@ -35,18 +35,18 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     private HidPhrAddressSubscriber hidPhrAddressSubscriber;
 
     @Override
-	public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
-		HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
-		return hidPhrAddressRepository.save(hidPhrAddress)
-				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
-	}
+    public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
+        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
+        return hidPhrAddressRepository.save(hidPhrAddress)
+                .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+    }
 
     @Override
-	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
-		HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
-		return hidPhrAddressRepository.save(hidPhrAddress)
-				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
-	}
+    public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
+        HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
+        return hidPhrAddressRepository.save(hidPhrAddress)
+                .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+    }
 
     @Override
     public Mono<HidPhrAddressDto> getHidPhrAddressById(Long hidPhrAddressId) {
@@ -59,12 +59,12 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
         return hidPhrAddressRepository.deleteById(hidPhrAddressId);
     }
 
-	@Override
-	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
-			List<Integer> preferred) {
-		return hidPhrAddressRepository.findByHealthIdNumberInAndPreferredIn(healthIdNumbers, preferred)
-				.map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
-	}
+    @Override
+    public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
+                                                                                  List<Integer> preferred) {
+        return hidPhrAddressRepository.findByHealthIdNumberInAndPreferredIn(healthIdNumbers, preferred)
+                .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+    }
     @Override
     public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
         return hidPhrAddressRepository.findByPhrAddressIn(phrAddress)
@@ -78,8 +78,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     }
 
     @Override
-    public Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber) {
-        return hidPhrAddressRepository.findByByHealthIdNumber(healthIdNumber)
+    public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
+        return hidPhrAddressRepository.findByHealthIdNumber(healthIdNumber)
                 .map(hidPhrAddress -> modelMapper.map(hidPhrAddress,HidPhrAddressDto.class));
     }
 }
