@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * Validating abha address should be valid
  */
 public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
-    String pattern = "^[A-Za-z](([A-Za-z0-9]{3,31})|(([A-Za-z0-9]*\\.[A-Za-z0-9]+)))$";
+    String pattern = "(^[a-zA-Z0-9]+[.]?[a-zA-Z0-9]*[_]?[a-zA-Z0-9]+$)|(^[a-zA-Z0-9]+[_]?[a-zA-Z0-9]*[.]?[a-zA-Z0-9]+$)";
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
@@ -18,7 +18,10 @@ public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
             if (StringUtils.hasLength(value) && value.contains("@")) {
                 value = value.split("@")[0];
             }
-            return Pattern.compile(pattern).matcher(value).matches();
+            if(value.length()>=8 && value.length()<=18)
+            {
+                return Pattern.compile(pattern).matcher(value).matches();
+            }
         }
         return false;
     }

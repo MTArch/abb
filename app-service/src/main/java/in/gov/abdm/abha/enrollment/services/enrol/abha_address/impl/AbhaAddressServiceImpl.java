@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
@@ -48,7 +49,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     private LinkedHashMap<String, String> errors;
 
     public static final String TXN_ID = "txnId";
-    private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+    private final String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
     @Override
     public Mono<SuggestAbhaResponseDto> getAbhaAddress(String txnId) {
@@ -56,60 +57,92 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 .flatMap(transactionDto -> {
                     if(transactionDto!=null)
                     {
-                       return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
-                       .flatMap(accountDto ->
-                        {
-                            if(accountDto!=null)
-                            {
-                                Set<String> listAbhaSuggestion = populatePHRAddress(accountDto);
-                                List<String> stringList = listAbhaSuggestion.stream().collect(Collectors.toList());
+                        return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
+                                .flatMap(accountDto ->
+                                {
+                                    if(accountDto!=null)
+                                    {
+                                        Set<String> listAbhaSuggestion = populatePHRAddress(accountDto);
+                                        List<String> stringList = listAbhaSuggestion.stream().collect(Collectors.toList());
 
-                                return hidPhrAddressService.findByPhrAddressIn(stringList)
-                                .collectList().flatMap(Mono::just)
-                                        .flatMap(hidPhrAddressDtoList -> {
-                                            List<String> listAbhaAddressDb = hidPhrAddressDtoList.stream()
-                                                    .map(HidPhrAddressDto::getPhrAddress)
-                                                    .collect(Collectors.toList());
-
-                                            listAbhaSuggestion.removeAll(listAbhaAddressDb);
-                                            listAbhaSuggestion.removeIf(s -> s.length() >= 13 && s.length() <= 23);
-                                            listAbhaSuggestion.stream().collect(Collectors.toList());
-                                            return handleGetAbhaAddressResponse(transactionDto, listAbhaSuggestion);
-                                        });
-                            }
-                            return Mono.empty();
-                        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+                                        return hidPhrAddressService.findByPhrAddressIn(stringList)
+                                                .collectList().flatMap(Mono::just)
+                                                .flatMap(hidPhrAddressDtoList -> {
+                                                    List<String> listAbhaAddressDb = hidPhrAddressDtoList.stream()
+                                                            .map(HidPhrAddressDto::getPhrAddress)
+                                                            .collect(Collectors.toList());
+                                                    stringList.removeAll(listAbhaAddressDb);
+                                                    List<String> list1 = stringList.stream().collect(Collectors.toList());
+                                                    List<String> list2= list1.stream()
+                                                            .map(s -> s.replace("@abdm",""))
+                                                            .collect(Collectors.toList());
+                                                    list2.removeIf(s -> s.length() < 8 || s.length()>18);
+                                                    return handleGetAbhaAddressResponse(transactionDto, list2);
+                                                });
+                                    }
+                                    return Mono.empty();
+                                }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                     }
                     return Mono.empty();
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<SuggestAbhaResponseDto> handleGetAbhaAddressResponse(TransactionDto transactionDto, Set<String> listAbhaSuggestion) {
+    private Mono<SuggestAbhaResponseDto> handleGetAbhaAddressResponse(TransactionDto transactionDto, List<String> listAbhaSuggestion) {
         return Mono.just(SuggestAbhaResponseDto.builder()
                 .txnId(String.valueOf(transactionDto.getTxnId()))
-                .abhaAddressList(listAbhaSuggestion.stream().collect(Collectors.toList())).build());
+                .abhaAddressList(listAbhaSuggestion).build());
     }
 
     private Set<String> populatePHRAddress(AccountDto accountDto) {
         Set<String> abhaAddress = new LinkedHashSet<String>();
         String dayOfBirth = !StringUtils.isEmpty(accountDto.getDayOfBirth()) ? accountDto.getDayOfBirth() : "";
         String monthOfBirth = !StringUtils.isEmpty(accountDto.getMonthOfBirth()) ? accountDto.getMonthOfBirth() : "";
+        String yearOfBirth = !StringUtils.isEmpty(accountDto.getYearOfBirth()) ? accountDto.getYearOfBirth() : "";
         if (!StringUtils.isEmpty(accountDto.getFirstName())) {
             abhaAddress.add(populatePHRAddress(accountDto.getFirstName()));
         }
         if (!StringUtils.isEmpty(accountDto.getLastName()) && !StringUtils.isEmpty(accountDto.getFirstName())) {
             abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName()));
             abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), ".", accountDto.getLastName()));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), "_", accountDto.getLastName()));
         }
         if (!StringUtils.isEmpty(accountDto.getFirstName())) {
-            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(), accountDto.getYearOfBirth()));
-            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getYearOfBirth()));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(), yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(),".", yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(),"_", yearOfBirth));
+
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),".", yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),"_", yearOfBirth));
+
             abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), dayOfBirth, monthOfBirth));
-            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), dayOfBirth, monthOfBirth, accountDto.getYearOfBirth()));
-            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(), dayOfBirth, monthOfBirth, accountDto.getYearOfBirth()));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),".", dayOfBirth, monthOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),"_", dayOfBirth, monthOfBirth));
+
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), dayOfBirth, monthOfBirth, yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),".", dayOfBirth, monthOfBirth, yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),"_", dayOfBirth, monthOfBirth, yearOfBirth));
+
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(), dayOfBirth, monthOfBirth, yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(),".", dayOfBirth, monthOfBirth, yearOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(), accountDto.getLastName(),"_", dayOfBirth, monthOfBirth, yearOfBirth));
         }
         if (!StringUtils.isEmpty(accountDto.getLastName())) {
             abhaAddress.add(populatePHRAddress(accountDto.getLastName(), dayOfBirth, monthOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getLastName(),".", dayOfBirth, monthOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getLastName(),"_", dayOfBirth, monthOfBirth));
+        }
+
+        if (!StringUtils.isEmpty(accountDto.getLastName()) && !StringUtils.isEmpty(accountDto.getFirstName())) {
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),accountDto.getLastName(),dayOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),accountDto.getLastName(),".",dayOfBirth));
+            abhaAddress.add(populatePHRAddress(accountDto.getFirstName(),accountDto.getLastName(),"_",dayOfBirth));
+        }
+
+        if (!StringUtils.isEmpty(accountDto.getLastName()) && !StringUtils.isEmpty(accountDto.getFirstName())) {
+            abhaAddress.add(populatePHRAddress(dayOfBirth,monthOfBirth,"_",accountDto.getFirstName(),".",accountDto.getLastName()));
+            abhaAddress.add(populatePHRAddress(yearOfBirth,"_",accountDto.getFirstName(),".",accountDto.getLastName()));
+            abhaAddress.add(populatePHRAddress(dayOfBirth,"_",accountDto.getFirstName(),".",accountDto.getLastName()));
         }
 
         if (!StringUtils.isEmpty(accountDto.getEmail()) && accountDto.getEmail().contains("@")) {
@@ -127,7 +160,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
             } else if (!StringUtils.isEmpty(healthIdStr) && healthIdStr.contains("@ndhm")) {
                 healthIdStr = healthIdStr.replace("@ndhm", phrIdSuffix);
             }
-            return healthIdStr.toLowerCase();
+            return healthIdStr.toLowerCase()+"@abdm";
         }
         return healthIdStr;
     }
@@ -145,27 +178,27 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                     if(transactionDto!=null)
                     {
                         return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
-                        .flatMap(accountDto ->
-                        {
-                            if(accountDto!=null)
-                            {
-                               return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress())
-                                        .flatMap(hidPhrAddressDto ->
-                                        {
-                                            if(StringUtils.isEmpty(hidPhrAddressDto))
-                                            {
-                                                return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
-                                            }
-                                            else
-                                            {
-                                                throw new GenericExceptionMessage(AbhaConstants.ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE);
-                                            }
-                                        }).switchIfEmpty(Mono.defer(()-> {
-                                           return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
-                                       }));
-                            }
-                            return Mono.empty();
-                        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+                                .flatMap(accountDto ->
+                                {
+                                    if(accountDto!=null)
+                                    {
+                                        return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+"@abdm")
+                                                .flatMap(hidPhrAddressDto ->
+                                                {
+                                                    if(StringUtils.isEmpty(hidPhrAddressDto))
+                                                    {
+                                                        return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
+                                                    }
+                                                    else
+                                                    {
+                                                        throw new GenericExceptionMessage(AbhaConstants.ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE);
+                                                    }
+                                                }).switchIfEmpty(Mono.defer(()-> {
+                                                    return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
+                                                }));
+                                    }
+                                    return Mono.empty();
+                                }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                     }
                     return Mono.empty();
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -176,7 +209,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred()==1)
         {
             Mono<HidPhrAddressDto> hidPhrAddressDtoMono
-                    = hidPhrAddressService.findByByHealthIdNumber(accountDto.getHealthIdNumber());
+                    = hidPhrAddressService.findByHealthIdNumber(accountDto.getHealthIdNumber());
             return hidPhrAddressDtoMono.flatMap(hidPhrAddressDto -> {
                 if(hidPhrAddressDto!=null)
                 {
@@ -189,7 +222,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                             Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
                                     = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
                             return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
-                                return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto);
+                                return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
                             });
                         }
                         return Mono.empty();
@@ -201,19 +234,19 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         return Mono.empty();
     }
 
-    private Mono<AbhaAddressResponseDto> handleCreateAbhaResponse(HidPhrAddressDto hidPhrAddressDto, TransactionDto transactionDto) {
+    private Mono<AbhaAddressResponseDto> handleCreateAbhaResponse(HidPhrAddressDto hidPhrAddressDto, TransactionDto transactionDto,AbhaAddressRequestDto abhaAddressRequestDto) {
         return Mono.just(AbhaAddressResponseDto.builder()
                 .txnId(String.valueOf(transactionDto.getTxnId()))
                 .healthIdNumber(hidPhrAddressDto.getHealthIdNumber())
-                .preferredAbhaAddress(hidPhrAddressDto.getPhrAddress())
+                .preferredAbhaAddress(abhaAddressRequestDto.getPreferredAbhaAddress())
                 .build());
     }
 
     private HidPhrAddressDto prepareHidPhrAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto) {
         return HidPhrAddressDto.builder()
                 .healthIdNumber(accountDto.getHealthIdNumber())
-                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress())
-                .status("ACTIVE")
+                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+"@abdm")
+                .status(AccountStatus.ACTIVE.getValue())
                 .preferred(abhaAddressRequestDto.getPreferred())
                 .lastModifiedBy(ABHA_APP)
                 .lastModifiedDate(LocalDateTime.now())
@@ -239,10 +272,6 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     }
 
     private boolean isValidTxnId(String txnId) {
-        if (Pattern.compile(TxnId).matcher(txnId).matches()) {
-            return true;
-        } else {
-            return false;
-        }
+        return Pattern.compile(TxnId).matcher(txnId).matches();
     }
 }

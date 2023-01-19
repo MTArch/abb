@@ -13,7 +13,8 @@ public interface HidPhrAddressRepository extends ReactiveCrudRepository<HidPhrAd
 
 	Flux<HidPhrAddress> findByHealthIdNumberInAndPreferredIn(List<String> healthIdNumbers, List<Integer> preferred);
 	Flux<HidPhrAddress> findByPhrAddressIn(List<String> phrAddress);
+	@Query("SELECT * from hid_phr_address where lower(phr_address) = :phrAddress")
 	Mono<HidPhrAddress> getPhrAddressByPhrAddress(String phrAddress);
 	@Query("SELECT * from hid_phr_address phr where phr.preferred = 1 AND phr.health_id_number = :healthIdNumber")
-	Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber);
+	Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber);
 }

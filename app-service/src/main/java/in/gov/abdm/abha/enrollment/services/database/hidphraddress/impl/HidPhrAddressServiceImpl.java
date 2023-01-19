@@ -34,7 +34,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
 	@Override
 	public HidPhrAddressDto prepareNewHidPhrAddress(TransactionDto transactionDto, AccountDto accountDto,
-			ABHAProfileDto abhaProfileDto) {
+													ABHAProfileDto abhaProfileDto) {
 
 		return HidPhrAddressDto.builder()
 				.healthIdNumber(abhaProfileDto.getAbhaNumber())
@@ -71,7 +71,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
 	@Override
 	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
-			List<Integer> preferred) {
+																				  List<Integer> preferred) {
 		StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_HID_PHR_ADDRESS_URI)
 				.append(StringConstants.QUESTION)
 				.append("healthIdNumber")
@@ -101,7 +101,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 	}
 
 	@Override
-	public Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber) {
+	public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
 		return abhaDBClient.getEntityById(HidPhrAddressDto.class,healthIdNumber);
 	}
 

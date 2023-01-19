@@ -32,6 +32,6 @@ public interface HidPhrAddressService {
 
     Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress);
 
-    Mono<HidPhrAddressDto> findByByHealthIdNumber(String healthIdNumber);
+    Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber);
     Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId);
 }

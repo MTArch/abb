@@ -35,12 +35,12 @@ public class HidPhrAddressController {
         return ResponseEntity.ok(hidPhrAddressService.deleteHidPhrAddressById(hidPhrAddressId));
     }
 
-	@GetMapping
-	public ResponseEntity<?> getHidPhrAddressByHealthIdNumbersAndPreferredIn(
-			@RequestParam("healthIdNumber") List<String> healthIdNumbers,
-			@RequestParam("preferred") List<Integer> preferred) {
-		return ResponseEntity.ok(hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers, preferred));
-	}
+    @GetMapping
+    public ResponseEntity<?> getHidPhrAddressByHealthIdNumbersAndPreferredIn(
+            @RequestParam("healthIdNumber") List<String> healthIdNumbers,
+            @RequestParam("preferred") List<Integer> preferred) {
+        return ResponseEntity.ok(hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers, preferred));
+    }
     @GetMapping("/check")
     public ResponseEntity<?> findByPhrAddressIn(
             @RequestParam("phrAddress") List<String> phrAddress) {
@@ -52,8 +52,8 @@ public class HidPhrAddressController {
         return ResponseEntity.ok(hidPhrAddressService.getPhrAddressByPhrAddress(phrAddress));
     }
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER)
-    public ResponseEntity<?> findByByHealthIdNumber(@PathVariable("healthIdNumber") String healthIdNumber) {
-        return ResponseEntity.ok(hidPhrAddressService.findByByHealthIdNumber(healthIdNumber));
+    public ResponseEntity<?> findByHealthIdNumber(@PathVariable("healthIdNumber") String healthIdNumber) {
+        return ResponseEntity.ok(hidPhrAddressService.findByHealthIdNumber(healthIdNumber));
     }
 
 }
