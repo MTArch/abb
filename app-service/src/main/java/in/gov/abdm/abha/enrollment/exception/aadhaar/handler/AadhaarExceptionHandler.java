@@ -19,7 +19,7 @@ import java.util.Map;
 public class AadhaarExceptionHandler {
 
     private static final String AADHAAR_EXCEPTION = "Aadhaar Exception : ";
-    private static final String MESSAGE = "Message";
+    private static final String MESSAGE = "message";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String aadhaarErrorPrefix = "UIDAI Error code : ";
 
