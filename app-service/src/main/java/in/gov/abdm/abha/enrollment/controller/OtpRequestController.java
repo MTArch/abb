@@ -48,30 +48,32 @@ public class OtpRequestController {
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendOtpViaNotificationServiceDLFlow(mobileOrEmailOtpRequestDto);
         }
-       
+
+        // mobile update flow
         // If scope -abha-enrol and mobile-verify and otpSystem -abdm
         else if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))
-                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM) ) {
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
-        else if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
-                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)){
+        // Email update Flow
+        else if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendEmailOtpViaNotificationService(mobileOrEmailOtpRequestDto);
         }
         // If scope -abha-enrol or -child-abha-enrol abd  otpSystem -aadhaar
         else if ((Common.isScopeAvailable(requestScopes, Scopes.ABHA_ENROL)
-        		||Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
+                || Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
             return otpRequestService.sendAadhaarOtp(mobileOrEmailOtpRequestDto);
         }
         // If scope -child-abha-enrol
-        else if(Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)
-        		  && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)){
+        else if (Common.isScopeAvailable(requestScopes, Scopes.CHILD_ABHA_ENROL)
+                && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return otpRequestService.sendIdpOtp(mobileOrEmailOtpRequestDto);
         }
         // other case
-        else{
-        	throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+        else {
+            throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
         }
     }
 }

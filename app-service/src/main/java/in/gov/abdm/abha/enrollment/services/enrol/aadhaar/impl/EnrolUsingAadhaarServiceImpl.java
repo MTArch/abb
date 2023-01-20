@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
@@ -22,11 +23,14 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
+import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
@@ -69,39 +73,46 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private LGDClient lgdClient;
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
+    @Autowired
+    RedisService redisService;
+
+    private RedisOtp redisOtp;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
-        return transactionService
-                .findTransactionDetailsFromDB(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyAadhaarOtp(transactionDto, enrolByAadhaarRequestDto))
-                .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+        redisOtp = redisService.getRedisOtp(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
+        if (redisOtp == null) {
+            throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
+        } else {
+            if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
+                throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            }
+            Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
+                    aadhaarClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
+                            .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
+                            .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
+                            .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
+                            .build());
+
+            return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+        }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarOtp(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
-        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarClient.verifyOtp(
-                AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
-                        .aadhaarTransactionId(transactionDto.getAadharTxn())
-                        .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
-                        .build());
-
-        return aadhaarResponseDtoMono
-                .flatMap(res -> HandleAadhaarOtpResponse(enrolByAadhaarRequestDto, res, transactionDto));
-    }
-
-    private Mono<EnrolByAadhaarResponseDto> HandleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<EnrolByAadhaarResponseDto> handleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
 
-        transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-        String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
-        return accountService.findByXmlUid(encodedXmlUid)
-                .flatMap(existingAccount -> {
-                    return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
-                })
-                .switchIfEmpty(Mono.defer(() -> {
-                    return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
-                }));
+        return transactionService.findTransactionDetailsFromDB(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId()).flatMap(transactionDto -> {
+            transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
+            String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
+            return accountService.findByXmlUid(encodedXmlUid)
+                    .flatMap(existingAccount -> {
+                        return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                    })
+                    .switchIfEmpty(Mono.defer(() -> {
+                        return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
+                    }));
+        });
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
@@ -118,6 +129,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
+                                    redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+                                    redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .abhaProfileDto(abhaProfileDto)
@@ -208,6 +221,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)
                         .flatMap(res -> {
                             if (!res.isEmpty()) {
+                                redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+                                redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
                                 return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
                                         .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
                             } else {
@@ -224,10 +239,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
         if (!aadhaarResponseDto.isSuccessful()) {
-            if (aadhaarResponseDto.getAadhaarAuthOtpDto() != null)
+            if (aadhaarResponseDto.getAadhaarAuthOtpDto() != null) {
+                if (redisService.isReceiverOtpTrackerAvailable(redisOtp.getReceiver())) {
+                    ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(redisOtp.getReceiver());
+                    receiverOtpTracker.setVerifyOtpCount(receiverOtpTracker.getVerifyOtpCount() + 1);
+                    redisService.saveReceiverOtpTracker(redisOtp.getReceiver(), receiverOtpTracker);
+                }
                 throw new AadhaarExceptions(aadhaarResponseDto.getAadhaarAuthOtpDto().getErrorCode());
-            else
+            } else {
                 throw new AadhaarExceptions(aadhaarResponseDto.getErrorCode());
+            }
         }
     }
 

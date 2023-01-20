@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
@@ -19,10 +20,13 @@ import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
+import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
+import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.notification.TemplatesHelper;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
@@ -78,10 +82,17 @@ public class OtpRequestService {
     TemplatesHelper templatesHelper;
     @Autowired
     IdpService idpService;
+    @Autowired
+    RedisService redisService;
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
+
+        if (!redisService.isResendOtpAllowed(phoneNumber)) {
+            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+        }
+
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
         return transactionDtoMono.flatMap(transactionDto -> {
             Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
@@ -96,10 +107,13 @@ public class OtpRequestService {
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
                     transactionDto.setCreatedDate(LocalDateTime.now());
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                            .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                    .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                    .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
-                                    .build()));
+                            .flatMap(res -> {
+                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), phoneNumber, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                                return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                        .txnId(mobileOrEmailOtpRequestDto.getTxnId())
+                                        .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
+                                        .build());
+                            });
                 } else {
                     throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
                 }
@@ -116,6 +130,10 @@ public class OtpRequestService {
      */
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
+        if (!redisService.isResendOtpAllowed(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()))) {
+            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+        }
+
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
@@ -123,13 +141,14 @@ public class OtpRequestService {
         transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
 
+        //Child abha parent Linking send parent aadhaar otp flow
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.CHILD_ABHA_ENROL)
                 && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR)) {
             return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
                     .flatMap(res1 -> {
                         if (res1.getHealthIdNumber() != null)
                             transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
-                        
+
                         transactionDto.setKycPhoto(res1.getKycPhoto());
                         Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
@@ -138,10 +157,11 @@ public class OtpRequestService {
                                 }
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-        } else {
+        } else { //standard abha send aadhaar otp flow
             Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
             return aadhaarResponseDto.flatMap(res ->
                     {
+                        handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()), res.getAadhaarAuthOtpDto().getUidtkn(), StringUtils.EMPTY);
                         return handleAadhaarOtpResponse(res, transactionDto);
                     }
             );
@@ -207,21 +227,21 @@ public class OtpRequestService {
         return idpService.sendOtp(mobileOrEmailOtpRequestDto)
                 .flatMap(idpSendOtpResponse -> {
                     if (!StringUtils.isEmpty(idpSendOtpResponse.getTransactionId())) {
-                    	TransactionDto trDto = transactionDto;
-                    	trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
-                    	trDto.setAadharTxn(idpSendOtpResponse.getResponse().getRequestId());
-                    	trDto.setId(null);
+                        TransactionDto trDto = transactionDto;
+                        trDto.setTxnId(UUID.fromString(idpSendOtpResponse.getTransactionId()));
+                        trDto.setAadharTxn(idpSendOtpResponse.getResponse().getRequestId());
+                        trDto.setId(null);
                         trDto.setCreatedDate(LocalDateTime.now());
                         return transactionService.createTransactionEntity(trDto)
                                 .flatMap(res -> {
-                                	String message = StringConstants.EMPTY;
-                					if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-                						message = OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING
-                								.concat(idpSendOtpResponse.getOtpSentTo());
-                					} else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
-                						message = OTP_IS_SENT_TO_MOBILE_ENDING.concat(idpSendOtpResponse.getOtpSentTo());
-                					}
-                                	
+                                    String message = StringConstants.EMPTY;
+                                    if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
+                                        message = OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING
+                                                .concat(idpSendOtpResponse.getOtpSentTo());
+                                    } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE)) {
+                                        message = OTP_IS_SENT_TO_MOBILE_ENDING.concat(idpSendOtpResponse.getOtpSentTo());
+                                    }
+
                                     return Mono.just(MobileOrEmailOtpResponseDto.builder()
                                             .txnId(res.getTxnId().toString())
                                             .message(message)
@@ -235,6 +255,11 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendEmailOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String email = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
+
+        if (!redisService.isResendOtpAllowed(email)) {
+            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+        }
+
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
         return transactionDtoMono.flatMap(transactionDto -> {
             Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(
@@ -249,10 +274,13 @@ public class OtpRequestService {
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
                     transactionDto.setCreatedDate(LocalDateTime.now());
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                            .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                    .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                    .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hidePhoneNumber(email))
-                                    .build()));
+                            .flatMap(res -> {
+                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                                return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                        .txnId(mobileOrEmailOtpRequestDto.getTxnId())
+                                        .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hidePhoneNumber(email))
+                                        .build());
+                            });
                 } else {
                     throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
                 }
@@ -263,6 +291,10 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationServiceDLFlow(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
+
+        if (!redisService.isResendOtpAllowed(phoneNumber)) {
+            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+        }
 
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
@@ -282,13 +314,40 @@ public class OtpRequestService {
                 transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
                 transactionDto.setCreatedDate(LocalDateTime.now());
                 return transactionService.createTransactionEntity(transactionDto)
-                        .flatMap(res -> Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                .txnId(transactionDto.getTxnId().toString())
-                                .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
-                                .build()));
+                        .flatMap(res -> {
+                            handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), phoneNumber, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                            return Mono.just(MobileOrEmailOtpResponseDto.builder()
+                                    .txnId(transactionDto.getTxnId().toString())
+                                    .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
+                                    .build());
+                        });
             } else {
                 throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
             }
         });
+    }
+
+    private void handleNewOtpRedisObjectCreation(String txnId, String receiver, String aadhaarTxn, String otpValue) {
+        RedisOtp redisOtp = RedisOtp.builder()
+                .txnId(txnId)
+                .otpValue(otpValue)
+                .aadhaarTxnId(aadhaarTxn)
+                .receiver(receiver)
+                .build();
+
+        ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(receiver);
+
+        if (receiverOtpTracker != null) {
+            receiverOtpTracker.setSentOtpCount(receiverOtpTracker.getSentOtpCount() + 1);
+            receiverOtpTracker.setVerifyOtpCount(0);
+        } else {
+            receiverOtpTracker = new ReceiverOtpTracker();
+            receiverOtpTracker.setReceiver(receiver);
+            receiverOtpTracker.setSentOtpCount(1);
+            receiverOtpTracker.setVerifyOtpCount(0);
+            receiverOtpTracker.setBlocked(false);
+        }
+        redisService.saveReceiverOtpTracker(receiver, receiverOtpTracker);
+        redisService.saveRedisOtp(txnId, redisOtp);
     }
 }
