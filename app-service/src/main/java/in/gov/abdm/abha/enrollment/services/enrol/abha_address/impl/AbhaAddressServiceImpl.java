@@ -229,7 +229,14 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                     });
                 }
                 return Mono.empty();
-            });
+            }).switchIfEmpty(Mono.defer(()-> {
+
+                Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
+                        = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
+                return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
+                    return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
+                });
+            }));
         }
         return Mono.empty();
     }
