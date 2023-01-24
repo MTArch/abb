@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
@@ -17,11 +18,14 @@ import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
+import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
+import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
@@ -31,10 +35,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.now;
@@ -69,9 +70,20 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
 
+    @Autowired
+    RedisService redisService;
+
+    private RedisOtp redisOtp;
 
     @Override
     public Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, boolean isMobile) {
+        redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
+
+        Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
+        if(redisResponse != null){
+            return redisResponse;
+        }
+
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                 .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto, isMobile))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -79,12 +91,39 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     @Override
     public Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(AuthRequestDto authByAbdmRequest) {
+        Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
+        if(redisResponse != null){
+            return redisResponse;
+        }
+
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                 .flatMap(transactionDto -> verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto, boolean isMobile) {
+    private Mono<AuthResponseDto> handleRedisABDMOtpVerification(AuthRequestDto authByAbdmRequest){
+        redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
+        if (redisOtp == null) {
+            throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
+        } else {
+            if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
+                throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            }
+            if (!Argon2Util.verify(redisOtp.getOtpValue(), authByAbdmRequest.getAuthData().getOtp().getOtpValue())) {
+                ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(redisOtp.getReceiver());
+                receiverOtpTracker.setVerifyOtpCount(receiverOtpTracker.getVerifyOtpCount() + 1);
+                redisService.saveReceiverOtpTracker(redisOtp.getReceiver(), receiverOtpTracker);
+
+                TransactionDto transactionDto = new TransactionDto();
+                transactionDto.setTxnId(UUID.fromString(authByAbdmRequest.getAuthData().getOtp().getTxnId()));
+                return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+            }
+        }
+        return null;
+    }
+
+    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto,
+                                                           boolean isMobile) {
         try {
             if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
@@ -112,7 +151,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         accountDto.setEmailVerified("Yes");
         accountDto.setEmailVerificationDate(now());
         accountDto.setUpdateDate(now());
-        
+        redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+        redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                 .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
                 .flatMap(accountDto1 -> prepareAuthByAdbmResponse(transactionDto, true, EMAIL_LINKED_SUCCESSFULLY));
@@ -126,6 +166,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 transactionDto.setMobileVerified(true);
                 return transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
                         .flatMap(transactionDtoResponse -> {
+                            redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+                            redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
                             return prepareAuthByAdbmResponse(transactionDto, true, OTP_VERIFIED_SUCCESSFULLY);
                         });
             } else {
@@ -136,12 +178,14 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
     }
 
-    private Mono<AuthResponseDto> updatePhoneNumberInAccountEntity(AccountDto accountDto, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> updatePhoneNumberInAccountEntity(AccountDto accountDto, TransactionDto
+            transactionDto) {
 
         transactionDto.setMobileVerified(Boolean.TRUE);
         accountDto.setMobile(transactionDto.getMobile());
         accountDto.setUpdateDate(now());
-
+        redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+        redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                 .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
                 .flatMap(accountDto1 -> updateAccountAuthMethodsWithMobileOtp(accountDto1.getHealthIdNumber()))
@@ -152,7 +196,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(abhaNumber, AccountAuthMethods.MOBILE_OTP.getValue())));
     }
 
-    private Mono<AuthResponseDto> prepareAuthByAdbmResponse(TransactionDto transactionDto, boolean status, String message) {
+    private Mono<AuthResponseDto> prepareAuthByAdbmResponse(TransactionDto transactionDto, boolean status, String
+            message) {
 
         AccountResponseDto accountResponseDto = null;
 
@@ -232,7 +277,9 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
     }
 
-    private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto authByAbdmRequest, List<AccountDto> accountDtoList, List<HidPhrAddressDto> phrAddressList, List<String> healthIdNumbers, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> handleAccountListResponse(AuthRequestDto
+                                                                    authByAbdmRequest, List<AccountDto> accountDtoList, List<HidPhrAddressDto> phrAddressList, List<String> healthIdNumbers, TransactionDto
+                                                                    transactionDto) {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
             transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
 
@@ -262,7 +309,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return accountResponseDtos;
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto
+                                                          authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)

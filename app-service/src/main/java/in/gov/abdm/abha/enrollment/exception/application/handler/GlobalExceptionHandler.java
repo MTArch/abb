@@ -1,8 +1,10 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
@@ -13,6 +15,7 @@ import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificati
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,10 +23,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -126,7 +127,28 @@ public class GlobalExceptionHandler {
      */
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(TransactionNotFoundException.class)
-    public Map<String,Object> transactionNotFound(TransactionNotFoundException ex) {
+    public Map<String, Object> transactionNotFound(TransactionNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
+
+    @ExceptionHandler(RedisConnectionFailureException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public Map<String, Object> redisConnectionFailureException(RedisConnectionFailureException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, EnrollErrorConstants.UNABLE_TO_CONNECT_TO_REDIS_PLEASE_TRY_AGAIN);
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
+
+
+    @ExceptionHandler(UnauthorizedUserToSendOrVerifyOtpException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public Map<String, Object> unauthorizedUserToSendOtpExceptionHandler(UnauthorizedUserToSendOrVerifyOtpException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(EXCEPTIONS, ex.getMessage());
@@ -135,14 +157,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * handling exception to show error message in case request body is un-expected 
+     * handling exception to show error message in case request body is un-expected
+     *
      * @param ex
      * @return
      */
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ErrorResponse> invalidRequest(InvalidRequestException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(new ErrorResponse(status,ex.getMessage()),status);
+        return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
     }
 
     /**
@@ -161,7 +184,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public Map<String, String> runtimeBadRequestHandler(BadRequestException ex) {
         LinkedHashMap<String, String> errorMap = ex.getErrors();
-        log.info(EXCEPTIONS+ ex.getErrors());
+        log.info(EXCEPTIONS + ex.getErrors());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }

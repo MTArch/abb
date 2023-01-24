@@ -3,8 +3,21 @@ server:
 spring:
   application:
     name: ${ENROLLMENT_APP_SERVICE_NAME}
+  redis:
+    database: 0
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+    timeout: 60000
+
+redis:
+  expireTimeInMinutes: 30
 
 enrollment:
+  otp:
+    userBlockTimeInMinutes: 30
+    maxSendOtpCount: 3
+    maxVerifyOtpCount: 3
   gateway:
     aadhaar:
       baseuri: ${AADHAAR_SERVICE_BASE_URI}
