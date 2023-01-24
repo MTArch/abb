@@ -29,7 +29,11 @@ public class AccountServiceImpl implements AccountService {
 	@Override
 	public Mono<AccountDto> addAccount(AccountDto accountDto) {
 		Accounts account = modelMapper.map(accountDto, Accounts.class);
-		return accountRepository.save(account).flatMap(acc -> updatePic(accountDto, acc));
+		return accountRepository.save(account.setAsNew()).flatMap(acc -> {
+			if(null != accountDto.getKycPhoto() || !accountDto.getKycPhoto().isEmpty())
+				updatePic(accountDto, acc);
+			return Mono.just(accountDto);
+		});
 	}
 
 	private Mono<AccountDto> updatePic(AccountDto accountDto, Accounts account) {
@@ -56,7 +60,11 @@ public class AccountServiceImpl implements AccountService {
 	public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
 		accountDto.setNewAccount(false);
 		Accounts account = modelMapper.map(accountDto, Accounts.class);
-		return accountRepository.save(account).flatMap(acc -> updatePic(accountDto, account));
+		return accountRepository.save(account).flatMap(acc -> {
+			if(null != accountDto.getKycPhoto() || !accountDto.getKycPhoto().isEmpty())
+				updatePic(accountDto, account);
+			return Mono.just(accountDto);
+		});
 	}
 
 	@Override
