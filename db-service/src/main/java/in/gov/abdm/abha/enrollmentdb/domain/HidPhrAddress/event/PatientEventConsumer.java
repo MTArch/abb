@@ -36,10 +36,10 @@ public class PatientEventConsumer implements EventConsumer {
         try {
             SyncAcknowledgement syncAcknowledgement = mapper.readValue(message, SyncAcknowledgement.class);
             log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM + requestId);
-            syncAcknowledgementService.updatePatientAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()),syncAcknowledgement)
-                    .subscribe(syncAcknowledgementUpdated -> {
-                        log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_HIECM + syncAcknowledgementUpdated.getHidPhrAddress());
-                    });
+//            syncAcknowledgementService.updatePatientAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()),syncAcknowledgement)
+//                    .subscribe(syncAcknowledgementUpdated -> {
+//                        log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_HIECM + syncAcknowledgementUpdated.getHidPhrAddress());
+//                    });
         }
         catch (Exception exception) {
             log.error(exception.getMessage());

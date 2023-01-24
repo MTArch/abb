@@ -73,7 +73,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                     syncAcknowledgement.setHidPhrAddress(hidPhrAddressAdded.getPhrAddress());
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
-                    syncAcknowledgementService.addNewAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
+//                    syncAcknowledgementService.addNewAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
                     return Mono.just(hidPhrAddressAdded);
                 })
                 .flatMap(this::findAccountFromHidPhrAddress)

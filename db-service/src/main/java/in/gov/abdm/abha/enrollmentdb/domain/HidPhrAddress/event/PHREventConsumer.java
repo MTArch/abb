@@ -40,10 +40,10 @@ public class PHREventConsumer implements EventConsumer {
         try {
             SyncAcknowledgement syncAcknowledgement = mapper.readValue(message, SyncAcknowledgement.class);
             log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_PHR + requestId);
-            syncAcknowledgementService.updatePhrAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement)
-                    .subscribe(syncAcknowledgementUpdated -> {
-                        log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_PHR + syncAcknowledgementUpdated.getHidPhrAddress());
-                    });
+//            syncAcknowledgementService.updatePhrAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement)
+//                    .subscribe(syncAcknowledgementUpdated -> {
+//                        log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_PHR + syncAcknowledgementUpdated.getHidPhrAddress());
+//                    });
         }
         catch (Exception exception) {
             log.error(exception.getMessage());
