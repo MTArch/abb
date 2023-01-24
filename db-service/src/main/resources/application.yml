@@ -12,7 +12,7 @@ spring:
     password: ${DB_PASSWORD}
 kafka:
   group:
-    id: ${KAFKA_PHR_GROUP_ID}
+    id: ${KAFKA_GROUP_ID}
   abha:
     patient:
       sync:
