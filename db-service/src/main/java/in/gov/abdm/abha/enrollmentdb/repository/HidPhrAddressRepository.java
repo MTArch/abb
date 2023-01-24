@@ -2,14 +2,14 @@ package in.gov.abdm.abha.enrollmentdb.repository;
 import java.util.List;
 import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
 import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface HidPhrAddressRepository extends ReactiveCrudRepository<HidPhrAddress, Long> {
+public interface HidPhrAddressRepository extends R2dbcRepository<HidPhrAddress, Long> {
 
 	Flux<HidPhrAddress> findByHealthIdNumberInAndPreferredIn(List<String> healthIdNumbers, List<Integer> preferred);
 	Flux<HidPhrAddress> findByPhrAddressIn(List<String> phrAddress);

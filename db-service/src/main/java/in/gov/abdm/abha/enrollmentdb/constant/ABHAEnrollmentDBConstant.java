@@ -39,4 +39,17 @@ public interface ABHAEnrollmentDBConstant {
     String GET_ACCOUNT_BY_DOCUMENT_CODE = "/documentCode/{documentCode}";
 
     String ACCOUNT_AUTH_METHODS_ENDPOINT = API_VERSION + "/accountauthmethods";
+    public static final String KAFKA_SERVER = "${spring.kafka.bootstrap-servers}";
+    public static final String REQUEST_DETAILS = " HEALTH ID : ";
+    public static final String TIMESTAMP = " TIMESTAMP : ";
+    public static final String PATIENT_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_patient = :isSyncedWithPatient WHERE request_id = :requestId and health_id_number = :healthIdNumber";
+    public static final String PHR_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_phr = :isSyncedWithPhr WHERE request_id = :requestId and health_id_number = :healthIdNumber";
+    public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM = "Received sync acknowledgement from HIECM with the request ID: ";
+    public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_HIECM = "Updated the status of synchronization at HIECM end for the patient with PHR/ABHA address: ";
+    public static final String MSG_ABHA_PUBLISH_PATIENT_TO_HIECM = "Published event to be consumed by HIECM system to add a new patient.";
+    public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_PHR = "Received sync acknowledgement from PHR with the request ID: ";
+    public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_PHR = "Updated the status of synchronization at ABHA end for the user with PHR/ABHA address: ";
+    public static final String MSG_ABHA_PUBLISH_USER_TO_PHR = "User about to be published from ABHA";
+    public static final String MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR = "User published to PHR successfully from ABHA";
+    public static final String MSG_SYNC_ACKNOWLEDGMENT_ADDED_ABHA = "Acknowledgment object added at ABHA system with request id: ";
 }

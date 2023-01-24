@@ -1,6 +1,8 @@
 server:
   port: ${ENROLLMENT_DB_SERVICE_PORT}
 spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVICE_URL}
   application:
     name: ${ENROLLMENT_DB_SERVICE_NAME}
     
@@ -8,3 +10,22 @@ spring:
     url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+kafka:
+  group:
+    id: ${KAFKA_PHR_GROUP_ID}
+  abha:
+    patient:
+      sync:
+        topic: ${KAFKA_ABHA_PATIENT_SYNC_TOPIC}
+        ack:
+          topic: ${KAFKA_ABHA_PATIENT_SYNC_ACK_TOPIC}
+    phr:
+      sync:
+        topic: ${KAFKA_ABHA_PHR_SYNC_TOPIC}
+        ack:
+          topic: ${KAFKA_ABHA_PHR_SYNC_ACK_TOPIC}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_KEYS}

@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -307,6 +309,13 @@ public class Accounts implements Persistable<String>{
     @NotNull(message = FIELD_BLANK_ERROR_MSG)
     private AbhaType type;
     
+    /**
+     * HID PHR Address DTO object for Kafka implementation
+     */
+    @JsonIgnore
+    @Transient
+    private HidPhrAddress hidPhrAddress;
+
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.
      */
