@@ -117,7 +117,7 @@
         <dependency>
             <groupId>in.gov.abdm</groupId>
             <artifactId>abdm-phr</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>in.gov.abdm</groupId>
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>in.gov.abdm</groupId>
             <artifactId>abdm-process</artifactId>
-            <version>1.0.8</version>
+            <version>1.0.9</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
