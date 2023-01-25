@@ -46,8 +46,12 @@ public class GeneralUtils {
         return isOTPExpire;
     }
 
-    public String documentChecksum(String documentId){
-        return DigestUtils.md5Hex(documentId);
+    public String documentChecksum(String documentType, String documentId){
+        return DigestUtils.md5Hex(documentType.concat("-").concat(documentId));
+    }
+
+    public String removeSpecialChar(String str) {
+        return str.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
     }
 }
 

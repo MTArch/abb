@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
     public Map<String, Object> redisConnectionFailureException(RedisConnectionFailureException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(StringConstants.MESSAGE, EnrollErrorConstants.UNABLE_TO_CONNECT_TO_REDIS_PLEASE_TRY_AGAIN);
-        log.info(EXCEPTIONS, ex.getMessage());
+        log.info(EXCEPTIONS, EnrollErrorConstants.UNABLE_TO_CONNECT_TO_REDIS_PLEASE_TRY_AGAIN);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }

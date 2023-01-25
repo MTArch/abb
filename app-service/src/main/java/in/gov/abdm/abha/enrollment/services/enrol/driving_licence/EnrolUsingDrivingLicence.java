@@ -81,12 +81,13 @@ public class EnrolUsingDrivingLicence {
     LGDClient lgdClient;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
                 .flatMap(txnDto -> {
                     log.info(TRANSACTION + txnDto.getTxnId() + FOUND);
                     if (txnDto.isMobileVerified()) {
                         log.info(MOBILE_NUMBER_IS_VERIFIED);
-                        return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentId()))
+                        return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                                 .flatMap(accountDto -> {
                                     log.info(FOUND_ACCOUNT + accountDto.getHealthIdNumber() + WITH_SAME_DL + enrolByDocumentRequestDto.getDocumentId() + CLOSING);
                                     return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> {
@@ -155,7 +156,7 @@ public class EnrolUsingDrivingLicence {
                 .kycPhoto(StringConstants.EMPTY)
                 .consentVersion(enrolByDocumentRequestDto.getConsent().getVersion())
                 .consentDate(LocalDateTime.now())
-                .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentId()))
+                .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                 .healthId(defaultAbhaAddress)
                 .build();
 
@@ -227,14 +228,16 @@ public class EnrolUsingDrivingLicence {
                 .firstName(accountDto.getFirstName())
                 .middleName(accountDto.getMiddleName())
                 .lastName(accountDto.getLastName())
-                .dob(accountDto.getDayOfBirth())
+                .dob(accountDto.getYearOfBirth() + StringConstants.DASH
+                        + accountDto.getMonthOfBirth() + StringConstants.DASH
+                        + accountDto.getDayOfBirth())
                 .gender(accountDto.getGender())
                 .mobile(accountDto.getMobile())
                 .email(accountDto.getEmail())
                 .address(accountDto.getAddress())
                 .districtCode(accountDto.getDistrictCode())
                 .stateCode(accountDto.getStateCode())
-                .abhaType(StringUtils.upperCase(accountDto.getType().getValue()))
+                .abhaType(accountDto.getType() == null ? null : StringUtils.upperCase(accountDto.getType().getValue()))
                 .pinCode(accountDto.getPincode())
                 .state(accountDto.getStateName())
                 .district(accountDto.getDistrictName())
