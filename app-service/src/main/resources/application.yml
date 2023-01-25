@@ -15,7 +15,7 @@ redis:
 
 enrollment:
   otp:
-    userBlockTimeInMinutes: 30
+    userBlockTimeInMinutes: 5
     maxSendOtpCount: 3
     maxVerifyOtpCount: 3
   gateway:
