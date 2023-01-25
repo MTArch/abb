@@ -114,6 +114,21 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-phr</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-hiecm</artifactId>
+            <version>1.0.35</version>
+        </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-process</artifactId>
+            <version>1.0.8</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
