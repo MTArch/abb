@@ -301,5 +301,6 @@ public class AccountDto {
      * kyc photo of abha user
      */
     private String kycPhoto;
-    
+
+    private String profilePhoto;
 }

@@ -107,6 +107,7 @@ public class AccountServiceImpl implements AccountService {
             if (accountDto.getKycPhoto() == null) {
                 newUser.setKycPhoto(transactionDto.getKycPhoto());
             }
+            newUser.setProfilePhoto(transactionDto.getKycPhoto());
             if (!StringUtils.isBlank(transactionDto.getPincode())) {
                 newUser.setPincode(transactionDto.getPincode());
             }
@@ -117,7 +118,6 @@ public class AccountServiceImpl implements AccountService {
             newUser.setVerificationType(AbhaConstants.AADHAAR);
             newUser.setVerificationStatus(AbhaConstants.VERIFIED);
 
-            //TODO LGD service implementation
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
 
             newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
@@ -129,10 +129,6 @@ public class AccountServiceImpl implements AccountService {
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
             newUser.setTownName(transactionDto.getTownName());
             newUser.setXmlUID(transactionDto.getXmluid());
-            //TODO email settings
-//            if (!StringUtils.isBlank(accountRequest.getEmail())) {
-//                newUser.setEmail(accountRequest.getEmail());
-//            }
             if (!StringUtils.isBlank(transactionDto.getEmail())) {
                 newUser.setEmail(transactionDto.getEmail());
             }

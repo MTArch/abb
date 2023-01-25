@@ -1,30 +1,35 @@
 package in.gov.abdm.abha.enrollmentdb.repository;
 
-import java.util.List;
-
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
-import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 
 @Repository
-public interface AccountRepository extends R2dbcRepository<Accounts, String> {
-     Mono<Accounts> findByXmluid(@Param("xmluid") String xmluid);
+public interface AccountRepository extends ReactiveCrudRepository<Accounts, String> {
+    @Query(value = "INSERT INTO accounts (health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, first_name, gender, health_id, kycdob, kyc_photo, profile_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, pincode, state_code, state_name, status, update_date, xmluid , year_of_birth, consent_date, email_verification_date, email_verified, lst_updated_by, consent_version, type) VALUES (:#{#account.healthIdNumber},:#{#account.address},:#{#account.origin},:#{#account.createdDate},:#{#account.dayOfBirth},:#{#account.districtCode},:#{#account.districtName},:#{#account.email},:#{#account.firstName},:#{#account.gender},:#{#account.healthId},:#{#account.kycdob},lo_from_bytea(0, convert_to(:#{#account.kycPhoto}, 'utf8')),lo_from_bytea(0, convert_to(:#{#account.profilePhoto}, 'utf8')),:#{#account.kycVerified },:#{#account.lastName},:#{#account.middleName},:#{#account.mobile},:#{#account.monthOfBirth},:#{#account.name},:#{#account.okycVerified},:#{#account.pincode},:#{#account.stateCode},:#{#account.stateName},:#{#account.status},:#{#account.updateDate},:#{#account.xmluid},:#{#account.yearOfBirth},:#{#account.consentDate},:#{#account.emailVerificationDate},:#{#account.emailVerified},:#{#account.lstUpdatedBy},:#{#account.consentVersion},:#{#account.type})")
+    Mono<Accounts> saveAccounts(@Param("account") Accounts accounts);
 
-     Flux<Accounts> findByHealthIdNumberIn(List<String> healthIdNumbers);
+    @Query(value = "UPDATE accounts SET health_id_number=:#{#account.healthIdNumber}, address=:#{#account.address}, origin=:#{#account.origin}, created_date=:#{#account.createdDate}, day_of_birth=:#{#account.dayOfBirth}, district_code=:#{#account.districtCode}, district_name=:#{#account.districtName}, email=:#{#account.email}, first_name=:#{#account.firstName}, gender=:#{#account.gender}, health_id=:#{#account.healthId}, kycdob=:#{#account.kycdob}, kyc_photo=lo_from_bytea(0, convert_to(:#{#account.kycPhoto}, 'utf8')), profile_photo=lo_from_bytea(0, convert_to(:#{#account.profilePhoto}, 'utf8')), kyc_verified=:#{#account.kycVerified}, last_name=:#{#account.lastName}, middle_name=:#{#account.middleName}, mobile=:#{#account.mobile}, month_of_birth=:#{#account.monthOfBirth}, name=:#{#account.name}, okyc_verified=:#{#account.okycVerified}, pincode=:#{#account.pincode}, state_code=:#{#account.stateCode}, state_name=:#{#account.stateName}, status=:#{#account.status}, update_date=:#{#account.updateDate}, xmluid=:#{#account.xmluid}, year_of_birth=:#{#account.yearOfBirth}, consent_date=:#{#account.consentDate}, email_verification_date=:#{#account.emailVerificationDate}, email_verified=:#{#account.emailVerified}, lst_updated_by=:#{#account.lstUpdatedBy}, consent_version=:#{#account.consentVersion}, type=:#{#account.type} where health_id_number = :healthIdNumber")
+    Mono<Accounts> updateAccounts(@Param("healthIdNumber") String healthIdNumber, @Param("account") Accounts accounts);
 
-     @Query(value = "SELECT encode(lo_get(kyc_photo), 'base64') FROM accounts a where a.health_id_number = :healthIdNumber")
-     Mono<String> getProfilePhoto(@Param("healthIdNumber") String healthIdNumber);
+    @Query(value = "SELECT health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, facility_id, first_name, gender, health_id, kycdob, encode(lo_get(kyc_photo), 'escape') as kyc_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, password, pincode, encode(lo_get(profile_photo), 'escape') as profile_photo, state_code, state_name, status, sub_district_code, subdistrict_name, town_code, town_name, update_date, village_code, village_name, ward_code, ward_name, hip_id, xmluid as xmlUID, year_of_birth, consent_date, profile_photo_compressed, email_verification_date, email_verified, document_code, verification_status, verification_type, lst_updated_by, consent_version, cm_migrated, phr_migrated, health_worker_mobile, health_worker_name, mobile_type, type, mig_denom FROM accounts a where a.health_id_number = :healthIdNumber")
+    Mono<Accounts> getAccountsByHealthIdNumber(@Param("healthIdNumber") String healthIdNumber);
 
-    Mono<Accounts> findByDocumentCode(@Param("documentCode") String documentCode);
+    @Query(value = "SELECT health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, facility_id, first_name, gender, health_id, kycdob, encode(lo_get(kyc_photo), 'escape') as kyc_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, password, pincode, encode(lo_get(profile_photo), 'escape') as profile_photo, state_code, state_name, status, sub_district_code, subdistrict_name, town_code, town_name, update_date, village_code, village_name, ward_code, ward_name, hip_id, xmluid as xmlUID, year_of_birth, consent_date, profile_photo_compressed, email_verification_date, email_verified, document_code, verification_status, verification_type, lst_updated_by, consent_version, cm_migrated, phr_migrated, health_worker_mobile, health_worker_name, mobile_type, type, mig_denom FROM accounts a where a.health_id_number in (:healthIdNumbers)")
+    Flux<Accounts> getAccountsByHealthIdNumbers(@Param("healthIdNumber") List<String> healthIdNumbers);
 
-    @Query(value = "UPDATE accounts SET kyc_photo=lo_from_bytea(0, :kycPhoto) where health_id_number = :healthIdNumber")
-    Mono<AccountDto> updateKycPhoto(@Param("kycPhoto") byte[] kycPhoto, @Param("healthIdNumber") String healthIdNumber);
+    @Query(value = "SELECT health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, facility_id, first_name, gender, health_id, kycdob, encode(lo_get(kyc_photo), 'escape') as kyc_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, password, pincode, encode(lo_get(profile_photo), 'escape') as profile_photo, state_code, state_name, status, sub_district_code, subdistrict_name, town_code, town_name, update_date, village_code, village_name, ward_code, ward_name, hip_id, xmluid as xmlUID, year_of_birth, consent_date, profile_photo_compressed, email_verification_date, email_verified, document_code, verification_status, verification_type, lst_updated_by, consent_version, cm_migrated, phr_migrated, health_worker_mobile, health_worker_name, mobile_type, type, mig_denom FROM accounts a where a.xmluid = :xmluid")
+    Mono<Accounts> getAccountsByXmluid(@Param("xmluid") String xmluid);
+
+    @Query(value = "SELECT health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, facility_id, first_name, gender, health_id, kycdob, encode(lo_get(kyc_photo), 'escape') as kyc_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, password, pincode, encode(lo_get(profile_photo), 'escape') as profile_photo, state_code, state_name, status, sub_district_code, subdistrict_name, town_code, town_name, update_date, village_code, village_name, ward_code, ward_name, hip_id, xmluid as xmlUID, year_of_birth, consent_date, profile_photo_compressed, email_verification_date, email_verified, document_code, verification_status, verification_type, lst_updated_by, consent_version, cm_migrated, phr_migrated, health_worker_mobile, health_worker_name, mobile_type, type, mig_denom FROM accounts a where a.document_code = :documentCode")
+    Mono<Accounts> getAccountsByDocumentCode(@Param("documentCode") String documentCode);
 }

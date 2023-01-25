@@ -101,7 +101,7 @@ public class Accounts implements Persistable<String>{
 //	@Basic(fetch = LAZY)
 //	@Lob
 //	@Type(type = "org.hibernate.type.BinaryType")
-//	private byte[] kycPhoto;
+	private String kycPhoto;
 
 	/**
      * kyc verified flag for user
@@ -154,7 +154,7 @@ public class Accounts implements Persistable<String>{
 //    @Basic(fetch = LAZY)
 //	@Lob
 //	@Column(name = "profile_photo")
-//    private byte[] profilePhoto;
+    private String profilePhoto;
 
     /**
      * state code of abha user

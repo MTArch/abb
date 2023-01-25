@@ -1,11 +1,11 @@
 package in.gov.abdm.abha.enrollmentdb.model.account;
 
-import java.time.LocalDateTime;
-
 import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * Data Transfer Object for Account
@@ -285,5 +285,9 @@ public class AccountDto {
      * kyc photo of abha user
      */
     private String kycPhoto;
-    
+
+    /**
+     * profile photo of abha user
+     */
+    private String profilePhoto;
 }

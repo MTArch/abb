@@ -148,7 +148,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
         transactionDto.setEmailVerified(Boolean.TRUE);
         accountDto.setEmail(transactionDto.getEmail());
-        accountDto.setEmailVerified("Yes");
+        accountDto.setEmailVerified(transactionDto.getEmail());
         accountDto.setEmailVerificationDate(now());
         accountDto.setUpdateDate(now());
         redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
