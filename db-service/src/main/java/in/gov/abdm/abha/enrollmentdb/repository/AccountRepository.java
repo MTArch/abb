@@ -1,11 +1,9 @@
 package in.gov.abdm.abha.enrollmentdb.repository;
 
-import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,7 +12,7 @@ import java.util.List;
 
 
 @Repository
-public interface AccountRepository extends ReactiveCrudRepository<Accounts, String> {
+public interface AccountRepository extends R2dbcRepository<Accounts, String> {
     @Query(value = "INSERT INTO accounts (health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, first_name, gender, health_id, kycdob, kyc_photo, profile_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, pincode, state_code, state_name, status, update_date, xmluid , year_of_birth, consent_date, email_verification_date, email_verified, lst_updated_by, consent_version, type) VALUES (:#{#account.healthIdNumber},:#{#account.address},:#{#account.origin},:#{#account.createdDate},:#{#account.dayOfBirth},:#{#account.districtCode},:#{#account.districtName},:#{#account.email},:#{#account.firstName},:#{#account.gender},:#{#account.healthId},:#{#account.kycdob},lo_from_bytea(0, convert_to(:#{#account.kycPhoto}, 'utf8')),lo_from_bytea(0, convert_to(:#{#account.profilePhoto}, 'utf8')),:#{#account.kycVerified },:#{#account.lastName},:#{#account.middleName},:#{#account.mobile},:#{#account.monthOfBirth},:#{#account.name},:#{#account.okycVerified},:#{#account.pincode},:#{#account.stateCode},:#{#account.stateName},:#{#account.status},:#{#account.updateDate},:#{#account.xmluid},:#{#account.yearOfBirth},:#{#account.consentDate},:#{#account.emailVerificationDate},:#{#account.emailVerified},:#{#account.lstUpdatedBy},:#{#account.consentVersion},:#{#account.type})")
     Mono<Accounts> saveAccounts(@Param("account") Accounts accounts);
 
