@@ -49,7 +49,7 @@ public class AuthController {
         else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest, Boolean.FALSE);
         } else {
-            throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+            throw new InvalidRequestException();
         }
     }
 

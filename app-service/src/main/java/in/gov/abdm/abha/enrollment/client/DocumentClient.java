@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
@@ -58,7 +58,7 @@ public class DocumentClient {
                 .retrieve()
                 .bodyToMono(VerifyDLResponse.class)
                 .onErrorResume(error -> {
-                    throw new GenericExceptionMessage(EnrollErrorConstants.EXCEPTION_OCCURRED_WHILE_COMMUNICATING_WITH_DL_GATEWAY_PLEASE_TRY_AGAIN);
+                    throw new DocumentGatewayUnavailableException();
                 });
     }
 

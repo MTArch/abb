@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +65,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                         }));
                     }
                     else {
-                        throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                        throw new AbhaUnAuthorizedException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
                     }
                 });
     }
@@ -82,7 +84,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
                 boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
                 if(!flag1 || !flag2) {
-                    throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+					throw new AbhaUnAuthorizedException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
                 }
             }
             return Mono.just(true);

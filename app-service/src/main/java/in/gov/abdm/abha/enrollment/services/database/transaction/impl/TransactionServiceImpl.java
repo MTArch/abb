@@ -22,7 +22,7 @@ import java.util.Base64;
 
 @Service
 @Slf4j
-public class TransactionServiceImpl implements TransactionService {
+public class TransactionServiceImpl extends AbhaDBClient implements TransactionService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
@@ -111,21 +111,21 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto) {
-        return abhaDBClient.addEntity(TransactionDto.class, transactionDto);
+        return addEntity(TransactionDto.class, transactionDto);
     }
 
     @Override
     public Mono<TransactionDto> findTransactionDetailsFromDB(String txnId) {
-        return abhaDBClient.getEntityById(TransactionDto.class, txnId);
+        return getEntityById(TransactionDto.class, txnId);
     }
 
     @Override
     public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
-        return abhaDBClient.updateEntity(TransactionDto.class, transactionDto, transactionId);
+        return updateEntity(TransactionDto.class, transactionDto, transactionId);
     }
 
     @Override
     public Mono<ResponseEntity<Void>> deleteTransactionEntity(String transactionId) {
-        return abhaDBClient.deleteEntity(TransactionDto.class, transactionId);
+        return deleteEntity(TransactionDto.class, transactionId);
     }
 }

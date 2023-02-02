@@ -1,25 +1,8 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -33,7 +16,6 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,18 +31,15 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
-    @Autowired
-    AbhaDBClient abhaDBClient;
-
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
-        return abhaDBClient.getEntityById(AccountDto.class, xmlUid);
+        return getEntityById(AccountDto.class, xmlUid);
     }
 
     @Override
@@ -201,17 +180,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
-        return abhaDBClient.getAccountEntityById(AccountDto.class, healthIdNumber);
+        return getAccountEntityById(AccountDto.class, healthIdNumber);
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
-        return abhaDBClient.updateEntity(AccountDto.class, accountDto, healthIdNumber);
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        return updateEntity(AccountDto.class, accountDto, healthIdNumber);
     }
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
-        return abhaDBClient.getAccountEntityByDocumentCode(AccountDto.class, documentCode);
+        return getAccountEntityByDocumentCode(AccountDto.class, documentCode);
     }
 
     @Override
@@ -223,7 +203,7 @@ public class AccountServiceImpl implements AccountService {
 				.append(StringConstants.EQUAL)
 				.append(healthIdNumbers.stream().collect(Collectors.joining(",")));
 
-		return abhaDBClient.GetFluxDatabase(AccountDto.class, sb.toString());
+		return GetFluxDatabase(AccountDto.class, sb.toString());
     }
 
     private void breakName(AccountDto accountDto) {
@@ -280,10 +260,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Mono<AccountDto> createAccountEntity(AccountDto accountDto) {
-        //TODO Call to DB service to save entity
-
         accountDto.setNewAccount(true);
-
-        return abhaDBClient.addEntity(AccountDto.class, accountDto);
+        accountDto.setOrigin(ContextHolder.getClientId());
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        return addEntity(AccountDto.class, accountDto);
     }
 }

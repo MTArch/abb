@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -73,7 +72,7 @@ public class OtpRequestController {
         }
         // other case
         else {
-            throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+            throw new InvalidRequestException();
         }
     }
 }
