@@ -26,7 +26,12 @@ public class PatientEventPublisher implements EventPublisher {
 
     @Override
     public void publish(Patient patient, String requestId) {
-        kafkaTemplate.send(patientTopic, requestId, patient);
-        log.info(MSG_ABHA_PUBLISH_PATIENT_TO_HIECM);
+        try {
+            kafkaTemplate.send(patientTopic, requestId, patient);
+            log.info(MSG_ABHA_PUBLISH_PATIENT_TO_HIECM);
+        }
+        catch (Exception exception) {
+            log.error(exception.getMessage());
+        }
     }
 }
