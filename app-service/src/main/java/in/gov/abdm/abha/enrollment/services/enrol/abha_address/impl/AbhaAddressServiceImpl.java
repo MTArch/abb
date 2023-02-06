@@ -1,14 +1,16 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
+
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaOkException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.AbhaAddressResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbhaResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -16,11 +18,12 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
+import in.gov.abdm.error.ABDMError;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -185,13 +188,13 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                         return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+"@abdm")
                                                 .flatMap(hidPhrAddressDto ->
                                                 {
-                                                    if(StringUtils.isEmpty(hidPhrAddressDto))
+                                                    if(StringUtils.isEmpty(hidPhrAddressDto.getHealthIdNumber()))
                                                     {
                                                         return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
                                                     }
                                                     else
                                                     {
-                                                        throw new GenericExceptionMessage(AbhaConstants.ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE);
+                                                        throw new AbhaConflictException(ABDMError.ABHA_ADDRESS_EXIST.getCode(), ABDMError.ABHA_ADDRESS_EXIST.getMessage());
                                                     }
                                                 }).switchIfEmpty(Mono.defer(()-> {
                                                     return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);

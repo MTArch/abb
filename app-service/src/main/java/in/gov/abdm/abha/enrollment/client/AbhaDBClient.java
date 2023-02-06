@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.client;
 
-import java.util.List;
-
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -9,12 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Component
 public class AbhaDBClient<T> {
@@ -38,7 +36,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -55,7 +53,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -69,7 +67,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -84,7 +82,7 @@ public class AbhaDBClient<T> {
                 .bodyToFlux(t)
                 .collectList()
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -101,7 +99,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -126,7 +124,7 @@ public class AbhaDBClient<T> {
         return Mono.empty();
     }
 
-    public Mono<T> getAccountEntityById(Class<T> t, String id) {
+    protected Mono<T> getAccountEntityById(Class<T> t, String id) {
         switch (t.getSimpleName()) {
             case "AccountDto":
                 return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER + id);
@@ -134,11 +132,11 @@ public class AbhaDBClient<T> {
         return Mono.empty();
     }
 
-    public Mono<T> getAccountEntityByDocumentCode(Class<T> t, String documentCode) {
+    protected Mono<T> getAccountEntityByDocumentCode(Class<T> t, String documentCode) {
         return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_DOCUMENT_CODE + documentCode);
     }
 
-    public Mono<T> addEntity(Class<T> t, T row) {
+    protected Mono<T> addEntity(Class<T> t, T row) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_TRANSACTION_URI, row);
@@ -152,7 +150,7 @@ public class AbhaDBClient<T> {
         return Mono.empty();
     }
 
-    public Mono<T> updateEntity(Class<T> t, T row, String id) {
+    protected Mono<T> updateEntity(Class<T> t, T row, String id) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return monoPatchDatabase(t, URIConstant.DB_UPDATE_TRANSACTION_URI, row, id);
@@ -176,7 +174,7 @@ public class AbhaDBClient<T> {
         return fluxPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT, rows);
     }
 
-    public Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {
+    private Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {
         return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
                 .build()
                 .delete()
@@ -185,7 +183,7 @@ public class AbhaDBClient<T> {
                 .toBodilessEntity();
     }
 
-    public Mono<ResponseEntity<Void>> deleteEntity(Class<T> t, String id) {
+    protected Mono<ResponseEntity<Void>> deleteEntity(Class<T> t, String id) {
         switch (t.getSimpleName()) {
             case "TransactionDto":
                 return deleteDatabaseRow(t, URIConstant.DB_DELETE_TRANSACTION_URI + id);

@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.DependentAccountRelationshipDto;
@@ -63,7 +64,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                         }));
                     }
                     else {
-                        throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+                        throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
                     }
                 });
     }
@@ -82,7 +83,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
                 boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
                 if(!flag1 || !flag2) {
-                    throw new ParentLinkingFailedException(AbhaConstants.INVALID_LINK_REQUEST_EXCEPTION_MESSAGE);
+					throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
                 }
             }
             return Mono.just(true);

@@ -86,6 +86,8 @@ public interface AbhaConstants {
 
     String INVALID_REQUEST = "Bad request, check request before retrying";
 
+    String INVALID_CLIENT_ID_IN_HEADERS = "Bad request, invalid clientId in headers.";
+
     String DRIVING_LICENCE = "DRIVING_LICENCE";
 
     String PROVISIONAL = "PROVISIONAL";
@@ -128,6 +130,7 @@ public interface AbhaConstants {
     
     String VERIFIED = "VERIFIED";
 
+    String DOCUMENT_TYPE = "documentType";
 
     String VALIDATION_ERROR_ABHA_ADDRESS_FIELD = "Invalid Abha Address";
 

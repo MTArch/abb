@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +14,7 @@ import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
@@ -84,9 +85,9 @@ public class AuthByAadhaarService {
         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
                 accountDto.getDayOfBirth());
         if (age < 18 )
-        	throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER);
+        	throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER.getCode(), ABDMError.CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER.getMessage());
         if(accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber()))
-        	throw new GenericExceptionMessage(CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER);
+            throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER.getCode(), ABDMError.CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER.getMessage());
         
         Flux<String> fluxPhrAaddress = hidPhrAddressService
 				.getHidPhrAddressByHealthIdNumbersAndPreferredIn(new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),

@@ -1,15 +1,15 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -49,7 +49,7 @@ public class AuthController {
         else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest, Boolean.FALSE);
         } else {
-            throw new InvalidRequestException(AbhaConstants.INVALID_REQUEST);
+            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(),ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
     }
 

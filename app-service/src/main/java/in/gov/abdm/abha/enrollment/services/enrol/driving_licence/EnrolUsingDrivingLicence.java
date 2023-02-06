@@ -3,15 +3,14 @@ package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 import in.gov.abdm.abha.enrollment.client.DocumentClient;
 import in.gov.abdm.abha.enrollment.client.LGDClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
@@ -24,9 +23,9 @@ import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddress
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
-import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
+import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -105,7 +102,7 @@ public class EnrolUsingDrivingLicence {
                                 }));
                     } else {
                         log.info(MOBILE_NUMBER_NOT_VERIFIED);
-                        throw new GenericExceptionMessage(MOBILE_NUMBER_VERIFICATION_IS_PENDING);
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getMessage());
                     }
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
@@ -123,7 +120,7 @@ public class EnrolUsingDrivingLicence {
             } else {
                 //failure response
                 log.info(DL_DETAILS_NOT_VERIFIED);
-                throw new GenericExceptionMessage(verifyDLResponse.getMessage());
+                throw new AbhaUnProcessableException(ABDMError.DRIVING_LICENSE_EXCEPTIONS.getCode(), verifyDLResponse.getMessage());
             }
         });
     }
@@ -186,15 +183,15 @@ public class EnrolUsingDrivingLicence {
                                             return prepareErolByDLResponse(accountDto);
                                         });
                                     } else {
-                                        throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                                        throw new AbhaDBGatewayUnavailableException();
                                     }
                                 });
                             } else {
-                                throw new GenericExceptionMessage(FAILED_TO_STORE_DOCUMENTS);
+                                throw new DocumentGatewayUnavailableException();
                             }
                         });
                     } else {
-                        throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                        throw new AbhaDBGatewayUnavailableException();
                     }
                 });
             });
