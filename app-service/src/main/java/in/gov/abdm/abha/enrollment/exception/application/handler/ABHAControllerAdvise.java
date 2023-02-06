@@ -37,6 +37,7 @@ import java.util.Map;
 public class ABHAControllerAdvise {
 
     private static final String FEIGN = "feign";
+    private static final String BAD_REQUEST = "BAD_REQUEST";
     private static final String MESSAGE = "\"message\":";
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
@@ -78,11 +79,17 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
         } else if (exception.getClass().getPackageName().equals(FEIGN) && exception.getMessage().contains(MESSAGE)) {
             return handleFienClientExceptions(exception);
+        } else if (exception.getMessage().contains(BAD_REQUEST)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
             );
         }
+    }
+
+    private Mono<ErrorResponse> handleAbdmException(ABDMError error){
+        return ABDMControllerAdvise.handleException(new Exception(error.getCode() + error.getMessage()));
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -95,7 +102,7 @@ public class ABHAControllerAdvise {
             errorMessage = AADHAAR_ERROR_PREFIX + ex.getMessage() + StringConstants.COLON + AadhaarErrorCodes.valueOf("OTHER_ERROR").getValue();
         }
         log.info(errorMessage);
-        return prepareCustomErrorResponse(ABDMError.AADHAAR_EXCEPTIONS.getCode(), errorMessage);
+        return prepareCustomErrorResponse(ABDMError.AADHAAR_EXCEPTIONS.getCode().split(":")[0], errorMessage);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
