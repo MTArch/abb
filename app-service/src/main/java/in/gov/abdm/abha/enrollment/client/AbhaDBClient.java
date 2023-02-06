@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,7 +36,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -54,7 +53,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -68,7 +67,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -83,7 +82,7 @@ public class AbhaDBClient<T> {
                 .bodyToFlux(t)
                 .collectList()
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 
@@ -100,7 +99,7 @@ public class AbhaDBClient<T> {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new AbhaDBGatewayUnavailableException();
                 });
     }
 

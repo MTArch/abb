@@ -3,9 +3,11 @@ package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaOkException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.AbhaAddressResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbhaResponseDto;
@@ -192,7 +194,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                                     }
                                                     else
                                                     {
-                                                        throw new AbhaUnProcessableException(ABDMError.ABHA_ADDRESS_EXIST.getCode(), ABDMError.ABHA_ADDRESS_EXIST.getMessage());
+                                                        throw new AbhaConflictException(ABDMError.ABHA_ADDRESS_EXIST.getCode(), ABDMError.ABHA_ADDRESS_EXIST.getMessage());
                                                     }
                                                 }).switchIfEmpty(Mono.defer(()-> {
                                                     return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
