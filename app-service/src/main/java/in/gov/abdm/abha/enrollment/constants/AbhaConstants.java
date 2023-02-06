@@ -138,4 +138,5 @@ public interface AbhaConstants {
 
     String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
 
+    String SENT = "sent";
 }

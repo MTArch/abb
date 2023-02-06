@@ -104,11 +104,9 @@ public class EnrolUsingDrivingLicence {
                                             log.info(TRANSACTION_DELETED);
                                         }
 
-                                        Mono<NotificationResponseDto> notificationResponseDtoMono
-                                                = notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber());
-
-                                        return notificationResponseDtoMono.flatMap(notificationResponseDto->{
-                                            if (notificationResponseDto.getStatus().equals(SENT)) {
+                                        return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
+                                          .flatMap(notificationResponseDto->{
+                                            if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
 
                                                 return prepareErolByDLResponse(accountDto);
                                             }

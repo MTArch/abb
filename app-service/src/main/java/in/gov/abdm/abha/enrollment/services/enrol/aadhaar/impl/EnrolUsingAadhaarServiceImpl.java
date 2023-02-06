@@ -50,7 +50,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static in.gov.abdm.hiecm.consentmanagement.ConsentNotificationStatus.SENT;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 
 @Service
 @Slf4j
@@ -232,10 +232,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
 
-                                Mono<NotificationResponseDto> notificationResponseDtoMono
-                                        = notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber());
-
-                                return notificationResponseDtoMono.flatMap(notificationResponseDto->{
+                                return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber())
+                                  .flatMap(notificationResponseDto->{
                                     if (notificationResponseDto.getStatus().equals(SENT)) {
 
                                         return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())

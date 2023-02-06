@@ -39,6 +39,7 @@ public class NotificationService {
                 NotificationContentType.OTP,
                 phoneNumber,
                 OTP_SUBJECT,
+                1007164181681962323L,
                 templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp));
     }
 
@@ -47,19 +48,21 @@ public class NotificationService {
                 NotificationContentType.INFO,
                 phoneNumber,
                 SMS_SUBJECT,
+                1007164181688870515L,
                 templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name,abhaNumber,ABHA_URL));
     }
 
-    public Mono<NotificationResponseDto> sendSMS(NotificationType notificationType, NotificationContentType notificationContentType , String phoneNumber, String subject, String message) {
+    public Mono<NotificationResponseDto> sendSMS(NotificationType notificationType, NotificationContentType notificationContentType , String phoneNumber, String subject,Long templateId,String message) {
         return notificationClient.sendOtp(
                 prepareNotificationRequest(notificationType,
                         notificationContentType.getValue(),
                         phoneNumber,
                         subject,
+                        templateId,
                         message));
     }
 
-    private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, String message) {
+    private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, Long templateId ,String message) {
         NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
         notificationRequestDto.setOrigin(ORIGIN);
         notificationRequestDto.setType(Collections.singletonList(notificationType.getValue()));
@@ -67,7 +70,7 @@ public class NotificationService {
         notificationRequestDto.setSender(SENDER);
         notificationRequestDto.setReceiver(Collections.singletonList(new KeyValue(MOBILE_KEY, phoneNumber)));
         List<KeyValue> notification = new LinkedList<>();
-        notification.add(new KeyValue(TEMPLATE_ID, message));
+        notification.add(new KeyValue(TEMPLATE_ID, String.valueOf(templateId)));
         notification.add(new KeyValue(SUBJECT, subject));
         notification.add(new KeyValue(CONTENT, message));
         notificationRequestDto.setNotification(notification);
