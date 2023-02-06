@@ -32,7 +32,7 @@ public class NotificationDBClient<T> {
 
     public Flux<T> getAll(Class<T> t) {
         switch (t.getSimpleName()) {
-            case "Template":
+            case "Templates":
                 return fluxGetDatabase(t, URIConstant.NOTIFICATION_DB_GET_ALL_TEMPLATES_URI);
         }
         return Flux.empty();
