@@ -32,7 +32,7 @@ public class BeanConfiguration {
             templates.addAll(Common.loadDummyTemplates());
         }).subscribe(templates::addAll);
         //TODO remove
-        templates.addAll(Common.loadDummyTemplates());
+        //templates.addAll(Common.loadDummyTemplates());
         return templates;
     }
 

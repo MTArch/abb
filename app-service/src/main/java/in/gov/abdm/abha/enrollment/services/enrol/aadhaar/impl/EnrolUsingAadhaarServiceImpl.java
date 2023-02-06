@@ -12,6 +12,7 @@ import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
@@ -23,6 +24,7 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
@@ -30,6 +32,7 @@ import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.Accoun
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -48,6 +51,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static in.gov.abdm.hiecm.consentmanagement.ConsentNotificationStatus.SENT;
+
 @Service
 @Slf4j
 public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
@@ -58,6 +63,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
 
+    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
 
     @Autowired
     AccountService accountService;
@@ -75,6 +81,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
     RedisService redisService;
+
+    @Autowired
+    NotificationService notificationService;
 
     private RedisOtp redisOtp;
 
@@ -223,8 +232,21 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             if (!res.isEmpty()) {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+
+                                Mono<NotificationResponseDto> notificationResponseDtoMono
+                                        = notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber());
+
+                                return notificationResponseDtoMono.flatMap(notificationResponseDto->{
+                                    if (notificationResponseDto.getStatus().equals(SENT)) {
+
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                                .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+                                    }
+                                    else {
+                                        throw new FailedToSendNotificationException(FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION);
+                                    }
+                                });
+
                             } else {
                                 throw new DatabaseConstraintFailedException(
                                         EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);

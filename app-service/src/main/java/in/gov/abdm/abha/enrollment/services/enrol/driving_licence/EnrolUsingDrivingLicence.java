@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
@@ -18,10 +19,12 @@ import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -38,6 +41,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static in.gov.abdm.hiecm.consentmanagement.ConsentNotificationStatus.SENT;
 
 @Slf4j
 @Service
@@ -61,6 +66,7 @@ public class EnrolUsingDrivingLicence {
     private static final String FAILED_TO_STORE_DOCUMENTS = "Failed to store Documents";
     private static final String ACCOUNT_AUTH_METHODS_ADDED = "Account Auth methods added";
     public static final String DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE = "Default PHR Address Updated In HID PHR Address Table";
+    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
 
     @Autowired
     TransactionService transactionService;
@@ -80,6 +86,9 @@ public class EnrolUsingDrivingLicence {
     @Autowired
     LGDClient lgdClient;
 
+    @Autowired
+    NotificationService notificationService;
+
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
@@ -96,7 +105,20 @@ public class EnrolUsingDrivingLicence {
                                         } else {
                                             log.info(TRANSACTION_DELETED);
                                         }
-                                        return prepareErolByDLResponse(accountDto);
+
+                                        Mono<NotificationResponseDto> notificationResponseDtoMono
+                                                = notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber());
+
+                                        return notificationResponseDtoMono.flatMap(notificationResponseDto->{
+                                            if (notificationResponseDto.getStatus().equals(SENT)) {
+
+                                                return prepareErolByDLResponse(accountDto);
+                                            }
+                                            else {
+                                                throw new FailedToSendNotificationException(FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION);
+                                            }
+                                        });
+
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account

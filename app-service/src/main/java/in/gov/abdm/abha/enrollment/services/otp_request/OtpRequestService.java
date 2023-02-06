@@ -95,10 +95,9 @@ public class OtpRequestService {
 
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
         return transactionDtoMono.flatMap(transactionDto -> {
-            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
-                    phoneNumber,
-                    OTP_SUBJECT,
-                    templatesHelper.prepareUpdateMobileMessage(newOtp));
+
+            Mono<NotificationResponseDto> notificationResponseDtoMono
+                    = notificationService.sendRegistrationOtp(phoneNumber,newOtp);
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {
@@ -265,7 +264,7 @@ public class OtpRequestService {
             Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(
                     email,
                     EMAIL_OTP_SUBJECT,
-                    templatesHelper.prepareUpdateMobileMessage(newOtp));
+                    templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L,newOtp));
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {
@@ -304,10 +303,8 @@ public class OtpRequestService {
         transactionDto.setOtp(Argon2Util.encode(newOtp));
         transactionDto.setKycPhoto(StringConstants.EMPTY);
 
-        Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
-                phoneNumber,
-                OTP_SUBJECT,
-                templatesHelper.prepareUpdateMobileMessage(newOtp));
+        Mono<NotificationResponseDto> notificationResponseDtoMono
+                = notificationService.sendRegistrationOtp(phoneNumber,newOtp);
 
         return notificationResponseDtoMono.flatMap(response -> {
             if (response.getStatus().equals(SENT)) {

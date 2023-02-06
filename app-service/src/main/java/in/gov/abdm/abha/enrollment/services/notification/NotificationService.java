@@ -22,13 +22,38 @@ public class NotificationService {
 
     public static final String EMAIL_KEY = "emailId";
 
+    private static final String OTP_SUBJECT = "mobile verification";
+    private static final String SMS_SUBJECT = "account creation";
+
+    private static final String ABHA_URL= "https://healthid.ndhm.gov.in";
+
+
     @Autowired
     NotificationClient notificationClient;
 
-    public Mono<NotificationResponseDto> sendSMSOtp(String phoneNumber, String subject, String message) {
+    @Autowired
+    TemplatesHelper templatesHelper;
+
+    public Mono<NotificationResponseDto> sendRegistrationOtp(String phoneNumber, String otp){
+        return sendSMS(NotificationType.SMS,
+                NotificationContentType.OTP,
+                phoneNumber,
+                OTP_SUBJECT,
+                templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp));
+    }
+
+    public Mono<NotificationResponseDto> sendRegistrationSMS(String phoneNumber,String name,String abhaNumber){
+        return sendSMS(NotificationType.SMS,
+                NotificationContentType.INFO,
+                phoneNumber,
+                SMS_SUBJECT,
+                templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name,abhaNumber,ABHA_URL));
+    }
+
+    public Mono<NotificationResponseDto> sendSMS(NotificationType notificationType, NotificationContentType notificationContentType , String phoneNumber, String subject, String message) {
         return notificationClient.sendOtp(
-                prepareNotificationRequest(NotificationType.SMS,
-                        NotificationContentType.OTP.getValue(),
+                prepareNotificationRequest(notificationType,
+                        notificationContentType.getValue(),
                         phoneNumber,
                         subject,
                         message));
@@ -42,7 +67,7 @@ public class NotificationService {
         notificationRequestDto.setSender(SENDER);
         notificationRequestDto.setReceiver(Collections.singletonList(new KeyValue(MOBILE_KEY, phoneNumber)));
         List<KeyValue> notification = new LinkedList<>();
-        notification.add(new KeyValue(TEMPLATE_ID, "1007164181681962323"));
+        notification.add(new KeyValue(TEMPLATE_ID, message));
         notification.add(new KeyValue(SUBJECT, subject));
         notification.add(new KeyValue(CONTENT, message));
         notificationRequestDto.setNotification(notification);
