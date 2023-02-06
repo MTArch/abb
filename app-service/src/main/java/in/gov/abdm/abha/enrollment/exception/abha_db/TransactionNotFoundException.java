@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.exception.database.constraint;
+package in.gov.abdm.abha.enrollment.exception.abha_db;
 
 public class TransactionNotFoundException extends RuntimeException {
 
