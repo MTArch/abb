@@ -64,6 +64,7 @@ public class RSAUtil {
             try {
                 Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION_ALGORITHM);
                 cipher.init(Cipher.DECRYPT_MODE, getPrivateKey());
+                System.out.println("----->"+new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes()))));
                 return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes())));
             } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
                      NoSuchPaddingException exception) {

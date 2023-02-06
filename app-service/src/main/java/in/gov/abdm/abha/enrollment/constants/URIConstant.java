@@ -90,4 +90,12 @@ public interface URIConstant {
     String DOCUMENT_DB_BASE_URI = "/api/v3/documentdb";
     String DOCUMENT_VERIFY = DOCUMENT_BASE_URI + "/verify";
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
+
+    String IDENTITY_DOCUMENT_GET = DOCUMENT_DB_BASE_URI + "/identityDocument/";
+    String FACILITY_ENDPOINT = "api/v3/facility";
+    String FACILITY_OTP_ENDPOINT = "/request/otp";
+    String VERIFY_FACILITY_OTP_ENDPOINT = "/auth/byAbdm";
+    String VERIFY_ENROLLMENT_ENDPOINT = "/enrollment/byEnrollmentNumber";
+
+    String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT ="/enrollment/{enrollmentNumber}";
 }

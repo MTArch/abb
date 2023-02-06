@@ -5,11 +5,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.AccountNotFoundException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.InvalidRequestException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.ParentLinkingFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.database.constraint.*;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.model.ErrorResponse;
 import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -85,6 +81,24 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> dbConstraintFailed(DatabaseConstraintFailedException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         return new ResponseEntity<>(new ErrorResponse(status, ex.getMessage()), status);
+    }
+
+    @ExceptionHandler(EnrolmentIdNotFoundException.class)
+    public Map<String, Object> EnrolmentIdNotFound(EnrolmentIdNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
+
+    @ExceptionHandler(HealthIdNumberNotFoundException.class)
+    public Map<String, Object> HealthIdNumberNotFound(HealthIdNumberNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
     }
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)

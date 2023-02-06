@@ -31,5 +31,9 @@ public class EnrolProfileDto {
     private String abhaType;
     private String pinCode;
     private String abhaStatus;
+    private String photo;
+    private String photoFront;
+    private String photoBack;
     private List<String> phrAddress;
+
 }
