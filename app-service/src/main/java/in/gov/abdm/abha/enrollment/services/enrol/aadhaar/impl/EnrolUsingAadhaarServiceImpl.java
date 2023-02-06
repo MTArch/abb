@@ -3,16 +3,15 @@ package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.LGDClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
-import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
@@ -94,7 +93,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
         } else {
             if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
-                throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+                throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
             Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
                     aadhaarClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
@@ -209,7 +208,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .responseTokensDto(new ResponseTokensDto())
                     .build());
         } else {
-            throw new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+            throw new AbhaDBGatewayUnavailableException();
         }
     }
 
@@ -248,13 +247,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 });
 
                             } else {
-                                throw new DatabaseConstraintFailedException(
-                                        EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_CREATE);
+                                throw new AbhaDBGatewayUnavailableException();
                             }
                         });
             } else {
-                throw new DatabaseConstraintFailedException(
-                        EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE);
+                throw new AbhaDBGatewayUnavailableException();
             }
         });
     }

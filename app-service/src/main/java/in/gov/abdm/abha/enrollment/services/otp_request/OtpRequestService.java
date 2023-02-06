@@ -2,18 +2,17 @@ package in.gov.abdm.abha.enrollment.services.otp_request;
 
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.DatabaseConstraintFailedException;
-import in.gov.abdm.abha.enrollment.exception.database.constraint.TransactionNotFoundException;
-import in.gov.abdm.abha.enrollment.exception.notification.FailedToSendNotificationException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.idp.IdpGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -90,7 +89,7 @@ public class OtpRequestService {
         String newOtp = GeneralUtils.generateRandomOTP();
 
         if (!redisService.isResendOtpAllowed(phoneNumber)) {
-            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            throw new UnauthorizedUserToSendOrVerifyOtpException();
         }
 
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
@@ -114,7 +113,7 @@ public class OtpRequestService {
                                         .build());
                             });
                 } else {
-                    throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
+                    throw new NotificationGatewayUnavailableException();
                 }
             });
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -130,7 +129,7 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendAadhaarOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         if (!redisService.isResendOtpAllowed(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()))) {
-            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            throw new UnauthorizedUserToSendOrVerifyOtpException();
         }
 
         TransactionDto transactionDto = new TransactionDto();
@@ -245,10 +244,10 @@ public class OtpRequestService {
                                             .txnId(res.getTxnId().toString())
                                             .message(message)
                                             .build());
-                                }).switchIfEmpty(Mono.error(new DatabaseConstraintFailedException(EnrollErrorConstants.EXCEPTION_OCCURRED_POSTGRES_DATABASE_CONSTRAINT_FAILED_WHILE_UPDATE)));
+                                }).switchIfEmpty(Mono.error(new AbhaDBGatewayUnavailableException()));
                     }
                     return Mono.empty();
-                }).switchIfEmpty(Mono.error(new GenericExceptionMessage(FAILED_TO_CALL_IDP_SERVICE)));
+                }).switchIfEmpty(Mono.error(new IdpGatewayUnavailableException()));
     }
 
     public Mono<MobileOrEmailOtpResponseDto> sendEmailOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
@@ -256,7 +255,7 @@ public class OtpRequestService {
         String newOtp = GeneralUtils.generateRandomOTP();
 
         if (!redisService.isResendOtpAllowed(email)) {
-            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            throw new UnauthorizedUserToSendOrVerifyOtpException();
         }
 
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
@@ -281,7 +280,7 @@ public class OtpRequestService {
                                         .build());
                             });
                 } else {
-                    throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
+                    throw new NotificationGatewayUnavailableException();
                 }
             });
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -292,7 +291,7 @@ public class OtpRequestService {
         String newOtp = GeneralUtils.generateRandomOTP();
 
         if (!redisService.isResendOtpAllowed(phoneNumber)) {
-            throw new UnauthorizedUserToSendOrVerifyOtpException(EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+            throw new UnauthorizedUserToSendOrVerifyOtpException();
         }
 
         TransactionDto transactionDto = new TransactionDto();
@@ -319,7 +318,7 @@ public class OtpRequestService {
                                     .build());
                         });
             } else {
-                throw new FailedToSendNotificationException(FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION);
+                throw new NotificationGatewayUnavailableException();
             }
         });
     }

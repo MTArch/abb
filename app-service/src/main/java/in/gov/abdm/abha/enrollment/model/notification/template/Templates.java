@@ -15,5 +15,4 @@ public class Templates {
     private String name;
     private String message;
     private String header;
-    private TemplateType type;
 }

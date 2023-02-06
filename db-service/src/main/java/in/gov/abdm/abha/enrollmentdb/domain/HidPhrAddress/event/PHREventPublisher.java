@@ -24,9 +24,14 @@ public class PHREventPublisher implements EventPublisher {
 
     public void publish(User user, String requestId) {
         ObjectMapper objectMapper = new ObjectMapper();
-        log.info(MSG_ABHA_PUBLISH_USER_TO_PHR);
-        kafkaTemplate.send(userTopic, requestId, user);
-        log.info(MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR);
+        try {
+            log.info(MSG_ABHA_PUBLISH_USER_TO_PHR);
+            kafkaTemplate.send(userTopic, requestId, user);
+            log.info(MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR);
+        }
+        catch (Exception exception) {
+            log.error(exception.getMessage());
+        }
     }
 
     @Override

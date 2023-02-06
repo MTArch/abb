@@ -1,19 +1,15 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
-import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
 import java.util.List;
 
 @Component
@@ -43,6 +39,6 @@ public class LGDClient {
                 .retrieve()
                 .bodyToFlux(LgdDistrictResponse.class)
                 .collectList()
-                .onErrorResume(error -> {throw new GenericExceptionMessage(FAILED_TO_COMMUNICATE_WITH_LGD_SERVICE);});
+                .onErrorResume(error -> {throw new LgdGatewayUnavailableException();});
     }
 }

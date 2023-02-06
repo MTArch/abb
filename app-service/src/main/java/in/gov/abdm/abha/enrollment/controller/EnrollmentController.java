@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.controller;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.application.GenericExceptionMessage;
+import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
@@ -14,12 +14,13 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarServi
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.driving_licence.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol_by_document.EnrolByDocumentValidatorService;
-import in.gov.abdm.abha.enrollment.validators.annotations.Uuid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 
 @RestController
 @CrossOrigin
@@ -49,7 +50,7 @@ public class EnrollmentController {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
             return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
         }else{
-            throw new GenericExceptionMessage(AbhaConstants.INVALID_DOCUMENT_TYPE);
+            throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
         }
     }
 
