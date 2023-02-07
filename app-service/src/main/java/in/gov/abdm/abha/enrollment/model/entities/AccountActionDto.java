@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.model.accountaction;
+package in.gov.abdm.abha.enrollment.model.entities;
 
 
 import lombok.AllArgsConstructor;

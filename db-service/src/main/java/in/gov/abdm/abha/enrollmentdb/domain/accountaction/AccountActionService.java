@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 public interface AccountActionService {
     Mono<AccountActions> updateAccountActionByHealthIdNumber(AccountActionDto accountActionDto, String healthIdNumber);
 
-    Mono<AccountActions> getAccountActionByHealthIdNumber(String healthIdNumber);
+    Mono<AccountActionDto> getAccountActionByHealthIdNumber(String healthIdNumber);
 
     Mono<AccountActionDto> addAccount(AccountActionDto accountActionDto);
 }

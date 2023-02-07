@@ -198,12 +198,12 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
 
         StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_ACCOUNT_URI)
-				.append(StringConstants.QUESTION)
-				.append("healthIdNumber")
-				.append(StringConstants.EQUAL)
-				.append(healthIdNumbers.stream().collect(Collectors.joining(",")));
+                .append(StringConstants.QUESTION)
+                .append("healthIdNumber")
+                .append(StringConstants.EQUAL)
+                .append(healthIdNumbers.stream().collect(Collectors.joining(",")));
 
-		return GetFluxDatabase(AccountDto.class, sb.toString());
+        return GetFluxDatabase(AccountDto.class, sb.toString());
     }
 
     private void breakName(AccountDto accountDto) {

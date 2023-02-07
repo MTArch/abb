@@ -36,16 +36,16 @@ public class AccountActionServiceImpl implements AccountActionService {
     }
 
     @Override
-    public Mono<AccountActions> getAccountActionByHealthIdNumber(String healthIdNumber) {
+    public Mono<AccountActionDto> getAccountActionByHealthIdNumber(String healthIdNumber) {
         return accountActionRepository.getAccountsByHealthIdNumber(healthIdNumber);
     }
 
     @Override
     public Mono<AccountActionDto> addAccount(AccountActionDto accountActionDto) {
-        AccountActions accountActions = map(accountActionDto);
-        accountActions.setAsNew();
-        return accountActionRepository.saveAccounts(accountActions)
-                .map(accounts -> modelMapper.map(accountActions, AccountActionDto.class))
+//        AccountActions accountActions = map(accountActionDto);
+        accountActionDto.setNewAccount(true);
+        return accountActionRepository.saveAccounts(accountActionDto)
+                .map(accounts -> modelMapper.map(accountActionDto, AccountActionDto.class))
                 .doOnError(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountActionDto));
     }

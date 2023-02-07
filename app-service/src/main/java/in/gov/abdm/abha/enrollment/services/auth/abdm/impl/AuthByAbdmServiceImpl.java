@@ -3,8 +3,10 @@ package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -107,7 +109,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
         } else {
             if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
-                throw new UnauthorizedUserToSendOrVerifyOtpException();
+                throw new UnauthorizedUserToSendOrVerifyOtpException(AadhaarErrorCodes.E_952.getValue(), EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
             }
             if (!Argon2Util.verify(redisOtp.getOtpValue(), authByAbdmRequest.getAuthData().getOtp().getOtpValue())) {
                 ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(redisOtp.getReceiver());

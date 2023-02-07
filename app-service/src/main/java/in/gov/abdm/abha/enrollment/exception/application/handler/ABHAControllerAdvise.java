@@ -4,6 +4,8 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.HealthIdNumberNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.*;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
@@ -111,14 +113,10 @@ public class ABHAControllerAdvise {
         Map<String, Object> errorMap = new LinkedHashMap<>();
 
         if (!ex.getAllErrors().isEmpty()) {
-            ex.getAllErrors().forEach(error -> {
-                {
-                    errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
-                            .filter(v -> v.getValue().equals(error.getDefaultMessage()))
-                            .findAny()
-                            .get().toString(), error.getDefaultMessage());
-                }
-            });
+            ex.getAllErrors().forEach(error -> errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
+                    .filter(v -> v.getValue().equals(error.getDefaultMessage()))
+                    .findAny()
+                    .get().toString(), error.getDefaultMessage()));
         }
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS + errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
@@ -177,7 +175,23 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+    @ExceptionHandler(EnrolmentIdNotFoundException.class)
+    public Map<String, Object> EnrolmentIdNotFound(EnrolmentIdNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
 
+    @ExceptionHandler(HealthIdNumberNotFoundException.class)
+    public Map<String, Object> HealthIdNumberNotFound(HealthIdNumberNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.info(EXCEPTIONS, ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
     private ResponseEntity<Mono<ErrorResponse>> handleLgdGatewayUnavailableException() {
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(

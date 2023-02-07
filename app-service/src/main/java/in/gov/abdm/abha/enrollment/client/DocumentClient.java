@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.exception.abha_db.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
@@ -50,6 +51,7 @@ public class DocumentClient {
     }
 
     private Mono<IdentityDocumentsDto> GetMonoDatabase(Class<IdentityDocumentsDto> t, String uri) {
+        System.out.println("url---"+uri);
         return webClient.
                 baseUrl(DOCUMENT_DB_SERVICE_BASE_URI)
                 .build()
