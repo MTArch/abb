@@ -138,8 +138,7 @@ public class Common {
                 SMS_TEMPLATE_ID,
                 ABHA,
                 MESSAGE,
-                SUBJECT,
-                TemplateType.SMS_OTP));
+                SUBJECT));
         //OTP for updating the mobile number linked with your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, NHA##1007164725434022866
         return templates;
     }
