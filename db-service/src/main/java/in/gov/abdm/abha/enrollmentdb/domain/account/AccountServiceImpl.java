@@ -46,7 +46,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         Accounts account = map(accountDto);
-        System.out.println(account.toString());
         account.setNewAccount(false);
         return accountRepository.updateAccounts(account.getHealthIdNumber(), account)
                 .map(accounts -> modelMapper.map(account, AccountDto.class))

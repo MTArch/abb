@@ -25,10 +25,8 @@ public class AccountActionServiceImpl implements AccountActionService {
 
     @Override
     public Mono<AccountActions> updateAccountActionByHealthIdNumber(AccountActionDto accountActionDto, String healthIdNumber) {
-        System.out.println("Im here 2");
         AccountActions accountAction = map(accountActionDto);
         accountAction.setNewAccount(false);
-        System.out.println("Im here");
         return accountActionRepository.updateAccountAction(accountAction.getHealthIdNumber(), accountAction);
 //                .map(accountActions -> modelMapper.map(accountAction, AccountActionDto.class))
 //                .doOnError(throwable -> log.error(throwable.getMessage()))

@@ -51,7 +51,6 @@ public class DocumentClient {
     }
 
     private Mono<IdentityDocumentsDto> GetMonoDatabase(Class<IdentityDocumentsDto> t, String uri) {
-        System.out.println("url---"+uri);
         return webClient.
                 baseUrl(DOCUMENT_DB_SERVICE_BASE_URI)
                 .build()

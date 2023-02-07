@@ -93,7 +93,6 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     @Override
     public Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(AuthRequestDto authByAbdmRequest) {
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
-        System.out.println("Im here 1");
         if(redisResponse != null){
             return redisResponse;
         }
