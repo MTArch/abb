@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
-import in.gov.abdm.abha.enrollment.client.LGDClient;
+import in.gov.abdm.abha.enrollment.client.AadhaarFClient;
+import in.gov.abdm.abha.enrollment.client.LGDFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -65,17 +65,19 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     TransactionService transactionService;
     @Autowired
-    AadhaarClient aadhaarClient;
-    @Autowired
     RSAUtil rsaUtil;
-    @Autowired
-    private LGDClient lgdClient;
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
     RedisService redisService;
 
     private RedisOtp redisOtp;
+
+    @Autowired
+    LGDFClient lgdfClient;
+
+    @Autowired
+    AadhaarFClient aadhaarFClient;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
@@ -87,7 +89,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
             Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
-                    aadhaarClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
+                    aadhaarFClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
                             .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
                             .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
                             .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
@@ -140,7 +142,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
-        Mono<AccountDto> newAccountDto = lgdClient.getLgdDistrictDetails(transactionDto.getPincode())
+        Mono<AccountDto> newAccountDto = lgdfClient.getDetailsByAttribute(transactionDto.getPincode(),"District")
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
@@ -164,7 +166,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             // TODO if standard abha
             String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile();
             if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
-                return aadhaarClient.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                return aadhaarFClient.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
                                 accountDto.setMobile(userEnteredPhoneNumber);

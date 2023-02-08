@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.client.AadhaarFClient;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ public class AuthByAadhaarService {
     RSAUtil rsaUtil;
     @Autowired
     HidPhrAddressService hidPhrAddressService;
+    @Autowired
+    AadhaarFClient aadhaarFClient;
 
     public Mono<AuthResponseDto> verifyOtpChildAbha(AuthRequestDto authByAadhaarRequestDto) {
         Mono<TransactionDto> txnResponseDto = transactionService.findTransactionDetailsFromDB(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
@@ -57,7 +60,7 @@ public class AuthByAadhaarService {
     }
 
     private Mono<AuthResponseDto> verifyAadhaarOtpChildAbha(TransactionDto transactionDto, AuthRequestDto authByAadhaarRequestDto) {
-        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarClient.verifyOtp(
+        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarFClient.verifyOtp(
                 AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
                         .aadhaarTransactionId(transactionDto.getAadharTxn())
                         .otp(authByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())

@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
 import com.password4j.BadParametersException;
-import in.gov.abdm.abha.enrollment.client.IdpClient;
+import in.gov.abdm.abha.enrollment.client.IdpFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -55,7 +55,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
 
     @Autowired
-    IdpClient idpClient;
+    IdpFClient idpFClient;
 
     @Autowired
     TransactionService transactionService;
@@ -229,7 +229,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-        return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
+        return idpFClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
                 .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 

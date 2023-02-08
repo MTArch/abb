@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.otp_request;
 
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
+import in.gov.abdm.abha.enrollment.client.AadhaarFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
@@ -83,6 +84,8 @@ public class OtpRequestService {
     IdpService idpService;
     @Autowired
     RedisService redisService;
+    @Autowired
+    AadhaarFClient aadhaarFClient;
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());

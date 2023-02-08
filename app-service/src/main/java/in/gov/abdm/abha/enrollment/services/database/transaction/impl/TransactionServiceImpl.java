@@ -1,7 +1,8 @@
 package in.gov.abdm.abha.enrollment.services.database.transaction.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.client.TransactionFClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
@@ -22,14 +23,14 @@ import java.util.Base64;
 
 @Service
 @Slf4j
-public class TransactionServiceImpl extends AbhaDBClient implements TransactionService {
+public class TransactionServiceImpl implements TransactionService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     @Autowired
-    AbhaDBClient abhaDBClient;
+    TransactionFClient transactionFClient;
 
     @Override
     public void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType) {
@@ -111,21 +112,25 @@ public class TransactionServiceImpl extends AbhaDBClient implements TransactionS
 
     @Override
     public Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto) {
-        return addEntity(TransactionDto.class, transactionDto);
+        return transactionFClient.createTransaction(transactionDto)
+                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> findTransactionDetailsFromDB(String txnId) {
-        return getEntityById(TransactionDto.class, txnId);
+        return transactionFClient.getTransactionByTxnId(txnId)
+                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
-        return updateEntity(TransactionDto.class, transactionDto, transactionId);
+        return transactionFClient.updateTransactionById( transactionDto, transactionId)
+                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> deleteTransactionEntity(String transactionId) {
-        return deleteEntity(TransactionDto.class, transactionId);
+    public Mono<ResponseEntity<Mono<Void>>> deleteTransactionEntity(String transactionId) {
+        return transactionFClient.deleteTransactionByTxnId(transactionId)
+                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

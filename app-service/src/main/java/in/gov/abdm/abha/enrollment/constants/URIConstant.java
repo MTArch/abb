@@ -46,7 +46,7 @@ public interface URIConstant {
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
 
-    String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/";
+    String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
 
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
 
@@ -90,4 +90,9 @@ public interface URIConstant {
     String DOCUMENT_DB_BASE_URI = "/api/v3/documentdb";
     String DOCUMENT_VERIFY = DOCUMENT_BASE_URI + "/verify";
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
+
+    //Feign Client
+    public static final String REQUEST_ID = "REQUEST_ID";
+    public static final String TIMESTAMP = "TIMESTAMP";
+    public static final String REQUESTER_ID="REQUESTER_ID";
 }

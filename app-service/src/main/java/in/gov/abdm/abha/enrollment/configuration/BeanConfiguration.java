@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactivefeign.ReactiveOptions;
+import reactivefeign.webclient.WebReactiveOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,14 @@ public class BeanConfiguration {
         return notificationDBClient.getAll(Templates.class).collectList().doOnError(throwable -> {
             templates.addAll(Common.loadDummyTemplates());
         }).block();
+    }
+    @Bean
+    public ReactiveOptions reactiveOptions() {
+        return new WebReactiveOptions.Builder()
+                .setReadTimeoutMillis(2000)
+                .setWriteTimeoutMillis(2000)
+                .setResponseTimeoutMillis(2000)
+                .build();
     }
 
     @Bean

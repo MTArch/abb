@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 
-import in.gov.abdm.abha.enrollment.client.DocumentClient;
-import in.gov.abdm.abha.enrollment.client.LGDClient;
+import in.gov.abdm.abha.enrollment.client.*;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -10,7 +9,9 @@ import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
@@ -66,16 +67,19 @@ public class EnrolUsingDrivingLicence {
     AccountService accountService;
 
     @Autowired
-    DocumentClient documentClient;
-
-    @Autowired
     HidPhrAddressService hidPhrAddressService;
 
     @Autowired
     AccountAuthMethodService accountAuthMethodService;
 
     @Autowired
-    LGDClient lgdClient;
+    LGDFClient lgdfClient;
+
+    @Autowired
+    DocumentFClient documentFClient;
+
+    @Autowired
+    DocumentDBFClient documentDBFClient;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
@@ -108,7 +112,7 @@ public class EnrolUsingDrivingLicence {
     }
 
     private Mono<EnrolByDocumentResponseDto> verifyDrivingLicence(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto) {
-        return documentClient.verify(VerifyDLRequest.builder()
+        return documentFClient.verify(VerifyDLRequest.builder()
                 .documentType(AbhaConstants.DRIVING_LICENCE)
                 .documentId(enrolByDocumentRequestDto.getDocumentId())
                 .dob(enrolByDocumentRequestDto.getDob())
@@ -122,7 +126,7 @@ public class EnrolUsingDrivingLicence {
                 log.info(DL_DETAILS_NOT_VERIFIED);
                 throw new AbhaUnProcessableException(ABDMError.DRIVING_LICENSE_EXCEPTIONS.getCode(), verifyDLResponse.getMessage());
             }
-        });
+        }).doOnError((throwable->Mono.error(new DocumentGatewayUnavailableException())));
     }
 
     private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto) {
@@ -157,7 +161,7 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .build();
 
-        return lgdClient.getLgdDistrictDetails(enrolByDocumentRequestDto.getPinCode()).flatMap(lgdDistrictResponses -> {
+        return lgdfClient.getDetailsByAttribute(enrolByDocumentRequestDto.getPinCode(),"District").flatMap(lgdDistrictResponses -> {
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
             accountDto.setStateCode(lgdDistrictResponse.getStateCode());
             accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
@@ -195,7 +199,7 @@ public class EnrolUsingDrivingLicence {
                     }
                 });
             });
-        });
+        }).doOnError((throwable->Mono.error(new LgdGatewayUnavailableException())));
     }
 
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
@@ -215,7 +219,8 @@ public class EnrolUsingDrivingLicence {
         identityDocumentsDto.setVerificationStatus(accountDto.getVerificationStatus());
         identityDocumentsDto.setVerificationType(AbhaConstants.DRIVING_LICENCE);
 
-        return documentClient.addIdentityDocuments(identityDocumentsDto);
+        return documentDBFClient.addIdentityDocuments(identityDocumentsDto)
+                .doOnError((throwable->Mono.error(new DocumentDBGatewayUnavailableException())));
     }
 
     private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto) {

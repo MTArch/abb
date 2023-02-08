@@ -6,14 +6,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import in.gov.abdm.abha.enrollment.client.IdpFClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
-import in.gov.abdm.abha.enrollment.model.idp.sendotp.Parameters;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -32,11 +31,11 @@ public class IdpService {
 	SimpleDateFormat dateTimeFormatter = new SimpleDateFormat(DATE_TIME_FORMATTER);
 
 	private static final String AUTHORIZATION = "123344";
-//	private static final String REQUEST_ID = "abha_ee2cf4ef-b3d3-494e-8d3a-27c75100e036";
+	//	private static final String REQUEST_ID = "abha_ee2cf4ef-b3d3-494e-8d3a-27c75100e036";
 	private static final String HIP_REQUEST_ID = "22222";
 
 	@Autowired
-	IdpClient idpClient;
+	IdpFClient idpFClient;
 
 	public Mono<IdpSendOtpResponse> sendOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 		String requestId = "abha_".concat(UUID.randomUUID().toString());
@@ -51,6 +50,6 @@ public class IdpService {
 		idpSendOtpRequest.setScope(OTP_SCOPE);
 		idpSendOtpRequest.setParameters(parameters);
 		String timestamp = LocalDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)).toString();
-		return idpClient.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
+		return idpFClient.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
 	}
 }
