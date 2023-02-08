@@ -7,6 +7,7 @@ public class ContextHolder {
 
     private static final ThreadLocal<String> CLIENT_ID = new InheritableThreadLocal<>();
     private static final ThreadLocal<String> CLIENT_IP = new InheritableThreadLocal<>();
+    private static final ThreadLocal<String> TIMESTAMP = new InheritableThreadLocal<>();
 
     public void setClientId(String clientId) {
         CLIENT_ID.set(clientId);
@@ -24,8 +25,17 @@ public class ContextHolder {
         return CLIENT_IP.get();
     }
 
+    public void setTimestamp(String ip) {
+        TIMESTAMP.set(ip);
+    }
+
+    public String getTimestamp() {
+        return TIMESTAMP.get();
+    }
+
     public void removeAll() {
         CLIENT_ID.remove();
         CLIENT_IP.remove();
+        TIMESTAMP.remove();
     }
 }

@@ -39,8 +39,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Mono getAccountByHealthIdNumber(String healthIdNumber) {
-        return accountRepository.getAccountsByHealthIdNumber(healthIdNumber);
+    public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
+        return accountRepository.getAccountsByHealthIdNumber(healthIdNumber).map(accounts -> modelMapper.map(accounts, AccountDto.class));
     }
 
     @Override
