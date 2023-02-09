@@ -64,6 +64,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
         String requestId = String.valueOf(UUID.randomUUID());
+        Timestamp timeStamp = Timestamp.valueOf(LocalDateTime.now());
         HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
         return hidPhrAddressRepository.save(hidPhrAddress)
                 .flatMap(hidPhrAddressAdded -> {
@@ -73,7 +74,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                     syncAcknowledgement.setHidPhrAddress(hidPhrAddressAdded.getPhrAddress());
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
-//                    syncAcknowledgementService.addNewAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
+                    syncAcknowledgement.setCreatedDate(timeStamp);
+//                    syncAcknowledgementService.addNewAcknowledgement(requestId, timeStamp, syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
                     return Mono.just(hidPhrAddressAdded);
                 })
                 .flatMap(this::findAccountFromHidPhrAddress)
@@ -189,6 +191,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
             user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
+            user.setNew(true);
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
