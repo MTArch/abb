@@ -16,10 +16,10 @@ public class IdpAppService {
     IdpAppFClient idpAppFClient;
 
     public Mono<IdpSendOtpResponse> sendOtp(IdpSendOtpRequest idpSendOtpRequest, String authorization, String timestamp, String hipRequestId, String requestId) {
-        return idpAppFClient.sendOtp(idpSendOtpRequest, authorization, timestamp, hipRequestId, requestId).doOnError(throwable -> Mono.error(new IdpGatewayUnavailableException()));
+        return idpAppFClient.sendOtp(idpSendOtpRequest, authorization, timestamp, hipRequestId, requestId).onErrorResume(throwable -> Mono.error(new IdpGatewayUnavailableException()));
     }
 
     public Mono<IdpVerifyOtpResponse> verifyOtp(IdpVerifyOtpRequest idpVerifyOtpRequest, String authorization, String timeStamp, String hipRequestId, String requestId) {
-        return idpAppFClient.verifyOtp(idpVerifyOtpRequest, authorization, timeStamp, hipRequestId, requestId).doOnError(throwable -> Mono.error(new IdpGatewayUnavailableException()));
+        return idpAppFClient.verifyOtp(idpVerifyOtpRequest, authorization, timeStamp, hipRequestId, requestId).onErrorResume(throwable -> Mono.error(new IdpGatewayUnavailableException()));
     }
 }

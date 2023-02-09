@@ -35,7 +35,7 @@ public class NotificationService {
                         phoneNumber,
                         subject,
                         message), UUID.randomUUID().toString(), Common.timeStampWithT())
-                .doOnError((throwable->Mono.error(new NotificationGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
     }
 
     private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, String message) {
@@ -60,7 +60,7 @@ public class NotificationService {
                         email,
                         subject,
                         message),UUID.randomUUID().toString(), Common.timeStampWithT())
-                .doOnError((throwable->Mono.error(new NotificationGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
     }
 
     private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {

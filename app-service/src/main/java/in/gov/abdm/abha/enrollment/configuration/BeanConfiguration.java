@@ -30,7 +30,7 @@ public class BeanConfiguration {
     @Bean(AbhaConstants.MESSAGE_TEMPLATES)
     List<Templates> loadTemplate() {
         List<Templates> templates = new ArrayList<>();
-        return notificationDBClient.getAll(Templates.class).collectList().doOnError(throwable -> {
+        return notificationDBClient.getAll(Templates.class).collectList().onErrorResume(throwable -> {
             templates.addAll(Common.loadDummyTemplates());
         }).block();
     }

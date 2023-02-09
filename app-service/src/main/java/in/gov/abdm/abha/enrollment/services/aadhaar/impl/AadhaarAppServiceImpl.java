@@ -18,14 +18,14 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
     AadhaarFClient aadhaarFClient;
 
     public Mono<AadhaarResponseDto> sendOtp(AadhaarOtpRequestDto aadhaarOtpRequestDto){
-        return aadhaarFClient.sendOtp(aadhaarOtpRequestDto).doOnError(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.sendOtp(aadhaarOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
 
     public Mono<AadhaarResponseDto> verifyOtp(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto){
-        return aadhaarFClient.verifyOtp(aadhaarVerifyOtpRequestDto).doOnError(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.verifyOtp(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
 
     public Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest){
-        return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).doOnError(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
 }

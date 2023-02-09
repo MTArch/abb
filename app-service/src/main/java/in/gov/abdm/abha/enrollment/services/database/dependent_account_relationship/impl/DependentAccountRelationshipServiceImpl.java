@@ -39,7 +39,7 @@ public class DependentAccountRelationshipServiceImpl extends AbhaDBClient implem
     //    @Override
     public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
         return abhaDBDependentAccountRelationshipFClient.createDependentRelationships(dependentAccountRelationshipList)
-                .doOnError((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override

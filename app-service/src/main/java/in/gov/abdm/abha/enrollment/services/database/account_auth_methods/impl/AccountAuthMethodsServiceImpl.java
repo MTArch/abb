@@ -21,6 +21,6 @@ public class AccountAuthMethodsServiceImpl implements AccountAuthMethodService {
     @Override
     public Mono<List<AccountAuthMethodsDto>> addAccountAuthMethods(List<AccountAuthMethodsDto> authMethodsDtos) {
         return abhaDBAccountAuthMethodsFClient.addAccountAuthMethods(authMethodsDtos)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

@@ -44,7 +44,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
         return abhaDBAccountFClient.getAccountByXmlUid( xmlUid)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
@@ -186,26 +186,26 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
         return abhaDBAccountFClient.getAccountByHealthIdNumber(healthIdNumber)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
         return abhaDBAccountFClient.getAccountEntityByDocumentCode(documentCode)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
         return abhaDBAccountFClient.getAccountsByHealthIdNumbers(healthIdNumbers.stream().collect(Collectors.joining(",")))
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     private void breakName(AccountDto accountDto) {
@@ -266,6 +266,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         accountDto.setOrigin(ContextHolder.getClientId());
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         return abhaDBAccountFClient.createAccount(accountDto)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

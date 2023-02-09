@@ -16,6 +16,6 @@ public class LgdAppService {
     LgdAppFClient lgdAppFClient;
 
     public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(String pinCode, String district) {
-        return lgdAppFClient.getDetailsByAttribute(pinCode, district).doOnError(throwable -> Mono.error(new LgdGatewayUnavailableException()));
+        return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
     }
 }

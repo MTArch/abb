@@ -15,6 +15,6 @@ public class IdentityDocumentDBServiceImpl implements IdentityDocumentDBService 
 
      @Override
      public Mono<IdentityDocumentsDto> addIdentityDocuments(IdentityDocumentsDto identityDocumentsDto) {
-          return documentDBIdentityDocumentFClient.addIdentityDocuments(identityDocumentsDto).doOnError((throwable->Mono.error(new DocumentDBGatewayUnavailableException())));
+          return documentDBIdentityDocumentFClient.addIdentityDocuments(identityDocumentsDto).onErrorResume((throwable->Mono.error(new DocumentDBGatewayUnavailableException())));
      }
 }

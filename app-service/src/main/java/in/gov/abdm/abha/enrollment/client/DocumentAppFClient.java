@@ -14,6 +14,6 @@ import reactor.core.publisher.Mono;
 public interface DocumentAppFClient {
 
     @PostMapping(URIConstant.DOCUMENT_VERIFY)
-    public Mono<VerifyDLResponse> verify(@RequestBody VerifyDLRequest verifyDLRequest);
+    public Mono<VerifyDLResponse> verify(VerifyDLRequest verifyDLRequest);
 
 }

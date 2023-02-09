@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.document.impl;
 
 import in.gov.abdm.abha.enrollment.client.DocumentAppFClient;
+import in.gov.abdm.abha.enrollment.client.DocumentClient;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLResponse;
@@ -17,6 +18,6 @@ public class DocumentAppServiceImpl implements DocumentAppService {
 
     @Override
     public Mono<VerifyDLResponse> verify(VerifyDLRequest verifyDLRequest) {
-        return documentAppFClient.verify(verifyDLRequest).doOnError(throwable -> Mono.error(new DocumentGatewayUnavailableException()));
+        return documentAppFClient.verify(verifyDLRequest).onErrorResume(throwable -> Mono.error(new DocumentGatewayUnavailableException()));
     }
 }

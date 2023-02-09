@@ -80,15 +80,12 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.OK, exception.getMessage());
         } else if (exception.getClass() == AbhaConflictException.class) {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
-        } else if (exception.getClass().getPackageName().equals(FEIGN) && exception.getMessage().contains(MESSAGE)) {
+        } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
-        } else if (exception.getMessage().contains(BAD_REQUEST)) {
+        } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                    prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
-            );
         }
+        throw new RuntimeException(exception);
     }
 
     private Mono<ErrorResponse> handleAbdmException(ABDMError error){
@@ -222,9 +219,9 @@ public class ABHAControllerAdvise {
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleFienClientExceptions(Exception exception) {
-        String msg = (exception.getMessage().split("\"message\":")[1]);
-        Exception wrapped = new Exception(ABDMError.BAD_REQUEST + StringConstants.COLON + msg);
-        return ResponseEntity.badRequest().body(ABDMControllerAdvise.handleException(wrapped));
+        String msg = (exception.getMessage());
+        Exception wrapped = new Exception(ABDMError.FEIGN_EXCEPTION.getCode() + msg.replace(":", "-"));
+        return ResponseEntity.internalServerError().body(ABDMControllerAdvise.handleException(wrapped));
     }
 
     private Mono<ErrorResponse> prepareCustomErrorResponse(String errorCode, String errorMessage) {

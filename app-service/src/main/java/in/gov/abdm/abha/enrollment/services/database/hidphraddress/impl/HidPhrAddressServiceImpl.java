@@ -31,7 +31,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 		hidPhrAddressDto.setCreatedBy(ContextHolder.getClientId());
 		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
 		return abhaDBHidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
@@ -75,31 +75,31 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
 																				  List<Integer> preferred) {
 		return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(n -> n.toString()).collect(Collectors.joining(",")))
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
 		return abhaDBHidPhrAddressFClient.findByPhrAddressIn(phrAddress.stream().collect(Collectors.joining(",")))
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 	@Override
 	public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
 		return abhaDBHidPhrAddressFClient.getPhrAddress(phrAddress)
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
 		return abhaDBHidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
 		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
 		return abhaDBHidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
-				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 }

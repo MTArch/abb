@@ -113,24 +113,24 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto) {
         return abhaDBTransactionFClient.createTransaction(transactionDto)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> findTransactionDetailsFromDB(String txnId) {
         return abhaDBTransactionFClient.getTransactionByTxnId(txnId)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
         return abhaDBTransactionFClient.updateTransactionById( transactionDto, transactionId)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<ResponseEntity<Mono<Void>>> deleteTransactionEntity(String transactionId) {
         return abhaDBTransactionFClient.deleteTransactionByTxnId(transactionId)
-                .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }
