@@ -11,5 +11,5 @@ public interface AccountActionService {
 
     Mono<AccountActionDto> getAccountActionByHealthIdNumber(String healthIdNumber);
 
-    Mono<AccountActionDto> addAccount(AccountActionDto accountActionDto);
+    Mono<AccountActions> addAccount(AccountActions accountActions);
 }

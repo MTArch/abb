@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.accountaction.AccountActionService;
 import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActionDto;
+import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +21,8 @@ public class AccountActionController {
                 .switchIfEmpty(Mono.empty()));
     }
 
-    @PostMapping(value = ABHAEnrollmentDBConstant.SAVE_ACCOUNT_ACTION_ENDPOINT)
-    public ResponseEntity<?> saveAccountAction(@RequestBody AccountActionDto accountActionDto) {
-        return ResponseEntity.ok(accountActionService.addAccount(accountActionDto).switchIfEmpty(Mono.empty()));
+    @PostMapping
+    public ResponseEntity<?> saveAccountAction(@RequestBody AccountActions accountAction) {
+        return ResponseEntity.ok(accountActionService.addAccount(accountAction).switchIfEmpty(Mono.empty()));
     }
 }

@@ -6,8 +6,7 @@ import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
-import in.gov.abdm.abha.enrollment.model.enrol.document.GetByDocumentResponseDto;
+import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
@@ -54,7 +53,7 @@ public class FacilityController {
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
         // If scope -abha-enrol and verify-enrolment and otpSystem -abdm
-        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLMENT))
+        if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
                 && mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
             return facilityRequestService.sendOtpForEnrollmentNumberService(mobileOrEmailOtpRequestDto);
         }
@@ -62,12 +61,6 @@ public class FacilityController {
         else {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
-    }
-
-    @GetMapping("enc/{encrypt}")
-    public String getEncrypted(@Valid @PathVariable String encrypt) {
-
-        return rsaUtil.encrypt(encrypt);
     }
 
     @GetMapping(URIConstant.FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT)
@@ -78,7 +71,7 @@ public class FacilityController {
     @PostMapping(VERIFY_FACILITY_OTP_ENDPOINT)
     public Mono<AuthResponseDto> authByAbdm(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
-        if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLMENT))) {
+        if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))) {
             return authByAbdmService.verifyOtpViaNotificationDLFlow(authByAbdmRequest);
         } else {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());

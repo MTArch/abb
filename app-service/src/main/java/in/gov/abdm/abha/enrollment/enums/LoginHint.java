@@ -15,7 +15,7 @@ public enum LoginHint {
 	ABHA_NUMBER("abha-number"),
 	MOBILE("mobile"),
 
-	ENROLMENT("enrolment"),
+	ENROLLMENT("enrollment"),
 	EMAIL("email"),
 	PHR_ADDRESS("phr-address"),
 	AADHAAR("aadhaar"),

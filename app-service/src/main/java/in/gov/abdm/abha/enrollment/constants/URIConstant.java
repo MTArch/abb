@@ -39,7 +39,7 @@ public interface URIConstant {
     String DB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/";
 
     String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
-    String DB_ADD_ACCOUNT_ACTION_URI = DB_BASE_URI + "/accountaction/save";
+    String DB_ADD_ACCOUNT_ACTION_URI = DB_BASE_URI + "/accountaction";
 
     String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountActions implements Persistable<String> {
+public class AccountActions implements Persistable<BigInteger> {
     @Id
     private BigInteger id;
     private String action;
@@ -44,10 +44,4 @@ public class AccountActions implements Persistable<String> {
         isNewAccount = true;
         return this;
     }
-
-    @Override
-    public String getId() {
-        return this.getHealthIdNumber();
-    }
-
 }

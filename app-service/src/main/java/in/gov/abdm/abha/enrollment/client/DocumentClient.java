@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import in.gov.abdm.abha.enrollment.exception.abha_db.DatabaseConstraintFailedException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
@@ -14,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -60,7 +58,7 @@ public class DocumentClient {
                 .retrieve()
                 .bodyToMono(t)
                 .onErrorResume(error -> {
-                    throw new DatabaseConstraintFailedException(((WebClientResponseException.BadRequest) error).getResponseBodyAsString());
+                    throw new DocumentDBGatewayUnavailableException();
                 });
     }
 

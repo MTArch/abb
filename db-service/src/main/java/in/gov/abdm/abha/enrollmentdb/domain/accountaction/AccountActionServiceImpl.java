@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Service
 @Slf4j
 public class AccountActionServiceImpl implements AccountActionService {
@@ -29,13 +31,10 @@ public class AccountActionServiceImpl implements AccountActionService {
     }
 
     @Override
-    public Mono<AccountActionDto> addAccount(AccountActionDto accountActionDto) {
-//        AccountActions accountActions = map(accountActionDto);
-        accountActionDto.setNewAccount(true);
-        return accountActionRepository.saveAccounts(accountActionDto)
-                .map(accounts -> modelMapper.map(accountActionDto, AccountActionDto.class))
-                .doOnError(throwable -> log.error(throwable.getMessage()))
-                .switchIfEmpty(Mono.just(accountActionDto));
+    public Mono<AccountActions> addAccount(AccountActions accountActions) {
+        accountActions.setCreatedDate(LocalDateTime.now());
+        accountActions.setAsNew();
+        return accountActionRepository.save(accountActions);
     }
 
 

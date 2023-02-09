@@ -4,8 +4,6 @@ public interface ABHAEnrollmentDBConstant {
     String API_VERSION = "/api/v3/enrollmentdb";
     String ACCOUNT_ENDPOINT = API_VERSION + "/account";
     String ACCOUNT_ACTION_ENDPOINT = API_VERSION + "/accountaction";
-    String UPDATE_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
-    String SAVE_ACCOUNT_ACTION_ENDPOINT = "/save";
     String TRANSACTION_ENDPOINT = API_VERSION + "/transaction";
     String GET_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
     String UPDATE_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
