@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.configuration;
 
 import in.gov.abdm.abha.enrollment.client.NotificationDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactivefeign.ReactiveOptions;
 import reactivefeign.webclient.WebReactiveOptions;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class BeanConfiguration {
         List<Templates> templates = new ArrayList<>();
         return notificationDBClient.getAll(Templates.class).collectList().onErrorResume(throwable -> {
             templates.addAll(Common.loadDummyTemplates());
+            return Mono.error(new NotificationDBGatewayUnavailableException());
         }).block();
     }
     @Bean

@@ -21,6 +21,6 @@ public interface AbhaDBTransactionFClient {
     @PatchMapping(URIConstant.DB_UPDATE_TRANSACTION_URI)
     public Mono<TransactionDto>updateTransactionById(@RequestBody TransactionDto transactionDto, @PathVariable("id") String transactionId);
 
-    @DeleteMapping(URIConstant.DB_DELETE_TRANSACTION_URI)
-    public Mono<ResponseEntity<Mono<Void>> > deleteTransactionByTxnId(@PathVariable("txnId") String txnId);
+    @DeleteMapping(URIConstant.FDB_DELETE_TRANSACTION_URI)
+    public Mono<ResponseEntity<Mono<Void>>> deleteTransactionByTxnId(@PathVariable("txnId") String txnId);
 }

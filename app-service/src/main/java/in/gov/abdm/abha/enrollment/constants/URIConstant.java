@@ -34,6 +34,7 @@ public interface URIConstant {
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
     String DB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/";
+    String FDB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/{txnId}";
     String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
     String FDB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/{txnId}";
 
