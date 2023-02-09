@@ -184,11 +184,11 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYSTEM");
-            user.setUpdatedBy("ABHA_SYSTEM");
+            user.setCreatedBy("ABHA_SYNC");
+            user.setUpdatedBy("ABHA_SYNC");
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
-            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
+            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
