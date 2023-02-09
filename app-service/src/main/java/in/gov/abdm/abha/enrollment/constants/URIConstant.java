@@ -11,7 +11,7 @@ public interface URIConstant {
     String ENROL_ENDPOINT = BASE_URI + "/enrol";
     String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
     String ENROL_BY_DOCUMENT_ENDPOINT = "/byDocument";
-    String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion/{txnId}";
+    String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion";
 
     String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
 
