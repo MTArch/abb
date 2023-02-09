@@ -35,8 +35,10 @@ public interface URIConstant {
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
     String DB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/";
     String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
+    String FDB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/{txnId}";
 
     String DB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/";
+    String FDB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/{xmlUid}";
 
     String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
 
@@ -45,8 +47,11 @@ public interface URIConstant {
     String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
+    String FDB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
+    String FDB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
 
-    String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
+    String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/";
+    String FDB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
 
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
 
@@ -59,6 +64,7 @@ public interface URIConstant {
     String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = DB_BASE_URI + "/hidphraddress/byPhrAddress/";
 
     String DB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/";
+    String FDB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/{healthIdNumber}";
 
     String DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID = DB_BASE_URI + "/hidphraddress/{hidPhrAddressId}";
 //    Aadhaar Service URI
@@ -84,6 +90,7 @@ public interface URIConstant {
 
     //LGD service
     String LGD_BASE_URI = "/internal/v3/abdm/lgd";
+    String FLGD_BASE_URI = "/internal/v3/abdm/lgd/{search}";
 
     // Driving Licence
     String DOCUMENT_BASE_URI = "/api/v3/document";
@@ -92,7 +99,7 @@ public interface URIConstant {
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
 
     //Feign Client
-    public static final String REQUEST_ID = "REQUEST_ID";
-    public static final String TIMESTAMP = "TIMESTAMP";
-    public static final String REQUESTER_ID="REQUESTER_ID";
+    String REQUEST_ID = "REQUEST_ID";
+    String TIMESTAMP = "TIMESTAMP";
+    String REQUESTER_ID="REQUESTER_ID";
 }

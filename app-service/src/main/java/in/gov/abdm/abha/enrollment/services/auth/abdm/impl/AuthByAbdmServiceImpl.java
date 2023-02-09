@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
 import com.password4j.BadParametersException;
-import in.gov.abdm.abha.enrollment.client.IdpFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -24,6 +23,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -55,7 +55,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
 
     @Autowired
-    IdpFClient idpFClient;
+    IdpAppService idpAppService;
 
     @Autowired
     TransactionService transactionService;
@@ -229,7 +229,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-        return idpFClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
+        return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
                 .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 

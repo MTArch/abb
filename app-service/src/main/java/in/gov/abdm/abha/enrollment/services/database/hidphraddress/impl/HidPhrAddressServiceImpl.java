@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.database.hidphraddress.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
-import in.gov.abdm.abha.enrollment.client.HidPhrAddressFClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBHidPhrAddressFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class HidPhrAddressServiceImpl extends AbhaDBClient implements HidPhrAddressService {
+public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
 	@Autowired
-	HidPhrAddressFClient hidPhrAddressFClient;
+	AbhaDBHidPhrAddressFClient abhaDBHidPhrAddressFClient;
 
 	@Override
 	public Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto) {
 		hidPhrAddressDto.setCreatedBy(ContextHolder.getClientId());
 		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
-		return hidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
+		return abhaDBHidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
@@ -74,31 +74,31 @@ public class HidPhrAddressServiceImpl extends AbhaDBClient implements HidPhrAddr
 	@Override
 	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
 																				  List<Integer> preferred) {
-		return hidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(n -> n.toString()).collect(Collectors.joining(",")))
+		return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(n -> n.toString()).collect(Collectors.joining(",")))
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
-		return hidPhrAddressFClient.findByPhrAddressIn(phrAddress.stream().collect(Collectors.joining(",")))
+		return abhaDBHidPhrAddressFClient.findByPhrAddressIn(phrAddress.stream().collect(Collectors.joining(",")))
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 	@Override
 	public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
-		return hidPhrAddressFClient.getPhrAddress(phrAddress)
+		return abhaDBHidPhrAddressFClient.getPhrAddress(phrAddress)
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
-		return hidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
+		return abhaDBHidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 
 	@Override
 	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
 		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
-		return hidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
+		return abhaDBHidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
 				.doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 

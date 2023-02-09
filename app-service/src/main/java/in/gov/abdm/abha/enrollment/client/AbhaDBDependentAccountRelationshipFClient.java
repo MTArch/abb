@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.configuration.BeanConfiguration;
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.entities.DependentAccountRelationshipDto;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,8 +11,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@ReactiveFeignClient(name="dependentAccountRelationship-enrolment-db-client", url="${enrollment.gateway.enrollmentdb.baseuri}", configuration = BeanConfiguration.class)
-public interface DependentAccountRelationshipFClient {
+@ReactiveFeignClient(name= AbhaConstants.ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT, url="${enrollment.gateway.enrollmentdb.baseuri}", configuration = BeanConfiguration.class)
+public interface AbhaDBDependentAccountRelationshipFClient {
 
     @PostMapping(URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI)
     public Mono<DependentAccountRelationshipDto> createDependentRelationships(@RequestBody List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);

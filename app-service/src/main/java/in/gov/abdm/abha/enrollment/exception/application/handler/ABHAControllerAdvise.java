@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.exception.application.handler;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.*;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -55,6 +56,8 @@ public class ABHAControllerAdvise {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.DOCUMENT_DB_GATEWAY_UNAVAILABLE);
+        } else if (exception.getClass() == AadhaarGatewayUnavailableException.class) {
+            return handleAadhaarGatewayUnavailableException();
         } else if (exception.getClass() == NotificationGatewayUnavailableException.class) {
             return handleNotificationGatewayUnavailableException();
         } else if (exception.getClass() == RedisConnectionFailureException.class) {
@@ -147,6 +150,15 @@ public class ABHAControllerAdvise {
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.NOTIFICATION_SERVICE_UNAVAILABLE.getCode()
                                 + ABDMError.NOTIFICATION_SERVICE_UNAVAILABLE.getMessage())
+                )
+        );
+    }
+
+    private ResponseEntity<Mono<ErrorResponse>> handleAadhaarGatewayUnavailableException() {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
+                ABDMControllerAdvise.handleException(
+                        new Exception(ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getCode()
+                                + ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getMessage())
                 )
         );
     }

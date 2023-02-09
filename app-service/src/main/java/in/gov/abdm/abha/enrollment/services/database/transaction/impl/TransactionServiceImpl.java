@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.database.transaction.impl;
 
-import in.gov.abdm.abha.enrollment.client.TransactionFClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBTransactionFClient;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
@@ -30,7 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     @Autowired
-    TransactionFClient transactionFClient;
+    AbhaDBTransactionFClient abhaDBTransactionFClient;
 
     @Override
     public void mapTransactionWithEkyc(TransactionDto transactionDto, AadhaarUserKycDto kycData, String kycType) {
@@ -112,25 +112,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<TransactionDto> createTransactionEntity(TransactionDto transactionDto) {
-        return transactionFClient.createTransaction(transactionDto)
+        return abhaDBTransactionFClient.createTransaction(transactionDto)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> findTransactionDetailsFromDB(String txnId) {
-        return transactionFClient.getTransactionByTxnId(txnId)
+        return abhaDBTransactionFClient.getTransactionByTxnId(txnId)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId) {
-        return transactionFClient.updateTransactionById( transactionDto, transactionId)
+        return abhaDBTransactionFClient.updateTransactionById( transactionDto, transactionId)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<ResponseEntity<Mono<Void>>> deleteTransactionEntity(String transactionId) {
-        return transactionFClient.deleteTransactionByTxnId(transactionId)
+        return abhaDBTransactionFClient.deleteTransactionByTxnId(transactionId)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

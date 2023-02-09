@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.notification;
 
-import in.gov.abdm.abha.enrollment.client.NotificationFClient;
+import in.gov.abdm.abha.enrollment.client.NotificationAppFClient;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.notification.*;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -26,10 +26,10 @@ public class NotificationService {
     public static final String EMAIL_KEY = "emailId";
 
     @Autowired
-    NotificationFClient notificationFClient;
+    NotificationAppFClient notificationAppFClient;
 
     public Mono<NotificationResponseDto> sendSMSOtp(String phoneNumber, String subject, String message) {
-        return notificationFClient.sendOtp(
+        return notificationAppFClient.sendOtp(
                 prepareNotificationRequest(NotificationType.SMS,
                         NotificationContentType.OTP.getValue(),
                         phoneNumber,
@@ -54,7 +54,7 @@ public class NotificationService {
     }
 
     public Mono<NotificationResponseDto> sendEmailOtp(String email, String subject, String message) {
-        return notificationFClient.sendOtp(
+        return notificationAppFClient.sendOtp(
                 prepareEmailNotificationRequest(NotificationType.EMAIL,
                         NotificationContentType.OTP.getValue(),
                         email,

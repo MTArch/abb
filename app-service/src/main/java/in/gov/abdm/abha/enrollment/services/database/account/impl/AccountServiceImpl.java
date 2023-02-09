@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
-import in.gov.abdm.abha.enrollment.client.AccountFClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Autowired
-    AccountFClient accountFClient;
+    AbhaDBAccountFClient abhaDBAccountFClient;
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
@@ -43,7 +43,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
-        return accountFClient.getAccountByXmlUid( xmlUid)
+        return abhaDBAccountFClient.getAccountByXmlUid( xmlUid)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
@@ -185,26 +185,26 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
-        return accountFClient.getAccountByHealthIdNumber(healthIdNumber)
+        return abhaDBAccountFClient.getAccountByHealthIdNumber(healthIdNumber)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
-        return accountFClient.updateAccount(accountDto, healthIdNumber)
+        return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
-        return accountFClient.getAccountEntityByDocumentCode(documentCode)
+        return abhaDBAccountFClient.getAccountEntityByDocumentCode(documentCode)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
-        return accountFClient.getAccountsByHealthIdNumbers(healthIdNumbers.stream().collect(Collectors.joining(",")))
+        return abhaDBAccountFClient.getAccountsByHealthIdNumbers(healthIdNumbers.stream().collect(Collectors.joining(",")))
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
@@ -265,7 +265,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         accountDto.setNewAccount(true);
         accountDto.setOrigin(ContextHolder.getClientId());
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
-        return accountFClient.createAccount(accountDto)
+        return abhaDBAccountFClient.createAccount(accountDto)
                 .doOnError((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

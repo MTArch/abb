@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import in.gov.abdm.abha.enrollment.client.IdpFClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ public class IdpService {
 	private static final String HIP_REQUEST_ID = "22222";
 
 	@Autowired
-	IdpFClient idpFClient;
+    IdpAppService idpAppService;
 
 	public Mono<IdpSendOtpResponse> sendOtp(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 		String requestId = "abha_".concat(UUID.randomUUID().toString());
@@ -50,6 +49,6 @@ public class IdpService {
 		idpSendOtpRequest.setScope(OTP_SCOPE);
 		idpSendOtpRequest.setParameters(parameters);
 		String timestamp = LocalDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)).toString();
-		return idpFClient.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
+		return idpAppService.sendOtp(idpSendOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId);
 	}
 }
