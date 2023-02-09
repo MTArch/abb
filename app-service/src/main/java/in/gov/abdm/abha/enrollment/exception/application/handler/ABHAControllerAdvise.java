@@ -83,7 +83,7 @@ public class ABHAControllerAdvise {
         } else if (exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
         } else if (exception.getClass() == EnrolmentIdNotFoundException.class) {
-            return EnrolmentIdNotFound(exception);
+            return handleEnrolmentIdNotFoundException();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
@@ -178,8 +178,8 @@ public class ABHAControllerAdvise {
         );
     }
 
-    public ResponseEntity<Mono<ErrorResponse>> EnrolmentIdNotFound(Exception ex) {
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+    public ResponseEntity<Mono<ErrorResponse>> handleEnrolmentIdNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.ENROLLMENT_ID_NOT_FOUND.getCode()
                                 + ABDMError.ENROLLMENT_ID_NOT_FOUND.getMessage())
