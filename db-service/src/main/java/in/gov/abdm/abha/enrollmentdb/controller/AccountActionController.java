@@ -14,12 +14,6 @@ public class AccountActionController {
     @Autowired
     AccountActionService accountActionService;
 
-    @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER)
-    public ResponseEntity<?> updateAccount(@RequestBody AccountActionDto accountActionDto,
-                                           @PathVariable("healthIdNumber") String healthIdNumber) {
-        return ResponseEntity.ok(accountActionService.updateAccountActionByHealthIdNumber(accountActionDto, healthIdNumber));
-    }
-
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_HEALTH_ID_NUMBER)
     public ResponseEntity<?> getAccountByHealthIdNumber(@PathVariable("healthIdNumber") String healthIdNumber) {
         return ResponseEntity.ok(accountActionService.getAccountActionByHealthIdNumber(healthIdNumber)

@@ -7,12 +7,13 @@ import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.document.GetByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
-import in.gov.abdm.abha.enrollment.services.facility.FacilityRequestService;
+import in.gov.abdm.abha.enrollment.services.facility.FacilityEnrolByEnrollmentNumberService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
@@ -33,7 +34,7 @@ import static in.gov.abdm.abha.enrollment.constants.URIConstant.VERIFY_FACILITY_
 public class FacilityController {
 
     @Autowired
-    FacilityRequestService facilityRequestService;
+    FacilityEnrolByEnrollmentNumberService facilityRequestService;
 
     @Autowired
     RSAUtil rsaUtil;
@@ -70,7 +71,7 @@ public class FacilityController {
     }
 
     @GetMapping(URIConstant.FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT)
-    public Mono<EnrolByDocumentResponseDto> getDetailsByEnrolmentNumber(@Valid @PathVariable String enrollmentNumber) {
+    public Mono<GetByDocumentResponseDto> getDetailsByEnrolmentNumber(@Valid @PathVariable String enrollmentNumber) {
         return facilityRequestService.fetchDetailsByEnrollmentNumber(enrollmentNumber);
     }
 

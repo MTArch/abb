@@ -8,7 +8,6 @@ import reactor.core.publisher.Mono;
  * Service layer to perform crud operations on AccountAction Entity
  */
 public interface AccountActionService {
-    Mono<AccountActions> updateAccountActionByHealthIdNumber(AccountActionDto accountActionDto, String healthIdNumber);
 
     Mono<AccountActionDto> getAccountActionByHealthIdNumber(String healthIdNumber);
 

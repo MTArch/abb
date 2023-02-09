@@ -86,7 +86,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
         } else {
             if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
-                throw new UnauthorizedUserToSendOrVerifyOtpException(AadhaarErrorCodes.E_952.getValue(), EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+                throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
             Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
                     aadhaarClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()

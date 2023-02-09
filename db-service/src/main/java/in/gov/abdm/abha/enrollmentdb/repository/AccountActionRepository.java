@@ -13,8 +13,6 @@ import java.math.BigInteger;
 
 @Repository
 public interface AccountActionRepository extends R2dbcRepository<AccountActions, BigInteger> {
-    @Query(value = "UPDATE public.account_actions SET action=:#{#accountAction.action}, health_id_number=:#{#accountAction.healthIdNumber}, new_value=:#{#accountAction.newValue}, previous_value=:#{#accountAction.previousValue}, reason=:#{#accountAction.reason}, reasons=:#{#accountAction.reasons} where health_id_number = :healthIdNumber")
-    Mono<AccountActions> updateAccountAction(@Param("healthIdNumber") String healthIdNumber, @Param("accountAction") AccountActions accountAction);
 
     @Query(value = "SELECT  action, created_date, field, health_id_number, new_value, previous_value, reactivation_date, reason, reasons FROM public.account_actions a where a.health_id_number = :healthIdNumber order by a.created_date desc limit 1")
     Mono<AccountActionDto> getAccountsByHealthIdNumber(@Param("healthIdNumber") String healthIdNumber);

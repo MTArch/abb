@@ -81,7 +81,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
 
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
-        if(redisResponse != null){
+        if (redisResponse != null) {
             return redisResponse;
         }
 
@@ -93,28 +93,29 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     @Override
     public Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(AuthRequestDto authByAbdmRequest) {
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
-        if(redisResponse != null){
+        if (redisResponse != null) {
             return redisResponse;
         }
-
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
+                .flatMap(transactionDto ->
+                {
+                    return verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto);
+                })
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> handleRedisABDMOtpVerification(AuthRequestDto authByAbdmRequest){
+    private Mono<AuthResponseDto> handleRedisABDMOtpVerification(AuthRequestDto authByAbdmRequest) {
         redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
         if (redisOtp == null) {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
         } else {
             if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
-                throw new UnauthorizedUserToSendOrVerifyOtpException(AadhaarErrorCodes.E_952.getValue(), EnrollErrorConstants.RESEND_OR_REMATCH_OTP_EXCEPTION);
+                throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
             if (!Argon2Util.verify(redisOtp.getOtpValue(), authByAbdmRequest.getAuthData().getOtp().getOtpValue())) {
                 ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(redisOtp.getReceiver());
                 receiverOtpTracker.setVerifyOtpCount(receiverOtpTracker.getVerifyOtpCount() + 1);
                 redisService.saveReceiverOtpTracker(redisOtp.getReceiver(), receiverOtpTracker);
-
                 TransactionDto transactionDto = new TransactionDto();
                 transactionDto.setTxnId(UUID.fromString(authByAbdmRequest.getAuthData().getOtp().getTxnId()));
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
