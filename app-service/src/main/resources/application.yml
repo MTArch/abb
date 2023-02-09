@@ -1,40 +1,25 @@
 server:
-  port: ${ENROLLMENT_APP_SERVICE_PORT}
+  port: 7102
 spring:
   application:
-    name: ${ENROLLMENT_APP_SERVICE_NAME}
-  redis:
-    database: 0
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    password: ${REDIS_PASSWORD}
-    timeout: 60000
-
-redis:
-  expireTimeInMinutes: 30
+    name: abha-enrollment-app
 
 enrollment:
-  otp:
-    userBlockTimeInMinutes: 5
-    maxSendOtpCount: 3
-    maxVerifyOtpCount: 3
   gateway:
     aadhaar:
-      baseuri: ${AADHAAR_SERVICE_BASE_URI}
+#     baseuri: http://localhost:9292
+      baseuri: http://global2dev.abdm.gov.internal
     enrollmentdb:
-      baseuri: ${ENROLLMENT_DB_BASE_URI}
+      baseuri: http://abha2dev.abdm.gov.internal
+#     baseuri: http://abha2dev.abdm.gov.internal
     idp:
-      baseuri: ${IDP_SERVICE_BASE_URI}
+      baseuri: http://global2dev.abdm.gov.internal
     notification:
-      baseuri: ${NOTIFICATION_SERVICE_BASE_URI}
+      baseuri: http://global2dev.abdm.gov.internal
     notificationdb:
-      baseuri: ${NOTIFICATION_DB_BASE_URI}
+      baseuri: http://global2dev.abdm.gov.internal
     lgd:
-      baseuri: ${LGD_SERVICE_BASE_URI}
-    document:
-      baseuri: ${DOCUMENT_SERVICE_BASE_URI}
-    documentdb:
-      baseuri: ${DOCUMENT_DB_BASE_URI}
+      baseuri: http://global2dev.abdm.gov.internal
 
 
 rsa:
