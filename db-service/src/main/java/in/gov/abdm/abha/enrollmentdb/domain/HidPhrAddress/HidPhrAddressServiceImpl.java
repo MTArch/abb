@@ -166,7 +166,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
             user.setGender(accounts.getGender());
-            //user.setProfilePhoto(accounts.getKycPhoto()); //TODO - Need to uncomment when the kyc photo or profile photo is implemented
+            user.setProfilePhoto(accounts.getKycPhoto());
             user.setLastName(accounts.getLastName());
             user.setMiddleName(accounts.getMiddleName());
             user.setMobileNumber(accounts.getMobile());
@@ -185,8 +185,10 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
             user.setCreatedBy("ABHA_SYSTEM");
+            user.setUpdatedBy("ABHA_SYSTEM");
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
+            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
@@ -226,7 +228,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
-            patient.setKycVerified(accounts.isKycVerified());
+//            patient.setKycVerified(accounts.isKycVerified()); //TODO: Uncomment the code once kyc_verified column is added in patient table of sandbox.
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
             patient.setMobileVerified(accounts.isKycVerified());
