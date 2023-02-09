@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaOkException;
@@ -21,6 +22,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressServic
 import in.gov.abdm.error.ABDMError;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -37,6 +39,9 @@ import java.util.stream.Stream;
 public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     public static final String ABHA_APP = "ABHA_APP";
+
+    @Value("${enrollment.domain}")
+    private static String ABHA_ADDRESS_EXTENSION;
     @Autowired
     TransactionService transactionService;
 
@@ -77,7 +82,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                                     stringList.removeAll(listAbhaAddressDb);
                                                     List<String> list1 = stringList.stream().collect(Collectors.toList());
                                                     List<String> list2= list1.stream()
-                                                            .map(s -> s.replace("@abdm",""))
+                                                            .map(s -> s.replace(StringConstants.AT +ABHA_ADDRESS_EXTENSION,""))
                                                             .collect(Collectors.toList());
                                                     list2.removeIf(s -> s.length() < 8 || s.length()>18);
                                                     return handleGetAbhaAddressResponse(transactionDto, list2);
@@ -163,7 +168,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
             } else if (!StringUtils.isEmpty(healthIdStr) && healthIdStr.contains("@ndhm")) {
                 healthIdStr = healthIdStr.replace("@ndhm", phrIdSuffix);
             }
-            return healthIdStr.toLowerCase()+"@abdm";
+            return healthIdStr.toLowerCase()+StringConstants.AT+ABHA_ADDRESS_EXTENSION;
         }
         return healthIdStr;
     }
@@ -185,7 +190,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                 {
                                     if(accountDto!=null)
                                     {
-                                        return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+"@abdm")
+                                        return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+StringConstants.AT +ABHA_ADDRESS_EXTENSION)
                                                 .flatMap(hidPhrAddressDto ->
                                                 {
                                                     if(StringUtils.isEmpty(hidPhrAddressDto.getHealthIdNumber()))
@@ -255,7 +260,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     private HidPhrAddressDto prepareHidPhrAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto) {
         return HidPhrAddressDto.builder()
                 .healthIdNumber(accountDto.getHealthIdNumber())
-                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+"@abdm")
+                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT+ABHA_ADDRESS_EXTENSION)
                 .status(AccountStatus.ACTIVE.getValue())
                 .preferred(abhaAddressRequestDto.getPreferred())
                 .lastModifiedBy(ABHA_APP)
