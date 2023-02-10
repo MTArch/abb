@@ -5,8 +5,6 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaOkException;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
@@ -51,9 +49,6 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     @Autowired
     HidPhrAddressService hidPhrAddressService;
-
-    @Autowired
-    AbhaDBClient abhaDBClient;
 
     private LinkedHashMap<String, String> errors;
 
