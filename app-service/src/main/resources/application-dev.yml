@@ -11,6 +11,9 @@
 #    password: nk8abFAL
 #    timeout: 60000
 #
+#redis:
+#  expireTimeInMinutes: 30
+#
 #enrollment:
 #  domain: abdm
 #  otp:

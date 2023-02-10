@@ -59,8 +59,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
 
 
-    @Value("${enrollment.domain}")
-    private String ABHA_ADDRESS_EXTENSION;
     @Autowired
     AccountService accountService;
     @Autowired
@@ -77,6 +75,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
     RedisService redisService;
+    @Autowired
+    AbhaAddressGenerator abhaAddressGenerator;
 
     private RedisOtp redisOtp;
 
@@ -159,7 +159,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionDto.setHealthIdNumber(newAbhaNumber);
             accountDto.setHealthIdNumber(newAbhaNumber);
             ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber, ABHA_ADDRESS_EXTENSION);
+            String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
             accountDto.setHealthId(defaultAbhaAddress);
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
