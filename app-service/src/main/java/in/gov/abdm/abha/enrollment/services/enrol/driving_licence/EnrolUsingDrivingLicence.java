@@ -1,7 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 
-import in.gov.abdm.abha.enrollment.client.DocumentClient;
-import in.gov.abdm.abha.enrollment.client.LGDClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -11,6 +9,7 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableExc
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
@@ -19,8 +18,11 @@ import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
+import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
+import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
@@ -66,16 +68,22 @@ public class EnrolUsingDrivingLicence {
     AccountService accountService;
 
     @Autowired
-    DocumentClient documentClient;
-
-    @Autowired
     HidPhrAddressService hidPhrAddressService;
 
     @Autowired
     AccountAuthMethodService accountAuthMethodService;
 
     @Autowired
-    LGDClient lgdClient;
+    LgdAppService lgdAppService;
+
+    @Autowired
+    AbhaAddressGenerator abhaAddressGenerator;
+
+    @Autowired
+    DocumentAppService documentAppService;
+
+    @Autowired
+    IdentityDocumentDBService identityDocumentDBService;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
@@ -108,7 +116,7 @@ public class EnrolUsingDrivingLicence {
     }
 
     private Mono<EnrolByDocumentResponseDto> verifyDrivingLicence(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto) {
-        return documentClient.verify(VerifyDLRequest.builder()
+        return documentAppService.verify(VerifyDLRequest.builder()
                 .documentType(AbhaConstants.DRIVING_LICENCE)
                 .documentId(enrolByDocumentRequestDto.getDocumentId())
                 .dob(enrolByDocumentRequestDto.getDob())
@@ -127,7 +135,7 @@ public class EnrolUsingDrivingLicence {
 
     private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto) {
         String enrollmentNumber = AbhaNumberGenerator.generateAbhaNumber();
-        String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
+        String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
                 .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),
@@ -157,7 +165,7 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .build();
 
-        return lgdClient.getLgdDistrictDetails(enrolByDocumentRequestDto.getPinCode()).flatMap(lgdDistrictResponses -> {
+        return lgdAppService.getDetailsByAttribute(enrolByDocumentRequestDto.getPinCode(),"District").flatMap(lgdDistrictResponses -> {
             LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
             accountDto.setStateCode(lgdDistrictResponse.getStateCode());
             accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
@@ -215,7 +223,7 @@ public class EnrolUsingDrivingLicence {
         identityDocumentsDto.setVerificationStatus(accountDto.getVerificationStatus());
         identityDocumentsDto.setVerificationType(AbhaConstants.DRIVING_LICENCE);
 
-        return documentClient.addIdentityDocuments(identityDocumentsDto);
+        return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
     }
 
     private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto) {

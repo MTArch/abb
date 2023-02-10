@@ -1,10 +1,11 @@
 package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
 import com.password4j.BadParametersException;
-import in.gov.abdm.abha.enrollment.client.IdpClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -24,6 +25,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -55,7 +57,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
 
     @Autowired
-    IdpClient idpClient;
+    IdpAppService idpAppService;
 
     @Autowired
     TransactionService transactionService;
@@ -79,7 +81,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
 
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
-        if(redisResponse != null){
+        if (redisResponse != null) {
             return redisResponse;
         }
 
@@ -91,16 +93,18 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     @Override
     public Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(AuthRequestDto authByAbdmRequest) {
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
-        if(redisResponse != null){
+        if (redisResponse != null) {
             return redisResponse;
         }
-
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
+                .flatMap(transactionDto ->
+                {
+                    return verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto);
+                })
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> handleRedisABDMOtpVerification(AuthRequestDto authByAbdmRequest){
+    private Mono<AuthResponseDto> handleRedisABDMOtpVerification(AuthRequestDto authByAbdmRequest) {
         redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
         if (redisOtp == null) {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
@@ -112,7 +116,6 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(redisOtp.getReceiver());
                 receiverOtpTracker.setVerifyOtpCount(receiverOtpTracker.getVerifyOtpCount() + 1);
                 redisService.saveReceiverOtpTracker(redisOtp.getReceiver(), receiverOtpTracker);
-
                 TransactionDto transactionDto = new TransactionDto();
                 transactionDto.setTxnId(UUID.fromString(authByAbdmRequest.getAuthData().getOtp().getTxnId()));
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
@@ -229,7 +232,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-        return idpClient.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
+        return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
                 .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 

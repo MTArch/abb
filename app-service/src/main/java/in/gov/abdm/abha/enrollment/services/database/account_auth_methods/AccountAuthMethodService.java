@@ -7,6 +7,4 @@ import java.util.List;
 
 public interface AccountAuthMethodService {
     Mono<List<AccountAuthMethodsDto>> addAccountAuthMethods(List<AccountAuthMethodsDto> authMethodsDtos);
-
-//    Mono<AccountAuthMethodsDto> findBlockedAuthMethods(String abhaNumber);
 }
