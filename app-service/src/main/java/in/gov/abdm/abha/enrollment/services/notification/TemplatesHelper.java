@@ -15,11 +15,11 @@ public class TemplatesHelper {
     @Qualifier(AbhaConstants.MESSAGE_TEMPLATES)
     List<Templates> templates;
 
-    public String prepareUpdateMobileMessage(String otp) {
-        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(1007164181681962323L)).findAny().get().getMessage(), otp);
+    public String prepareRegistrationOtpMessage(Long templateId, String otp) {
+        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), otp);
     }
 
-    public static String getUpdateMobileTemplateId() {
-        return "1007164725434022866";
+    public String prepareRegistrationSMSMessage(Long templateId,String name,String abhaNumber,String url) {
+        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), name,abhaNumber,url);
     }
 }

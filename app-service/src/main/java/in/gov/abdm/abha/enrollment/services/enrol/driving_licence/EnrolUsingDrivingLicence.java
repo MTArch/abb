@@ -1,42 +1,48 @@
 package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
-import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
+import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
+import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
-import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
-import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
+import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
+import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
 
 @Slf4j
 @Service
@@ -60,6 +66,7 @@ public class EnrolUsingDrivingLicence {
     private static final String FAILED_TO_STORE_DOCUMENTS = "Failed to store Documents";
     private static final String ACCOUNT_AUTH_METHODS_ADDED = "Account Auth methods added";
     public static final String DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE = "Default PHR Address Updated In HID PHR Address Table";
+    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
 
     @Autowired
     TransactionService transactionService;
@@ -85,6 +92,9 @@ public class EnrolUsingDrivingLicence {
     @Autowired
     IdentityDocumentDBService identityDocumentDBService;
 
+    @Autowired
+    NotificationService notificationService;
+
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
@@ -101,7 +111,18 @@ public class EnrolUsingDrivingLicence {
                                         } else {
                                             log.info(TRANSACTION_DELETED);
                                         }
-                                        return prepareErolByDLResponse(accountDto);
+
+                                        return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
+                                          .flatMap(notificationResponseDto->{
+                                            if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
+
+                                                return prepareErolByDLResponse(accountDto);
+                                            }
+                                            else {
+                                                throw new NotificationGatewayUnavailableException();
+                                            }
+                                        });
+
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account

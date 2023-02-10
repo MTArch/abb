@@ -120,7 +120,7 @@ public class FacilityEnrolByEnrollmentNumberService {
             if (!redisService.isResendOtpAllowed(accountDto.getMobile())) {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
-            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(accountDto.getMobile(), OTP_SUBJECT, templatesHelper.prepareUpdateMobileMessage(newOtp));
+            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendRegistrationOtp(accountDto.getMobile(), newOtp);
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {

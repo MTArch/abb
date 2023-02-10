@@ -144,6 +144,8 @@ public interface AbhaConstants {
 
     String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
 
+    String SENT = "sent";
+    
     String TRANSACTION_ID = "TRANSACTION_ID";
     String AADHAAR_SERVICE_CLIENT = "aadhaar-service-client";
 
