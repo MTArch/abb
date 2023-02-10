@@ -41,7 +41,8 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     public static final String ABHA_APP = "ABHA_APP";
 
     @Value("${enrollment.domain}")
-    private static String ABHA_ADDRESS_EXTENSION;
+    private String ABHA_ADDRESS_EXTENSION;
+
     @Autowired
     TransactionService transactionService;
 
@@ -159,7 +160,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         return abhaAddress.stream().map(v -> v.replace(" ", "")).collect(Collectors.toSet());
     }
 
-    public static String sanetizePhrAddress(String healthIdStr) {
+    public String sanetizePhrAddress(String healthIdStr) {
         String phrIdSuffix = "";
         if (!StringUtils.isEmpty(healthIdStr)) {
             healthIdStr = healthIdStr.toLowerCase();
