@@ -1,7 +1,9 @@
 package in.gov.abdm.abha.enrollment.services.notification;
 
-import in.gov.abdm.abha.enrollment.client.NotificationClient;
+import in.gov.abdm.abha.enrollment.client.NotificationAppFClient;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.notification.*;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -9,6 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NotificationService {
@@ -23,15 +26,16 @@ public class NotificationService {
     public static final String EMAIL_KEY = "emailId";
 
     @Autowired
-    NotificationClient notificationClient;
+    NotificationAppFClient notificationAppFClient;
 
     public Mono<NotificationResponseDto> sendSMSOtp(String phoneNumber, String subject, String message) {
-        return notificationClient.sendOtp(
+        return notificationAppFClient.sendOtp(
                 prepareNotificationRequest(NotificationType.SMS,
                         NotificationContentType.OTP.getValue(),
                         phoneNumber,
                         subject,
-                        message));
+                        message), UUID.randomUUID().toString(), Common.timeStampWithT())
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
     }
 
     private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, String message) {
@@ -50,12 +54,13 @@ public class NotificationService {
     }
 
     public Mono<NotificationResponseDto> sendEmailOtp(String email, String subject, String message) {
-        return notificationClient.sendOtp(
+        return notificationAppFClient.sendOtp(
                 prepareEmailNotificationRequest(NotificationType.EMAIL,
                         NotificationContentType.OTP.getValue(),
                         email,
                         subject,
-                        message));
+                        message),UUID.randomUUID().toString(), Common.timeStampWithT())
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
     }
 
     private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {

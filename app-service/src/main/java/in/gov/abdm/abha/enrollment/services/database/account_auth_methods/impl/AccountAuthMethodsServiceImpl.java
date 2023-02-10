@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.database.account_auth_methods.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBAccountAuthMethodsFClient;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,11 @@ import java.util.List;
 public class AccountAuthMethodsServiceImpl implements AccountAuthMethodService {
 
     @Autowired
-    AbhaDBClient abhaDBClient;
+    AbhaDBAccountAuthMethodsFClient abhaDBAccountAuthMethodsFClient;
 
     @Override
     public Mono<List<AccountAuthMethodsDto>> addAccountAuthMethods(List<AccountAuthMethodsDto> authMethodsDtos) {
-        return abhaDBClient.addFluxEntity(AccountAuthMethodsDto.class, authMethodsDtos);
+        return abhaDBAccountAuthMethodsFClient.addAccountAuthMethods(authMethodsDtos)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

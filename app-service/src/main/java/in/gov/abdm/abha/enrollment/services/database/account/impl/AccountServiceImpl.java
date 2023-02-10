@@ -1,12 +1,12 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
+import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -16,6 +16,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,13 +34,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
+    @Autowired
+    AbhaDBAccountFClient abhaDBAccountFClient;
+
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
-        return getEntityById(AccountDto.class, xmlUid);
+        return abhaDBAccountFClient.getAccountByXmlUid( xmlUid)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
@@ -180,30 +185,27 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
-        return getAccountEntityById(AccountDto.class, healthIdNumber);
+        return abhaDBAccountFClient.getAccountByHealthIdNumber(healthIdNumber)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
-        return updateEntity(AccountDto.class, accountDto, healthIdNumber);
+        return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
-        return getAccountEntityByDocumentCode(AccountDto.class, documentCode);
+        return abhaDBAccountFClient.getAccountEntityByDocumentCode(documentCode)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
-
-        StringBuilder sb = new StringBuilder(URIConstant.DB_ADD_ACCOUNT_URI)
-                .append(StringConstants.QUESTION)
-                .append("healthIdNumber")
-                .append(StringConstants.EQUAL)
-                .append(healthIdNumbers.stream().collect(Collectors.joining(",")));
-
-        return GetFluxDatabase(AccountDto.class, sb.toString());
+        return abhaDBAccountFClient.getAccountsByHealthIdNumbers(healthIdNumbers.stream().collect(Collectors.joining(",")))
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     private void breakName(AccountDto accountDto) {
@@ -263,6 +265,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         accountDto.setNewAccount(true);
         accountDto.setOrigin(ContextHolder.getClientId());
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
-        return addEntity(AccountDto.class, accountDto);
+        return abhaDBAccountFClient.createAccount(accountDto)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }

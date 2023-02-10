@@ -143,4 +143,22 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_PREFERRED_FLAG = "Invalid Preferred Flag";
 
     String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
+
+    String TRANSACTION_ID = "TRANSACTION_ID";
+    String AADHAAR_SERVICE_CLIENT = "aadhaar-service-client";
+
+    String ABHA_DB_ACCOUNT_AUTH_METHODS_CLIENT = "abha-db-account-auth-methods-client";
+
+    String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
+    String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
+
+    String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
+    String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";
+    String DOCUMENT_APP_CLIENT = "document-app-client";
+    String ABHA_DB_HID_PHR_ADDRESS_CLIENT = "abha-db-hid-phr-address-client";
+    String IDP_APP_CLIENT = "idp-app-client";
+    String LGD_APP_CLIENT = "lgd-app-client";
+    String NOTIFICATION_APP_SERVICE = "notification-app-service";
+
+
 }
