@@ -48,6 +48,20 @@ public class DocumentClient {
                 });
     }
 
+    private Mono<IdentityDocumentsDto> GetMonoDatabase(Class<IdentityDocumentsDto> t, String uri) {
+        return webClient.
+                baseUrl(DOCUMENT_DB_SERVICE_BASE_URI)
+                .build()
+                .get()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(t)
+                .onErrorResume(error -> {
+                    throw new DocumentDBGatewayUnavailableException();
+                });
+    }
+
     public Mono<VerifyDLResponse> verify(VerifyDLRequest verifyDLRequest) {
         return webClient.baseUrl(DOCUMENT_SERVICE_BASE_URI)
                 .build()
@@ -63,5 +77,9 @@ public class DocumentClient {
 
     public Mono<IdentityDocumentsDto> addIdentityDocuments(IdentityDocumentsDto row) {
         return monoPostDatabase(URIConstant.IDENTITY_DOCUMENT_ADD, row);
+    }
+
+    public Mono<IdentityDocumentsDto> getIdentityDocuments(String healthid) {
+        return GetMonoDatabase(IdentityDocumentsDto.class,URIConstant.IDENTITY_DOCUMENT_GET+healthid);
     }
 }

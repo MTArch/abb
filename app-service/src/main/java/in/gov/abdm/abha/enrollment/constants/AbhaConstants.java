@@ -51,6 +51,12 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_BIO_OBJECT = "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
     String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with AADHAAR Number.Please,create an account by clicking Click here to Create ABHA Number link.";
     String TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid transaction, either the transaction is expired or not found";
+
+    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid enrollment id, either the enrolment id is wrong or not found in db";
+    String VERIFICATION_STATUS_NOT_PROVISIONAL = "Verification status for this account is not Provisional";
+
+    String HEALTH_ID_NUMBER_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid health id, either the health id is wrong or not found in db";
+
     String VALIDATION_ERROR_PARENT_ABHA_REQUEST_DEMO_OBJECT = "ParentAbhaRequest cannot be null or empty OR ABHANumber ,yearOfBirth,name,gender,email,relationship,document,or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
@@ -71,7 +77,7 @@ public interface AbhaConstants {
     String EXPIRED_OTP = "OTP expired, Please try again.";
 
     String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
-    
+
     String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
 
     String INVALID_EMAIL_ID = "Invalid Email Id";
@@ -127,7 +133,7 @@ public interface AbhaConstants {
     String INVALID_PIN_CODE = "Invalid PinCode";
 
     String AADHAAR = "AADHAAR";
-    
+
     String VERIFIED = "VERIFIED";
 
     String DOCUMENT_TYPE = "documentType";

@@ -42,12 +42,14 @@ public interface URIConstant {
     String FDB_GET_ACCOUNT_BY_XML_UID = DB_BASE_URI + "/account/getByXml/{xmlUid}";
 
     String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
+    String DB_ADD_ACCOUNT_ACTION_URI = DB_BASE_URI + "/accountaction";
 
     String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 
     String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
+    String DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/accountaction/";
     String FDB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
     String FDB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
 
@@ -99,6 +101,13 @@ public interface URIConstant {
     String DOCUMENT_VERIFY = DOCUMENT_BASE_URI + "/verify";
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
 
+    String IDENTITY_DOCUMENT_GET = DOCUMENT_DB_BASE_URI + "/identityDocument/";
+    String FACILITY_ENDPOINT = "api/v3/facility";
+    String FACILITY_OTP_ENDPOINT = "/request/otp";
+    String VERIFY_FACILITY_OTP_ENDPOINT = "/auth/byAbdm";
+    String VERIFY_ENROLLMENT_ENDPOINT = "/enrollment/byEnrollmentNumber";
+
+    String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT ="/enrollment/{enrollmentNumber}";
     //Feign Client
     String REQUEST_ID = "REQUEST_ID";
     String TIMESTAMP = "TIMESTAMP";

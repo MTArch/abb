@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.*;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
@@ -84,11 +85,16 @@ public class ABHAControllerAdvise {
             return handleFienClientExceptions(exception);
         } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
+        } else if (exception.getClass() == EnrolmentIdNotFoundException.class) {
+            return handleEnrolmentIdNotFoundException();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
+            );
         }
-        throw new RuntimeException(exception);
     }
 
-    private Mono<ErrorResponse> handleAbdmException(ABDMError error){
+    private Mono<ErrorResponse> handleAbdmException(ABDMError error) {
         return ABDMControllerAdvise.handleException(new Exception(error.getCode() + error.getMessage()));
     }
 
@@ -111,19 +117,16 @@ public class ABHAControllerAdvise {
         Map<String, Object> errorMap = new LinkedHashMap<>();
 
         if (!ex.getAllErrors().isEmpty()) {
-            ex.getAllErrors().forEach(error -> {
-                {
-                    errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
-                            .filter(v -> v.getValue().equals(error.getDefaultMessage()))
-                            .findAny()
-                            .get().toString(), error.getDefaultMessage());
-                }
-            });
+            ex.getAllErrors().forEach(error -> errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
+                    .filter(v -> v.getValue().equals(error.getDefaultMessage()))
+                    .findAny()
+                    .get().toString(), error.getDefaultMessage()));
         }
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS + errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
+
 
     private ResponseEntity<Mono<ErrorResponse>> handleTransactionNotFoundException() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -183,6 +186,15 @@ public class ABHAControllerAdvise {
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.DOCUMENT_GATEWAY_UNAVAILABLE.getCode()
                                 + ABDMError.DOCUMENT_GATEWAY_UNAVAILABLE.getMessage())
+                )
+        );
+    }
+
+    public ResponseEntity<Mono<ErrorResponse>> handleEnrolmentIdNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ABDMControllerAdvise.handleException(
+                        new Exception(ABDMError.ENROLLMENT_ID_NOT_FOUND.getCode()
+                                + ABDMError.ENROLLMENT_ID_NOT_FOUND.getMessage())
                 )
         );
     }

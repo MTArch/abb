@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.model.enrol.document;
+package in.gov.abdm.abha.enrollment.model.facility.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class EnrolProfileDto {
+public class EnrolProfileDetailsDto {
     private String enrolmentNumber;
     private String enrolmentState;
     private String firstName;
@@ -29,5 +29,8 @@ public class EnrolProfileDto {
     private String abhaType;
     private String pinCode;
     private String abhaStatus;
+    private String photo;
+    private String photoFront;
+    private String photoBack;
     private List<String> phrAddress;
 }
