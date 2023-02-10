@@ -3,15 +3,27 @@
 #spring:
 #  application:
 #    name: abha-enrollment-app
+#  redis:
+#    database: 0
+#    host: redis1.nha2abdmdevpaas.tatacommunications.com
+##    host: 100.96.1.9
+#    port: 5105
+#    password: nk8abFAL
+#    timeout: 60000
 #
 #enrollment:
+#  domain: abdm
+#  otp:
+#    userBlockTimeInMinutes: 5
+#    maxSendOtpCount: 3
+#    maxVerifyOtpCount: 3
 #  gateway:
 #    aadhaar:
-##     baseuri: http://localhost:9292
 #      baseuri: http://global2dev.abdm.gov.internal
+##      baseuri: http://localhost:9292
 #    enrollmentdb:
-#      baseuri: http://localhost:9188
-##     baseuri: http://abha2dev.abdm.gov.internal
+#      baseuri: http://abha2dev.abdm.gov.internal
+##      baseuri: http://localhost:9188
 #    idp:
 #      baseuri: http://global2dev.abdm.gov.internal
 #    notification:
@@ -19,6 +31,10 @@
 #    notificationdb:
 #      baseuri: http://global2dev.abdm.gov.internal
 #    lgd:
+#      baseuri: http://global2dev.abdm.gov.internal
+#    document:
+#      baseuri: http://global2dev.abdm.gov.internal
+#    documentdb:
 #      baseuri: http://global2dev.abdm.gov.internal
 #
 #

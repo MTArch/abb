@@ -39,6 +39,7 @@ public class HidPhrAddressServiceImpl extends AbhaDBClient implements HidPhrAddr
 				.status("ACTIVE")
 				.preferred(1)
 				.lastModifiedBy(accountDto.getLstUpdatedBy())
+				.lastModifiedDate(accountDto.getCreatedDate())
 				.hasMigrated("N")
 				.createdBy(accountDto.getLstUpdatedBy())
 				.createdDate(accountDto.getCreatedDate())

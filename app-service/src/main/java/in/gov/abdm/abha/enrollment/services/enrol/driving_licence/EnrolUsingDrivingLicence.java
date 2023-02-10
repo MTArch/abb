@@ -29,6 +29,7 @@ import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -59,6 +60,9 @@ public class EnrolUsingDrivingLicence {
     private static final String ACCOUNT_AUTH_METHODS_ADDED = "Account Auth methods added";
     public static final String DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE = "Default PHR Address Updated In HID PHR Address Table";
 
+    @Value("${enrollment.domain}")
+    private String ABHA_ADDRESS_EXTENSION;
+    
     @Autowired
     TransactionService transactionService;
 
@@ -127,7 +131,7 @@ public class EnrolUsingDrivingLicence {
 
     private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto) {
         String enrollmentNumber = AbhaNumberGenerator.generateAbhaNumber();
-        String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
+        String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber, ABHA_ADDRESS_EXTENSION);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
                 .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),

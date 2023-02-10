@@ -38,6 +38,7 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,6 +59,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
 
 
+    @Value("${enrollment.domain}")
+    private String ABHA_ADDRESS_EXTENSION;
     @Autowired
     AccountService accountService;
     @Autowired
@@ -156,7 +159,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionDto.setHealthIdNumber(newAbhaNumber);
             accountDto.setHealthIdNumber(newAbhaNumber);
             ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
+            String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber, ABHA_ADDRESS_EXTENSION);
             accountDto.setHealthId(defaultAbhaAddress);
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
