@@ -22,6 +22,8 @@ import javax.validation.Valid;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID;
+
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.ENROL_ENDPOINT)
@@ -55,7 +57,8 @@ public class EnrollmentController {
     }
 
     @GetMapping(URIConstant.ENROL_SUGGEST_ABHA_ENDPOINT)
-    public Mono<SuggestAbhaResponseDto> getAbhaAddressSuggestion(@PathVariable("txnId") String txnId) {
+    public Mono<SuggestAbhaResponseDto> getAbhaAddressSuggestion(
+            @RequestHeader(value = TRANSACTION_ID) String txnId) {
         abhaAddressService.validateRequest(txnId);
         return abhaAddressService.getAbhaAddress(txnId);
     }

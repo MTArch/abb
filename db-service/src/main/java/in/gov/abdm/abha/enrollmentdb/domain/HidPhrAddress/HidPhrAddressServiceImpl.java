@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
+import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
 import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
-import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.address.Address;
 import in.gov.abdm.phr.enrollment.user.User;
@@ -40,7 +40,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     HidPhrAddressRepository hidPhrAddressRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Autowired
     private PHREventPublisher phrEventPublisher;
@@ -130,7 +130,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     }
 
     private Mono<Accounts> findAccountFromHidPhrAddress (HidPhrAddress hidPhrAddress) {
-        return accountRepository.findById(hidPhrAddress.getHealthIdNumber())
+        return accountService.getAccountByHealthIdNumber(hidPhrAddress.getHealthIdNumber())
+                .map(accountsDto -> modelMapper.map(accountsDto, Accounts.class))
                 .flatMap(account -> {
                     account.setHidPhrAddress(hidPhrAddress);
                     return Mono.just(account);
@@ -155,6 +156,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
+            address.setCreatedBy("ABHA_SYNC");
+            address.setUpdatedBy("ABHA_SYNC");
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
             if (null != accounts.getCreatedDate()) {
@@ -166,7 +169,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
             user.setGender(accounts.getGender());
-            //user.setProfilePhoto(accounts.getKycPhoto()); //TODO - Need to uncomment when the kyc photo or profile photo is implemented
+            user.setProfilePhoto(accounts.getKycPhoto());
             user.setLastName(accounts.getLastName());
             user.setMiddleName(accounts.getMiddleName());
             user.setMobileNumber(accounts.getMobile());
@@ -184,9 +187,11 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYSTEM");
+            user.setCreatedBy("ABHA_SYNC");
+            user.setUpdatedBy("ABHA_SYNC");
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
+            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
@@ -226,7 +231,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
-            patient.setKycVerified(accounts.isKycVerified());
+//            patient.setKycVerified(accounts.isKycVerified()); //TODO: Uncomment the code once kyc_verified column is added in patient table of sandbox.
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
             patient.setMobileVerified(accounts.isKycVerified());

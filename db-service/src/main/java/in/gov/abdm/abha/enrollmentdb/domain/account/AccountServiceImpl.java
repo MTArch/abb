@@ -34,13 +34,13 @@ public class AccountServiceImpl implements AccountService {
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto));
     }
 
     @Override
-    public Mono getAccountByHealthIdNumber(String healthIdNumber) {
-        return accountRepository.getAccountsByHealthIdNumber(healthIdNumber);
+    public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
+        return accountRepository.getAccountsByHealthIdNumber(healthIdNumber).map(accounts -> modelMapper.map(accounts, AccountDto.class));
     }
 
     @Override
@@ -49,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
         account.setNewAccount(false);
         return accountRepository.updateAccounts(account.getHealthIdNumber(), account)
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto));
     }
 

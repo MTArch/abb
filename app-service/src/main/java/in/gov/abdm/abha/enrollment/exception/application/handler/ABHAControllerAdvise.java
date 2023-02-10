@@ -3,7 +3,9 @@ package in.gov.abdm.abha.enrollment.exception.application.handler;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.*;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
@@ -55,6 +57,8 @@ public class ABHAControllerAdvise {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.DOCUMENT_DB_GATEWAY_UNAVAILABLE);
+        } else if (exception.getClass() == AadhaarGatewayUnavailableException.class) {
+            return handleAadhaarGatewayUnavailableException();
         } else if (exception.getClass() == NotificationGatewayUnavailableException.class) {
             return handleNotificationGatewayUnavailableException();
         } else if (exception.getClass() == RedisConnectionFailureException.class) {
@@ -77,10 +81,12 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.OK, exception.getMessage());
         } else if (exception.getClass() == AbhaConflictException.class) {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
-        } else if (exception.getClass().getPackageName().equals(FEIGN) && exception.getMessage().contains(MESSAGE)) {
+        } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
-        } else if (exception.getMessage().contains(BAD_REQUEST)) {
+        } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
+        } else if (exception.getClass() == EnrolmentIdNotFoundException.class) {
+            return handleEnrolmentIdNotFoundException();
         } else {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
@@ -88,7 +94,7 @@ public class ABHAControllerAdvise {
         }
     }
 
-    private Mono<ErrorResponse> handleAbdmException(ABDMError error){
+    private Mono<ErrorResponse> handleAbdmException(ABDMError error) {
         return ABDMControllerAdvise.handleException(new Exception(error.getCode() + error.getMessage()));
     }
 
@@ -111,19 +117,16 @@ public class ABHAControllerAdvise {
         Map<String, Object> errorMap = new LinkedHashMap<>();
 
         if (!ex.getAllErrors().isEmpty()) {
-            ex.getAllErrors().forEach(error -> {
-                {
-                    errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
-                            .filter(v -> v.getValue().equals(error.getDefaultMessage()))
-                            .findAny()
-                            .get().toString(), error.getDefaultMessage());
-                }
-            });
+            ex.getAllErrors().forEach(error -> errorMap.put(Arrays.stream(ClassLevelExceptionConstants.values())
+                    .filter(v -> v.getValue().equals(error.getDefaultMessage()))
+                    .findAny()
+                    .get().toString(), error.getDefaultMessage()));
         }
         log.info(CONTROLLER_ADVICE_EXCEPTION_CLASS + errorMap);
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
+
 
     private ResponseEntity<Mono<ErrorResponse>> handleTransactionNotFoundException() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
@@ -151,6 +154,15 @@ public class ABHAControllerAdvise {
         );
     }
 
+    private ResponseEntity<Mono<ErrorResponse>> handleAadhaarGatewayUnavailableException() {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
+                ABDMControllerAdvise.handleException(
+                        new Exception(ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getCode()
+                                + ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getMessage())
+                )
+        );
+    }
+
     private ResponseEntity<Mono<ErrorResponse>> handleRedisConnectionFailureException() {
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(
@@ -174,6 +186,15 @@ public class ABHAControllerAdvise {
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.DOCUMENT_GATEWAY_UNAVAILABLE.getCode()
                                 + ABDMError.DOCUMENT_GATEWAY_UNAVAILABLE.getMessage())
+                )
+        );
+    }
+
+    public ResponseEntity<Mono<ErrorResponse>> handleEnrolmentIdNotFoundException() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ABDMControllerAdvise.handleException(
+                        new Exception(ABDMError.ENROLLMENT_ID_NOT_FOUND.getCode()
+                                + ABDMError.ENROLLMENT_ID_NOT_FOUND.getMessage())
                 )
         );
     }
@@ -210,9 +231,9 @@ public class ABHAControllerAdvise {
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleFienClientExceptions(Exception exception) {
-        String msg = (exception.getMessage().split("\"message\":")[1]);
-        Exception wrapped = new Exception(ABDMError.BAD_REQUEST + StringConstants.COLON + msg);
-        return ResponseEntity.badRequest().body(ABDMControllerAdvise.handleException(wrapped));
+        String msg = (exception.getMessage());
+        Exception wrapped = new Exception(ABDMError.FEIGN_EXCEPTION.getCode() + msg.replace(":", "-"));
+        return ResponseEntity.internalServerError().body(ABDMControllerAdvise.handleException(wrapped));
     }
 
     private Mono<ErrorResponse> prepareCustomErrorResponse(String errorCode, String errorMessage) {

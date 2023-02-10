@@ -128,6 +128,8 @@ public class AbhaDBClient<T> {
         switch (t.getSimpleName()) {
             case "AccountDto":
                 return GetMonoDatabase(t, URIConstant.DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER + id);
+            case "AccountActionDto":
+                return GetMonoDatabase(t,URIConstant.DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER+id);
         }
         return Mono.empty();
     }
@@ -142,6 +144,8 @@ public class AbhaDBClient<T> {
                 return monoPostDatabase(t, URIConstant.DB_ADD_TRANSACTION_URI, row);
             case "AccountDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_URI, row);
+            case "AccountActionDto":
+                return monoPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_ACTION_URI, row);
             case "DependentAccountRelationshipDto":
                 return monoPostDatabase(t, URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI, row);
             case "HidPhrAddressDto":

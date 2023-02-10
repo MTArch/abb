@@ -17,5 +17,5 @@ public interface TransactionService {
 
     Mono<TransactionDto> updateTransactionEntity(TransactionDto transactionDto, String transactionId);
 
-    Mono<ResponseEntity<Void>> deleteTransactionEntity(String transactionId);
+    Mono<ResponseEntity<Mono<Void>>> deleteTransactionEntity(String transactionId);
 }

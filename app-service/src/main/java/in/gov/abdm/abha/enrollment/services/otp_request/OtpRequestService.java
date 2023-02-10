@@ -9,8 +9,8 @@ import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.idp.IdpGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
@@ -21,6 +21,7 @@ import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
+import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -82,6 +83,9 @@ public class OtpRequestService {
     IdpService idpService;
     @Autowired
     RedisService redisService;
+
+    @Autowired
+    AadhaarAppService aadhaarAppService;
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
@@ -147,7 +151,7 @@ public class OtpRequestService {
                             transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
 
                         transactionDto.setKycPhoto(res1.getKycPhoto());
-                        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+                        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
                                 {
                                     return handleAadhaarOtpResponse(res, transactionDto);
@@ -155,7 +159,7 @@ public class OtpRequestService {
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
         } else { //standard abha send aadhaar otp flow
-            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
             return aadhaarResponseDto.flatMap(res ->
                     {
                         handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()), res.getAadhaarAuthOtpDto().getUidtkn(), StringUtils.EMPTY);

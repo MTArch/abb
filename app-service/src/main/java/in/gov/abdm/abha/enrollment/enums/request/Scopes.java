@@ -18,6 +18,8 @@ public enum Scopes {
     PARENT_ABHA_LINK("parent-abha-link"),
     DL_FLOW("dl-flow"),
     MOBILE_VERIFY("mobile-verify"),
+
+    VERIFY_ENROLLMENT("verify-enrollment"),
     EMAIL_VERIFY("email-verify"),
     WRONG("wrong");
 
