@@ -9,8 +9,8 @@ import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.idp.IdpGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
@@ -21,6 +21,7 @@ import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
+import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -41,6 +42,8 @@ import java.util.Base64;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+
 /**
  * service for OTP Request coming from ui
  * otp can be sent via aadhaar / abdm
@@ -56,12 +59,9 @@ public class OtpRequestService {
     private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with ";
     private static final String OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING = "OTP is sent to ABHA registered mobile number ending with ";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
-    private static final String OTP_SUBJECT = "mobile verification";
-    private static final String SENT = "sent";
     private static final String FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION = "Failed to Send OTP for Mobile verification";
     private static final String FAILED_TO_CALL_IDP_SERVICE = "Failed to call IDP service";
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
-
     private static final String EMAIL_OTP_SUBJECT = "email verification";
 
     private static final String OTP_IS_SENT_TO_EMAIL_ENDING = "OTP is sent to email ending with ";
@@ -84,6 +84,9 @@ public class OtpRequestService {
     @Autowired
     RedisService redisService;
 
+    @Autowired
+    AadhaarAppService aadhaarAppService;
+
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String phoneNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
@@ -94,10 +97,9 @@ public class OtpRequestService {
 
         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
         return transactionDtoMono.flatMap(transactionDto -> {
-            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
-                    phoneNumber,
-                    OTP_SUBJECT,
-                    templatesHelper.prepareUpdateMobileMessage(newOtp));
+
+            Mono<NotificationResponseDto> notificationResponseDtoMono
+                    = notificationService.sendRegistrationOtp(phoneNumber,newOtp);
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {
@@ -149,7 +151,7 @@ public class OtpRequestService {
                             transactionDto.setHealthIdNumber(res1.getHealthIdNumber());
 
                         transactionDto.setKycPhoto(res1.getKycPhoto());
-                        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+                        Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
                                 {
                                     return handleAadhaarOtpResponse(res, transactionDto);
@@ -157,7 +159,7 @@ public class OtpRequestService {
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
         } else { //standard abha send aadhaar otp flow
-            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarClient.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
+            Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
             return aadhaarResponseDto.flatMap(res ->
                     {
                         handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()), res.getAadhaarAuthOtpDto().getUidtkn(), StringUtils.EMPTY);
@@ -264,7 +266,7 @@ public class OtpRequestService {
             Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(
                     email,
                     EMAIL_OTP_SUBJECT,
-                    templatesHelper.prepareUpdateMobileMessage(newOtp));
+                    templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L,newOtp));
 
             return notificationResponseDtoMono.flatMap(response -> {
                 if (response.getStatus().equals(SENT)) {
@@ -303,10 +305,8 @@ public class OtpRequestService {
         transactionDto.setOtp(Argon2Util.encode(newOtp));
         transactionDto.setKycPhoto(StringConstants.EMPTY);
 
-        Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendSMSOtp(
-                phoneNumber,
-                OTP_SUBJECT,
-                templatesHelper.prepareUpdateMobileMessage(newOtp));
+        Mono<NotificationResponseDto> notificationResponseDtoMono
+                = notificationService.sendRegistrationOtp(phoneNumber,newOtp);
 
         return notificationResponseDtoMono.flatMap(response -> {
             if (response.getStatus().equals(SENT)) {

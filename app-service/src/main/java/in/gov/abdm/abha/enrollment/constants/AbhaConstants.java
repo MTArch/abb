@@ -51,6 +51,12 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_BIO_OBJECT = "bio cannot be null or empty OR timeStamp ,aadhaar or rPidData cannot be null or empty";
     String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with AADHAAR Number.Please,create an account by clicking Click here to Create ABHA Number link.";
     String TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid transaction, either the transaction is expired or not found";
+
+    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid enrollment id, either the enrolment id is wrong or not found in db";
+    String VERIFICATION_STATUS_NOT_PROVISIONAL = "Verification status for this account is not Provisional";
+
+    String HEALTH_ID_NUMBER_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid health id, either the health id is wrong or not found in db";
+
     String VALIDATION_ERROR_PARENT_ABHA_REQUEST_DEMO_OBJECT = "ParentAbhaRequest cannot be null or empty OR ABHANumber ,yearOfBirth,name,gender,email,relationship,document,or mobile cannot be null or empty";
 
     String VALIDATION_ERROR_CHILD_ABHA_REQUEST_DEMO_OBJECT = "ChildAbhaRequest cannot be null or empty OR ABHANumber cannot be null or empty";
@@ -71,7 +77,7 @@ public interface AbhaConstants {
     String EXPIRED_OTP = "OTP expired, Please try again.";
 
     String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
-    
+
     String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
 
     String INVALID_EMAIL_ID = "Invalid Email Id";
@@ -127,7 +133,7 @@ public interface AbhaConstants {
     String INVALID_PIN_CODE = "Invalid PinCode";
 
     String AADHAAR = "AADHAAR";
-    
+
     String VERIFIED = "VERIFIED";
 
     String DOCUMENT_TYPE = "documentType";
@@ -138,5 +144,23 @@ public interface AbhaConstants {
 
     String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
 
+    String SENT = "sent";
+    
     String TRANSACTION_ID = "TRANSACTION_ID";
+    String AADHAAR_SERVICE_CLIENT = "aadhaar-service-client";
+
+    String ABHA_DB_ACCOUNT_AUTH_METHODS_CLIENT = "abha-db-account-auth-methods-client";
+
+    String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
+    String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
+
+    String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
+    String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";
+    String DOCUMENT_APP_CLIENT = "document-app-client";
+    String ABHA_DB_HID_PHR_ADDRESS_CLIENT = "abha-db-hid-phr-address-client";
+    String IDP_APP_CLIENT = "idp-app-client";
+    String LGD_APP_CLIENT = "lgd-app-client";
+    String NOTIFICATION_APP_SERVICE = "notification-app-service";
+
+
 }

@@ -5,8 +5,6 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaOkException;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
@@ -41,7 +39,8 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     public static final String ABHA_APP = "ABHA_APP";
 
     @Value("${enrollment.domain}")
-    private static String ABHA_ADDRESS_EXTENSION;
+    private String ABHA_ADDRESS_EXTENSION;
+
     @Autowired
     TransactionService transactionService;
 
@@ -50,9 +49,6 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     @Autowired
     HidPhrAddressService hidPhrAddressService;
-
-    @Autowired
-    AbhaDBClient abhaDBClient;
 
     private LinkedHashMap<String, String> errors;
 
@@ -159,7 +155,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         return abhaAddress.stream().map(v -> v.replace(" ", "")).collect(Collectors.toSet());
     }
 
-    public static String sanetizePhrAddress(String healthIdStr) {
+    public String sanetizePhrAddress(String healthIdStr) {
         String phrIdSuffix = "";
         if (!StringUtils.isEmpty(healthIdStr)) {
             healthIdStr = healthIdStr.toLowerCase();

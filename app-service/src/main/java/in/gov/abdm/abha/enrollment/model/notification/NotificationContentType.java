@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public enum NotificationContentType {
-    OTP("otp");
+    OTP("otp"),
+    INFO("info");
     private String value;
 }

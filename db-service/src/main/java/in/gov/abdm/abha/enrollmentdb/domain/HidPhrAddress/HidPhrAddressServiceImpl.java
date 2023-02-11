@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
+import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
 import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
-import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.address.Address;
 import in.gov.abdm.phr.enrollment.user.User;
@@ -40,7 +40,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     HidPhrAddressRepository hidPhrAddressRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Autowired
     private PHREventPublisher phrEventPublisher;
@@ -132,7 +132,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     }
 
     private Mono<Accounts> findAccountFromHidPhrAddress (HidPhrAddress hidPhrAddress) {
-        return accountRepository.findById(hidPhrAddress.getHealthIdNumber())
+        return accountService.getAccountByHealthIdNumber(hidPhrAddress.getHealthIdNumber())
+                .map(accountsDto -> modelMapper.map(accountsDto, Accounts.class))
                 .flatMap(account -> {
                     account.setHidPhrAddress(hidPhrAddress);
                     return Mono.just(account);
@@ -157,6 +158,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
+            address.setCreatedBy("ABHA_SYNC");
+            address.setUpdatedBy("ABHA_SYNC");
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
             if (null != accounts.getCreatedDate()) {

@@ -1,10 +1,11 @@
 package in.gov.abdm.abha.enrollment.utilities.abha_generator;
 
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-@UtilityClass
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
+
+@Service
 public class AbhaAddressGenerator {
 
 
@@ -15,4 +16,6 @@ public class AbhaAddressGenerator {
         return new StringBuffer(abhaNumber.replaceAll(StringConstants.DASH, StringConstants.EMPTY))
                 .append(StringConstants.AT)+ ABHA_ADDRESS_EXTENSION;
     }
+    
+    
 }

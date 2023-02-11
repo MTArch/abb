@@ -1,7 +1,9 @@
 package in.gov.abdm.abha.enrollment.services.notification;
 
-import in.gov.abdm.abha.enrollment.client.NotificationClient;
+import in.gov.abdm.abha.enrollment.client.NotificationAppFClient;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.notification.*;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -9,6 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class NotificationService {
@@ -22,19 +25,48 @@ public class NotificationService {
 
     public static final String EMAIL_KEY = "emailId";
 
-    @Autowired
-    NotificationClient notificationClient;
+    private static final String OTP_SUBJECT = "mobile verification";
+    private static final String SMS_SUBJECT = "account creation";
 
-    public Mono<NotificationResponseDto> sendSMSOtp(String phoneNumber, String subject, String message) {
-        return notificationClient.sendOtp(
-                prepareNotificationRequest(NotificationType.SMS,
-                        NotificationContentType.OTP.getValue(),
-                        phoneNumber,
-                        subject,
-                        message));
+    private static final String ABHA_URL= "https://healthid.ndhm.gov.in";
+
+
+    @Autowired
+    NotificationAppFClient notificationAppFClient;
+
+    @Autowired
+    TemplatesHelper templatesHelper;
+
+    public Mono<NotificationResponseDto> sendRegistrationOtp(String phoneNumber, String otp){
+        return sendSMS(NotificationType.SMS,
+                NotificationContentType.OTP,
+                phoneNumber,
+                OTP_SUBJECT,
+                1007164181681962323L,
+                templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp));
     }
 
-    private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, String message) {
+    public Mono<NotificationResponseDto> sendRegistrationSMS(String phoneNumber,String name,String abhaNumber){
+        return sendSMS(NotificationType.SMS,
+                NotificationContentType.INFO,
+                phoneNumber,
+                SMS_SUBJECT,
+                1007164181688870515L,
+                templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name,abhaNumber,ABHA_URL));
+    }
+
+    public Mono<NotificationResponseDto> sendSMS(NotificationType notificationType, NotificationContentType notificationContentType , String phoneNumber, String subject,Long templateId,String message) {
+        return notificationAppFClient.sendOtp(
+                prepareNotificationRequest(notificationType,
+                        notificationContentType.getValue(),
+                        phoneNumber,
+                        subject,
+                        templateId,
+                        message), UUID.randomUUID().toString(), Common.timeStampWithT())
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
+    }
+
+    private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, Long templateId ,String message) {
         NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
         notificationRequestDto.setOrigin(ORIGIN);
         notificationRequestDto.setType(Collections.singletonList(notificationType.getValue()));
@@ -42,7 +74,7 @@ public class NotificationService {
         notificationRequestDto.setSender(SENDER);
         notificationRequestDto.setReceiver(Collections.singletonList(new KeyValue(MOBILE_KEY, phoneNumber)));
         List<KeyValue> notification = new LinkedList<>();
-        notification.add(new KeyValue(TEMPLATE_ID, "1007164181681962323"));
+        notification.add(new KeyValue(TEMPLATE_ID, String.valueOf(templateId)));
         notification.add(new KeyValue(SUBJECT, subject));
         notification.add(new KeyValue(CONTENT, message));
         notificationRequestDto.setNotification(notification);
@@ -50,12 +82,13 @@ public class NotificationService {
     }
 
     public Mono<NotificationResponseDto> sendEmailOtp(String email, String subject, String message) {
-        return notificationClient.sendOtp(
+        return notificationAppFClient.sendOtp(
                 prepareEmailNotificationRequest(NotificationType.EMAIL,
                         NotificationContentType.OTP.getValue(),
                         email,
                         subject,
-                        message));
+                        message),UUID.randomUUID().toString(), Common.timeStampWithT())
+                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
     }
 
     private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {

@@ -2,6 +2,8 @@ package in.gov.abdm.abha.enrollmentdb.domain.account;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -45,7 +48,7 @@ public class AccountServiceImpl implements AccountService {
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-                .doOnError(throwable -> log.error(throwable.getMessage()))
+                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto));
     }
 
@@ -62,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
         account.setNewAccount(false);
         Mono<AccountDto> accountsMono = accountRepository.updateAccounts(account.getHealthIdNumber(), account)
                 .map(accounts -> modelMapper.map(account, AccountDto.class));
-        accountsMono.doOnError(throwable -> log.error(throwable.getMessage()))
+        accountsMono.onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto))
                 .flatMap(accountAdded -> {
                     SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
@@ -84,22 +87,6 @@ public class AccountServiceImpl implements AccountService {
         return accountsMono;
     }
 
-    private User mapAccountToUser(AccountDto accountDto) {
-        User userToBePublished = new User();
-        userToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
-        userToBePublished.setMobileNumber(accountDto.getMobile());
-        userToBePublished.setEmailId(accountDto.getEmail());
-        return userToBePublished;
-    }
-
-    private Patient mapAccountToPatient(AccountDto accountDto) {
-        Patient patientToBePublished = new Patient();
-        patientToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
-        patientToBePublished.setPhoneNumber(accountDto.getMobile());
-        patientToBePublished.setEmailId(accountDto.getEmail());
-        return patientToBePublished;
-    }
-
     @Override
     public Mono getAccountByXmlUid(String xmluid) {
         return accountRepository.getAccountsByXmluid(xmluid);
@@ -107,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
-       return accountRepository.getAccountsByHealthIdNumbers(healthIdNumbers).map(account -> modelMapper.map(account, AccountDto.class));
+        return accountRepository.getAccountsByHealthIdNumbers(healthIdNumbers).map(account -> modelMapper.map(account, AccountDto.class));
     }
 
     @Override
@@ -125,4 +112,21 @@ public class AccountServiceImpl implements AccountService {
         }
         return account;
     }
+
+    private User mapAccountToUser(AccountDto accountDto) {
+        User userToBePublished = new User();
+        userToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
+        userToBePublished.setMobileNumber(accountDto.getMobile());
+        userToBePublished.setEmailId(accountDto.getEmail());
+        return userToBePublished;
+    }
+
+    private Patient mapAccountToPatient(AccountDto accountDto) {
+        Patient patientToBePublished = new Patient();
+        patientToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
+        patientToBePublished.setPhoneNumber(accountDto.getMobile());
+        patientToBePublished.setEmailId(accountDto.getEmail());
+        return patientToBePublished;
+    }
+
 }

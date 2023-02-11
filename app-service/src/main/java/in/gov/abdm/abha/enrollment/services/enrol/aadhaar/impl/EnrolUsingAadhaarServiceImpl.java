@@ -1,7 +1,16 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
-import in.gov.abdm.abha.enrollment.client.LGDClient;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -9,8 +18,9 @@ import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
@@ -24,11 +34,14 @@ import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
+import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
+import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -36,16 +49,8 @@ import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -57,6 +62,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
 
+    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
 
     @Autowired
     AccountService accountService;
@@ -65,17 +71,24 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     TransactionService transactionService;
     @Autowired
-    AadhaarClient aadhaarClient;
-    @Autowired
     RSAUtil rsaUtil;
-    @Autowired
-    private LGDClient lgdClient;
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
     RedisService redisService;
+    @Autowired
+    AbhaAddressGenerator abhaAddressGenerator;
+
+    @Autowired
+    NotificationService notificationService;
 
     private RedisOtp redisOtp;
+
+    @Autowired
+    LgdAppService lgdAppService;
+
+    @Autowired
+    AadhaarAppService aadhaarAppService;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
@@ -87,7 +100,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
             Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
-                    aadhaarClient.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
+                    aadhaarAppService.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
                             .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
                             .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
                             .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
@@ -140,7 +153,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
-        Mono<AccountDto> newAccountDto = lgdClient.getLgdDistrictDetails(transactionDto.getPincode())
+        Mono<AccountDto> newAccountDto = lgdAppService.getDetailsByAttribute(transactionDto.getPincode(),"District")
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
@@ -156,7 +169,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionDto.setHealthIdNumber(newAbhaNumber);
             accountDto.setHealthIdNumber(newAbhaNumber);
             ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            String defaultAbhaAddress = AbhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
+            String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
             accountDto.setHealthId(defaultAbhaAddress);
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
@@ -164,7 +177,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             // TODO if standard abha
             String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile();
             if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
-                return aadhaarClient.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
                                 accountDto.setMobile(userEnteredPhoneNumber);
@@ -222,8 +235,19 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             if (!res.isEmpty()) {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+
+                                return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber())
+                                  .flatMap(notificationResponseDto->{
+                                    if (notificationResponseDto.getStatus().equals(SENT)) {
+
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                                .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
+                                    }
+                                    else {
+                                        throw new NotificationGatewayUnavailableException();
+                                    }
+                                });
+
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
                             }
