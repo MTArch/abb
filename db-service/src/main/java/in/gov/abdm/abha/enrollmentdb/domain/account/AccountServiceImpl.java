@@ -48,7 +48,7 @@ public class AccountServiceImpl implements AccountService {
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-                .onErrorResume(throwable -> log.error(throwable.getMessage()))
+                .doOnError(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto));
     }
 
@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
         account.setNewAccount(false);
         Mono<AccountDto> accountsMono = accountRepository.updateAccounts(account.getHealthIdNumber(), account)
                 .map(accounts -> modelMapper.map(account, AccountDto.class));
-        accountsMono.onErrorResume(throwable -> log.error(throwable.getMessage()))
+        accountsMono.doOnError(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto))
                 .flatMap(accountAdded -> {
                     SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
