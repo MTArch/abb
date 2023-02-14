@@ -36,13 +36,13 @@ public class SyncAcknowledgementServiceImpl implements SyncAcknowledgementServic
     public Mono<SyncAcknowledgement> updatePatientAcknowledgement(String requestId, Timestamp timestamp, SyncAcknowledgement syncAcknowledgement) {
         return processMethod.processMono(
                 requestId, timestamp, ENROLLMENT_LOG_PREFIX,
-                syncAcknowledgmentRepository.updatePatientSyncAcknowledgment(syncAcknowledgement.isSyncedWithPatient(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
+                syncAcknowledgmentRepository.updatePatientSyncAcknowledgment(syncAcknowledgement.isSyncedWithPatient(), syncAcknowledgement.getUpdateDate(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
     }
 
     @Override
     public Mono<SyncAcknowledgement> updatePhrAcknowledgement(String requestId, Timestamp timestamp, SyncAcknowledgement syncAcknowledgement) {
         return processMethod.processMono(
                 requestId, timestamp, ENROLLMENT_LOG_PREFIX,
-                syncAcknowledgmentRepository.updatePhrSyncAcknowledgment(syncAcknowledgement.isSyncedWithPhr(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
+                syncAcknowledgmentRepository.updatePhrSyncAcknowledgment(syncAcknowledgement.isSyncedWithPhr(), syncAcknowledgement.getUpdateDate(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
     }
 }

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
+import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.user.User;
 import in.gov.abdm.syncacknowledgement.SyncAcknowledgement;
@@ -30,6 +31,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    private SyncAcknowledgementService syncAcknowledgementService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -63,9 +67,9 @@ public class AccountServiceImpl implements AccountService {
         Timestamp timeStamp = Timestamp.valueOf(LocalDateTime.now());
         Accounts account = map(accountDto);
         account.setNewAccount(false);
-        Mono<AccountDto> accountsMono = accountRepository.updateAccounts(account.getHealthIdNumber(), account)
-                .map(accounts -> modelMapper.map(account, AccountDto.class));
-        accountsMono.doOnError(throwable -> log.error(throwable.getMessage()))
+        return accountRepository.updateAccounts(account.getHealthIdNumber(), account)
+                .map(accounts -> modelMapper.map(account, AccountDto.class))
+                .doOnError(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto))
                 .flatMap(accountAdded -> {
                     SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
@@ -82,9 +86,10 @@ public class AccountServiceImpl implements AccountService {
                     Patient patientToBePublished = mapAccountToPatient(accountToBePublished);
                     phrEventPublisher.publish(userToBePublished.setAsNew(false), requestId);
                     patientEventPublisher.publish(patientToBePublished.setNew(false), requestId);
-                    return accountsMono;
-                });
-        return accountsMono;
+                    return Mono.just(accountToBePublished);
+                })
+                .flatMap(accounts -> Mono.just(modelMapper.map(account, AccountDto.class)));
+
     }
 
     @Override
