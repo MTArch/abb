@@ -64,6 +64,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
 
+    private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
+    private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
+    private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
+
     @Autowired
     AccountService accountService;
     @Autowired
@@ -239,7 +243,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber())
                                   .flatMap(notificationResponseDto->{
                                     if (notificationResponseDto.getStatus().equals(SENT)) {
-
+                                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION+ON_MOBILE_NUMBER+accountDtoResponse.getMobile()+FOR_HEALTH_ID_NUMBER+accountDtoResponse.getHealthIdNumber());
                                         return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
                                                 .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
                                     }
