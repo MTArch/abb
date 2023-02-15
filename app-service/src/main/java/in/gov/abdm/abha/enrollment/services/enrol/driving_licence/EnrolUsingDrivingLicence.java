@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,9 @@ public class EnrolUsingDrivingLicence {
     private static final String ACCOUNT_AUTH_METHODS_ADDED = "Account Auth methods added";
     public static final String DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE = "Default PHR Address Updated In HID PHR Address Table";
     private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
-
+    private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
+    private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
+    private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
     @Autowired
     TransactionService transactionService;
 
@@ -111,18 +114,7 @@ public class EnrolUsingDrivingLicence {
                                         } else {
                                             log.info(TRANSACTION_DELETED);
                                         }
-
-                                        return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
-                                          .flatMap(notificationResponseDto->{
-                                            if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
-
-                                                return prepareErolByDLResponse(accountDto);
-                                            }
-                                            else {
-                                                throw new NotificationGatewayUnavailableException();
-                                            }
-                                        });
-
+                                        return prepareErolByDLResponse(accountDto);
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account
@@ -209,7 +201,7 @@ public class EnrolUsingDrivingLicence {
                                             } else {
                                                 log.info(TRANSACTION_DELETED);
                                             }
-                                            return prepareErolByDLResponse(accountDto);
+                                            return sendSucessNotificationAndPrepareDLResponse(accountDto);
                                         });
                                     } else {
                                         throw new AbhaDBGatewayUnavailableException();
@@ -248,6 +240,7 @@ public class EnrolUsingDrivingLicence {
     }
 
     private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto) {
+
         EnrolProfileDto enrolProfileDto = EnrolProfileDto.builder()
                 .enrolmentNumber(accountDto.getHealthIdNumber())
                 .enrolmentState(accountDto.getVerificationStatus())
@@ -271,5 +264,18 @@ public class EnrolUsingDrivingLicence {
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
         return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto));
+    }
+
+    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto) {
+       return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
+               .flatMap(notificationResponseDto->{
+                    if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
+                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION+ON_MOBILE_NUMBER+accountDto.getMobile()+FOR_HEALTH_ID_NUMBER+accountDto.getHealthIdNumber());
+                        return prepareErolByDLResponse(accountDto);
+                    }
+                    else {
+                        throw new NotificationGatewayUnavailableException();
+                    }
+                });
     }
 }
