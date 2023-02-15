@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
@@ -36,13 +35,13 @@ public class SyncAcknowledgementServiceImpl implements SyncAcknowledgementServic
     public Mono<SyncAcknowledgement> updatePatientAcknowledgement(String requestId, Timestamp timestamp, SyncAcknowledgement syncAcknowledgement) {
         return processMethod.processMono(
                 requestId, timestamp, ENROLLMENT_LOG_PREFIX,
-                syncAcknowledgmentRepository.updatePatientSyncAcknowledgment(syncAcknowledgement.isSyncedWithPatient(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
+                syncAcknowledgmentRepository.updatePatientSyncAcknowledgment(syncAcknowledgement.isSyncedWithPatient(), syncAcknowledgement.getUpdatedDate(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
     }
 
     @Override
     public Mono<SyncAcknowledgement> updatePhrAcknowledgement(String requestId, Timestamp timestamp, SyncAcknowledgement syncAcknowledgement) {
         return processMethod.processMono(
                 requestId, timestamp, ENROLLMENT_LOG_PREFIX,
-                syncAcknowledgmentRepository.updatePhrSyncAcknowledgment(syncAcknowledgement.isSyncedWithPhr(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
+                syncAcknowledgmentRepository.updatePhrSyncAcknowledgment(syncAcknowledgement.isSyncedWithPhr(), syncAcknowledgement.getUpdatedDate(), syncAcknowledgement.getRequestID(), syncAcknowledgement.getHealthIdNumber()));
     }
 }

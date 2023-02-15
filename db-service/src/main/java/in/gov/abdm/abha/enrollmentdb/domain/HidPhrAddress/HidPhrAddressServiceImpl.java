@@ -64,6 +64,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
         String requestId = String.valueOf(UUID.randomUUID());
+        Timestamp timeStamp = Timestamp.valueOf(LocalDateTime.now());
         HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
         return hidPhrAddressRepository.save(hidPhrAddress)
                 .flatMap(hidPhrAddressAdded -> {
@@ -73,15 +74,16 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                     syncAcknowledgement.setHidPhrAddress(hidPhrAddressAdded.getPhrAddress());
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
-//                    syncAcknowledgementService.addNewAcknowledgement(requestId, Timestamp.valueOf(LocalDateTime.now()), syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
+                    syncAcknowledgement.setCreatedDate(timeStamp);
+//                    syncAcknowledgementService.addNewAcknowledgement(requestId, timeStamp, syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
                     return Mono.just(hidPhrAddressAdded);
                 })
                 .flatMap(this::findAccountFromHidPhrAddress)
                 .flatMap(accountToPublish -> {
                     User userToPublish = setUserToPublish(accountToPublish);
                     Patient patientToPublish = setPatientToPublish(accountToPublish);
-                    phrEventPublisher.publish(userToPublish, requestId);
-                    patientEventPublisher.publish(patientToPublish, requestId);
+                    phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
+                    patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
                     return Mono.just(accountToPublish.getHidPhrAddress());
                 })
                 .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
