@@ -82,8 +82,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                 .flatMap(accountToPublish -> {
                     User userToPublish = setUserToPublish(accountToPublish);
                     Patient patientToPublish = setPatientToPublish(accountToPublish);
-                    phrEventPublisher.publish(userToPublish, requestId);
-                    patientEventPublisher.publish(patientToPublish, requestId);
+                    phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
+                    patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
                     return Mono.just(accountToPublish.getHidPhrAddress());
                 })
                 .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
@@ -194,7 +194,6 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
             user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
-            user.setNew(true);
         }
         catch (Exception ex) {
             log.error(ex.getMessage());

@@ -21,13 +21,20 @@ public class PatientEventPublisher implements EventPublisher {
 
     @Override
     public void publish(User user, String requestId) {
-
+        // Unused implementation of the method as ABHA does not publish a user object to HIECM system.
     }
 
     @Override
     public void publish(Patient patient, String requestId) {
+        String header = "";
+        if(patient.isNew()) {
+            header = requestId + "_NEW";
+        }
+        else {
+            header = requestId;
+        }
         try {
-            kafkaTemplate.send(patientTopic, requestId, patient);
+            kafkaTemplate.send(patientTopic, header, patient);
             log.info(MSG_ABHA_PUBLISH_PATIENT_TO_HIECM);
         }
         catch (Exception exception) {

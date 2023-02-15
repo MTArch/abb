@@ -20,13 +20,19 @@ public class PHREventPublisher implements EventPublisher {
 
     @Value("${kafka.abha.phr.sync.topic}")
     private String userTopic;
-    @Override
 
+    @Override
     public void publish(User user, String requestId) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        String header = "";
+        if(user.isNew()) {
+            header = requestId + "_NEW";
+        }
+        else {
+            header = requestId;
+        }
         try {
             log.info(MSG_ABHA_PUBLISH_USER_TO_PHR);
-            kafkaTemplate.send(userTopic, requestId, user);
+            kafkaTemplate.send(userTopic, header, user);
             log.info(MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR);
         }
         catch (Exception exception) {
@@ -36,6 +42,6 @@ public class PHREventPublisher implements EventPublisher {
 
     @Override
     public void publish(Patient patient, String requestId) {
-
+        // Unused implementation of the method as ABHA does not publish a patient object to PHR system.
     }
 }
