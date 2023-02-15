@@ -43,6 +43,7 @@ public interface ABHAEnrollmentDBConstant {
     public static final String KAFKA_SERVER = "${spring.kafka.bootstrap-servers}";
     public static final String REQUEST_DETAILS = " HEALTH ID : ";
     public static final String TIMESTAMP = " TIMESTAMP : ";
+    public static final String UNDERSCORE_NEW = "_NEW";
     public static final String PATIENT_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_patient = :isSyncedWithPatient, updated_date = :updatedDate WHERE request_id = :requestId and health_id_number = :healthIdNumber";
     public static final String PHR_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_phr = :isSyncedWithPhr, updated_date = :updatedDate WHERE request_id = :requestId and health_id_number = :healthIdNumber";
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM = "Received sync acknowledgement from HIECM with the request ID: ";

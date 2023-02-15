@@ -9,6 +9,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.MSG_ABHA_PUBLISH_PATIENT_TO_HIECM;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.UNDERSCORE_NEW;
 
 @Service
 @Slf4j
@@ -26,9 +27,9 @@ public class PatientEventPublisher implements EventPublisher {
 
     @Override
     public void publish(Patient patient, String requestId) {
-        String header = "";
+        String header;
         if(patient.isNew()) {
-            header = requestId + "_NEW";
+            header = requestId + UNDERSCORE_NEW;
         }
         else {
             header = requestId;
