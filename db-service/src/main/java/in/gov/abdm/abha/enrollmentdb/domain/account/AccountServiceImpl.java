@@ -72,15 +72,15 @@ public class AccountServiceImpl implements AccountService {
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
 //                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto))
-                .flatMap(accountAdded -> {
+                .flatMap(accountUpdated -> {
                     SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
                     syncAcknowledgement.setRequestID(requestId);
-                    syncAcknowledgement.setHealthIdNumber(accountAdded.getHealthIdNumber());
+                    syncAcknowledgement.setHealthIdNumber(accountUpdated.getHealthIdNumber());
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
                     syncAcknowledgement.setCreatedDate(timeStamp);
 //                    syncAcknowledgementService.addNewAcknowledgement(requestId, timeStamp, syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
-                    return Mono.just(accountAdded);
+                    return Mono.just(accountUpdated);
                 })
                 .flatMap(accountToBePublished -> {
                     User userToBePublished = mapAccountToUser(accountToBePublished);
