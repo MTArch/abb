@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.*;
 import static java.time.LocalDateTime.now;
 
@@ -61,13 +62,16 @@ public class FacilityEnrolByEnrollmentNumberService {
 
 
     private static final String MOBILE_NUMBER_IS_VERIFIED = "Mobile Number is Verified";
+    private static final String ACTION_ALREADY_MADE = "Action already made for this transaction";
+    private static final String ACCOUNT_ALREADY_REJECTED = "Account already rejected for this transaction";
     private static final String MOBILE_NUMBER_NOT_VERIFIED = "Mobile Number Not Verified";
     private static final String ENROL_VERIFICATION_STATUS = "success";
     private static final String ACCEPT = "ACCEPT";
     private static final String VERIFIED = "VERIFIED";
     private static final String REJECTED = "REJECTED";
-    private static final String REACTIVATION = "REACTIVATION";
-    private static final String DEACTIVATION = "DEACTIVATION";
+    private static final String ACTIVATION = "ACTIVATION";
+    private static final String DELETION = "DELETION";
+    private static final String DELETED = "DELETED";
     private static final String STATUS = "status";
     private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Successfully verified";
     private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "Successfully rejected";
@@ -258,46 +262,41 @@ public class FacilityEnrolByEnrollmentNumberService {
             if (txnDto.isMobileVerified()) {
                 log.info(MOBILE_NUMBER_IS_VERIFIED);
                 return accountService.getAccountByHealthIdNumber(txnDto.getHealthIdNumber()).flatMap(accountDto -> {
-                    EnrollmentResponse enrollmentResponse = new EnrollmentResponse();
+                    if (accountDto.getVerificationStatus() == null) {
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ACTION_ALREADY_MADE);
+                    }
+                    if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ACTION_ALREADY_MADE);
+                    }
+                    EnrollmentResponse enrollmentResponse;
                     if (status.equalsIgnoreCase(ACCEPT)) {
                         accountDto.setVerificationStatus(VERIFIED);
                         accountDto.setStatus(ACTIVE.getValue());
-                        accountDto.setUpdateDate(LocalDateTime.now());
+                        accountDto.setUpdateDate(now());
+                        accountDto.setKycVerified(true);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
-                        accountActionService.getAccountActionByHealthIdNumber(txnDto.getHealthIdNumber())
-                                .flatMap(accountActionDto -> {
-                                    String prevValue = accountActionDto.getNewValue();
-                                    AccountActionDto newAccountActionDto = new AccountActionDto();
-                                    newAccountActionDto.setAction(REACTIVATION);
-                                    newAccountActionDto.setField(STATUS);
-                                    newAccountActionDto.setCreatedDate(accountActionDto.getCreatedDate());
-                                    newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
-                                    newAccountActionDto.setNewValue(ACTIVE.getValue());
-                                    newAccountActionDto.setPreviousValue(prevValue);
-                                    newAccountActionDto.setReactivationDate(LocalDateTime.now().toString());
-                                    newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
-                                    accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                                    return Mono.empty();
-                                }).subscribe();
+                        AccountActionDto newAccountActionDto = new AccountActionDto();
+                        newAccountActionDto.setAction(ACTIVATION);
+                        newAccountActionDto.setField(STATUS);
+                        newAccountActionDto.setCreatedDate(now());
+                        newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
+                        newAccountActionDto.setNewValue(ACTIVE.getValue());
+                        newAccountActionDto.setPreviousValue(null);
+                        newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
+                        accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE);
                     } else {
                         formatAccountDto(accountDto);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
-                        accountActionService.getAccountActionByHealthIdNumber(txnDto.getHealthIdNumber())
-                                .flatMap(accountActionDto -> {
-                                    String prevValue = accountActionDto.getNewValue();
-                                    AccountActionDto newAccountActionDto = new AccountActionDto();
-                                    newAccountActionDto.setAction(DEACTIVATION);
-                                    newAccountActionDto.setField(STATUS);
-                                    newAccountActionDto.setCreatedDate(accountActionDto.getCreatedDate());
-                                    newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
-                                    newAccountActionDto.setNewValue(DEACTIVATED.getValue());
-                                    newAccountActionDto.setPreviousValue(prevValue);
-                                    newAccountActionDto.setReactivationDate(LocalDateTime.now().toString());
-                                    newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
-                                    accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                                    return Mono.empty();
-                                }).subscribe();
+                        AccountActionDto newAccountActionDto = new AccountActionDto();
+                        newAccountActionDto.setAction(DELETION);
+                        newAccountActionDto.setField(STATUS);
+                        newAccountActionDto.setCreatedDate(now());
+                        newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
+                        newAccountActionDto.setNewValue(DELETED);
+                        newAccountActionDto.setPreviousValue(null);
+                        newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
+                        accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE);
                     }
                     return Mono.just(enrollmentResponse);
@@ -309,9 +308,9 @@ public class FacilityEnrolByEnrollmentNumberService {
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private AccountDto formatAccountDto(AccountDto accountDto) {
+    private void formatAccountDto(AccountDto accountDto) {
         accountDto.setStatus(REJECTED);
-        accountDto.setStatus(DELETED.toString());
+        accountDto.setStatus(DELETED);
         accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setAddress(null);
         accountDto.setDayOfBirth(null);
@@ -320,7 +319,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setEmail(null);
         accountDto.setFacilityId(null);
         accountDto.setFirstName(null);
-        accountDto.setGender("XXX");
+        accountDto.setGender(null);
         accountDto.setHealthId(null);
         accountDto.setKycdob(null);
         accountDto.setKycVerified(false);
@@ -357,6 +356,5 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setKycPhoto(null);
         accountDto.setProfilePhoto(null);
         accountDto.setType(null);
-        return accountDto;
     }
 }
