@@ -64,7 +64,7 @@ public interface URIConstant {
 
     String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS_LIST = DB_BASE_URI + "/hidphraddress/check/";
 
-    String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = DB_BASE_URI + "/hidphraddress/byPhrAddress/";
+    String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = DB_BASE_URI + "/hidphraddress/byPhrAddress/{phrAddress}";
 
     String DB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/";
     String FDB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/{healthIdNumber}";

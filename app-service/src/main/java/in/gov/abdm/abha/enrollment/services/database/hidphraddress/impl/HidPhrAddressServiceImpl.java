@@ -67,6 +67,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 				.hasMigrated("N")
 				.createdBy(accountDto.getLstUpdatedBy())
 				.createdDate(accountDto.getCreatedDate())
+				.lastModifiedDate(LocalDateTime.now())
 				.linked(1)
 				.cmMigrated(0)
 				.isNewHidPhrAddress(true)
