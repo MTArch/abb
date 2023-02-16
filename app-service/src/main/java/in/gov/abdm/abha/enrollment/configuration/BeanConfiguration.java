@@ -40,9 +40,9 @@ public class BeanConfiguration {
     @Bean
     public ReactiveOptions reactiveOptions() {
         return new WebReactiveOptions.Builder()
-                .setReadTimeoutMillis(2000)
-                .setWriteTimeoutMillis(2000)
-                .setResponseTimeoutMillis(2000)
+                .setReadTimeoutMillis(10000)
+                .setWriteTimeoutMillis(10000)
+                .setResponseTimeoutMillis(10000)
                 .build();
     }
 
