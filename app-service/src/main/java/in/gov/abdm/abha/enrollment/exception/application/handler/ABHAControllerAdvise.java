@@ -91,7 +91,7 @@ public class ABHAControllerAdvise {
             return handleEnrolmentIdNotFoundException();
         } else {
             String trackingId = UUID.randomUUID().toString();
-            log.error(trackingId + StringConstants.COLON + exception.getMessage());
+            log.error(trackingId + StringConstants.COLON + exception.getMessage() + StringConstants.COLON + exception.getStackTrace()[0].toString());
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage() + StringConstants.COLON + TRACKING_ID + trackingId)
             );
