@@ -20,9 +20,13 @@ public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
             }
             if(value.length()>=8 && value.length()<=18)
             {
-                return Pattern.compile(pattern).matcher(value).matches();
+                return Pattern.compile(pattern).matcher(value).matches() && validateNumericInput(value);
             }
         }
         return false;
+    }
+
+    private boolean validateNumericInput(String value) {
+        return !(Pattern.compile("[0-9]+").matcher(value).matches() && value.length()==14);
     }
 }
