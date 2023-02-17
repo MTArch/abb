@@ -15,6 +15,9 @@ redis:
 
 enrollment:
   domain: ${ABHA_DOMAIN}
+  photo:
+    minSizeInKB: 200
+    maxSizeInKB: 1000
   otp:
     userBlockTimeInMinutes: 5
     maxSendOtpCount: 3

@@ -4,7 +4,9 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +30,8 @@ public class EnrolByDocumentValidatorService {
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
+    private static final String FRONT_SIDE_PHOTO = "FrontSidePhoto";
+    private static final String BACK_SIDE_PHOTO = "BackSidePhoto";
     private static final String CONSENT = "Consent";
     public static final int MAX_NAME_SIZE = 255;
     private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
@@ -37,6 +41,12 @@ public class EnrolByDocumentValidatorService {
     private String onlyDigitRegex = "^[0-9]{6}$";
 
     private LinkedHashMap<String, String> errors;
+
+    @Value("${enrollment.photo.minSizeInKB}")
+    private String photoMinSizeLimit;
+
+    @Value("${enrollment.photo.maxSizeInKB}")
+    private String photoMaxSizeLimit;
 
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         errors = new LinkedHashMap<>();
@@ -70,12 +80,38 @@ public class EnrolByDocumentValidatorService {
         if (!isValidDistrict(enrolByDocumentRequestDto)) {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
+        if (!isValidFrontSidePhoto(enrolByDocumentRequestDto)) {
+            errors.put(FRONT_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_SIZE_OR_FORMAT);
+        }
+        if (!isValidBackSidePhoto(enrolByDocumentRequestDto)) {
+            errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_SIZE_OR_FORMAT);
+        }
         if (enrolByDocumentRequestDto.getConsent() == null) {
             errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidFrontSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        double size = GeneralUtils.fileSize(enrolByDocumentRequestDto.getFrontSidePhoto());
+        if (size < Integer.parseInt(photoMinSizeLimit)
+                || size > Integer.parseInt(photoMaxSizeLimit)
+                || !GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getFrontSidePhoto())) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidBackSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        double size = GeneralUtils.fileSize(enrolByDocumentRequestDto.getBackSidePhoto());
+        if (size < Integer.parseInt(photoMinSizeLimit)
+                || size > Integer.parseInt(photoMaxSizeLimit)
+                || !GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getBackSidePhoto())) {
+            return false;
+        }
+        return true;
     }
 
     private boolean isValidDistrict(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
@@ -133,7 +169,7 @@ public class EnrolByDocumentValidatorService {
             } else {
                 return false;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }

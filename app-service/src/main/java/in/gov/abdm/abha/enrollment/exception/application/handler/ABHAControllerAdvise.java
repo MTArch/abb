@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -45,6 +46,7 @@ public class ABHAControllerAdvise {
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";
     private static final String AADHAAR_ERROR_PREFIX = "UIDAI Error code : ";
+    private static final String TRACKING_ID = "Tracking Id : ";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
@@ -88,8 +90,10 @@ public class ABHAControllerAdvise {
         } else if (exception.getClass() == EnrolmentIdNotFoundException.class) {
             return handleEnrolmentIdNotFoundException();
         } else {
+            String trackingId = UUID.randomUUID().toString();
+            log.error(trackingId + StringConstants.COLON + exception.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                    prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage())
+                    prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage() + StringConstants.COLON + TRACKING_ID + trackingId)
             );
         }
     }

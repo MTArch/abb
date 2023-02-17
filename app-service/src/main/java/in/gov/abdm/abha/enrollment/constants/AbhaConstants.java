@@ -129,6 +129,7 @@ public interface AbhaConstants {
     String INVALID_STATE = "Invalid State";
 
     String INVALID_DISTRICT = "Invalid District";
+    String INVALID_PHOTO_SIZE_OR_FORMAT = "Invalid Photo, File Size should be grater than 200 KB and less than 1 MB and File Format should be png/jpeg/jpg";
 
     String INVALID_PIN_CODE = "Invalid PinCode";
 

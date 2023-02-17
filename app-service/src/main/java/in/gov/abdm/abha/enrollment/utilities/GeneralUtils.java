@@ -6,6 +6,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +20,11 @@ import java.util.concurrent.TimeUnit;
 @UtilityClass
 @Slf4j
 public class GeneralUtils {
+
+    public static final String PNG = "PNG";
+    public static final String JPG = "JPG";
+    public static final String JPEG = "JPEG";
+
     /**
      * Method to check if given String is palindrome
      *
@@ -46,12 +55,26 @@ public class GeneralUtils {
         return isOTPExpire;
     }
 
-    public String documentChecksum(String documentType, String documentId){
+    public String documentChecksum(String documentType, String documentId) {
         return DigestUtils.md5Hex(documentType.concat("-").concat(documentId));
     }
 
     public String removeSpecialChar(String str) {
         return str.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
+    }
+
+    public double fileSize(String base64) {
+        double sizeInBytes = 4 * Math.ceil((base64.length() / 3)) * 0.5624896334383812;
+        double sizeInKb = sizeInBytes / 1024;
+        return sizeInKb;
+    }
+
+    public boolean isImageFileFormat(String base64) {
+        try {
+            return ImageIO.read(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64))) != null;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
 

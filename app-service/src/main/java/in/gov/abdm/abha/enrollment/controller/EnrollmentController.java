@@ -14,6 +14,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarServi
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.driving_licence.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol_by_document.EnrolByDocumentValidatorService;
+import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -50,7 +51,8 @@ public class EnrollmentController {
     public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
-            return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
+            return Mono.empty();
+            //return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
         }else{
             throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
         }

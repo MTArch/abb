@@ -37,14 +37,6 @@ public class BeanConfiguration {
             return Mono.error(new NotificationDBGatewayUnavailableException());
         }).block();
     }
-    @Bean
-    public ReactiveOptions reactiveOptions() {
-        return new WebReactiveOptions.Builder()
-                .setReadTimeoutMillis(10000)
-                .setWriteTimeoutMillis(10000)
-                .setResponseTimeoutMillis(10000)
-                .build();
-    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
