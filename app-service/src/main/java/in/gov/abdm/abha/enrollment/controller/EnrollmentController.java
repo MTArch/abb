@@ -51,8 +51,7 @@ public class EnrollmentController {
     public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
-            return Mono.empty();
-            //return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
+            return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
         }else{
             throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
         }
