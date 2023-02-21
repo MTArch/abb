@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import org.apache.commons.lang3.StringUtils;
 
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -58,10 +59,16 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
                 List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))) {
             return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
         } else {
+            if ((mobileOrEmailOtpRequestDto.getLoginHint().getValue().equalsIgnoreCase(LoginHint.MOBILE.getValue())
+                    || mobileOrEmailOtpRequestDto.getLoginHint().getValue().
+                    equalsIgnoreCase(LoginHint.EMAIL.getValue()))
+                    && StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                return false;
+            }
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
                 return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
                         .matches();
-            }else{
+            } else {
                 return true;
             }
         }
