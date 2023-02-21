@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,6 +95,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     AadhaarAppService aadhaarAppService;
 
+    @Autowired
+    JWTUtil jwtUtil;
+
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         redisOtp = redisService.getRedisOtp(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
@@ -147,8 +151,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                     redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
+                                    ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                            .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
+                                            .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                            .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                                            .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                            .build();
+                                    //Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
+                                            .responseTokensDto(responseTokensDto)
                                             .abhaProfileDto(abhaProfileDto)
                                             .build());
                                 });
@@ -157,7 +169,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
-        Mono<AccountDto> newAccountDto = lgdAppService.getDetailsByAttribute(transactionDto.getPincode(),"District")
+        Mono<AccountDto> newAccountDto = lgdAppService.getDetailsByAttribute(transactionDto.getPincode(), "District")
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
@@ -240,17 +252,22 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
 
-                                return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(),accountDtoResponse.getName(),accountDtoResponse.getHealthIdNumber())
-                                  .flatMap(notificationResponseDto->{
-                                    if (notificationResponseDto.getStatus().equals(SENT)) {
-                                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION+ON_MOBILE_NUMBER+accountDtoResponse.getMobile()+FOR_HEALTH_ID_NUMBER+accountDtoResponse.getHealthIdNumber());
-                                        return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                                .abhaProfileDto(abhaProfileDto).responseTokensDto(new ResponseTokensDto()).build());
-                                    }
-                                    else {
-                                        throw new NotificationGatewayUnavailableException();
-                                    }
-                                });
+                                return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
+                                        .flatMap(notificationResponseDto -> {
+                                            if (notificationResponseDto.getStatus().equals(SENT)) {
+                                                log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());
+                                                ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                                        .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                                                        .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                                        .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                                                        .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                                        .build();
+                                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).build());
+                                            } else {
+                                                throw new NotificationGatewayUnavailableException();
+                                            }
+                                        });
 
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();

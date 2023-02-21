@@ -53,6 +53,16 @@
             <version>3.2.5</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-jwt-util</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.9.1</version>
+        </dependency>
     </dependencies>
 
 </project>

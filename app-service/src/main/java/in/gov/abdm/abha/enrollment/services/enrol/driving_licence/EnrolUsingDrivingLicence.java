@@ -224,7 +224,7 @@ public class EnrolUsingDrivingLicence {
         IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
         identityDocumentsDto.setDocumentNumber(accountDto.getDocumentCode());
         identityDocumentsDto.setDocumentType(AbhaConstants.DRIVING_LICENCE);
-        identityDocumentsDto.setDob(accountDto.getDayOfBirth());
+        identityDocumentsDto.setDob(enrolByDocumentRequestDto.getDob());
         identityDocumentsDto.setGender(accountDto.getGender());
         identityDocumentsDto.setFirstName(accountDto.getFirstName());
         identityDocumentsDto.setLastName(accountDto.getLastName());

@@ -163,5 +163,10 @@ public interface AbhaConstants {
     String LGD_APP_CLIENT = "lgd-app-client";
     String NOTIFICATION_APP_SERVICE = "notification-app-service";
 
+    String TOKEN_TYPE_TRANSACTION = "Transaction";
+    String TOKEN_TYPE_REFRESH = "Refresh";
+    String CLIENT_ID_VALUE= "abha-profile-app-api";
+    String SYSTEM_VALUE ="ABHA-N";
+
 
 }

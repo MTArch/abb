@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.document.impl;
 
 import in.gov.abdm.abha.enrollment.client.DocumentAppFClient;
-import in.gov.abdm.abha.enrollment.client.DocumentClient;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLResponse;

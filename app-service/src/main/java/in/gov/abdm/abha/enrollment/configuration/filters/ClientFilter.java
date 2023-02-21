@@ -27,8 +27,9 @@ public class ClientFilter implements WebFilter {
 //            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 //            return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, ABDMError.INVALID_OR_UNAVAILABLE_HEADER_REQUEST_ID_HEADER));
             }
-
-            ContextHolder.setClientId(clientId);
+            if(!StringUtils.isEmpty(clientId)) {
+                ContextHolder.setClientId(clientId.substring(0, clientId.lastIndexOf("_")));
+            }
             ContextHolder.setTimestamp(timestamp);
             ContextHolder.setClientIp((exchange.getRequest().getRemoteAddress() != null && exchange.getRequest().getRemoteAddress().getAddress() != null) ?
                     exchange.getRequest().getRemoteAddress().getAddress().getHostAddress() : null);

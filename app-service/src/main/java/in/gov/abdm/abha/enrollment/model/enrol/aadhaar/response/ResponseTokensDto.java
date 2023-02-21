@@ -12,24 +12,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ResponseTokensDto {
 
-    /**
-     * It is token id
-     */
-    @JsonProperty("id_token")
-    private String tokenId;
-    /**
-     * It is token type
-     */
-    @JsonProperty("token_type")
-    private String tokenType;
-    /**
-     * It is Token expiration
-     */
-    @JsonProperty("expires_in")
-    private int expiresIn;
-    /**
-     * It is refresh token
-     */
-    @JsonProperty("refresh_token")
+    @JsonProperty("token")
+    private String token;
+
+    @JsonProperty("expiresIn")
+    private Long expiresIn;
+
+    @JsonProperty("refreshToken")
     private String refreshToken;
+
+    @JsonProperty("refreshExpiresIn")
+    private Long refreshExpiresIn;
 }

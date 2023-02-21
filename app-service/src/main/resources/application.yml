@@ -9,6 +9,8 @@ spring:
     port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
     timeout: 60000
+  codec:
+    max-in-memory-size: 10MB
 
 redis:
   expireTimeInMinutes: 30
@@ -40,7 +42,6 @@ enrollment:
     documentdb:
       baseuri: ${DOCUMENT_DB_BASE_URI}
 
-
 rsa:
   algorithm: RSA
   transformation:
@@ -49,3 +50,9 @@ rsa:
     key: nha_rsa_private_key.pem
   public:
     key: nha_rsa_public_key.pem
+
+jwt:
+  token:
+    validityInSec: 1800 #Defaults to 30 min
+    refresh:
+      validityInSec: 1296000 #Defaults to 15 days

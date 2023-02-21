@@ -97,4 +97,8 @@ public class RSAUtil {
         }
         return null;
     }
+
+    public PrivateKey getJWTPrivateKey(){
+        return getPrivateKey();
+    }
 }
