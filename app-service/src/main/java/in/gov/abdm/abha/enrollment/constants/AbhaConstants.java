@@ -129,7 +129,10 @@ public interface AbhaConstants {
     String INVALID_STATE = "Invalid State";
 
     String INVALID_DISTRICT = "Invalid District";
-    String INVALID_PHOTO_SIZE_OR_FORMAT = "Invalid Photo, File Size should be grater than 200 KB and less than 1 MB and File Format should be png/jpeg/jpg";
+
+    String INVALID_DOCUMENT_PHOTO_SIZE = "The size of the document uploaded exceeds the permissible limits. Please upload a document of size less than 150KB";
+
+    String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
     String INVALID_PIN_CODE = "Invalid PinCode";
 

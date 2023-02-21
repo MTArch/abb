@@ -48,6 +48,12 @@ public class EnrolByDocumentValidatorService {
     @Value("${enrollment.photo.maxSizeInKB}")
     private String photoMaxSizeLimit;
 
+    @Value("${enrollment.documentPhoto.minSizeInKB}")
+    private String documentPhotoMinSizeLimit;
+
+    @Value("${enrollment.documentPhoto.maxSizeInKB}")
+    private String documentPhotoMaxSizeLimit;
+
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         errors = new LinkedHashMap<>();
         if (!isValidTxnId(enrolByDocumentRequestDto)) {
@@ -80,11 +86,15 @@ public class EnrolByDocumentValidatorService {
         if (!isValidDistrict(enrolByDocumentRequestDto)) {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
-        if (!isValidFrontSidePhoto(enrolByDocumentRequestDto)) {
-            errors.put(FRONT_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_SIZE_OR_FORMAT);
+        if (!isValidFrontSidePhotoFormat(enrolByDocumentRequestDto)) {
+            errors.put(FRONT_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_FORMAT);
+        } else if (!isValidFrontSidePhotoSize(enrolByDocumentRequestDto)) {
+            errors.put(FRONT_SIDE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         }
-        if (!isValidBackSidePhoto(enrolByDocumentRequestDto)) {
-            errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_SIZE_OR_FORMAT);
+        if (!isValidBackSidePhotoFormat(enrolByDocumentRequestDto)) {
+            errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_FORMAT);
+        } else if (!isValidBackSidePhotoSize(enrolByDocumentRequestDto)) {
+            errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         }
         if (enrolByDocumentRequestDto.getConsent() == null) {
             errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
@@ -94,24 +104,24 @@ public class EnrolByDocumentValidatorService {
         }
     }
 
-    private boolean isValidFrontSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+    private boolean isValidFrontSidePhotoSize(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         double size = GeneralUtils.fileSize(enrolByDocumentRequestDto.getFrontSidePhoto());
-        if (size < Integer.parseInt(photoMinSizeLimit)
-                || size > Integer.parseInt(photoMaxSizeLimit)
-                || !GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getFrontSidePhoto())) {
-            return false;
-        }
-        return true;
+        return !(size < Integer.parseInt(documentPhotoMinSizeLimit)
+                || size > Integer.parseInt(documentPhotoMaxSizeLimit));
     }
 
-    private boolean isValidBackSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+    private boolean isValidFrontSidePhotoFormat(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getFrontSidePhoto());
+    }
+
+    private boolean isValidBackSidePhotoSize(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         double size = GeneralUtils.fileSize(enrolByDocumentRequestDto.getBackSidePhoto());
-        if (size < Integer.parseInt(photoMinSizeLimit)
-                || size > Integer.parseInt(photoMaxSizeLimit)
-                || !GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getBackSidePhoto())) {
-            return false;
-        }
-        return true;
+        return !(size < Integer.parseInt(documentPhotoMinSizeLimit)
+                || size > Integer.parseInt(documentPhotoMaxSizeLimit));
+    }
+
+    private boolean isValidBackSidePhotoFormat(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return GeneralUtils.isImageFileFormat(enrolByDocumentRequestDto.getBackSidePhoto());
     }
 
     private boolean isValidDistrict(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
