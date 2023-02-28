@@ -208,6 +208,12 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
                 .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
+    @Override
+    public Mono<Integer> getMobileLinkedAccountCount(String mobileNumber) {
+        return abhaDBAccountFClient.getMobileLinkedAccountCount(mobileNumber)
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
+
     private void breakName(AccountDto accountDto) {
 
         String firstName = "";

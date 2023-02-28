@@ -55,6 +55,7 @@ public interface URIConstant {
 
     String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/";
     String FDB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
+    String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = DB_BASE_URI + "/account/linkedAccountCount/{mobileNumber}";
 
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
 
@@ -102,14 +103,14 @@ public interface URIConstant {
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
 
     String IDENTITY_DOCUMENT_GET = DOCUMENT_DB_BASE_URI + "/identityDocument/";
-    String FACILITY_ENDPOINT = BASE_URI+"/facility";
+    String FACILITY_ENDPOINT = BASE_URI + "/facility";
     String FACILITY_OTP_ENDPOINT = "/request/otp";
     String VERIFY_FACILITY_OTP_ENDPOINT = "/auth/byAbdm";
     String VERIFY_ENROLLMENT_ENDPOINT = "/byEnrollmentNumber";
 
-    String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT ="/{enrollmentNumber}";
+    String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT = "/{enrollmentNumber}";
     //Feign Client
     String REQUEST_ID = "REQUEST_ID";
     String TIMESTAMP = "TIMESTAMP";
-    String REQUESTER_ID="REQUESTER_ID";
+    String REQUESTER_ID = "REQUESTER_ID";
 }

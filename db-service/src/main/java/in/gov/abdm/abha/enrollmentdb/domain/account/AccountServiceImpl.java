@@ -107,6 +107,11 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.getAccountsByDocumentCode(documentCode).map(account -> modelMapper.map(account, AccountDto.class));
     }
 
+    @Override
+    public Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber) {
+        return accountRepository.getAccountsCountByMobileNumber(mobileNumber);
+    }
+
     private Accounts map(AccountDto accountDto){
         Accounts account = modelMapper.map(accountDto, Accounts.class);
         if (accountDto.getKycPhoto() != null && accountDto.getKycPhoto().isEmpty()) {

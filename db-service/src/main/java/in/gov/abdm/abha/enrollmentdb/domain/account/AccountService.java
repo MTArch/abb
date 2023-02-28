@@ -55,4 +55,6 @@ public interface AccountService {
     Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers);
 
     Mono<AccountDto> getAccountByDocumentCode(String documentCode);
+
+    Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber);
 }

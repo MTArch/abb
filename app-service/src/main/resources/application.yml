@@ -27,6 +27,7 @@ enrollment:
     userBlockTimeInMinutes: 5
     maxSendOtpCount: 3
     maxVerifyOtpCount: 3
+  maxMobileLinkingCount: 6
   gateway:
     aadhaar:
       baseuri: ${AADHAAR_SERVICE_BASE_URI}

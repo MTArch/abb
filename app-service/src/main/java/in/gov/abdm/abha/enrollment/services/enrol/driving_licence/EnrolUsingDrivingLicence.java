@@ -123,7 +123,7 @@ public class EnrolUsingDrivingLicence {
                                 }));
                     } else {
                         log.info(MOBILE_NUMBER_NOT_VERIFIED);
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getMessage());
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED);
                     }
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }

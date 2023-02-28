@@ -88,9 +88,9 @@ public class AuthByAadhaarService {
         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(),
                 accountDto.getDayOfBirth());
         if (age < 18 )
-        	throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER.getCode(), ABDMError.CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER.getMessage());
+        	throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER);
         if(accountDto.getHealthIdNumber().equals(transactionDto.getHealthIdNumber()))
-            throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER.getCode(), ABDMError.CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER.getMessage());
+            throw new AbhaUnProcessableException(ABDMError.CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER);
         
         Flux<String> fluxPhrAaddress = hidPhrAddressService
 				.getHidPhrAddressByHealthIdNumbersAndPreferredIn(new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),

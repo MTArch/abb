@@ -7,9 +7,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
+import in.gov.abdm.error.ABDMError;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
@@ -98,6 +101,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     JWTUtil jwtUtil;
 
+    @Value("${enrollment.maxMobileLinkingCount:6}")
+    private int maxMobileLinkingCount;
+
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         redisOtp = redisService.getRedisOtp(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
@@ -107,14 +113,21 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             if (!redisService.isMultipleOtpVerificationAllowed(redisOtp.getReceiver())) {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
-            Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
-                    aadhaarAppService.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
-                            .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
-                            .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
-                            .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
-                            .build());
+            return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
+                    .flatMap(mobileLinkedAccountCount -> {
+                        if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                            throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        } else {
+                            Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
+                                    aadhaarAppService.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
+                                            .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
+                                            .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
+                                            .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
+                                            .build());
 
-            return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+                            return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+                        }
+                    });
         }
     }
 

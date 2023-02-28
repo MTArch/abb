@@ -29,4 +29,7 @@ public interface AbhaDBAccountFClient {
 
     @GetMapping(URIConstant.FDB_GET_ACCOUNT_BY_DOCUMENT_CODE)
     public Mono<AccountDto> getAccountEntityByDocumentCode(@PathVariable("documentCode") String documentCode);
+
+    @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
+    public Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
 }

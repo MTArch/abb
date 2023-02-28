@@ -64,7 +64,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                         }));
                     }
                     else {
-                        throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
+                        throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST);
                     }
                 });
     }
@@ -83,7 +83,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                 boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
                 boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
                 if(!flag1 || !flag2) {
-					throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST.getCode(), ABDMError.INVALID_LINK_REQUEST.getMessage());
+					throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST);
                 }
             }
             return Mono.just(true);
