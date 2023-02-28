@@ -49,6 +49,10 @@ public enum ClassLevelExceptionConstants {
     pinCode(AbhaConstants.INVALID_PIN_CODE),
     firstName(AbhaConstants.INVALID_FIRST_NAME),
     abhaAddress(AbhaConstants.VALIDATION_ERROR_ABHA_ADDRESS_FIELD),
+    healthWorkerMobile(AbhaConstants.INVALID_HEALTH_WORKER_MOBILE_NUMBER),
+    healthWorkerName(AbhaConstants.INVALID_HEALTH_WORKER_NAME),
+    consentFormImage(AbhaConstants.INVALID_CONSENT_FORM_IMAGE),
+    yearOfBirth(AbhaConstants.INVALID_YEAR_OF_BIRTH),
     preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
     private final String value;
 

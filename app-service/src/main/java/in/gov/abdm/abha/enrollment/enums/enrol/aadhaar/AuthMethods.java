@@ -14,6 +14,7 @@ import lombok.ToString;
 public enum AuthMethods {
 	
     OTP("otp"),
+    DEMO("demo"),
     PI("pi"),
     WRONG("wrong");
     private final String value;

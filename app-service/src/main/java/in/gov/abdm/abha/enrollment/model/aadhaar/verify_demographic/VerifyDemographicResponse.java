@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class VerifyDemographicResponse {
     private boolean isVerified;
     private String reason;
+    private String xmlUid;
 }
