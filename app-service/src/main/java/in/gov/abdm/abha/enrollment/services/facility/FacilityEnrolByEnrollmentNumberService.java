@@ -14,11 +14,11 @@ import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUna
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
-import in.gov.abdm.abha.enrollment.model.facility.document.EnrolProfileDetailsDto;
-import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
 import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.facility.document.EnrolProfileDetailsDto;
+import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
@@ -33,8 +33,10 @@ import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.notification.TemplatesHelper;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.EnrolmentCipher;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
+import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +51,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
-import static in.gov.abdm.abha.enrollment.enums.AccountStatus.*;
+import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
 import static java.time.LocalDateTime.now;
 
 /**
@@ -113,6 +115,11 @@ public class FacilityEnrolByEnrollmentNumberService {
     DocumentClient documentClient;
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
+    @Autowired
+    EnrolmentCipher enrolmentCipher;
+    @Autowired
+    JWTUtil jwtUtil;
+
 
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpForEnrollmentNumberService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
@@ -154,6 +161,7 @@ public class FacilityEnrolByEnrollmentNumberService {
             Mono<IdentityDocumentsDto> response = documentClient.getIdentityDocuments(accountDto.getHealthIdNumber());
             return response.flatMap(res -> {
                 enrolProfileDto.setPhotoFront(res.getPhoto());
+                enrolProfileDto.setDocumentNumber(enrolmentCipher.decrypt(res.getDocumentNumber()));
                 enrolProfileDto.setPhotoBack(res.getPhotoBack());
                 return Mono.just(new GetByDocumentResponseDto(enrolProfileDto));
             }).switchIfEmpty(Mono.just(new GetByDocumentResponseDto(enrolProfileDto)));
@@ -283,8 +291,9 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setNewValue(ACTIVE.getValue());
                         newAccountActionDto.setPreviousValue(null);
                         newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
+                        notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber()).subscribe();
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE);
+                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE,jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
                         formatAccountDto(accountDto);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
@@ -297,7 +306,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setPreviousValue(null);
                         newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE);
+                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE,null);
                     }
                     return Mono.just(enrollmentResponse);
                 });

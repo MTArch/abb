@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class EnrolProfileDetailsDto {
     private String enrolmentNumber;
+    private String documentNumber;
     private String enrolmentState;
     private String firstName;
     private String middleName;
@@ -33,4 +34,5 @@ public class EnrolProfileDetailsDto {
     private String photoFront;
     private String photoBack;
     private List<String> phrAddress;
+
 }
