@@ -291,8 +291,8 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setNewValue(ACTIVE.getValue());
                         newAccountActionDto.setPreviousValue(null);
                         newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
-                        notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber()).subscribe();
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
+                        notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber()).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE,jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
                         formatAccountDto(accountDto);
