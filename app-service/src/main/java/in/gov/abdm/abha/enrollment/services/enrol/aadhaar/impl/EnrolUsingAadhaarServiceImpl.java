@@ -175,6 +175,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .txnId(transactionDto.getTxnId().toString())
                                             .responseTokensDto(responseTokensDto)
                                             .abhaProfileDto(abhaProfileDto)
+                                            .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
                                             .build());
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -275,8 +276,12 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                                         .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
                                                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                                         .build();
-                                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).build());
+                                                //final create new account response
+                                                return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                        .txnId(transactionDto.getTxnId().toString())
+                                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
+                                                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                                                        .build());
                                             } else {
                                                 throw new NotificationGatewayUnavailableException();
                                             }

@@ -12,7 +12,6 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
-import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
@@ -38,10 +37,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 
@@ -126,6 +122,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setHealthWorkerName(demographic.getHealthWorkerName());
         accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
         accountDto.setStatus(AccountStatus.ACTIVE.getValue());
+        accountDto.setMobileType(demographic.getMobileType().getValue());
 
         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
         if (age >= 18) {
@@ -150,7 +147,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
             return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
                 return addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
-                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto));
+                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto));
             });
         });
     }
@@ -174,17 +171,17 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
     }
 
-    private Mono<EnrolByAadhaarResponseDto> addAuthMethods(AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> addAuthMethods(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto) {
         List<AccountAuthMethodsDto> accountAuthMethodsDtoList = new ArrayList<>();
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.AADHAAR_OTP.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
         return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtoList)
-                .flatMap(authMethods -> sendAccountCreatedSMS(accountDto));
+                .flatMap(authMethods -> sendAccountCreatedSMS(accountDto, hidPhrAddressDto));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> sendAccountCreatedSMS(AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> sendAccountCreatedSMS(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto) {
         return notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
             if (notificationResponseDto.getStatus().equals(SENT)) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
@@ -193,8 +190,12 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                         .build();
+                ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
+                abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
+                //Final create account response
                 return Mono.just(EnrolByAadhaarResponseDto.builder()
-                        .abhaProfileDto(MapperUtils.mapProfileDetails(accountDto))
+                        .abhaProfileDto(abhaProfileDto)
+                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
                         .responseTokensDto(responseTokensDto).build());
             } else {
                 throw new NotificationGatewayUnavailableException();
@@ -221,6 +222,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             return Mono.just(EnrolByAadhaarResponseDto.builder()
                     .responseTokensDto(responseTokensDto)
                     .abhaProfileDto(abhaProfileDto)
+                    .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
                     .build());
         });
     }

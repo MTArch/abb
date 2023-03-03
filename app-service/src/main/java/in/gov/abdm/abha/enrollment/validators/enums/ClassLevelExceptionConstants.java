@@ -53,6 +53,7 @@ public enum ClassLevelExceptionConstants {
     healthWorkerName(AbhaConstants.INVALID_HEALTH_WORKER_NAME),
     consentFormImage(AbhaConstants.INVALID_CONSENT_FORM_IMAGE),
     yearOfBirth(AbhaConstants.INVALID_YEAR_OF_BIRTH),
+    mobileType(AbhaConstants.INVALID_MOBILE_TYPE),
     preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
     private final String value;
 

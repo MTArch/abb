@@ -177,7 +177,10 @@ public interface AbhaConstants {
     String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
     String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";
     String INVALID_MOBILE_NUMBER = "Invalid Mobile Number";
+    String INVALID_MOBILE_TYPE = "Invalid Mobile Type";
     String INVALID_HEALTH_WORKER_NAME = "Invalid Health Health Worker Name";
     String INVALID_HEALTH_WORKER_MOBILE_NUMBER = "Invalid Health Worker Mobile Number";
     String INVALID_CONSENT_FORM_IMAGE = "Invalid Consent Form Image";
+    String THIS_ACCOUNT_ALREADY_EXIST = "This account already exist";
+    String ACCOUNT_CREATED_SUCCESSFULLY = "Account created successfully";
 }

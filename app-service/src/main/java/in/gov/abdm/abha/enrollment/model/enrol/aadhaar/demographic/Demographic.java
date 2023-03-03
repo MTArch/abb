@@ -3,12 +3,14 @@ package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,6 +32,8 @@ public class Demographic {
     private String gender;
     @NotEmpty(message = AbhaConstants.INVALID_MOBILE_NUMBER)
     private String mobile;
+    @NotNull(message = AbhaConstants.INVALID_MOBILE_TYPE)
+    private MobileType mobileType;
     @NotEmpty(message = AbhaConstants.INVALID_STATE)
     private String state;
     @NotEmpty(message = AbhaConstants.INVALID_DISTRICT)

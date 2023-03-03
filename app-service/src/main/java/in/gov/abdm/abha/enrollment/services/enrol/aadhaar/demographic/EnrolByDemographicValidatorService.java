@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
@@ -36,6 +37,7 @@ public class EnrolByDemographicValidatorService {
     private static final String DISTRICT = "District";
     private static final String CONSENT_FORM_IMAGE = "ConsentFormImage";
     private static final String MOBILE = "mobile";
+    private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
     private static final String CONSENT = "Consent";
     public static final int MAX_NAME_SIZE = 255;
@@ -98,15 +100,22 @@ public class EnrolByDemographicValidatorService {
         } else if (!isValidConsentFormImageFormat(demographic)) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         }
-        if (!isValidMobileNumber(demographic)){
+        if (!isValidMobileNumber(demographic)) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
-        if (!isValidHealthWorkerMobile(demographic)){
+        if (!isValidMobileType(demographic)) {
+            errors.put(MOBILE_TYPE, AbhaConstants.INVALID_MOBILE_TYPE);
+        }
+        if (!isValidHealthWorkerMobile(demographic)) {
             errors.put(HEALTH_WORKER_MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidMobileType(Demographic demographic) {
+        return !demographic.getMobileType().equals(MobileType.WRONG);
     }
 
     private boolean isValidHealthWorkerMobile(Demographic demographic) {
