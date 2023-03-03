@@ -60,3 +60,6 @@ jwt:
     validityInSec: 1800 #Defaults to 30 min
     refresh:
       validityInSec: 1296000 #Defaults to 15 days
+
+cipher:
+  secretKey: ${ABHA_CIPHER}

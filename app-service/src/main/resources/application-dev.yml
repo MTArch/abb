@@ -49,3 +49,5 @@
 #    key: nha_rsa_private_key.pem
 #  public:
 #    key: nha_rsa_public_key.pem
+#cipher:
+#  secretKey: ENC(HmihGqsAn7SgZyvrp3awvMkYipmXXn4q+dgRtVPVNTc3yPNHGKlJpw==)
