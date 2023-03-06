@@ -127,7 +127,11 @@ public class AccountServiceImpl implements AccountService {
         User userToBePublished = new User();
         userToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
         userToBePublished.setMobileNumber(accountDto.getMobile());
+        userToBePublished.setMobileNumberVerified(null != accountDto.getMobile());
         userToBePublished.setEmailId(accountDto.getEmail());
+        userToBePublished.setEmailIdVerified(null != accountDto.getEmailVerified());
+        userToBePublished.setUpdatedBy("ABHA_SYNC");
+        userToBePublished.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
         return userToBePublished;
     }
 
@@ -135,7 +139,10 @@ public class AccountServiceImpl implements AccountService {
         Patient patientToBePublished = new Patient();
         patientToBePublished.setHealthIdNumber(accountDto.getHealthIdNumber());
         patientToBePublished.setPhoneNumber(accountDto.getMobile());
+        patientToBePublished.setMobileVerified(null != accountDto.getMobile());
         patientToBePublished.setEmailId(accountDto.getEmail());
+        patientToBePublished.setEmailVerified(null != accountDto.getEmailVerified());
+        patientToBePublished.setDateModified(Timestamp.valueOf(LocalDateTime.now()));
         return patientToBePublished;
     }
 
