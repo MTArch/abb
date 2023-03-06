@@ -52,7 +52,7 @@ public interface AbhaConstants {
     String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with AADHAAR Number.Please,create an account by clicking Click here to Create ABHA Number link.";
     String TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid transaction, either the transaction is expired or not found";
 
-    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid enrollment id, either the enrolment id is wrong or not found in db";
+    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "The provided Enrolment number does not exist.";
     String VERIFICATION_STATUS_NOT_PROVISIONAL = "Verification status for this account is not Provisional";
 
     String HEALTH_ID_NUMBER_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid health id, either the health id is wrong or not found in db";
@@ -170,6 +170,4 @@ public interface AbhaConstants {
     String TOKEN_TYPE_REFRESH = "Refresh";
     String CLIENT_ID_VALUE= "abha-profile-app-api";
     String SYSTEM_VALUE ="ABHA-N";
-
-
 }
