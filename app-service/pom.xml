@@ -20,38 +20,70 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20140107</version>
-        </dependency>
-         <dependency>
-    		<groupId>org.springframework.boot</groupId>
-    		<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>commons-codec</groupId>-->
+        <!--            <artifactId>commons-codec</artifactId>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.apache.commons</groupId>-->
+        <!--            <artifactId>commons-lang3</artifactId>-->
+        <!--            <version>3.9</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.netty</groupId>-->
+        <!--            <artifactId>netty-resolver-dns-native-macos</artifactId>-->
+        <!--            <version>4.1.72.Final</version>-->
+        <!--            <classifier>osx-aarch_64</classifier>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.json</groupId>-->
+        <!--            <artifactId>json</artifactId>-->
+        <!--            <version>20140107</version>-->
+        <!--        </dependency>-->
+        <!--         <dependency>-->
+        <!--    		<groupId>org.springframework.boot</groupId>-->
+        <!--    		<artifactId>spring-boot-starter-validation</artifactId>-->
+        <!--		</dependency>-->
         <dependency>
             <groupId>com.password4j</groupId>
             <artifactId>password4j</artifactId>
             <version>1.5.4</version>
         </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.playtika.reactivefeign</groupId>-->
+        <!--            <artifactId>feign-reactor-spring-cloud-starter</artifactId>-->
+        <!--            <version>3.2.5</version>-->
+        <!--            <type>pom</type>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>in.gov.abdm</groupId>-->
+        <!--            <artifactId>abdm-jwt-util</artifactId>-->
+        <!--            <version>1.0.3</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.jsonwebtoken</groupId>-->
+        <!--            <artifactId>jjwt</artifactId>-->
+        <!--            <version>0.9.1</version>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-reactive-web-bom</artifactId>
+            <version>1.0.6</version>
+            <type>pom</type>
         </dependency>
         <dependency>
-            <groupId>com.playtika.reactivefeign</groupId>
-            <artifactId>feign-reactor-spring-cloud-starter</artifactId>
-            <version>3.2.5</version>
-            <type>pom</type>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-validator</artifactId>
+            <version>1.0.28</version>
+        </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-identity</artifactId>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>in.gov.abdm</groupId>
@@ -63,6 +95,34 @@
             <artifactId>jjwt</artifactId>
             <version>0.9.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>in.gov.abdm</groupId>
+                <artifactId>abdm-reactive-web-bom</artifactId>
+                <version>1.0.6</version>
+                <type>pom</type>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.cloud</groupId>
+                        <artifactId>spring-cloud-sleuth-otel-autoconfigure</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.opentelemetry</groupId>
+                        <artifactId>opentelemetry-exporter-otlp-trace</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.opentracing.contrib</groupId>
+                        <artifactId>opentracing-spring-jaeger-cloud-starter</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
