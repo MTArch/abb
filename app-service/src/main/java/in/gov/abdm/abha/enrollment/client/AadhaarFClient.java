@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
+import static in.gov.abdm.abha.enrollment.constants.URIConstant.AADHAAR_VERIFY_FACE;
+
 
 @ReactiveFeignClient(name= AbhaConstants.AADHAAR_SERVICE_CLIENT, url="${enrollment.gateway.aadhaar.baseuri}", configuration = BeanConfiguration.class)
 public interface AadhaarFClient {
@@ -25,4 +27,8 @@ public interface AadhaarFClient {
 
     @PostMapping(URIConstant.AADHAAR_VERIFY_DEMOGRAPHIC)
     public Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest);
+
+    @PostMapping(AADHAAR_VERIFY_FACE)
+    public Mono<AadhaarResponseDto> faceAuth(@RequestBody AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
+
 }

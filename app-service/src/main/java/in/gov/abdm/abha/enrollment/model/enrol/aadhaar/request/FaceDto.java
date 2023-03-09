@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberBio;
+import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberFace;
 import in.gov.abdm.abha.enrollment.validators.annotations.TimestampBio;
 import lombok.Data;
 
@@ -8,9 +8,9 @@ import lombok.Data;
  * It is Data Transfer Object for Bio
  */
 @TimestampBio
-@AadhaarNumberBio
+@AadhaarNumberFace
 @Data
-public class BioDto {
+public class FaceDto {
     /**
      *  It is for date
      */

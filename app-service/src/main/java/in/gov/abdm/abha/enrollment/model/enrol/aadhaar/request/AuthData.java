@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
-import in.gov.abdm.abha.enrollment.validators.annotations.Bio;
+import in.gov.abdm.abha.enrollment.validators.annotations.Face;
 import in.gov.abdm.abha.enrollment.validators.annotations.Demo;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Otp
 @Demo
-@Bio
+@Face
 @AuthMethod
 public class AuthData {
 
@@ -49,7 +49,7 @@ public class AuthData {
     /**
      * It is Bio
      */
-    @JsonProperty("bio")
+    @JsonProperty("face")
     @Valid
-    private BioDto bio;
+    private FaceDto face;
 }

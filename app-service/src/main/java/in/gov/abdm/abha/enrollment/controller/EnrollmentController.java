@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.controller;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
@@ -44,7 +45,11 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
-        return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
+        if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
+            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
+        } else {
+            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
+        }
     }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)

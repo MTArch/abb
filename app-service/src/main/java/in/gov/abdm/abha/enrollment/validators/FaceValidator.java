@@ -1,7 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AuthData;
-import in.gov.abdm.abha.enrollment.validators.annotations.Bio;
+import in.gov.abdm.abha.enrollment.validators.annotations.Face;
 import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
@@ -13,12 +13,12 @@ import javax.validation.ConstraintValidatorContext;
  * if authMethods is 'otp' then bio can be null ,
  * if authMethods is 'pi' then bio object should not be null
  */
-public class BioValidator implements ConstraintValidator<Bio, AuthData> {
+public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     @Override
     public boolean isValid(AuthData authData, ConstraintValidatorContext context) {
         if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
                 && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
-                && authData.getAuthMethods().contains(AuthMethods.PI))
+                && authData.getAuthMethods().contains(AuthMethods.FACE))
         {
             if(bioNullorEmpty(authData))
                 return false;
@@ -27,7 +27,7 @@ public class BioValidator implements ConstraintValidator<Bio, AuthData> {
         }
         else if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
                 && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
-                && authData.getAuthMethods().stream().noneMatch(v->v.equals(AuthMethods.PI)))
+                && authData.getAuthMethods().stream().noneMatch(v->v.equals(AuthMethods.FACE)))
         {
             return (bioNullorEmpty(authData) || bioNotNullorEmpty(authData));
         }
@@ -37,24 +37,24 @@ public class BioValidator implements ConstraintValidator<Bio, AuthData> {
     }
 
     private boolean bioNullorEmpty(AuthData authData) {
-        return (StringUtils.isEmpty(authData.getBio())
-                || authData.getBio() == null)
-                || ((authData.getBio().getTimestamp() ==null
-                || authData.getBio().getTimestamp().isEmpty())
-                || (authData.getBio().getAadhaar()==null
-                || authData.getBio().getAadhaar().isEmpty())
-                || (authData.getBio().getRdPidData()==null
-                || authData.getBio().getRdPidData().isEmpty()));
+        return (StringUtils.isEmpty(authData.getFace())
+                || authData.getFace() == null)
+                || ((authData.getFace().getTimestamp() ==null
+                || authData.getFace().getTimestamp().isEmpty())
+                || (authData.getFace().getAadhaar()==null
+                || authData.getFace().getAadhaar().isEmpty())
+                || (authData.getFace().getRdPidData()==null
+                || authData.getFace().getRdPidData().isEmpty()));
     }
 
     private boolean bioNotNullorEmpty(AuthData authData) {
-        return !StringUtils.isEmpty(authData.getBio())
-                && authData.getBio()!=null
-                && authData.getBio().getTimestamp()!=null
-                && !authData.getBio().getTimestamp().isEmpty()
-                && authData.getBio().getAadhaar()!=null
-                && !authData.getBio().getAadhaar().isEmpty()
-                && authData.getBio().getRdPidData()!=null
-                && !authData.getBio().getRdPidData().isEmpty();
+        return !StringUtils.isEmpty(authData.getFace())
+                && authData.getFace()!=null
+                && authData.getFace().getTimestamp()!=null
+                && !authData.getFace().getTimestamp().isEmpty()
+                && authData.getFace().getAadhaar()!=null
+                && !authData.getFace().getAadhaar().isEmpty()
+                && authData.getFace().getRdPidData()!=null
+                && !authData.getFace().getRdPidData().isEmpty();
     }
 }
