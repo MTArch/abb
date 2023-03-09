@@ -1,14 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-
-import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -22,11 +13,7 @@ import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUna
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
@@ -38,12 +25,20 @@ import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.EnrolmentCipher;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Slf4j
 @Service
@@ -97,6 +92,9 @@ public class EnrolUsingDrivingLicence {
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    EnrolmentCipher enrolmentCipher;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
@@ -222,7 +220,7 @@ public class EnrolUsingDrivingLicence {
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
 
         IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
-        identityDocumentsDto.setDocumentNumber(accountDto.getDocumentCode());
+        identityDocumentsDto.setDocumentNumber(enrolmentCipher.encrypt(enrolByDocumentRequestDto.getDocumentId()));
         identityDocumentsDto.setDocumentType(AbhaConstants.DRIVING_LICENCE);
         identityDocumentsDto.setDob(enrolByDocumentRequestDto.getDob());
         identityDocumentsDto.setGender(accountDto.getGender());

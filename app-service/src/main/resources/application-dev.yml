@@ -3,43 +3,61 @@
 #spring:
 #  application:
 #    name: abha-enrollment-app
+#  zipkin:
+#    baseUrl: https://webhook.site/553362c9-f161-482e-9949-4c31d497e4db
+#    sender:
+#      type: web
+#    service:
+#      name: ${brave.localServiceName:${spring.application.name}}
+#    check-timeout: 10000
+#  sleuth:
+#    sampler:
+#      percentage: 1.0
 #  redis:
 #    database: 0
 #    host: redis1.nha2abdmdevpaas.tatacommunications.com
-##    host: 100.96.1.9
+#    #    host: 100.96.1.9
 #    port: 5105
 #    password: nk8abFAL
 #    timeout: 60000
+#  codec:
+#    max-in-memory-size: 10MB
 #
 #redis:
 #  expireTimeInMinutes: 30
 #
 #enrollment:
 #  domain: abdm
+#  photo:
+#    minSizeInKB: 0
+#    maxSizeInKB: 100
+#  documentPhoto:
+#    minSizeInKB: 0
+#    maxSizeInKB: 150
 #  otp:
 #    userBlockTimeInMinutes: 5
 #    maxSendOtpCount: 3
 #    maxVerifyOtpCount: 3
+#  maxMobileLinkingCount: 6
 #  gateway:
 #    aadhaar:
-#      baseuri: http://global2dev.abdm.gov.internal
-##      baseuri: http://localhost:9292
+#      baseuri: http://adhaarmock.abdm.gov.internal
+#    #      baseuri: http://localhost:9292
 #    enrollmentdb:
-#      baseuri: http://abha2dev.abdm.gov.internal
-##      baseuri: http://localhost:9188
+#      baseuri: http://abha2stg.abdm.gov.internal
+#    #      baseuri: http://localhost:9188
 #    idp:
 #      baseuri: http://global2dev.abdm.gov.internal
 #    notification:
-#      baseuri: http://global2dev.abdm.gov.internal
+#      baseuri: http://notificationmock.abdm.gov.internal
 #    notificationdb:
-#      baseuri: http://global2dev.abdm.gov.internal
+#      baseuri: http://global2stg.abdm.gov.internal
 #    lgd:
-#      baseuri: http://global2dev.abdm.gov.internal
+#      baseuri: http://global2stg.abdm.gov.internal
 #    document:
 #      baseuri: http://global2dev.abdm.gov.internal
 #    documentdb:
 #      baseuri: http://global2dev.abdm.gov.internal
-#
 #
 #rsa:
 #  algorithm: RSA
@@ -49,3 +67,16 @@
 #    key: nha_rsa_private_key.pem
 #  public:
 #    key: nha_rsa_public_key.pem
+#
+#jwt:
+#  token:
+#    validityInSec: 1800 #Defaults to 30 min
+#    refresh:
+#      validityInSec: 1296000 #Defaults to 15 days
+#
+#cipher:
+#  secretKey: ENC(HmihGqsAn7SgZyvrp3awvMkYipmXXn4q+dgRtVPVNTc3yPNHGKlJpw==)
+#
+#logging:
+#  pattern:
+#    level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"

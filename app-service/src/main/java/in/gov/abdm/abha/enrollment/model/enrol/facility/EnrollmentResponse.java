@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class EnrollmentResponse {
     private String status;
     private String message;
+    private String token;
 }
