@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.controller;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
@@ -12,10 +14,11 @@ import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbha
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
+import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
-import in.gov.abdm.abha.enrollment.services.enrol.driving_licence.EnrolUsingDrivingLicence;
-import in.gov.abdm.abha.enrollment.services.enrol_by_document.EnrolByDocumentValidatorService;
-import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
+import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -43,8 +46,19 @@ public class EnrollmentController {
     @Autowired
     AbhaAddressService abhaAddressService;
 
+    @Autowired
+    EnrolByDemographicService enrolByDemographicService;
+
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+        List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
+        if (authMethods.contains(AuthMethods.OTP)) {
+            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
+        } else if (authMethods.contains(AuthMethods.DEMO)) {
+            enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
+            return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
+        }
+        throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
             return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
         } else {
@@ -57,7 +71,7 @@ public class EnrollmentController {
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
             return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
-        }else{
+        } else {
             throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
         }
     }

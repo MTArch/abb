@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.services.enrol_by_document;
+package in.gov.abdm.abha.enrollment.services.enrol.document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;

@@ -36,7 +36,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 	}
 
 	@Override
-	public HidPhrAddressDto prepareNewHidPhrAddress(TransactionDto transactionDto, AccountDto accountDto,
+	public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto,
 													ABHAProfileDto abhaProfileDto) {
 
 		return HidPhrAddressDto.builder()

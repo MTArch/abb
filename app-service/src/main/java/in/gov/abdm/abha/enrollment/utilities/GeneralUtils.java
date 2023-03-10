@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import liquibase.pro.packaged.P;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -75,6 +76,10 @@ public class GeneralUtils {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public boolean isValidAadhaarNumber(String aadhaarNumber){
+        return VerhoeffAlgorithm.validateVerhoeff(aadhaarNumber);
     }
 }
 

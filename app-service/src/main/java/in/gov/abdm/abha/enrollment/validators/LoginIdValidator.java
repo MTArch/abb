@@ -9,6 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -121,7 +122,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * @return
      */
     private boolean isValidAadhaar(String aadhaar) {
-        return VerhoeffAlgorithm.validateVerhoeff(aadhaar);
+        return GeneralUtils.isValidAadhaarNumber(aadhaar);
     }
 
     /**
