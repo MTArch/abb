@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID;
 
@@ -57,13 +58,10 @@ public class EnrollmentController {
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
-        }
-        throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
-        if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
-            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
-        } else {
+        }else if(authMethods.contains(AuthMethods.FACE)){
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }
+        throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
     }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)

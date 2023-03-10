@@ -5,7 +5,6 @@ import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
 import in.gov.abdm.abha.enrollment.validators.annotations.Face;
-import in.gov.abdm.abha.enrollment.validators.annotations.Demo;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
