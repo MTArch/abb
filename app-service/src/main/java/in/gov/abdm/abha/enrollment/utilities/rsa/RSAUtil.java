@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.utilities.rsa;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import liquibase.pro.packaged.E;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +68,7 @@ public class RSAUtil {
                 return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes())));
             } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
                      NoSuchPaddingException exception) {
-                log.error(FAILED_TO_DECRYPT_DUE_TO + data + StringConstants.COLON, exception);
+                log.error(FAILED_TO_DECRYPT_DUE_TO + data + StringConstants.COLON, exception.getMessage());
             }
         }
         return StringConstants.EMPTY;
@@ -79,9 +80,9 @@ public class RSAUtil {
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
             return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e);
+            log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage());
         } catch (InvalidKeySpecException e) {
-            log.error(INVALID_KEY_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e);
+            log.error(INVALID_KEY_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage());
         }
         return null;
     }
@@ -98,7 +99,11 @@ public class RSAUtil {
         return null;
     }
 
-    public PrivateKey getJWTPrivateKey(){
+    public PrivateKey getJWTPrivateKey() {
         return getPrivateKey();
+    }
+
+    public boolean isRSAEncrypted(String encryptedValue) {
+        return !decrypt(encryptedValue).isEmpty();
     }
 }

@@ -1,19 +1,18 @@
 package in.gov.abdm.abha.enrollment.services.database.hidphraddress;
 
-import java.util.List;
-
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public interface HidPhrAddressService {
 
     Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto);
 
-    HidPhrAddressDto prepareNewHidPhrAddress(TransactionDto transactionDto, AccountDto accountDto, ABHAProfileDto abhaProfileDto);
+    HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto, ABHAProfileDto abhaProfileDto);
 
     HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto);
 

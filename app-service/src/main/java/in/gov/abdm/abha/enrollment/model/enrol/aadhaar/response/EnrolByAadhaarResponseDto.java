@@ -20,4 +20,5 @@ public class EnrolByAadhaarResponseDto {
     private ResponseTokensDto responseTokensDto;
     @JsonProperty("ABHAProfile")
     private ABHAProfileDto abhaProfileDto;
+    private String message;
 }

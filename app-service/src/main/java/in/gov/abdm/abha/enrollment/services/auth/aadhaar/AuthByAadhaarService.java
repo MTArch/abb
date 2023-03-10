@@ -75,8 +75,7 @@ public class AuthByAadhaarService {
         if (authResponseDto != null) {
             return Mono.just(authResponseDto);
         } else {
-            String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
-            return accountService.findByXmlUid(encodedXmlUid)
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature())
                     .flatMap(accountDtoMono -> prepareResponse(accountDtoMono, transactionDto))
                     .flatMap(accountResponseDtoMono -> handleAccountListResponse(authByAadhaarRequestDto, Collections.singletonList(accountResponseDtoMono), transactionDto))
                     .switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS, AbhaConstants.NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER, Collections.emptyList()))));

@@ -1,16 +1,14 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
 import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
 import in.gov.abdm.abha.enrollment.validators.annotations.TimestampOtp;
 import in.gov.abdm.abha.enrollment.validators.annotations.Uuid;
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * It is Data Transfer Object for Otp

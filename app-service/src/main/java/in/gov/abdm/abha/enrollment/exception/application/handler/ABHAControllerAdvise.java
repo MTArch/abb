@@ -50,7 +50,8 @@ public class ABHAControllerAdvise {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
-
+        String trackingId = UUID.randomUUID().toString();
+        log.error(trackingId + StringConstants.COLON + "Message : " + exception.getMessage() + StringConstants.COLON + exception.getStackTrace()[0].toString());
         if (exception.getClass() == TransactionNotFoundException.class) {
             return handleTransactionNotFoundException();
         } else if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
@@ -90,8 +91,6 @@ public class ABHAControllerAdvise {
         } else if (exception.getClass() == EnrolmentIdNotFoundException.class) {
             return handleEnrolmentIdNotFoundException();
         } else {
-            String trackingId = UUID.randomUUID().toString();
-            log.error(trackingId + StringConstants.COLON + exception.getMessage() + StringConstants.COLON + exception.getStackTrace()[0].toString());
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     prepareCustomErrorResponse(ABDMError.UNKNOWN_EXCEPTION.getCode(), ABDMError.UNKNOWN_EXCEPTION.getMessage() + StringConstants.COLON + TRACKING_ID + trackingId)
             );

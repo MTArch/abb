@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.services.enrol.driving_licence;
+package in.gov.abdm.abha.enrollment.services.enrol.document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
