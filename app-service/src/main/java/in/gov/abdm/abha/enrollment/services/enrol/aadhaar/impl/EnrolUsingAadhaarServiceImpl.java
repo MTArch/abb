@@ -343,8 +343,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            String encodedXmlUid = Common.base64Encode(aadhaarResponseDto.getAadhaarUserKycDto().getSignature());
-            return accountService.findByXmlUid(encodedXmlUid).flatMap(existingAccount -> {
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> {
                 return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
             }).switchIfEmpty(Mono.defer(() -> {
                 return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
