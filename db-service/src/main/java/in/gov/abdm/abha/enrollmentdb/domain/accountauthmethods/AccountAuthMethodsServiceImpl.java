@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,7 +29,13 @@ public class AccountAuthMethodsServiceImpl implements AccountAuthMethodsService 
 
     @Override
     public Flux<AccountAuthMethodsDto> addAccountAuthMethods(List<AccountAuthMethods> accountAuthMethods) {
-        accountAuthMethods.forEach(AccountAuthMethods::setAsNew);
-        return accountAuthMethodsRepository.saveAll(accountAuthMethods).map(res -> modelMapper.map(res, AccountAuthMethodsDto.class));
+        List<AccountAuthMethodsDto> accountAuthMethodsDtos = new ArrayList<>();
+        accountAuthMethods.forEach(accountAuthMethods1 -> {
+            accountAuthMethods1.setAsNew();
+            accountAuthMethodsRepository.saveIfNotExist(accountAuthMethods1).subscribe();
+            accountAuthMethodsDtos.add(modelMapper.map(accountAuthMethods1, AccountAuthMethodsDto.class));
+        });
+        return Flux.fromIterable(accountAuthMethodsDtos);
+
     }
 }
