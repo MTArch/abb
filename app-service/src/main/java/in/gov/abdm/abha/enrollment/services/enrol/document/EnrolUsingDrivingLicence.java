@@ -181,6 +181,7 @@ public class EnrolUsingDrivingLicence {
             accountDto.setStateCode(lgdDistrictResponse.getStateCode());
             accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
             accountDto.setCreatedDate(LocalDateTime.now());
+            accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
             return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
                 log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
                 HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
