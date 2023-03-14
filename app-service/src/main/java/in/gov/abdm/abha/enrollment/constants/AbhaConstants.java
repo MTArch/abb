@@ -67,7 +67,7 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
     String INVALID_REASON = "Maximum length allowed is 255";
-    String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' and 'REJECT'";
+    String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
 
