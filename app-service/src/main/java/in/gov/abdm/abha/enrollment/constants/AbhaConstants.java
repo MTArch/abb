@@ -66,6 +66,9 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
+    String INVALID_REASON = "Maximum length allowed is 255";
+    String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
+    String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
@@ -158,6 +161,7 @@ public interface AbhaConstants {
 
     String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
     String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
+    String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
 
     String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";
