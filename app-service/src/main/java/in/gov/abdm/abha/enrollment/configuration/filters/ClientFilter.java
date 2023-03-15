@@ -1,7 +1,13 @@
 package in.gov.abdm.abha.enrollment.configuration.filters;
 
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
+import in.gov.abdm.error.ABDMError;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -9,30 +15,36 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
+import static in.gov.abdm.constant.ABDMConstant.*;
+
+@Slf4j
 @Component
 public class ClientFilter implements WebFilter {
 
-    public static final String REQUEST_ID = "REQUEST_ID";
-    public static final String TIMESTAMP = "TIMESTAMP";
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        if(!exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)) {
-            String clientId = exchange.getRequest().getHeaders().get(REQUEST_ID) != null ? exchange.getRequest().getHeaders().get(REQUEST_ID).get(0) : StringUtils.EMPTY;
-            String timestamp = exchange.getRequest().getHeaders().get(TIMESTAMP) != null ? exchange.getRequest().getHeaders().get(TIMESTAMP).get(0) : StringUtils.EMPTY;
-            if (StringUtils.isEmpty(clientId)) {
-                //uncomment below code in case we didnt find clientId headers, once UI implemented in all Apis
-//            ServerHttpResponse response = exchange.getResponse();
-//            response.setStatusCode(HttpStatus.NOT_FOUND);
-//            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-//            return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, ABDMError.INVALID_OR_UNAVAILABLE_HEADER_REQUEST_ID_HEADER));
+        if (!exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)) {
+            HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
+            String authorization = requestHeaders.get(AbhaConstants.AUTHORIZATION) != null ? requestHeaders.get(HttpHeaders.AUTHORIZATION).get(0) : StringUtils.EMPTY;
+            String requestId = requestHeaders.get(REQUEST_ID) != null ? requestHeaders.get(REQUEST_ID).get(0) : StringUtils.EMPTY;
+            String timestamp = requestHeaders.get(TIMESTAMP) != null ? requestHeaders.get(TIMESTAMP).get(0) : StringUtils.EMPTY;
+
+            if (!Common.isValidateISOTimeStamp(timestamp)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_TIMESTAMP);
             }
-            if(!StringUtils.isEmpty(clientId)) {
-                ContextHolder.setClientId(clientId.substring(0, clientId.lastIndexOf("_")));
+            if (!Common.isValidRequestId(requestId)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_REQUEST_ID);
             }
+
+            if (!StringUtils.isEmpty(authorization)) {
+                Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
+                ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
+            }
+            ContextHolder.setRequestId(requestId);
             ContextHolder.setTimestamp(timestamp);
-            ContextHolder.setClientIp((exchange.getRequest().getRemoteAddress() != null && exchange.getRequest().getRemoteAddress().getAddress() != null) ?
-                    exchange.getRequest().getRemoteAddress().getAddress().getHostAddress() : null);
+            ContextHolder.setClientIp((exchange.getRequest().getRemoteAddress() != null && exchange.getRequest().getRemoteAddress().getAddress() != null) ? exchange.getRequest().getRemoteAddress().getAddress().getHostAddress() : null);
         }
         return chain.filter(exchange);
     }

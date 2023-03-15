@@ -19,6 +19,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLice
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +33,7 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.ENROL_ENDPOINT)
+@ResponseStatus(HttpStatus.OK)
 public class EnrollmentController {
 
     @Autowired

@@ -5,9 +5,18 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ContextHolder {
 
+    private static final ThreadLocal<String> REQUEST_ID = new InheritableThreadLocal<>();
     private static final ThreadLocal<String> CLIENT_ID = new InheritableThreadLocal<>();
     private static final ThreadLocal<String> CLIENT_IP = new InheritableThreadLocal<>();
     private static final ThreadLocal<String> TIMESTAMP = new InheritableThreadLocal<>();
+
+    public void setRequestId(String requestId) {
+        REQUEST_ID.set(requestId);
+    }
+
+    public String getRequestId() {
+        return REQUEST_ID.get();
+    }
 
     public void setClientId(String clientId) {
         CLIENT_ID.set(clientId);
@@ -34,6 +43,7 @@ public class ContextHolder {
     }
 
     public void removeAll() {
+        REQUEST_ID.remove();
         CLIENT_ID.remove();
         CLIENT_IP.remove();
         TIMESTAMP.remove();

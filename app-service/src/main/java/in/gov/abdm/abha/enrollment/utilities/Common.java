@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -7,6 +8,7 @@ import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.template.TemplateType;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.services.common.HealthIdContextHolder;
+import in.gov.abdm.error.ABDMError;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,10 +16,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
+import javax.validation.ConstraintValidatorContext;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +35,8 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
 
 @UtilityClass
 @Slf4j
@@ -222,5 +234,33 @@ public class Common {
 
     public String getDob(String day, String month, String year){
         return day + StringConstants.DASH + month + StringConstants.DASH + year;
+    }
+
+    public boolean isValidateISOTimeStamp(String timestamp) {
+        //log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + VALIDATE_TIMESTAMP_LOG, timestamp);
+        if (timestamp != null && !timestamp.isBlank()) {
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat(AbhaConstants.TIMESTAMP_FORMAT);
+                dateFormat.setTimeZone(TimeZone.getTimeZone(AbhaConstants.UTC_TIMEZONE_ID));
+                new Timestamp(dateFormat.parse(timestamp).getTime());
+                return true;
+            } catch (IllegalArgumentException | ParseException e) {
+                log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + INVALID_TIMESTAMP_LOG, timestamp);
+                log.error(AbhaConstants.ABHA_ENROL_LOG_PREFIX + e.getMessage());
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean isValidRequestId(String requestId) {
+        return requestId != null && !requestId.equalsIgnoreCase("null") && !requestId.isBlank() && requestId.matches("[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}$");
+    }
+
+    public Mono<Void> throwFilterBadRequestException(ServerWebExchange exchange, ABDMError abdmError){
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, abdmError));
     }
 }

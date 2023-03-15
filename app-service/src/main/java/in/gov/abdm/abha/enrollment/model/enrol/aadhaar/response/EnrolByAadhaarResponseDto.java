@@ -21,4 +21,6 @@ public class EnrolByAadhaarResponseDto {
     @JsonProperty("ABHAProfile")
     private ABHAProfileDto abhaProfileDto;
     private String message;
+    @JsonProperty("isNew")
+    private boolean isNew;
 }

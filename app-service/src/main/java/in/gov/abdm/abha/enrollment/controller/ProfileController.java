@@ -3,11 +3,8 @@ package in.gov.abdm.abha.enrollment.controller;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
@@ -18,6 +15,7 @@ import reactor.core.publisher.Mono;
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.PROFILE_ENDPOINT)
+@ResponseStatus(HttpStatus.OK)
 public class ProfileController {
 
     @Autowired

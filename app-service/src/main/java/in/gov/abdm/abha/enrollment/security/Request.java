@@ -4,15 +4,12 @@ import lombok.Value;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 
-import java.sql.Timestamp;
-import java.util.UUID;
-
 @Value
 public class Request extends AbstractAuthenticationToken {
-    UUID requestId;
-    Timestamp timestamp;
+    String requestId;
+    String timestamp;
 
-    Request(UUID requestId, java.sql.Timestamp timestamp){
+    Request(String requestId, String timestamp){
         super(AuthorityUtils.NO_AUTHORITIES);
         this.requestId=requestId;
         this.timestamp=timestamp;

@@ -1,18 +1,26 @@
 package in.gov.abdm.abha.enrollment.utilities.jwt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.jwt.util.JWTToken;
 import in.gov.abdm.jwt.util.JWTTokenRequest;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class JWTUtil {
     private static final String TXN_ID = "txnId";
@@ -98,4 +106,13 @@ public class JWTUtil {
     }
 
 
+
+    public static Map<String, Object> readJWTToken(String token) {
+        try {
+            return new ObjectMapper().readValue(new String(Base64.getDecoder().decode(token.split("\\.")[1])), Map.class);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        return Collections.emptyMap();
+    }
 }

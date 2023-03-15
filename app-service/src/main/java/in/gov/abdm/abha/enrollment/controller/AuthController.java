@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.AUTH_ENDPOINT)
+@ResponseStatus(HttpStatus.OK)
 public class AuthController {
 
     @Autowired

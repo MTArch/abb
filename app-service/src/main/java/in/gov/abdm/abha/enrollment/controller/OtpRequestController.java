@@ -1,32 +1,28 @@
 package in.gov.abdm.abha.enrollment.controller;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
-import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
-import in.gov.abdm.error.ABDMError;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.error.ABDMError;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.OTP_REQUEST_ENDPOINT)
+@ResponseStatus(HttpStatus.OK)
 public class OtpRequestController {
 
     @Autowired
@@ -74,7 +70,7 @@ public class OtpRequestController {
         }
         // other case
         else {
-            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(),ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
     }
 }

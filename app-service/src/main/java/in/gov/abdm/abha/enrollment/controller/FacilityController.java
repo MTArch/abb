@@ -17,6 +17,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +31,7 @@ import static in.gov.abdm.abha.enrollment.constants.URIConstant.VERIFY_FACILITY_
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.FACILITY_ENDPOINT)
+@ResponseStatus(HttpStatus.OK)
 public class FacilityController {
 
     @Autowired

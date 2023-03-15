@@ -24,4 +24,5 @@ public interface StringConstants {
     String MESSAGE = "message";
     String UNKNOWN = "Unknown";
     String COMMA_SPACE = ", ";
+    String DOT = ".";
 }

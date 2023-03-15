@@ -9,7 +9,10 @@ import reactor.core.publisher.Mono;
 public class RequestManager implements ReactiveAuthenticationManager {
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
-        authentication.setAuthenticated(true);
+        Request request = (Request) authentication;
+        if(request.getRequestId() !=null && request.getTimestamp()!=null) {
+            authentication.setAuthenticated(true);
+        }
         return Mono.just(authentication);
     }
 }

@@ -150,10 +150,11 @@ public interface AbhaConstants {
 
     String VALIDATION_ERROR_PREFERRED_FLAG = "Invalid Preferred Flag";
 
+    String ABHA_ENROL_LOG_PREFIX = "ABHA_ENROL_LOG_PREFIX: ";
     String ABHA_ADDRESS_ALREADY_EXISTS_EXCEPTION_MESSAGE = "This Abha Address already exists. Please create with unique Abha Address";
 
     String SENT = "sent";
-    
+
     String TRANSACTION_ID = "TRANSACTION_ID";
     String AADHAAR_SERVICE_CLIENT = "aadhaar-service-client";
 
@@ -173,8 +174,8 @@ public interface AbhaConstants {
 
     String TOKEN_TYPE_TRANSACTION = "Transaction";
     String TOKEN_TYPE_REFRESH = "Refresh";
-    String CLIENT_ID_VALUE= "abha-profile-app-api";
-    String SYSTEM_VALUE ="ABHA-N";
+    String CLIENT_ID_VALUE = "abha-profile-app-api";
+    String SYSTEM_VALUE = "ABHA-N";
 
     //Demographic validations
     String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
@@ -187,4 +188,9 @@ public interface AbhaConstants {
     String INVALID_CONSENT_FORM_IMAGE = "Invalid Consent Form Image";
     String THIS_ACCOUNT_ALREADY_EXIST = "This account already exist";
     String ACCOUNT_CREATED_SUCCESSFULLY = "Account created successfully";
+
+    String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    String UTC_TIMEZONE_ID = "UTC";
+
+    String AUTHORIZATION = "Authorization";
 }

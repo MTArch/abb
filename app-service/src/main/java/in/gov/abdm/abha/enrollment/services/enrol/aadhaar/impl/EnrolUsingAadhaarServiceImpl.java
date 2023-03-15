@@ -175,6 +175,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .responseTokensDto(responseTokensDto)
                                             .abhaProfileDto(abhaProfileDto)
                                             .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                                            .isNew(false)
                                             .build());
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -280,6 +281,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                                         .txnId(transactionDto.getTxnId().toString())
                                                         .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
                                                         .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                                                        .isNew(true)
                                                         .build());
                                             } else {
                                                 throw new NotificationGatewayUnavailableException();

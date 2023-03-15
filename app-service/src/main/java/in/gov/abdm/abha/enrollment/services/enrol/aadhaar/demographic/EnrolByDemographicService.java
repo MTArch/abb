@@ -197,6 +197,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 return Mono.just(EnrolByAadhaarResponseDto.builder()
                         .abhaProfileDto(abhaProfileDto)
                         .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                        .isNew(true)
                         .responseTokensDto(responseTokensDto).build());
             } else {
                 throw new NotificationGatewayUnavailableException();
@@ -224,6 +225,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .responseTokensDto(responseTokensDto)
                     .abhaProfileDto(abhaProfileDto)
                     .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                    .isNew(false)
                     .build());
         });
     }
