@@ -24,7 +24,6 @@ import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddress
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
-import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.EnrolmentCipher;
@@ -83,9 +82,6 @@ public class EnrolUsingDrivingLicence {
 
     @Autowired
     AccountAuthMethodService accountAuthMethodService;
-
-    @Autowired
-    LgdAppService lgdAppService;
 
     @Autowired
     AbhaAddressGenerator abhaAddressGenerator;

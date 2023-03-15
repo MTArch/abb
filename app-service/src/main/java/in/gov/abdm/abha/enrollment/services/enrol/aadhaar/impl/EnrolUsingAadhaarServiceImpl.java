@@ -1,23 +1,10 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
-import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
-import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
-import in.gov.abdm.error.ABDMError;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
+import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
@@ -44,7 +31,6 @@ import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.Accoun
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
-import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -63,10 +49,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 
@@ -106,9 +90,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     NotificationService notificationService;
 
     private RedisOtp redisOtp;
-
-    @Autowired
-    LgdAppService lgdAppService;
 
     @Autowired
     AadhaarAppService aadhaarAppService;
@@ -372,7 +353,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingFAceAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
-        Mono<AccountDto> newAccountDto = lgdAppService.getDetailsByAttribute(transactionDto.getPincode(),"District", null)
+        Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(),transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());

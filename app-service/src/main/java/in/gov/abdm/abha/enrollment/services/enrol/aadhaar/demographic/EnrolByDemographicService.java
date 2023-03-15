@@ -22,7 +22,6 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
-import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
@@ -53,8 +52,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private AccountService accountService;
     @Autowired
     private HidPhrAddressService hidPhrAddressService;
-    @Autowired
-    private LgdAppService lgdAppService;
     @Autowired
     private JWTUtil jwtUtil;
     @Autowired
