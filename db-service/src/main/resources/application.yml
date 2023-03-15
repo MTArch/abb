@@ -1,11 +1,22 @@
 server:
   port: ${ENROLLMENT_DB_SERVICE_PORT}
 spring:
+  zipkin:
+    baseUrl: ${ZIPKIN_BASE_URL}
+    sender:
+      type: web
+    service:
+      name: ${brave.localServiceName:${spring.application.name}}
+    check-timeout: 10000
+  sleuth:
+    sampler:
+      percentage: 1.0
+
   kafka:
     bootstrap-servers: ${KAFKA_SERVICE_URL}
   application:
     name: ${ENROLLMENT_DB_SERVICE_NAME}
-    
+
   r2dbc:
     url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
     username: ${DB_USERNAME}
@@ -29,3 +40,6 @@ management:
     web:
       exposure:
         include: ${ACTUATOR_KEYS}
+logging:
+  pattern:
+    level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"

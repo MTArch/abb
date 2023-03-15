@@ -66,6 +66,9 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
+    String INVALID_REASON = "Maximum length allowed is 255";
+    String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
+    String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
@@ -137,6 +140,7 @@ public interface AbhaConstants {
     String INVALID_PIN_CODE = "Invalid PinCode";
 
     String AADHAAR = "AADHAAR";
+    String OFFLINE_AADHAAR = "OFFLINE_AADHAAR";
 
     String VERIFIED = "VERIFIED";
 
@@ -157,6 +161,7 @@ public interface AbhaConstants {
 
     String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
     String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
+    String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
 
     String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";
@@ -170,4 +175,16 @@ public interface AbhaConstants {
     String TOKEN_TYPE_REFRESH = "Refresh";
     String CLIENT_ID_VALUE= "abha-profile-app-api";
     String SYSTEM_VALUE ="ABHA-N";
+
+    //Demographic validations
+    String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
+    String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
+    String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";
+    String INVALID_MOBILE_NUMBER = "Invalid Mobile Number";
+    String INVALID_MOBILE_TYPE = "Invalid Mobile Type";
+    String INVALID_HEALTH_WORKER_NAME = "Invalid Health Health Worker Name";
+    String INVALID_HEALTH_WORKER_MOBILE_NUMBER = "Invalid Health Worker Mobile Number";
+    String INVALID_CONSENT_FORM_IMAGE = "Invalid Consent Form Image";
+    String THIS_ACCOUNT_ALREADY_EXIST = "This account already exist";
+    String ACCOUNT_CREATED_SUCCESSFULLY = "Account created successfully";
 }

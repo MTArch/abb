@@ -43,7 +43,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
-        return abhaDBAccountFClient.getAccountByXmlUid( xmlUid)
+        return abhaDBAccountFClient.getAccountByXmlUid(Common.base64Encode(xmlUid))
                 .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
@@ -271,7 +271,8 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         accountDto.setNewAccount(true);
         accountDto.setOrigin(ContextHolder.getClientId());
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        accountDto.setCreatedDate(LocalDateTime.now());
         return abhaDBAccountFClient.createAccount(accountDto)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
     }
 }

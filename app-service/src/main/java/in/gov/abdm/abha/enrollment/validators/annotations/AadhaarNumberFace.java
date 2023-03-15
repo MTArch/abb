@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.validators.BioValidator;
+import in.gov.abdm.abha.enrollment.validators.AadhaarNumberFaceValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Retention;
@@ -9,15 +10,17 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotated interface for bio validation
+ * Annotated interface for aadhaar number validation
  */
 @Retention(RUNTIME)
-@Constraint(validatedBy = BioValidator.class)
+@Constraint(validatedBy = AadhaarNumberFaceValidator.class)
 @Target({TYPE})
-public @interface Bio {
-    String message() default AbhaConstants.VALIDATION_ERROR_BIO_OBJECT;
+public @interface AadhaarNumberFace {
+    String message() default AbhaConstants.AADHAAR_NUMBER_INVALID;
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
-    boolean encrypted() default false;
-    boolean required() default true;
+
+    boolean optional() default false;
 }

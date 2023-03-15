@@ -219,4 +219,8 @@ public class Common {
     public boolean validStringSize(String value, int size){
         return value.length() <= size;
     }
+
+    public String getDob(String day, String month, String year){
+        return day + StringConstants.DASH + month + StringConstants.DASH + year;
+    }
 }
