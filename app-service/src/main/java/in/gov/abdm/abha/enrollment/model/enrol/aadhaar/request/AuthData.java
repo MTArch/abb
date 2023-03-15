@@ -28,6 +28,13 @@ public class AuthData {
     ArrayList<AuthMethods> authMethods;
 
     /**
+     * It is token
+     */
+    @JsonProperty("token")
+    private TokenDto token;
+
+
+    /**
      * It is Otp
      */
     @JsonProperty("otp")
