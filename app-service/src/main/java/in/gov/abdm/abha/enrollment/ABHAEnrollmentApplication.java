@@ -12,4 +12,5 @@ public class ABHAEnrollmentApplication {
     public static void main(String[] args) {
         SpringApplication.run(ABHAEnrollmentApplication.class, args);
     }
+
 }

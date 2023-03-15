@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.enrol.document;
 
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -13,6 +14,7 @@ import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUna
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
+import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
@@ -29,6 +31,7 @@ import in.gov.abdm.abha.enrollment.utilities.EnrolmentCipher;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
+import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +69,8 @@ public class EnrolUsingDrivingLicence {
     private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
     private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
+    private static final String ENROL_VERIFICATION_STATUS = "success";
+    private static final String ABHA_CREATED_SUCCESS = "ABHA created successfully";
     @Autowired
     TransactionService transactionService;
 
@@ -95,6 +100,8 @@ public class EnrolUsingDrivingLicence {
 
     @Autowired
     EnrolmentCipher enrolmentCipher;
+    @Autowired
+    JWTUtil jwtUtil;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
@@ -112,7 +119,7 @@ public class EnrolUsingDrivingLicence {
                                         } else {
                                             log.info(TRANSACTION_DELETED);
                                         }
-                                        return prepareErolByDLResponse(accountDto);
+                                        return prepareErolByDLResponse(accountDto,txnDto.getTxnId().toString());
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account
@@ -152,7 +159,7 @@ public class EnrolUsingDrivingLicence {
                 .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),
                         enrolByDocumentRequestDto.getMiddleName(),
                         enrolByDocumentRequestDto.getLastName()))
-                .verificationStatus(AbhaConstants.PROVISIONAL)
+                .verificationStatus(FacilityContextHolder.getSubject()!=null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
                 .middleName(enrolByDocumentRequestDto.getMiddleName())
@@ -200,7 +207,7 @@ public class EnrolUsingDrivingLicence {
                                             } else {
                                                 log.info(TRANSACTION_DELETED);
                                             }
-                                            return sendSucessNotificationAndPrepareDLResponse(accountDto);
+                                            return sendSucessNotificationAndPrepareDLResponse(accountDto,transactionDto.getTxnId().toString());
                                         });
                                     } else {
                                         throw new AbhaDBGatewayUnavailableException();
@@ -238,7 +245,7 @@ public class EnrolUsingDrivingLicence {
         return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
     }
 
-    private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto) {
+    private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto, String txnId) {
 
         EnrolProfileDto enrolProfileDto = EnrolProfileDto.builder()
                 .enrolmentNumber(accountDto.getHealthIdNumber())
@@ -262,15 +269,19 @@ public class EnrolUsingDrivingLicence {
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
-        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto));
+        if(FacilityContextHolder.getSubject()!=null){
+            EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS,jwtUtil.generateToken(txnId, accountDto));
+            return Mono.just(new EnrolByDocumentResponseDto(null,enrollmentResponse));
+        }
+        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto,null));
     }
 
-    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto) {
+    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId) {
        return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
                .flatMap(notificationResponseDto->{
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
                         log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION+ON_MOBILE_NUMBER+accountDto.getMobile()+FOR_HEALTH_ID_NUMBER+accountDto.getHealthIdNumber());
-                        return prepareErolByDLResponse(accountDto);
+                        return prepareErolByDLResponse(accountDto, txnId);
                     }
                     else {
                         throw new NotificationGatewayUnavailableException();
