@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.facility;
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.DocumentClient;
+import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -91,6 +92,10 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
     private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
     public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
+    private static final String VERIFICATION_NULL = "Account verification status is null";
+    private static final String INVALID_STATUS = "Account verification status is not provisional";
+    private static final String YEAR_OF_BIRTH = "9999";
+    private static final String GENDER = "XXX";
 
 
     @Autowired
@@ -112,7 +117,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     @Autowired
     AccountActionService accountActionService;
     @Autowired
-    DocumentClient documentClient;
+    DocumentDBIdentityDocumentFClient documentClient;
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
@@ -121,13 +126,18 @@ public class FacilityEnrolByEnrollmentNumberService {
     JWTUtil jwtUtil;
 
 
-
     public Mono<MobileOrEmailOtpResponseDto> sendOtpForEnrollmentNumberService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String enrolmentNumber = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
         Mono<AccountDto> accountDtoMono = accountService.getAccountByHealthIdNumber(enrolmentNumber);
 
         return accountDtoMono.flatMap(accountDto -> {
+            if (accountDto.getVerificationStatus() == null) {
+                throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), VERIFICATION_NULL);
+            }
+            if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
+                throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), INVALID_STATUS);
+            }
             if (!redisService.isResendOtpAllowed(accountDto.getMobile())) {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
             }
@@ -264,7 +274,7 @@ public class FacilityEnrolByEnrollmentNumberService {
 
 
     public Mono<EnrollmentResponse> verifyFacilityByEnroll(EnrollmentStatusUpdate enrollmentStatusUpdate) {
-        String status = enrollmentStatusUpdate.getVerificationStatus().getValue();
+        String status = enrollmentStatusUpdate.getVerificationStatus();
         return transactionService.findTransactionDetailsFromDB(enrollmentStatusUpdate.getTxnId()).flatMap(txnDto -> {
             log.info(TRANSACTION + txnDto.getTxnId() + FOUND);
             if (txnDto.isMobileVerified()) {
@@ -290,10 +300,10 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
                         newAccountActionDto.setNewValue(ACTIVE.getValue());
                         newAccountActionDto.setPreviousValue(null);
-                        newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
+                        newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber()).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE,jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
+                        notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
+                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE, jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
                         formatAccountDto(accountDto);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
@@ -304,9 +314,9 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
                         newAccountActionDto.setNewValue(DELETED);
                         newAccountActionDto.setPreviousValue(null);
-                        newAccountActionDto.setReason(enrollmentStatusUpdate.getMessage());
+                        newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE,null);
+                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE, null);
                     }
                     return Mono.just(enrollmentResponse);
                 });
@@ -328,7 +338,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setEmail(null);
         accountDto.setFacilityId(null);
         accountDto.setFirstName(null);
-        accountDto.setGender(null);
+        accountDto.setGender(GENDER);
         accountDto.setHealthId(null);
         accountDto.setKycdob(null);
         accountDto.setKycVerified(false);
@@ -365,5 +375,6 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setKycPhoto(null);
         accountDto.setProfilePhoto(null);
         accountDto.setType(null);
+        accountDto.setYearOfBirth(YEAR_OF_BIRTH);
     }
 }

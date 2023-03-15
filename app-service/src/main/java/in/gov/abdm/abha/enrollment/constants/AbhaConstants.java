@@ -52,7 +52,7 @@ public interface AbhaConstants {
     String ACCOUNT_NOT_FOUND_EXCEPTION_MESSAGE = "No account found with AADHAAR Number.Please,create an account by clicking Click here to Create ABHA Number link.";
     String TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid transaction, either the transaction is expired or not found";
 
-    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid enrollment id, either the enrolment id is wrong or not found in db";
+    String ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE = "The provided Enrolment number does not exist.";
     String VERIFICATION_STATUS_NOT_PROVISIONAL = "Verification status for this account is not Provisional";
 
     String HEALTH_ID_NUMBER_NOT_FOUND_EXCEPTION_MESSAGE = "Invalid health id, either the health id is wrong or not found in db";
@@ -66,6 +66,9 @@ public interface AbhaConstants {
     String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
+    String INVALID_REASON = "Maximum length allowed is 255";
+    String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
+    String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
 
     String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
@@ -158,6 +161,7 @@ public interface AbhaConstants {
 
     String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
     String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
+    String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
 
     String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";

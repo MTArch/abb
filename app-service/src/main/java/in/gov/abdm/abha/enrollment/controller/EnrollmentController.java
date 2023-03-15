@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.controller;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+<<<<<<<<< Temporary merge branch 1
+=========
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
@@ -58,6 +60,8 @@ public class EnrollmentController {
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
+        }else if(authMethods.contains(AuthMethods.FACE)){
+            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         } else if(authMethods.contains(AuthMethods.FACE)){
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }

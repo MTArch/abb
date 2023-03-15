@@ -49,7 +49,7 @@ public interface URIConstant {
     String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
-    String DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/accountaction/";
+    String DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/accountaction/{id}";
     String FDB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
     String FDB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/{healthIdNumber}";
 
@@ -101,8 +101,8 @@ public interface URIConstant {
     String DOCUMENT_DB_BASE_URI = "/api/v3/documentdb";
     String DOCUMENT_VERIFY = DOCUMENT_BASE_URI + "/verify";
     String IDENTITY_DOCUMENT_ADD = DOCUMENT_DB_BASE_URI + "/identityDocument";
+    String IDENTITY_DOCUMENT_GET = DOCUMENT_DB_BASE_URI + "/identityDocument/{healthId}";
 
-    String IDENTITY_DOCUMENT_GET = DOCUMENT_DB_BASE_URI + "/identityDocument/";
     String FACILITY_ENDPOINT = BASE_URI + "/facility";
     String FACILITY_OTP_ENDPOINT = "/request/otp";
     String VERIFY_FACILITY_OTP_ENDPOINT = "/auth/byAbdm";

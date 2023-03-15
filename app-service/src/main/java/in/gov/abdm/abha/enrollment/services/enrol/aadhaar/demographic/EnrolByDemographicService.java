@@ -109,6 +109,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
         accountDto.setYearOfBirth(demographic.getYearOfBirth());
         accountDto.setMonthOfBirth(demographic.getMonthOfBirth());
+        accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
         accountDto.setDayOfBirth(demographic.getDayOfBirth());
         accountDto.setAddress(demographic.getAddress());
         accountDto.setGender(demographic.getGender());

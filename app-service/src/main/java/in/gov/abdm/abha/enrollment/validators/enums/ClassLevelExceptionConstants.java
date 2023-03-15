@@ -54,6 +54,8 @@ public enum ClassLevelExceptionConstants {
     consentFormImage(AbhaConstants.INVALID_CONSENT_FORM_IMAGE),
     yearOfBirth(AbhaConstants.INVALID_YEAR_OF_BIRTH),
     mobileType(AbhaConstants.INVALID_MOBILE_TYPE),
+    verificationStatus(AbhaConstants.INVALID_VERIFICATION_STATUS),
+    message(AbhaConstants.INVALID_REASON),
     preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
     private final String value;
 
