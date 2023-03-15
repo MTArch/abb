@@ -15,4 +15,5 @@ public class AadhaarVerifyOtpRequestDto {
     @JsonProperty("txnId")
     private String aadhaarTransactionId;
     private String otp;
+    private String faceAuthPid;
 }

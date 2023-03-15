@@ -1,11 +1,17 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.error.ABDMError;
+import in.gov.abdm.error.ErrorResponse;
 import liquibase.pro.packaged.P;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
@@ -81,5 +87,10 @@ public class GeneralUtils {
     public boolean isValidAadhaarNumber(String aadhaarNumber){
         return VerhoeffAlgorithm.validateVerhoeff(aadhaarNumber);
     }
+    public Mono<DataBuffer> prepareFilterExceptionResponse(ServerWebExchange exchange, ABDMError error) {
+        return Mono.just(exchange.getResponse().bufferFactory()
+                .wrap(new JSONObject(new ErrorResponse(error.getCode(), error.getMessage())).toString().getBytes()));
+    }
+
 }
 

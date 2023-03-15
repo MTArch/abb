@@ -8,4 +8,5 @@ public interface EnrolUsingAadhaarService {
 
     Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto);
 
+    Mono<EnrolByAadhaarResponseDto> faceAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto);
 }

@@ -16,6 +16,7 @@ public enum AuthMethods {
     OTP("otp"),
     DEMO("demo"),
     PI("pi"),
+    FACE("face"),
     WRONG("wrong");
     private final String value;
 

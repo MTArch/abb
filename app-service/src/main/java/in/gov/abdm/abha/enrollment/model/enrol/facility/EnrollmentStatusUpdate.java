@@ -5,11 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class EnrollmentStatusUpdate {
     private String txnId;
-    private EnrollmentStatus verificationStatus;
+    @Pattern(regexp = VERIFICATION_STATUS_REGEX, flags = Pattern.Flag.CASE_INSENSITIVE, message = INVALID_VERIFICATION_STATUS)
+    private String verificationStatus;
+    @Size(max = 255,message = INVALID_REASON)
     private String message;
 }

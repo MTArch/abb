@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.jwt.util.JWTToken;
 import in.gov.abdm.jwt.util.JWTTokenRequest;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -68,4 +69,33 @@ public class JWTUtil {
     public long jwtRefreshTokenExpiryTime() {
         return JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC;
     }
+
+    public boolean isTokenExpired(String token) {
+        token = token.split(" ")[1];
+        try {
+            JWTToken.validateToken(token, rsaUtil.getJWTPrivateKey());
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
+    }
+
+    public boolean isValidToken(String token) {
+        token = token.split(" ")[1];
+        try {
+            JWTToken.validateToken(token, rsaUtil.getJWTPrivateKey());
+            return true;
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public Map<String, Object> getTokenClaims(String token) {
+        token = token.split(" ")[1];
+        return JWTToken.decodeJWTToken(token, rsaUtil.getJWTPrivateKey());
+    }
+
+
 }

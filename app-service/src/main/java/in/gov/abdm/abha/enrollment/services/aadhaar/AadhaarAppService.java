@@ -14,4 +14,6 @@ public interface AadhaarAppService {
     Mono<AadhaarResponseDto> verifyOtp(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
 
     Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest);
+
+    Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
 }
