@@ -28,4 +28,8 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
     public Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest){
         return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
+
+    public Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto){
+        return aadhaarFClient.faceAuth(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+    }
 }

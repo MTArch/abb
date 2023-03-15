@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
+import in.gov.abdm.abha.enrollment.validators.annotations.Face;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Otp
+@Face
 @AuthMethod
 public class AuthData {
 
@@ -43,7 +45,7 @@ public class AuthData {
     /**
      * It is Bio
      */
-    @JsonProperty("bio")
+    @JsonProperty("face")
     @Valid
-    private BioDto bio;
+    private FaceDto face;
 }
