@@ -11,13 +11,17 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@ReactiveFeignClient(name= AbhaConstants.LGD_APP_CLIENT, url="${enrollment.gateway.lgd.baseuri}", configuration = BeanConfiguration.class)
+@ReactiveFeignClient(name = AbhaConstants.LGD_APP_CLIENT, url = "${enrollment.gateway.lgd.baseuri}", configuration = BeanConfiguration.class)
 public interface LgdAppFClient {
 
-    public static final String PIN_CODE="pinCode";
-    public static final String VIEW="view";
+    public static final String PIN_CODE = "pinCode";
+    public static final String VIEW = "view";
+    public static final String NAME = "name";
 
     @GetMapping(URIConstant.FLGD_BASE_URI)
-    public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(@RequestParam(value = PIN_CODE,required = false) String pinCode,
-                                                           @RequestParam(value = VIEW,required = false) String district);
+    public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(@RequestParam(value = PIN_CODE, required = false) String pinCode,
+                                                                 @RequestParam(value = VIEW, required = false) String district);
+
+    @GetMapping(URIConstant.FLGD_STATE_SEARCH_URI)
+    public Mono<List<LgdDistrictResponse>> getDetailsByAttributeState(@RequestParam(value = NAME, required = false) String name);
 }

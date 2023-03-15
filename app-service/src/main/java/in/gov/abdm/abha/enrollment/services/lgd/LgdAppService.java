@@ -15,7 +15,9 @@ public class LgdAppService {
     @Autowired
     LgdAppFClient lgdAppFClient;
 
-    public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(String pinCode, String district) {
+    public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(String pinCode, String district, String stateName) {
+        if (stateName != null)
+            return lgdAppFClient.getDetailsByAttributeState(stateName).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
         return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
     }
 }

@@ -95,6 +95,7 @@ public interface URIConstant {
     //LGD service
     String LGD_BASE_URI = "/internal/v3/abdm/lgd";
     String FLGD_BASE_URI = "/internal/v3/abdm/lgd/search";
+    String FLGD_STATE_SEARCH_URI = "/internal/v3/abdm/lgd/state/search";
 
     // Driving Licence
     String DOCUMENT_BASE_URI = "/api/v3/document";

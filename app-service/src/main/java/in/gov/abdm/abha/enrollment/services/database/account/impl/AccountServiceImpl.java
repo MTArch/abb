@@ -44,7 +44,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
         return abhaDBAccountFClient.getAccountByXmlUid(Common.base64Encode(xmlUid))
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
@@ -101,14 +101,16 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
             newUser.setStateName(transactionDto.getStateName());
             newUser.setVerificationType(AbhaConstants.AADHAAR);
             newUser.setVerificationStatus(AbhaConstants.VERIFIED);
-
-            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-
-            newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-            newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
-            newUser.setStateCode(lgdDistrictResponse.getStateCode());
-            newUser.setStateName(lgdDistrictResponse.getStateName());
-
+            if (!lgdDistrictResponses.isEmpty()) {
+                LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                newUser.setDistrictName(lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? transactionDto.getDistrictName() : lgdDistrictResponse.getDistrictName());
+                newUser.setStateCode(lgdDistrictResponse.getStateCode());
+                newUser.setStateName(lgdDistrictResponse.getStateName());
+            } else {
+                newUser.setDistrictName(transactionDto.getDistrictName());
+                newUser.setStateName(transactionDto.getStateName());
+            }
 
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
             newUser.setTownName(transactionDto.getTownName());
@@ -186,32 +188,32 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     @Override
     public Mono<AccountDto> getAccountByHealthIdNumber(String healthIdNumber) {
         return abhaDBAccountFClient.getAccountByHealthIdNumber(healthIdNumber)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
         return abhaDBAccountFClient.getAccountEntityByDocumentCode(documentCode)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers) {
         return abhaDBAccountFClient.getAccountsByHealthIdNumbers(healthIdNumbers.stream().collect(Collectors.joining(",")))
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<Integer> getMobileLinkedAccountCount(String mobileNumber) {
         return abhaDBAccountFClient.getMobileLinkedAccountCount(mobileNumber)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     private void breakName(AccountDto accountDto) {
@@ -273,6 +275,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         accountDto.setCreatedDate(LocalDateTime.now());
         return abhaDBAccountFClient.createAccount(accountDto)
-                .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
     }
 }
