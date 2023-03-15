@@ -3,10 +3,7 @@ package in.gov.abdm.abha.enrollment.controller;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
-<<<<<<<<< Temporary merge branch 1
-=========
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
-import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
@@ -61,8 +58,6 @@ public class EnrollmentController {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
         }else if(authMethods.contains(AuthMethods.FACE)){
-            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
-        } else if(authMethods.contains(AuthMethods.FACE)){
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }
         throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
