@@ -17,6 +17,9 @@ public class LgdUtility {
     public static final String DISTRICT = "district";
 
     public Mono<List<LgdDistrictResponse>> getLgdData(String pinCode, String state) {
+        if(pinCode == null || pinCode.isBlank()) {
+            return lgdAppService.getDetailsByAttribute(null, null, state);
+        }
         return lgdAppService.getDetailsByAttribute(pinCode, DISTRICT, null)
                 .flatMap(lgdDistrictResponses -> {
                     if (lgdDistrictResponses.isEmpty())
