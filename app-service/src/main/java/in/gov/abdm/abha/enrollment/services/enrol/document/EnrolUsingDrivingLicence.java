@@ -218,7 +218,7 @@ public class EnrolUsingDrivingLicence {
                                                     } else {
                                                         log.info(TRANSACTION_DELETED);
                                                     }
-                                                    return sendSucessNotificationAndPrepareDLResponse(accountDto);
+                                                    return sendSucessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString());
                                                 });
                                             } else {
                                                 throw new AbhaDBGatewayUnavailableException();
