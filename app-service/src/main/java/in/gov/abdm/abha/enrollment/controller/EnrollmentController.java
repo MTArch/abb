@@ -52,17 +52,14 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
-        if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
-            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
-        } else {
-            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
-        }
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
         if (authMethods.contains(AuthMethods.OTP)) {
             return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
+        } else if(authMethods.contains(AuthMethods.FACE)){
+            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }
         throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
     }

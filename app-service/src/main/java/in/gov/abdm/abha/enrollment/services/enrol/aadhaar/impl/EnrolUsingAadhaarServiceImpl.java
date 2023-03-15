@@ -390,7 +390,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponseUsingFaceAuth(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
 
-        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(transactionDto, accountDtoResponse, abhaProfileDto);
+        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse, abhaProfileDto);
 
         return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(response -> {
             if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {

@@ -5,7 +5,6 @@ import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
 import in.gov.abdm.abha.enrollment.validators.annotations.Face;
-import in.gov.abdm.abha.enrollment.validators.annotations.Demo;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Otp
-@Demo
 @Face
 @AuthMethod
 public class AuthData {
@@ -35,12 +33,6 @@ public class AuthData {
     @JsonProperty("token")
     private TokenDto token;
 
-    /**
-     * It is Demo
-     */
-    @JsonProperty("demo")
-    @Valid
-    private DemoDto demo;
 
     /**
      * It is Otp
