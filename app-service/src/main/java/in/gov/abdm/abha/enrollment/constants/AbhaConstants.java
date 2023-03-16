@@ -117,9 +117,15 @@ public interface AbhaConstants {
 
     String INVALID_FIRST_NAME = "Invalid First Name";
 
+    String FIRST_NAME_EXCEED="First Name exceeded 255 characters";
+
     String INVALID_MIDDLE_NAME = "Invalid Middle Name";
 
+    String MIDDLE_NAME_EXCEED = "Middle Name exceeded 255 characters";
+
     String INVALID_LAST_NAME = "Invalid Last Name";
+
+    String LAST_NAME_EXCEED = "Last Name exceeded 255 characters";
 
     String INVALID_DOB = "Invalid DOB";
 
@@ -128,6 +134,8 @@ public interface AbhaConstants {
     String INVALID_BACK_SIDE_PHOTO = "Invalid Back side photo";
 
     String INVALID_ADDRESS = "Invalid Address";
+
+    String ADDRESS_EXCEED = "Address exceeded 500 characters";
 
     String INVALID_STATE = "Invalid State";
 

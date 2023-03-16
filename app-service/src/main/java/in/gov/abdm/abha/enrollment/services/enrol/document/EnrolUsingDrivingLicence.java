@@ -156,9 +156,8 @@ public class EnrolUsingDrivingLicence {
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
-                .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),
-                        enrolByDocumentRequestDto.getMiddleName(),
-                        enrolByDocumentRequestDto.getLastName()))
+                .name(StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) ? Common.getName(enrolByDocumentRequestDto.getFirstName()
+                        ,enrolByDocumentRequestDto.getLastName()) : Common.getName(enrolByDocumentRequestDto.getFirstName(),enrolByDocumentRequestDto.getMiddleName() ,enrolByDocumentRequestDto.getLastName()))
                 .verificationStatus(FacilityContextHolder.getSubject()!=null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
