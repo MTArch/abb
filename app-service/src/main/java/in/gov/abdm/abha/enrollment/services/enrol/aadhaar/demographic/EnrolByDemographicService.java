@@ -22,9 +22,9 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
-import in.gov.abdm.abha.enrollment.services.lgd.LgdAppService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
@@ -53,8 +53,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Autowired
     private HidPhrAddressService hidPhrAddressService;
     @Autowired
-    private LgdAppService lgdAppService;
-    @Autowired
     private JWTUtil jwtUtil;
     @Autowired
     private AbhaAddressGenerator abhaAddressGenerator;
@@ -64,6 +62,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     NotificationService notificationService;
     @Autowired
     IdentityDocumentDBService identityDocumentDBService;
+    @Autowired
+    LgdUtility lgdUtility;
 
     public static final String DISTRICT = "District";
 
@@ -131,16 +131,20 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         } else {
             accountDto.setType(AbhaType.CHILD);
         }
-
-        return lgdAppService.getDetailsByAttribute(demographic.getPinCode(), DISTRICT).flatMap(lgdDistrictResponses -> {
-            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-            accountDto.setStateCode(lgdDistrictResponse.getStateCode());
-            accountDto.setStateName(lgdDistrictResponse.getStateName());
-            accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-            accountDto.setDistrictName(lgdDistrictResponse.getDistrictName());
-
-            return saveAccountDetails(accountDto, demographic.getConsentFormImage());
-        });
+        return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
+                .flatMap(lgdDistrictResponses -> {
+                    if (!lgdDistrictResponses.isEmpty()) {
+                        LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                        accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                        accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
+                        accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+                        accountDto.setStateName(lgdDistrictResponse.getStateName());
+                    } else {
+                        accountDto.setDistrictName(demographic.getDistrict());
+                        accountDto.setStateName(demographic.getState());
+                    }
+                    return saveAccountDetails(accountDto, demographic.getConsentFormImage());
+                });
     }
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(AccountDto accountDto, String consentFormImage) {
