@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.security;
 
 import in.gov.abdm.abha.enrollment.configuration.filters.ClientFilter;
+import in.gov.abdm.abha.enrollment.configuration.filters.FacilityXTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -18,6 +19,7 @@ public class SecurityConfig {
                         .and()
                         .addFilterAfter(webFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .addFilterAfter(new ClientFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
+                        .addFilterAfter(new FacilityXTokenFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
                         .httpBasic().disable()
                         .formLogin().disable()
                         .cors().disable()

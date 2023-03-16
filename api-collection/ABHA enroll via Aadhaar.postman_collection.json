@@ -1,0 +1,355 @@
+{
+	"info": {
+		"_postman_id": "359dc7e6-d426-4535-83b3-f541a4e3bea0",
+		"name": "ABHA creation- Mobile Email Abha Address update",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22758265"
+	},
+	"item": [
+		{
+			"name": "create access token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var verifyResponse = JSON.parse(responseBody);\r",
+							"if(verifyResponse!=null && verifyResponse.accessToken!=null)\r",
+							"pm.globals.set(\"token\", verifyResponse.accessToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"clientId\": \"SBX_000135\",\r\n    \"clientSecret\": \"0a480b6a-9221-49e8-93f7-a09e076ba736\",\r\n    \"grantType\": \"client_credentials\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dev.abdm.gov.in/gateway/v0.5/sessions",
+					"protocol": "https",
+					"host": [
+						"dev",
+						"abdm",
+						"gov",
+						"in"
+					],
+					"path": [
+						"gateway",
+						"v0.5",
+						"sessions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REQUEST - OTP to send on entered Aadhaar Number Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "REQUEST_ID",
+						"value": "health_id_12345",
+						"type": "text"
+					},
+					{
+						"key": "TIMESTAMP",
+						"value": "2023-02-20 12:19:30",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"txnId\": \"\",\n    \"scope\": [\n        \"abha-enrol\"\n    ],\n    \"loginHint\": \"aadhaar\",\n    \"loginId\": \"QNUXBjpJlDB9FWAL8j4mQI9ZMMFoYIZ+riOerECr4rGTQ4RFF5S8ruy+2GxPGm4lT57Pli3Ut1foEkUmEca18gzgm+pNPwhP6hs+hl0rOpz0tvNJD8BX1RZC24K+DKeqHF4CcXL3ZooHft1v9FZZeHIFCDZDyQ9yH75ppd7YsBseAQlWklE40a3ktTyc3LYUW4i5gfriWBCk3tuQzhyBkVULq+x5Zvh0c8dRYBtwPVupcdsv3vrOKP3DL0z4jGCNFsetghn0Kkm7buo+EKiyFCGq1BVU8Yx/bdb68FJrfVhaQfESmkkrm91Uu575/z+Tl9f4ItEpvMkEox7YeTOe/zdoVm98qY8VtUPs5nf4Fu4IUcNqlEGrrtzXFS7PClMyJuDvm+kwtrXXnCkay0JGl5fQjaXaHTrzy/EVBiEhc+IUQAwka5mBdTvQQV4p8OJdjKWSBMz2Nw1QIuQMKSM9gy7zBc8lVI5h6BOpqBMAEV0VPV5R7WmXL7370Arx5PVMGM2/TaNflAG0H7D+HLHjD7UA+2WSQDBmSsM57mq50LlGZYtaLs1vw69Oiwo89J3UvAFuxrK1s2KIq0YZ4bjn2CL5Mf8/LpMKAxYHuHgfEtliqPDegq/O+9ufmW5PfRKZEUfPNq2y9vwTult39qjSo1a9jknFB6d42Oy3c5JxPck=\",\n    \"otpSystem\": \"aadhaar\"\n}"
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/request/otp",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"request",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ENROL - BY AADHAAR VERIFICATION Copy 4",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const datetime = require('moment');\r",
+							"pm.collectionVariables.set(\"current_timestamp\", datetime().format(\"YYYY-MM-DD HH:mm:ss\"));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var verifyResponse = JSON.parse(responseBody);\r",
+							"if(verifyResponse!=null && verifyResponse.token!=null)\r",
+							"pm.collectionVariables.set(\"jwtToken\", verifyResponse.token);\r",
+							"if(verifyResponse!=null && verifyResponse.refreshToken!=null)\r",
+							"pm.collectionVariables.set(\"R-jwtToken\", verifyResponse.refreshToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "TIMESTAMP",
+						"value": "2023-02-20 12:19:30",
+						"type": "text"
+					},
+					{
+						"key": "REQUEST_ID",
+						"value": "health_id_12345",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"authData\": {\n        \"authMethods\": [\n            \"otp\"\n        ],\n        \"otp\": {\n            \"timeStamp\": \"2023-03-14 15:40:20\",\n            \"txnId\": \"2131f078-e847-40a1-b268-5714c9dbc391\",\n            \"otpValue\": \"F2lKKBNMxyWG15DWeF2u7RBnHYeou3W7UMbHaJPvj0fZEmmjTcfkFVUAisZba9kZx471b+GJnBqT2IAvOuN6oo8Hkjtri89KLbn/LBPT2qcVyHYKiT1sG1yjehBQpoZ7x+HWXVhf14s6jEnHnJBvq0aCekA+RK9hWxngj7dSJ+m7M8zxb5qB9iP4dDjLNUlHBMwIgwyg2ThBkO3d0B9A8GUQ176+GajmzCBQMyd5Xjgs+zsQVtiG29s/el3mZ8wvdGiV/AfYn2zjYK/g6RF3xNoqPimoKI8rZVge4uRts8BJ4+Tf4WExRRWQBUtfeisg6xb0okRj4wgO4V1te+M67Ni/l6fbQmirDKBoTTZUrOxIr0p6zQ396Px+8/wAzmQN7jU9JTO4WDb/T14LQrSpAa31Rro8DrHgs/FD6hcKNgMZIPca5hl7DiM9AlErHLETweCELWrc9DuGTfLRez/UmLsvDqvzOUYSjQw0iSJSzQOp3dEPCLOYWFAZ4sz2uiSDo5mdOVxswFK2+Q24/7VM7sXrD1my2i14RFrXmSrN5/1BCxdk95VlfE0IWZ9V/2Vw/RJXJ+tD4l7IdUlF4/HVX5Pi6dNzB6HGNpaJ89kZzv0cGOWh4fUw5LyTtxzNwaSQufYJJnbpNutO5ooF0U9Q5uL7A/SuhM1h2Cihe55WDq0=\",\n            \"mobile\": \"9405473662\"\n        }\n    },\n    \"consent\": {\n        \"code\": \"abha-enrollment\",\n        \"version\": \"1.4\"\n    }\n}"
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/enrol/byAadhaar",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"enrol",
+						"byAadhaar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REQUEST- MOBILE UPDATE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"txnId\": \"0358bae6-b1af-4f23-84e3-5a6a2c9c7d55\",\r\n    \"scope\": [\r\n        \"abha-enrol\",\r\n        \"mobile-verify\"\r\n    ],\r\n    \"loginHint\": \"mobile\",\r\n    \"loginId\": \"KlgpMaLsdAjMxxOqE52juzsk2iUmVgQctERIe3fwrgIUkcdLFFzZOYZQPn3nM3yrV3CmO2TyLZZ1bLxnFO1G81TEPEizTGMyEANFXK5ZjtvTHcOB1IRyKvPWNUhqD6YUckSPzbA2xdnXb+CQR57IH+JbmEeLxD97IMhQENJnziu1K/t5//xPGcizhHTwyVRIGqoP9KGGyVeYTrgdi5ejoo3k2ih4uhWT2l9YvkoFXzNk8RNP7Xv+kwnPKSZLIGfL1nG4YucGoLEl6Ka6kq+HYTKL2YT8Y1vFEDD4bNQitUSI/p88xBVfKPcdqLshNp/OclkG5t3YKHjq3bH/PhDXC5k3fOebkMaqarlUT3Q8NdyZF6H6V41lBXLpC5YpIR/biC97SfbTFkWZAcQyfyh+S9XIB+b1qB20uUlSMxskV5JY9HHfLm56Z3yYd5cNb9Xt2qDaaHGPJk7DpXtzxjpYxXfL4izlGrmzu8ueXulREWkO9RiDDgfySBUcmKqwAQaxFUrVXoVMiHB1rBXQP4sjiFNXFYwom2KVX3OK3PugHKRev5V9DaiKTc4+5w/FiMizh+GEF+S3R27TWRSjSupavofDfyu6Zv8fSyiCyUDy0N1Z0LIFgYUKzkVA1CMR7bcsAHiW/FBM9Ywv1r5W4sqayOduvZzB+vzlQRXZVmL4DuQ=\",\r\n    \"otpSystem\": \"abdm\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/request/otp",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"request",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VERIFY- MOBILE UPDATE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"scope\": [\r\n        \"abha-enrol\",\r\n        \"mobile-verify\"\r\n    ],\r\n    \"authData\": {\r\n        \"authMethods\": [\r\n            \"otp\"\r\n        ],\r\n        \"otp\": {\r\n            \"timeStamp\": \"2023-03-15 15:15:23\",\r\n            \"txnId\": \"0358bae6-b1af-4f23-84e3-5a6a2c9c7d55\",\r\n            \"otpValue\": \"f/1ev6Gm3Di1NF7Lhq2Zl7E/IMaI1SRJtlDR61ZKuqlO1HsCbUyzP8JKQry3WingS0UJZPVM/YunuFBQVGx2Em8zUbPOWT2KvJkcbOF7f+8eIbhDw2OmBf4LLfaq6B5OY985Ojfg8dvPoB+Pr8j16qOwOBfupeRf0VuDwlfSQ15L9TrKkUc9R2L9g9IHAUpwWY1ibS9SBDPW9jU1F5p6RVvwtd9kcpvdiDzkF5g6PgS4zN+6hL3e3K+hKbadUvhxrkND/31sLFTjoTxTBXPJHaNoEpacQlUtoLAe50aBVuPKGfaWyFebqrkpnOrjE9KpnQDmbjsYXAVSPzL0qAlwF6tR94R4Ctit50H2k+P/1hP8TIKVn/ZVpftGKh6n0h1bggCWV++c5Cu8MGj7MKoMuFo0bsoGMtZYPRVFWthtjihMzhWDSViwNGYZOYXnMGvoqHi3nVn4jO5ggE5s+V1eYgHHLWhNQee3LKOZfJMv6Ra2E1hZUCMpc6MhObTimoJ63kaT5GfiQgCTNv3i1R4yWJ8bARmym4tjxtkMW5o6/IXBEsmZFd1w2cY46ejU6I01tr41VjV6w0/Mti34LTGoji9VBHDqFQ4eP2NfvKlWZ5t2Bnd0z7JlMtPD4AHx7J5E6idQ7omiy5M9+czXhNyrvPrrI/7i52HF9QDo4MQ2Ne0=\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/auth/byAbdm",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"auth",
+						"byAbdm"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REQUEST- EMAIL UPDATE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"txnId\": \"0358bae6-b1af-4f23-84e3-5a6a2c9c7d55\",\r\n    \"scope\": [\r\n        \"abha-enrol\",\r\n        \"email-verify\"\r\n    ],\r\n    \"loginHint\": \"email\",\r\n    \"loginId\": \"sOirpMqDjAftEMzRFZzCtfP78SETTiHYUc+5dnz9JHVoC/BElFxhjpnVZ0r9ZBbFfEHjATrDH1oqcz88ayZQaS8Tso9tkRkiDSZ535EIttxXgWsDfu220JIswXfB/WuR8oaJH5L8VSXDj+mLL8i1kYRIs5mySwK5LKpgfktcO6LsW80zYhBA3vNR5CYXt6TEIxbQJW4d/qpDHB23YLAk6fK7iT5yVhE3StjGNrmBX2zMMx+Jzaa4/Ilk2Gn4dcklMm9ue0xH88kbzaHTj+kdqNi8pO85EEXgMGc9TS2swlUmiSVwscoUJGmK28PZbZcP1GTe3ee0jSOPPeVKDlXRBGV0gxvU7il+y1INgsU9g2iCJonncdSRtcsBAVjvi6tQRACyUZmoGGVOuYEV9/c2C3TSEUfIupFC/ETYwxQttKeC+pdKYJa7eIpUJq/2CQkZV+ditETDSKmKKEkHruSCLrw6mwz5teMLdFHquzKFzVu3Zex1GBRBB69Fw+x6s+jR3BJ6Rz56wKpwjs59cd+imKh/dBfHjahvQMRA8dnVD4f1M4uNGQd5kAIDtSU9RbZXZZSbXuMpE2yybcW3F1sBb4mEMhTUX7n5xM3Bjc3UqSAgP8S/eEBDG9TGPSVjUtb2EksnDsPEUAFhRxttJfb/PtpVFao3/k82tcB/xQ6b5Zg=\",\r\n    \"otpSystem\": \"abdm\"\r\n}"
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/request/otp",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"request",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VERIFY- EMAIL UPDATE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"scope\": [\r\n        \"abha-enrol\",\r\n        \"email-verify\"\r\n    ],\r\n    \"authData\": {\r\n        \"authMethods\": [\r\n            \"otp\"\r\n        ],\r\n        \"otp\": {\r\n            \"timeStamp\": \"2023-03-15 15:22:46\",\r\n            \"txnId\": \"0358bae6-b1af-4f23-84e3-5a6a2c9c7d55\",\r\n            \"otpValue\": \"cDjGZm/CLw7IdYiDi58jnGUlK3hx/PlG+FZYBfpUu4Ei2QRD9SnSFM0EbE0jMwbWcPTMBDSeQ2ThAdhHMXsqKCweyfKqXbrjLWKD+f+uBPyQc2PI5AMBLsviMzRJzj0+3VcOxgEHfMHpMB4L29+zKYOZFgnRIreeG6JN2G5qRBHvWGizJXUx5CNGwNvzSJc3J48q9cGSeKBoOu7EJMKBkWQ5BFxysgx170h6UZkJ21+5F/LcPoG8mo69Fk//WvF6qnCiJmOufvVCXagBRkeQJrpTYigoVBkyNmYGQNEApwtQRBrH+NWNaq/LqNMkWqpVJgLtbYNHSysoikYYVsy21XOQ5EiS/cy088zzIQflkCZcs25cHZ8xHL/3TRVMOJHDTsyW9Ho4UtiRr3WphuJ8eaGZMtzoUO5RrDFM+XbjDI8YkrvNwD7ctwEF1CbmYKWChAP4RwPuWJbJnli1hC98zFKNkmfbQ9xLTHN5p4ODcKaWzGRGoLgnUlEseCl8+udGAll+9Lk3u2ddDlsg5vtz+3YNnnjxq5dJij6+yiPnpQ++cY+yOby4lN+rvzUUV6GxqIKENUlLXO2ro6YsmhhdF5et198lU03F4avLlvqfxvJGM0pITrm3vHD3AWL48Az2tJAlxkbtin0KVueGJVuNCMlhbXaD4yvlT7Rx476VhAw=\"\r\n        }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{env}}/enrollment/auth/byAbdm",
+					"host": [
+						"{{env}}"
+					],
+					"path": [
+						"enrollment",
+						"auth",
+						"byAbdm"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const datetime = require('moment');",
+					"pm.collectionVariables.set(\"current_timestamp\", datetime().format(\"YYYY-MM-DD HH:mm:ss\"));"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "current_timestamp",
+			"value": "",
+			"disabled": true
+		},
+		{
+			"key": "current_timestamp",
+			"value": "",
+			"disabled": true
+		},
+		{
+			"key": "current_timestamp",
+			"value": ""
+		}
+	]
+}

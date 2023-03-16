@@ -29,7 +29,7 @@ public class FacilityXTokenFilter implements WebFilter {
     private static final String CLIENT_ID = "clientId";
     private static final String SYSTEM = "system";
     private static final String SUB = "sub";
-    private static final String USER_TYPE = "USER_TYPE";
+    private static final String USER_TYPE = "userType";
     private static final String ROLES = "roles";
 
     @Override
