@@ -144,6 +144,10 @@ public class Common {
         return Base64.getEncoder().encodeToString(value.getBytes());
     }
 
+    public byte[] base64Decode(String value){
+        return Base64.getDecoder().decode(value);
+    }
+
     public List<Templates> loadDummyTemplates() {
         List<Templates> templates = new ArrayList<>();
         templates.add(new Templates(

@@ -135,6 +135,8 @@ public interface AbhaConstants {
 
     String INVALID_DOCUMENT_PHOTO_SIZE = "The size of the document uploaded exceeds the permissible limits. Please upload a document of size less than 150KB";
 
+    String SAME_PHOTO_EXCEPTION = "Front and backside photos cannot be the same. Please upload different photos for both sides.";
+
     String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
     String INVALID_PIN_CODE = "Invalid PinCode";

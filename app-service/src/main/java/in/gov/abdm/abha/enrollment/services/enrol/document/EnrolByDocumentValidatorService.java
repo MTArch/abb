@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
@@ -96,12 +97,21 @@ public class EnrolByDocumentValidatorService {
         } else if (!isValidBackSidePhotoSize(enrolByDocumentRequestDto)) {
             errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         }
+        if(isSameFrontSideBackSidePhoto(enrolByDocumentRequestDto)){
+            errors.put(BACK_SIDE_PHOTO, AbhaConstants.SAME_PHOTO_EXCEPTION);
+        }
         if (enrolByDocumentRequestDto.getConsent() == null) {
             errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isSameFrontSideBackSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        byte[] imageBytes1 = Common.base64Decode(enrolByDocumentRequestDto.getFrontSidePhoto());
+        byte[] imageBytes2 = Common.base64Decode(enrolByDocumentRequestDto.getBackSidePhoto());
+        return Arrays.equals(imageBytes1, imageBytes2);
     }
 
     private boolean isValidFrontSidePhotoSize(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
