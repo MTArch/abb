@@ -135,7 +135,7 @@ public interface AbhaConstants {
 
     String INVALID_ADDRESS = "Invalid Address";
 
-    String ADDRESS_EXCEED = "Address exceeded 500 characters";
+    String ADDRESS_EXCEED = "Address exceeded 255 characters";
 
     String INVALID_STATE = "Invalid State";
 
