@@ -2,11 +2,9 @@ package in.gov.abdm.abha.enrollment.services.facility;
 
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
-import in.gov.abdm.abha.enrollment.client.DocumentClient;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
@@ -17,7 +15,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.Accou
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
-import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.entities.AccountActionDto;
+import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
+import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.facility.document.EnrolProfileDetailsDto;
 import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
@@ -28,6 +29,7 @@ import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.accountaction.AccountActionService;
+import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -48,11 +50,11 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
+import static in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService.OTP_VERIFIED_SUCCESSFULLY;
 import static java.time.LocalDateTime.now;
 
 /**
@@ -66,7 +68,6 @@ public class FacilityEnrolByEnrollmentNumberService {
 
     private static final String MOBILE_NUMBER_IS_VERIFIED = "Mobile Number is Verified";
     private static final String ACTION_ALREADY_MADE = "Action already made for this transaction";
-    private static final String ACCOUNT_ALREADY_REJECTED = "Account already rejected for this transaction";
     private static final String MOBILE_NUMBER_NOT_VERIFIED = "Mobile Number Not Verified";
     private static final String ENROL_VERIFICATION_STATUS = "success";
     private static final String ACCEPT = "ACCEPT";
@@ -79,15 +80,12 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Successfully verified";
     private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "Successfully rejected";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
-    private static final String OTP_SUBJECT = "mobile verification";
     private static final String SENT = "sent";
-    private static final String FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION = "Failed to Send OTP for Mobile verification";
-    private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
     private static final String FOUND = " found.";
     private static final String TRANSACTION = " Transaction.";
     private RedisOtp redisOtp;
 
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "OTP value did not match, please try again.";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
     private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
@@ -123,6 +121,8 @@ public class FacilityEnrolByEnrollmentNumberService {
     @Autowired
     EnrolmentCipher enrolmentCipher;
     @Autowired
+    HidPhrAddressService hidPhrAddressService;
+    @Autowired
     JWTUtil jwtUtil;
 
 
@@ -133,10 +133,10 @@ public class FacilityEnrolByEnrollmentNumberService {
 
         return accountDtoMono.flatMap(accountDto -> {
             if (accountDto.getVerificationStatus() == null) {
-                throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), VERIFICATION_NULL);
+                throw new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE);
             }
             if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), INVALID_STATUS);
+                throw new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE);
             }
             if (!redisService.isResendOtpAllowed(accountDto.getMobile())) {
                 throw new UnauthorizedUserToSendOrVerifyOtpException();
@@ -149,10 +149,18 @@ public class FacilityEnrolByEnrollmentNumberService {
                     transactionDto.setMobile(accountDto.getMobile());
                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                    transactionDto.setCreatedDate(LocalDateTime.now());
+                    transactionDto.setCreatedDate(now());
                     transactionDto.setHealthIdNumber(accountDto.getHealthIdNumber());
                     transactionDto.setTxnId(UUID.randomUUID());
                     transactionDto.setKycPhoto(StringConstants.EMPTY);
+                    transactionDto.setStateName(accountDto.getStateName());
+                    transactionDto.setDistrictName(accountDto.getDistrictName());
+                    transactionDto.setPincode(accountDto.getPincode());
+                    transactionDto.setDayOfBirth(accountDto.getDayOfBirth());
+                    transactionDto.setGender(accountDto.getGender());
+                    transactionDto.setEmail(accountDto.getEmail());
+                    transactionDto.setName(accountDto.getName());
+                    transactionDto.setAddress(accountDto.getAddress());
                     return transactionService.createTransactionEntity(transactionDto).flatMap(res -> {
                         handleNewOtpRedisObjectCreation(res.getTxnId().toString(), accountDto.getMobile(), StringUtils.EMPTY, Argon2Util.encode(newOtp));
                         return Mono.just(MobileOrEmailOtpResponseDto.builder().txnId(res.getTxnId().toString()).message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(accountDto.getMobile())).build());
@@ -197,15 +205,35 @@ public class FacilityEnrolByEnrollmentNumberService {
         redisService.saveRedisOtp(txnId, redisOtp);
     }
 
-    public Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, boolean isMobile) {
-        redisOtp = redisService.getRedisOtp(authByAbdmRequest.getAuthData().getOtp().getTxnId());
-
+    public Mono<AuthResponseDto> verifyOtpViaNotificationFlow(AuthRequestDto authByAbdmRequest) {
         Mono<AuthResponseDto> redisResponse = handleRedisABDMOtpVerification(authByAbdmRequest);
         if (redisResponse != null) {
             return redisResponse;
         }
+        return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
+                .flatMap(transactionDto ->
+                        verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
+                .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
 
-        return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId()).flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto, isMobile)).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    private Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(String otp, TransactionDto transactionDto) {
+        try {
+            if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
+                return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
+            } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
+                transactionDto.setMobileVerified(true);
+                return transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString())
+                        .flatMap(transactionDtoResponse -> {
+                            redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
+                            redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
+                            return prepareAuthByAdbmResponse(transactionDto, true, OTP_VERIFIED_SUCCESSFULLY);
+                        });
+            } else {
+                return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+            }
+        } catch (BadParametersException ex) {
+            return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
+        }
     }
 
 
@@ -236,42 +264,11 @@ public class FacilityEnrolByEnrollmentNumberService {
         AccountResponseDto accountResponseDto = null;
 
         if (status) {
-            accountResponseDto = AccountResponseDto.builder().ABHANumber(transactionDto.getHealthIdNumber()).name(transactionDto.getName()).build();
+            accountResponseDto = AccountResponseDto.builder().EnrolmentNumber(transactionDto.getHealthIdNumber()).name(transactionDto.getName()).build();
         }
 
-        return Mono.just(AuthResponseDto.builder().txnId(transactionDto.getTxnId().toString()).authResult(status ? StringConstants.SUCCESS : StringConstants.FAILED).message(message).accounts(status && StringUtils.isNoneEmpty(accountResponseDto.getABHANumber()) ? Collections.singletonList(accountResponseDto) : null).build());
+        return Mono.just(AuthResponseDto.builder().txnId(transactionDto.getTxnId().toString()).authResult(status ? StringConstants.SUCCESS : StringConstants.FAILED).message(message).accounts(status && StringUtils.isNoneEmpty(accountResponseDto.getEnrolmentNumber()) ? Collections.singletonList(accountResponseDto) : null).build());
     }
-
-
-    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto, boolean isMobile) {
-        try {
-            if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
-            } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
-                return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber()).flatMap(accountDto -> updatePhoneNumberInAccountEntity(accountDto, transactionDto));
-            } else {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
-            }
-        } catch (BadParametersException ex) {
-            return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
-        }
-    }
-
-
-    private Mono<AuthResponseDto> updatePhoneNumberInAccountEntity(AccountDto accountDto, TransactionDto transactionDto) {
-
-        transactionDto.setMobileVerified(Boolean.TRUE);
-        accountDto.setMobile(transactionDto.getMobile());
-        accountDto.setUpdateDate(now());
-        redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
-        redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId())).flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber())).flatMap(accountDto1 -> updateAccountAuthMethodsWithMobileOtp(accountDto1.getHealthIdNumber())).flatMap(res -> prepareAuthByAdbmResponse(transactionDto, true, MOBILE_NUMBER_LINKED_SUCCESSFULLY));
-    }
-
-    private Mono<List<AccountAuthMethodsDto>> updateAccountAuthMethodsWithMobileOtp(String abhaNumber) {
-        return accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(abhaNumber, AccountAuthMethods.MOBILE_OTP.getValue())));
-    }
-
 
     public Mono<EnrollmentResponse> verifyFacilityByEnroll(EnrollmentStatusUpdate enrollmentStatusUpdate) {
         String status = enrollmentStatusUpdate.getVerificationStatus();
@@ -313,7 +310,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setCreatedDate(now());
                         newAccountActionDto.setHealthIdNumber(txnDto.getHealthIdNumber());
                         newAccountActionDto.setNewValue(DELETED);
-                        newAccountActionDto.setPreviousValue(null);
+                        newAccountActionDto.setPreviousValue(ACTIVE.getValue());
                         newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE, null);

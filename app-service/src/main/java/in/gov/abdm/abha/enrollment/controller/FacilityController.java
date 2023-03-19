@@ -74,7 +74,7 @@ public class FacilityController {
     public Mono<AuthResponseDto> authByAbdm(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
         if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))) {
-            return authByAbdmService.verifyOtpViaNotificationDLFlow(authByAbdmRequest);
+            return facilityRequestService.verifyOtpViaNotificationFlow(authByAbdmRequest);
         } else {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }

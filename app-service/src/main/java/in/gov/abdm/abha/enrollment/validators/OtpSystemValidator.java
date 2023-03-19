@@ -48,6 +48,11 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 		{
 			validOtpSystem = false;
 		}
+		if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM))
+		{
+			validOtpSystem = false;
+		}
 		return validOtpSystem;
 	}
 }
