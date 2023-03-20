@@ -175,6 +175,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setLastName(accounts.getLastName());
             user.setMiddleName(accounts.getMiddleName());
             user.setMobileNumber(accounts.getMobile());
+            user.setMobileNumberVerified(accounts.getMobile()!=null);
             user.setMonthOfBirth(accounts.getMonthOfBirth());
             user.setFullName(accounts.getName());
             user.setPassword(accounts.getPassword()); //TODO - Verify if password can be reused or not
