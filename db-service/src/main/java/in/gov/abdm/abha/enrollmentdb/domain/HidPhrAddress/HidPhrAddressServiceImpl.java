@@ -237,7 +237,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 //            patient.setKycVerified(accounts.isKycVerified()); //TODO: Uncomment the code once kyc_verified column is added in patient table of sandbox.
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
-            patient.setMobileVerified(accounts.isKycVerified());
+            patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
