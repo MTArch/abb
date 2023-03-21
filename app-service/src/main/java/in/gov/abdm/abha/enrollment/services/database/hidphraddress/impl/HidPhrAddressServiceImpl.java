@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.database.hidphraddress.impl;
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBHidPhrAddressFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -29,8 +30,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
 	@Override
 	public Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto) {
-		hidPhrAddressDto.setCreatedBy(ContextHolder.getClientId());
-		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
+		hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : ContextHolder.getClientId());
+		hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : ContextHolder.getClientId());
 		return abhaDBHidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
 				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
