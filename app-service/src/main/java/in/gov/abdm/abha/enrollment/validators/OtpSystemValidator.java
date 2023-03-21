@@ -30,7 +30,7 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 	 */
 	@Override
 	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		if(mobileOrEmailOtpRequestDto.getScope() == null){
+		if(mobileOrEmailOtpRequestDto.getScope() == null || mobileOrEmailOtpRequestDto.getOtpSystem() ==null){
 			return false;
 		}
 		List<OtpSystem> enumNames = Stream.of(OtpSystem.values()).filter(name -> {
