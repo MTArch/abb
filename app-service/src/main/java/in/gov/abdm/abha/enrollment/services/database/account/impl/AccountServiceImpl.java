@@ -282,12 +282,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
             accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
         }
         accountDto.setNewAccount(true);
-
-
-
-        accountDto.setNewAccount(true);
-        accountDto.setOrigin(ContextHolder.getClientId());
-        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         accountDto.setCreatedDate(LocalDateTime.now());
         return abhaDBAccountFClient.createAccount(accountDto)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));

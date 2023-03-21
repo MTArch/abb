@@ -213,7 +213,6 @@ public class EnrolUsingDrivingLicence {
                     accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
                     return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
                         log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
-                        accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
                         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
                         return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
                             if (phrAddressDto != null) {

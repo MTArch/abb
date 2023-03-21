@@ -18,7 +18,6 @@ public class SecurityConfig {
                         .and()
                         .addFilterAfter(webFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .addFilterAfter(new ClientFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
-//                        .addFilterAfter(new FacilityXTokenFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
                         .httpBasic().disable()
                         .formLogin().disable()
                         .cors().disable()
