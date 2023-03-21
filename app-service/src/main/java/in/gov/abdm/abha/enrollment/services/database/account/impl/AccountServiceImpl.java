@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.database.account.impl;
 import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -29,6 +30,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static in.gov.abdm.constant.ABDMConstant.SUB;
 
 @Service
 @Slf4j
@@ -270,9 +273,15 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     }
 
     public Mono<AccountDto> createAccountEntity(AccountDto accountDto) {
+        if (FacilityContextHolder.getSubject() == null) {
+            accountDto.setOrigin(ContextHolder.getClientId());
+            accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        } else {
+            accountDto.setOrigin(ContextHolder.getClientId());
+            accountDto.setFacilityId(FacilityContextHolder.getSubject());
+            accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
+        }
         accountDto.setNewAccount(true);
-        accountDto.setOrigin(ContextHolder.getClientId());
-        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         accountDto.setCreatedDate(LocalDateTime.now());
         return abhaDBAccountFClient.createAccount(accountDto)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
