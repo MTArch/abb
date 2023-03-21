@@ -23,6 +23,7 @@ public enum ClassLevelExceptionConstants {
     authData(AbhaConstants.VALIDATION_ERROR_AUTH_DATA_FIELD),
     authMethods(AbhaConstants.VALIDATION_EMPTY_AUTH_METHOD),
     txnId(AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD),
+    txnID(AbhaConstants.VALIDATION_ERROR_TXN_ID),
     otpValue(AbhaConstants.VALIDATION_ERROR_OTP_VALUE_FIELD),
     Timestamp(AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD),
     name(AbhaConstants.INVALID_NAME_FORMAT),

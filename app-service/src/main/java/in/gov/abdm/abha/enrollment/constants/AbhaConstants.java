@@ -38,6 +38,7 @@ public interface AbhaConstants {
     String VALIDATION_EMPTY_AUTH_METHOD = "Invalid Auth Method";
 
     String VALIDATION_ERROR_AUTH_DATA_FIELD = "Auth data cannot be null or empty";
+    String VALIDATION_ERROR_TXN_ID = "Txn ID cannot be null or empty";
     String VALIDATION_ERROR_TIMESTAMP_FIELD = "Invalid Timestamp";
     String VALIDATION_ERROR_OTP_VALUE_FIELD = "Invalid OTP Value";
 

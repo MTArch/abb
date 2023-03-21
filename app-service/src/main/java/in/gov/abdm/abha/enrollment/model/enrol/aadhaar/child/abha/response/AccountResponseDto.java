@@ -13,6 +13,9 @@ public class AccountResponseDto {
     @JsonProperty("ABHANumber")
     private String ABHANumber;
 
+    @JsonProperty("EnrolmentNumber")
+    private String EnrolmentNumber;
+
     @JsonProperty("name")
     private String name;
 

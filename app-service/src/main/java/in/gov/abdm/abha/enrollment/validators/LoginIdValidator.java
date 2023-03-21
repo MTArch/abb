@@ -58,20 +58,18 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
         if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())
-                && mobileOrEmailOtpRequestDto.getLoginHint() != null) {
+                && mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getScope() != null) {
 
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
                     && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
 
                 String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+
                 if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
                     return isValidMobile(loginId);
-                }
-                else if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY)))
-                {
+                } else if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
                     return isValidEmail(loginId);
-                }
-                else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
                         && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
                         || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
                     return isValidAadhaar(loginId);
@@ -129,7 +127,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * @param abha
      * @return
      */
-	private boolean isValidAbha(String abha) {
-		return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();
-	}
+    private boolean isValidAbha(String abha) {
+        return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();
+    }
 }

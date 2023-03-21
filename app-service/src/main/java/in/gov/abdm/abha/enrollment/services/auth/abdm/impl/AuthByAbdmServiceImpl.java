@@ -51,7 +51,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
     private static final String HIP_REQUEST_ID = "22222";
 
     private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "OTP value did not match, please try again.";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
     public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
 
     private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
