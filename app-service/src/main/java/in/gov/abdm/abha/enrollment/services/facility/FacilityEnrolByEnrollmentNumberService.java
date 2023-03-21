@@ -175,9 +175,8 @@ public class FacilityEnrolByEnrollmentNumberService {
     public Mono<GetByDocumentResponseDto> fetchDetailsByEnrollmentNumber(String enrollmentNumber) {
         Mono<AccountDto> accountDtoMono = accountService.getAccountByHealthIdNumber(enrollmentNumber);
         return accountDtoMono.flatMap(accountDto -> {
-            if(accountDto.getStatus().equalsIgnoreCase(DELETED))
-                return Mono.error(new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE));
-            if(accountDto.getStatus().equalsIgnoreCase(PROVISIONAL))
+            if(!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)
+                && !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()))
                 return Mono.error(new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE));
             EnrolProfileDetailsDto enrolProfileDto = EnrolProfileDetailsDto.builder().enrolmentNumber(accountDto.getHealthIdNumber()).enrolmentState(accountDto.getVerificationStatus()).firstName(accountDto.getFirstName()).middleName(accountDto.getMiddleName()).lastName(accountDto.getLastName()).dob(accountDto.getYearOfBirth() + StringConstants.DASH + accountDto.getMonthOfBirth() + StringConstants.DASH + accountDto.getDayOfBirth()).gender(accountDto.getGender()).photo(accountDto.getProfilePhoto()).mobile(accountDto.getMobile()).email(accountDto.getEmail()).address(accountDto.getAddress()).districtCode(accountDto.getDistrictCode()).stateCode(accountDto.getStateCode()).abhaType(accountDto.getType() == null ? null : StringUtils.upperCase(accountDto.getType().getValue())).pinCode(accountDto.getPincode()).state(accountDto.getStateName()).district(accountDto.getDistrictName()).phrAddress(Collections.singletonList(accountDto.getHealthId())).abhaStatus(StringUtils.upperCase(accountDto.getStatus())).build();
             Mono<IdentityDocumentsDto> response = documentClient.getIdentityDocuments(accountDto.getHealthIdNumber());
