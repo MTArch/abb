@@ -28,6 +28,7 @@ public class EnrolByDocumentValidatorService {
     private static final String FIRST_NAME = "FirstName";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
+    private static final String ADDRESS = "Address";
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
@@ -77,6 +78,9 @@ public class EnrolByDocumentValidatorService {
         }
         if (!isValidLastName(enrolByDocumentRequestDto)) {
             errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
+        }
+        if (!isValidAddress(enrolByDocumentRequestDto)) {
+            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
         }
         if (!isValidPinCode(enrolByDocumentRequestDto)) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
@@ -158,6 +162,10 @@ public class EnrolByDocumentValidatorService {
 
     private boolean isValidFirstName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         return Common.validStringSize(enrolByDocumentRequestDto.getFirstName(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getFirstName().matches(alphabeticCharOnlyRegex);
+    }
+
+    private boolean isValidAddress(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return Common.validStringSize(enrolByDocumentRequestDto.getAddress(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getAddress().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {

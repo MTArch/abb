@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 
 @Data
 @AllArgsConstructor
@@ -22,13 +25,16 @@ public class EnrolByDocumentRequestDto {
 
     @NotEmpty(message = AbhaConstants.INVALID_DOCUMENT_ID)
     private String documentId;
-
+    
     @NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
+    @Size(max = 255,message = FIRST_NAME_EXCEED)
     private String firstName;
 
+    @Size(max = 255,message = MIDDLE_NAME_EXCEED)
     private String middleName;
 
     @NotEmpty(message = AbhaConstants.INVALID_LAST_NAME)
+    @Size(max = 255,message = LAST_NAME_EXCEED)
     private String lastName;
 
     @NotEmpty(message = AbhaConstants.INVALID_DOB)
@@ -44,6 +50,7 @@ public class EnrolByDocumentRequestDto {
     private String backSidePhoto;
 
     @NotEmpty(message = AbhaConstants.INVALID_ADDRESS)
+    @Size(max = 255,message = ADDRESS_EXCEED)
     private String address;
 
     @NotEmpty(message = AbhaConstants.INVALID_STATE)
