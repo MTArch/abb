@@ -119,7 +119,4 @@ public interface URIConstant {
     String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
     String ENROL_ABHA_RD_PID = "/pid";
 
-    String BASE_INTERNAL_URI = "/api" + API_VERSION + INTERNAL + "/enrollment";
-    String ENROL_INTERNAL_ENDPOINT = BASE_INTERNAL_URI + "/enrol";
-
 }
