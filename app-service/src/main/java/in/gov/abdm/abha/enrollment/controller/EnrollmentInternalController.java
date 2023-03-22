@@ -15,7 +15,7 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID
 
 @RestController
 @CrossOrigin
-@RequestMapping(URIConstant.ENROL_INTERNAL_ENDPOINT)
+@RequestMapping(URIConstant.ENROL_ENDPOINT)
 @ResponseStatus(HttpStatus.OK)
 public class EnrollmentInternalController {
 
