@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
-import static in.gov.abdm.abha.enrollment.constants.URIConstant.REQUEST_ID;
 import static in.gov.abdm.abha.enrollment.constants.URIConstant.TIMESTAMP;
+import static in.gov.abdm.constant.ABDMConstant.REQUEST_ID;
 
 @ReactiveFeignClient(name= AbhaConstants.NOTIFICATION_APP_SERVICE, url="${enrollment.gateway.notification.baseuri}", configuration = BeanConfiguration.class)
 public interface NotificationAppFClient {

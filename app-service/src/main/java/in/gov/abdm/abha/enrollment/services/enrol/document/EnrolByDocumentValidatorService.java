@@ -79,9 +79,6 @@ public class EnrolByDocumentValidatorService {
         if (!isValidLastName(enrolByDocumentRequestDto)) {
             errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
         }
-        if (!isValidAddress(enrolByDocumentRequestDto)) {
-            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
-        }
         if (!isValidPinCode(enrolByDocumentRequestDto)) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
@@ -162,10 +159,6 @@ public class EnrolByDocumentValidatorService {
 
     private boolean isValidFirstName(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         return Common.validStringSize(enrolByDocumentRequestDto.getFirstName(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getFirstName().matches(alphabeticCharOnlyRegex);
-    }
-
-    private boolean isValidAddress(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return Common.validStringSize(enrolByDocumentRequestDto.getAddress(), MAX_NAME_SIZE) && enrolByDocumentRequestDto.getAddress().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
