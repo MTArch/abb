@@ -115,4 +115,5 @@ public interface URIConstant {
     String TIMESTAMP = "TIMESTAMP";
     String REQUESTER_ID = "REQUESTER_ID";
     String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
+    String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
 }
