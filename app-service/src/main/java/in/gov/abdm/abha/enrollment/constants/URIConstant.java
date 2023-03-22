@@ -5,6 +5,8 @@ public interface URIConstant {
     String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188"; //
 
     String API_VERSION = "/v3";
+
+    String INTERNAL = "/internal";
     String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
     //enrol endpoints
@@ -115,4 +117,6 @@ public interface URIConstant {
     String TIMESTAMP = "TIMESTAMP";
     String REQUESTER_ID = "REQUESTER_ID";
     String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
+    String ENROL_ABHA_RD_PID = "/pid";
+
 }
