@@ -49,6 +49,11 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
 		List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
             return !name.equals(Scopes.WRONG);
         }).collect(Collectors.toList());
+        if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+                && (mobileOrEmailOtpRequestDto.getTxnId() == null ))
+        {
+            return true;
+        }
         if (requestScopes == null || requestScopes.isEmpty() || !Common.isAllScopesAvailable(enumNames, requestScopes))
             return true;
 

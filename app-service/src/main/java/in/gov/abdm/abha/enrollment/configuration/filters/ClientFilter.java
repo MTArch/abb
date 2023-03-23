@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.configuration.filters;
 
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.error.ABDMError;
@@ -41,7 +42,7 @@ public class ClientFilter implements WebFilter {
 
             if (!StringUtils.isEmpty(authorization)) {
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
-                ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
+                ContextHolder.setClientId(claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString());
             }
             ContextHolder.setRequestId(requestId);
             ContextHolder.setTimestamp(timestamp);

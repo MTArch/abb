@@ -28,6 +28,7 @@ public class EnrolByDocumentValidatorService {
     private static final String FIRST_NAME = "FirstName";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
+    private static final String ADDRESS = "Address";
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";

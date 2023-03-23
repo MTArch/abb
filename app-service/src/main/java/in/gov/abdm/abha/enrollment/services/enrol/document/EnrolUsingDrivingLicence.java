@@ -42,6 +42,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -71,6 +72,11 @@ public class EnrolUsingDrivingLicence {
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
     private static final String ENROL_VERIFICATION_STATUS = "success";
     private static final String ABHA_CREATED_SUCCESS = "ABHA created successfully";
+    private static final String CLIENT_ID = "clientId";
+    private static final String SYSTEM = "system";
+    private static final String SUB = "sub";
+    private static final String USER_TYPE = "userType";
+    private static final String ROLES = "roles";
     @Autowired
     TransactionService transactionService;
 
@@ -102,7 +108,16 @@ public class EnrolUsingDrivingLicence {
     @Autowired
     LgdUtility lgdUtility;
 
-    public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+    public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, String fToken) {
+        if(fToken != null && !fToken.isBlank()) {
+            Map<String, Object> claims = jwtUtil.getTokenClaims(fToken);
+            FacilityContextHolder.setClientId(claims.get(CLIENT_ID).toString());
+            FacilityContextHolder.setSystem(claims.get(SYSTEM).toString());
+            FacilityContextHolder.setSubject(claims.get(SUB).toString());
+            FacilityContextHolder.setUserType(claims.get(USER_TYPE).toString());
+            FacilityContextHolder.setRole(claims.get(ROLES) != null ? claims.get(ROLES).toString() : null);
+        }
+
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
                 .flatMap(txnDto -> {
@@ -155,9 +170,8 @@ public class EnrolUsingDrivingLicence {
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
-                .name(Common.getName(enrolByDocumentRequestDto.getFirstName(),
-                        enrolByDocumentRequestDto.getMiddleName(),
-                        enrolByDocumentRequestDto.getLastName()))
+                .name(StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) ? Common.getName(enrolByDocumentRequestDto.getFirstName()
+                        ,enrolByDocumentRequestDto.getLastName()) : Common.getName(enrolByDocumentRequestDto.getFirstName(),enrolByDocumentRequestDto.getMiddleName() ,enrolByDocumentRequestDto.getLastName()))
                 .verificationStatus(FacilityContextHolder.getSubject()!=null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
@@ -173,7 +187,7 @@ public class EnrolUsingDrivingLicence {
                 .stateName(enrolByDocumentRequestDto.getState())
                 .type(AbhaType.STANDARD)
                 .pincode(enrolByDocumentRequestDto.getPinCode())
-                .kycVerified(false)
+                .kycVerified(FacilityContextHolder.getSubject() != null)
                 .status(AccountStatus.ACTIVE.getValue())
                 .kycPhoto(StringConstants.EMPTY)
                 .consentVersion(enrolByDocumentRequestDto.getConsent().getVersion())

@@ -56,6 +56,11 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
                 && (mobileOrEmailOtpRequestDto.getLoginHint() ==null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR))) {
             validLoginHint = false;
         }
+        if(Common.isAllScopesAvailable(scopesList, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+                && (mobileOrEmailOtpRequestDto.getLoginHint() == null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ENROLLMENT)))
+        {
+            validLoginHint = false;
+        }
         return validLoginHint;
     }
 }

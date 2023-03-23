@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -109,6 +106,9 @@ public class JWTUtil {
 
     public static Map<String, Object> readJWTToken(String token) {
         try {
+            if(Arrays.stream(token.split("\\.")).count() != 3){
+                return Collections.emptyMap();
+            }
             return new ObjectMapper().readValue(new String(Base64.getDecoder().decode(token.split("\\.")[1])), Map.class);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());

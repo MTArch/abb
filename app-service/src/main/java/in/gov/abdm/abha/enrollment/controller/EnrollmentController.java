@@ -62,7 +62,7 @@ public class EnrollmentController {
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
-        }else if(authMethods.contains(AuthMethods.FACE)){
+        } else if (authMethods.contains(AuthMethods.FACE)) {
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }else if(authMethods.contains(AuthMethods.BIO)){
             enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto);
@@ -72,10 +72,11 @@ public class EnrollmentController {
     }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
-    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
+                                                            @RequestHeader(value = "F-token", required = false) String fToken) {
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
-            return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto);
+            return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto, fToken);
         } else {
             throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
         }
