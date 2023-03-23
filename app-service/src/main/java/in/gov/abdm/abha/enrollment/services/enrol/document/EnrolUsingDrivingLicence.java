@@ -133,7 +133,18 @@ public class EnrolUsingDrivingLicence {
                                         } else {
                                             log.info(TRANSACTION_DELETED);
                                         }
-                                        return prepareErolByDLResponse(accountDto,txnDto.getTxnId().toString());
+                                        if (accountDto.getStatus().equals(AccountStatus.DELETED.getValue())) {
+                                            log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
+                                            return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto);
+                                        }
+//                                        else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+//                                            TODO once Approach is finalized
+                                            //TODO avoid token for deactivated account
+//                                        }
+                                        else {
+                                            //return existing account
+                                            return prepareErolByDLResponse(accountDto,txnDto.getTxnId().toString());
+                                        }
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account
@@ -290,7 +301,7 @@ public class EnrolUsingDrivingLicence {
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
-        if(FacilityContextHolder.getSubject()!=null){
+        if(FacilityContextHolder.getSubject()!=null || accountDto.getStatus().equals(AccountStatus.ACTIVE.getValue())){
             EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS,jwtUtil.generateToken(txnId, accountDto));
             return Mono.just(new EnrolByDocumentResponseDto(null,enrollmentResponse));
         }
@@ -298,13 +309,12 @@ public class EnrolUsingDrivingLicence {
     }
 
     private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId) {
-       return notificationService.sendRegistrationSMS(accountDto.getMobile(),accountDto.getName(),accountDto.getHealthIdNumber())
-               .flatMap(notificationResponseDto->{
+        return notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
+                .flatMap(notificationResponseDto -> {
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
-                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION+ON_MOBILE_NUMBER+accountDto.getMobile()+FOR_HEALTH_ID_NUMBER+accountDto.getHealthIdNumber());
+                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
                         return prepareErolByDLResponse(accountDto, txnId);
-                    }
-                    else {
+                    } else {
                         throw new NotificationGatewayUnavailableException();
                     }
                 });

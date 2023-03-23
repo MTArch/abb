@@ -138,7 +138,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature())
                     .flatMap(existingAccount -> {
-                        return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                        if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
+                            return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
+                        }
+//                        else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())){
+//                            TODO check for DEACTIVATED ACCOUNT
+                        // TODO avoid token for deactivated account
+//                        }
+                        else {
+                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                        }
                     })
                     .switchIfEmpty(Mono.defer(() -> {
                         return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
@@ -345,7 +354,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> {
-                return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
+                if(existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())){
+                    return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
+                }
+//              else if(existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())){
+//
+//              }
+                else {
+                    return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
+                }
             }).switchIfEmpty(Mono.defer(() -> {
                 return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
             }));

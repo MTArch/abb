@@ -79,8 +79,16 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         //check if account exist
                         return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                 .flatMap(existingAccount -> {
-                                    //existing account
-                                    return respondExistingAccount(existingAccount);
+                                    if(existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())){
+                                        return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
+                                    }
+//                                    else if(existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())){
+//
+//                                    }
+                                    else {
+                                        //existing account
+                                        return respondExistingAccount(existingAccount);
+                                    }
                                 })
                                 .switchIfEmpty(Mono.defer(() -> {
                                     //create new account
