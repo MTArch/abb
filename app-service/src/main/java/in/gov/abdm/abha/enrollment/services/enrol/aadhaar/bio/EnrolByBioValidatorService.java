@@ -28,9 +28,6 @@ public class EnrolByBioValidatorService {
         if (!isValidAadhaar(bioData)) {
             errors.put(AADHAAR, AbhaConstants.AADHAAR_NUMBER_INVALID);
         }
-        if (!isRdPidData(bioData)) {
-            errors.put(RD_PID, AbhaConstants.PID_INVALID);
-        }
         if (!isValidTimeStamp(bioData)) {
             errors.put(TIMESTAMP, AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD);
         }
@@ -42,11 +39,6 @@ public class EnrolByBioValidatorService {
     private boolean isValidAadhaar(BioDto bioData) {
         return rsaUtil.isRSAEncrypted(bioData.getAadhaar()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(bioData.getAadhaar()));
     }
-
-    private boolean isRdPidData(BioDto bioData) {
-        return rsaUtil.isRSAEncrypted(bioData.getRdPidData());
-    }
-
     private boolean isValidTimeStamp(BioDto bioData) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
         if(!StringUtils.isEmpty(bioData)

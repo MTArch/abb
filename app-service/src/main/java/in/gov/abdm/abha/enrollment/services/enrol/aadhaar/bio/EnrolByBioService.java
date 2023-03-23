@@ -75,8 +75,8 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
     public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
-                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar()))
-                .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getFace().getRdPidData())
+                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
+                .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getRdPidData())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
     }
@@ -86,7 +86,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         handleAadhaarExceptions(aadhaarResponseDto);
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setStatus(TransactionStatus.ACTIVE.toString());
-        transactionDto.setAadharNo(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar());
+        transactionDto.setAadharNo(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
