@@ -17,4 +17,6 @@ public class EnrolByDocumentResponseDto {
     @JsonProperty("enrolProfile")
     EnrolProfileDto enrolProfileDto;
     EnrollmentResponse enrollmentResponse;
+    @JsonProperty("isNew")
+    private boolean isNew;
 }
