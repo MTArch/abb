@@ -249,7 +249,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         return Mono.just(AbhaAddressResponseDto.builder()
                 .txnId(String.valueOf(transactionDto.getTxnId()))
                 .healthIdNumber(hidPhrAddressDto.getHealthIdNumber())
-                .preferredAbhaAddress(abhaAddressRequestDto.getPreferredAbhaAddress())
+                .preferredAbhaAddress(hidPhrAddressDto.getPhrAddress())
                 .build());
     }
 

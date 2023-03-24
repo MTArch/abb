@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -241,5 +243,19 @@ public class ABHAControllerAdvise {
 
     private Mono<ErrorResponse> prepareCustomErrorResponse(String errorCode, String errorMessage) {
         return Mono.just(new ErrorResponse(errorCode, errorMessage));
+    }
+
+    @ExceptionHandler(ServerWebInputException.class)
+    public Map<String, Object> invalidRequest(ServerWebInputException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        String value ="";
+        if(ex.getMessage().contains("preferred"))
+        {
+            value = AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG;
+        }
+        errorMap.put(StringConstants.MESSAGE, value);
+        log.info(EXCEPTIONS + ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
     }
 }
