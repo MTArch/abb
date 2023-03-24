@@ -29,7 +29,6 @@ public class ClientFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         if (!exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)) {
             ContextHolder.removeAll();
-            FacilityContextHolder.removeAll();
             HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
             String authorization = requestHeaders.get(AbhaConstants.AUTHORIZATION) != null ? requestHeaders.get(HttpHeaders.AUTHORIZATION).get(0) : StringUtils.EMPTY;
             String requestId = requestHeaders.get(REQUEST_ID) != null ? requestHeaders.get(REQUEST_ID).get(0) : StringUtils.EMPTY;
