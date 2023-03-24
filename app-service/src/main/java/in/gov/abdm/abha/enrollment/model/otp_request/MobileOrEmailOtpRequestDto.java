@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.model.otp_request;
 import java.util.List;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -13,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Entity class which enables OTP auth/verfication using either Aadhaar or ABDM OTP systems.
@@ -41,6 +44,7 @@ public class MobileOrEmailOtpRequestDto {
      * Scope will be abha-enrol for abha creation using aadhaar
      */
     @ValidScope
+   // @NotNull(message = AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD)
     private List<Scopes> scope;
 
     /**

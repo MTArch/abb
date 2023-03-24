@@ -42,40 +42,42 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        if(mobileOrEmailOtpRequestDto.getScope() == null){
-            return false;
-        }
-        List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
-		List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
-            return !name.equals(Scopes.WRONG);
-        }).collect(Collectors.toList());
-        if(Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
-                && (mobileOrEmailOtpRequestDto.getTxnId() == null ))
-        {
-            return true;
-        }
-        if (requestScopes == null || requestScopes.isEmpty() || !Common.isAllScopesAvailable(enumNames, requestScopes))
-            return true;
 
-        if (requestScopes.size() == 1 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
-                Collections.singletonList(Scopes.ABHA_ENROL))) {
-            return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
-        } else if (requestScopes.size() == 3 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
-                List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))) {
-            return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
-        } else {
-            if ((mobileOrEmailOtpRequestDto.getLoginHint().getValue().equalsIgnoreCase(LoginHint.MOBILE.getValue())
-                    || mobileOrEmailOtpRequestDto.getLoginHint().getValue().
-                    equalsIgnoreCase(LoginHint.EMAIL.getValue()))
-                    && StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-                return false;
-            }
-            if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
-                return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
-                        .matches();
-            } else {
+
+        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null) {
+
+            List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
+            List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {
+                return !name.equals(Scopes.WRONG);
+            }).collect(Collectors.toList());
+            if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+                    && (mobileOrEmailOtpRequestDto.getTxnId() == null)) {
                 return true;
             }
+            if (requestScopes == null || requestScopes.isEmpty() || !Common.isAllScopesAvailable(enumNames, requestScopes))
+                return true;
+
+            if (requestScopes.size() == 1 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
+                    Collections.singletonList(Scopes.ABHA_ENROL))) {
+                return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
+            } else if (requestScopes.size() == 3 && HelperUtil.isScopeAvailable(mobileOrEmailOtpRequestDto,
+                    List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY, Scopes.DL_FLOW))) {
+                return StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId());
+            } else {
+                if ((mobileOrEmailOtpRequestDto.getLoginHint().getValue().equalsIgnoreCase(LoginHint.MOBILE.getValue())
+                        || mobileOrEmailOtpRequestDto.getLoginHint().getValue().
+                        equalsIgnoreCase(LoginHint.EMAIL.getValue()))
+                        && StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                    return false;
+                }
+                if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                    return Pattern.compile(TRANSACTION_ID_REGEX_PATTERN).matcher(mobileOrEmailOtpRequestDto.getTxnId())
+                            .matches();
+                } else {
+                    return true;
+                }
+            }
         }
+        return true;
     }
 }

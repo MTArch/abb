@@ -80,8 +80,13 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
                     return true;
                 }
             }
+            else return true;
+        }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())) {
+            return false;
         }
-        return false;
+        else
+            return true;
+
     }
 
     private boolean isValidEmail(String email) {
