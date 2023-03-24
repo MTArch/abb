@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.configuration.filters;
 
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -28,6 +29,7 @@ public class ClientFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         if (!exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS)) {
             ContextHolder.removeAll();
+            FacilityContextHolder.removeAll();
             HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
             String authorization = requestHeaders.get(AbhaConstants.AUTHORIZATION) != null ? requestHeaders.get(HttpHeaders.AUTHORIZATION).get(0) : StringUtils.EMPTY;
             String requestId = requestHeaders.get(REQUEST_ID) != null ? requestHeaders.get(REQUEST_ID).get(0) : StringUtils.EMPTY;
