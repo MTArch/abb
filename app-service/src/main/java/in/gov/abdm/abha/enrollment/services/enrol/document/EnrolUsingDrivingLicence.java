@@ -109,8 +109,8 @@ public class EnrolUsingDrivingLicence {
     LgdUtility lgdUtility;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, String fToken) {
+        FacilityContextHolder.removeAll();
         if (fToken != null && !fToken.isBlank()) {
-            FacilityContextHolder.removeAll();
             Map<String, Object> claims = jwtUtil.getTokenClaims(fToken);
             FacilityContextHolder.setClientId(claims.get(CLIENT_ID).toString());
             FacilityContextHolder.setSystem(claims.get(SYSTEM).toString());
