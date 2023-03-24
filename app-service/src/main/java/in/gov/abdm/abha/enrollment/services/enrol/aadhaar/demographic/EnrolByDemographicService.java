@@ -79,13 +79,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         //check if account exist
                         return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                 .flatMap(existingAccount -> {
-                                    if(existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())){
+                                    if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                                         return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
-                                    }
-//                                    else if(existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())){
-//
-//                                    }
-                                    else {
+                                    } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                        throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                                    } else {
                                         //existing account
                                         return respondExistingAccount(existingAccount);
                                     }

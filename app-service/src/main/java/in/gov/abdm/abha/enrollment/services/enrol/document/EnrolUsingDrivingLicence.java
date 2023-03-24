@@ -109,7 +109,7 @@ public class EnrolUsingDrivingLicence {
     LgdUtility lgdUtility;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, String fToken) {
-        if(fToken != null && !fToken.isBlank()) {
+        if (fToken != null && !fToken.isBlank()) {
             Map<String, Object> claims = jwtUtil.getTokenClaims(fToken);
             FacilityContextHolder.setClientId(claims.get(CLIENT_ID).toString());
             FacilityContextHolder.setSystem(claims.get(SYSTEM).toString());
@@ -136,14 +136,11 @@ public class EnrolUsingDrivingLicence {
                                         if (accountDto.getStatus().equals(AccountStatus.DELETED.getValue())) {
                                             log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
                                             return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto);
-                                        }
-//                                        else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-//                                            TODO once Approach is finalized
-                                            //TODO avoid token for deactivated account
-//                                        }
-                                        else {
+                                        } else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                            throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                                        } else {
                                             //return existing account
-                                            return prepareErolByDLResponse(accountDto,txnDto.getTxnId().toString());
+                                            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString());
                                         }
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
@@ -182,8 +179,8 @@ public class EnrolUsingDrivingLicence {
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
                 .name(StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) ? Common.getName(enrolByDocumentRequestDto.getFirstName()
-                        ,enrolByDocumentRequestDto.getLastName()) : Common.getName(enrolByDocumentRequestDto.getFirstName(),enrolByDocumentRequestDto.getMiddleName() ,enrolByDocumentRequestDto.getLastName()))
-                .verificationStatus(FacilityContextHolder.getSubject()!=null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
+                        , enrolByDocumentRequestDto.getLastName()) : Common.getName(enrolByDocumentRequestDto.getFirstName(), enrolByDocumentRequestDto.getMiddleName(), enrolByDocumentRequestDto.getLastName()))
+                .verificationStatus(FacilityContextHolder.getSubject() != null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
                 .middleName(enrolByDocumentRequestDto.getMiddleName())
@@ -301,11 +298,11 @@ public class EnrolUsingDrivingLicence {
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
-        if(FacilityContextHolder.getSubject()!=null || accountDto.getStatus().equals(AccountStatus.ACTIVE.getValue())){
-            EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS,jwtUtil.generateToken(txnId, accountDto));
-            return Mono.just(new EnrolByDocumentResponseDto(null,enrollmentResponse));
+        if (FacilityContextHolder.getSubject() != null || accountDto.getStatus().equals(AccountStatus.ACTIVE.getValue())) {
+            EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS, jwtUtil.generateToken(txnId, accountDto));
+            return Mono.just(new EnrolByDocumentResponseDto(null, enrollmentResponse));
         }
-        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto,null));
+        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null));
     }
 
     private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId) {
