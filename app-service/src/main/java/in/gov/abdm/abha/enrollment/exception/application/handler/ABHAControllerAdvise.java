@@ -248,12 +248,10 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        String value ="";
         if(ex.getMessage().contains("preferred"))
-        {
-            value = AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG;
-        }
-        errorMap.put(StringConstants.MESSAGE, value);
+            errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
+        else
+            errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.info(EXCEPTIONS + ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
