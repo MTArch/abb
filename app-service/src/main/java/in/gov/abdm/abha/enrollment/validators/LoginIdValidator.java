@@ -57,7 +57,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())
+        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId()) && mobileOrEmailOtpRequestDto.getLoginId()!=null
                 && mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getScope() != null) {
 
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())

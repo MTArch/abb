@@ -38,7 +38,7 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
                     return !name.equals(LoginHint.WRONG);
                 })
                 .collect(Collectors.toList());
-        if (  mobileOrEmailOtpRequestDto.getScope() != null) {
+        if (  mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null) {
             boolean validLoginHint = enumNames.contains(mobileOrEmailOtpRequestDto.getLoginHint());
             List<Scopes> scopesList = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
 
