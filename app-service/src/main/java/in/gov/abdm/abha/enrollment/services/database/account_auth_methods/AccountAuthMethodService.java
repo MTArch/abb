@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface AccountAuthMethodService {
     Mono<List<AccountAuthMethodsDto>> addAccountAuthMethods(List<AccountAuthMethodsDto> authMethodsDtos);
+    Mono<Void> deleteAccountAuthMethodByHealthId(String healthIdNumber);
 }

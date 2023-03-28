@@ -50,7 +50,7 @@
         <dependency>
             <groupId>in.gov.abdm</groupId>
             <artifactId>abdm-error</artifactId>
-            <version>1.1.17</version>
+            <version>1.1.20</version>
         </dependency>
         <dependency>
             <groupId>in.gov.abdm</groupId>
