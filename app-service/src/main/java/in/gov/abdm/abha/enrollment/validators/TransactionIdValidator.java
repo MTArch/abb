@@ -44,7 +44,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 
 
-        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null) {
+        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null && mobileOrEmailOtpRequestDto.getTxnId()!=null) {
 
             List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
             List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> {

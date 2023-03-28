@@ -38,7 +38,7 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 				})
 				.collect(Collectors.toList());
 
-		if(mobileOrEmailOtpRequestDto.getScope() != null ) {
+		if(mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem()!= null ) {
 
 
 			boolean validOtpSystem = enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem());
