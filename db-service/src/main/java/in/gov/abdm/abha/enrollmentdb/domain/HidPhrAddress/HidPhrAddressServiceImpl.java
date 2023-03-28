@@ -36,6 +36,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
+    private static final String PROVISIONAL = "PROVISIONAL";
+
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
@@ -80,10 +82,12 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                 })
                 .flatMap(this::findAccountFromHidPhrAddress)
                 .flatMap(accountToPublish -> {
-                    User userToPublish = setUserToPublish(accountToPublish);
-                    Patient patientToPublish = setPatientToPublish(accountToPublish);
-                    phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
-                    patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
+                    if (!accountToPublish.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
+                        User userToPublish = setUserToPublish(accountToPublish);
+                        Patient patientToPublish = setPatientToPublish(accountToPublish);
+                        phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
+                        patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
+                    }
                     return Mono.just(accountToPublish.getHidPhrAddress());
                 })
                 .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
