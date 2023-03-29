@@ -40,6 +40,7 @@ public interface ABHAEnrollmentDBConstant {
 
     String GET_ACCOUNT_BY_DOCUMENT_CODE = "/documentCode/{documentCode}";
     String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = "/linkedAccountCount/{mobileNumber}";
+    String GET_LINKED_ACCOUNT_COUNT_BY_EMAIL = "/linkedAccountCount/email/{email}";
 
     String ACCOUNT_AUTH_METHODS_ENDPOINT = API_VERSION + "/accountauthmethods";
     public static final String KAFKA_SERVER = "${spring.kafka.bootstrap-servers}";

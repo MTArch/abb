@@ -57,4 +57,5 @@ public interface AccountService {
     Mono<AccountDto> getAccountByDocumentCode(String documentCode);
 
     Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber);
+    Mono<Integer> getEmailLinkedAccountsCount(String email);
 }

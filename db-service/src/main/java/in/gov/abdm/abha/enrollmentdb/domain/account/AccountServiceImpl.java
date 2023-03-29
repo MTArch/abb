@@ -275,5 +275,9 @@ public class AccountServiceImpl implements AccountService {
         }
         return patient;
     }
+    @Override
+    public Mono<Integer> getEmailLinkedAccountsCount(String email) {
+        return accountRepository.getAccountsCountByEmailNumber(email);
+    }
 
 }
