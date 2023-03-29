@@ -23,4 +23,9 @@ public class AccountAuthMethodsServiceImpl implements AccountAuthMethodService {
         return abhaDBAccountAuthMethodsFClient.addAccountAuthMethods(authMethodsDtos)
                 .onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
     }
+
+    @Override
+    public Mono<Void> deleteAccountAuthMethodByHealthId(String healthIdNumber) {
+        return abhaDBAccountAuthMethodsFClient.deleteAccountAuthMethodByHealthId(healthIdNumber);
+    }
 }
