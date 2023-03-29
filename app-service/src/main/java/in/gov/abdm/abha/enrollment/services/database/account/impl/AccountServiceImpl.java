@@ -286,4 +286,10 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
         return abhaDBAccountFClient.createAccount(accountDto)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
     }
+
+    @Override
+    public Mono<Integer> getEmailLinkedAccountCount(String email) {
+        return abhaDBAccountFClient.getEmailLinkedAccountCount(email)
+                .onErrorResume((throwable-> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 }

@@ -157,7 +157,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                 .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
-                .flatMap(accountDto1 -> prepareAuthByAdbmResponse(transactionDto, true, EMAIL_LINKED_SUCCESSFULLY));
+                .flatMap(accountDto1 -> accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(accountDto1.getHealthIdNumber(), AccountAuthMethods.EMAIL_OTP.getValue()))))
+                .flatMap(res -> prepareAuthByAdbmResponse(transactionDto, true, EMAIL_LINKED_SUCCESSFULLY));
     }
 
     private Mono<AuthResponseDto> verifyOtpViaNotificationDLFlow(String otp, TransactionDto transactionDto) {
