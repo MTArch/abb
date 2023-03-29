@@ -53,6 +53,7 @@ public class AccountServiceImpl implements AccountService {
     HidPhrAddressRepository hidPhrAddressRepository;
 
     private static final String DRIVING_LICENCE = "DRIVING_LICENCE";
+    private static final String STATUS = "VERIFIED";
 
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
@@ -93,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
                 .flatMap(accountToBePublished -> {
                     User userToBePublished =null;
                     Patient patientToBePublished = null;
-                    if (accountToBePublished.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE)) {
+                    if (accountToBePublished.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE) && accountToBePublished.getVerificationStatus().equalsIgnoreCase(STATUS)) {
                         userToBePublished = setUserToPublish(accountToBePublished);
                         patientToBePublished = setPatientToPublish(accountToBePublished);
                         phrEventPublisher.publish(userToBePublished.setAsNew(true), requestId);
