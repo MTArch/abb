@@ -2,12 +2,14 @@ package in.gov.abdm.abha.enrollment.validators;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
@@ -30,29 +32,34 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 	 */
 	@Override
 	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		if(mobileOrEmailOtpRequestDto.getScope() == null || mobileOrEmailOtpRequestDto.getOtpSystem() ==null){
+		List<OtpSystem> enumNames = Stream.of(OtpSystem.values())
+				.filter(name -> {
+					return !name.equals(OtpSystem.WRONG);
+				})
+				.collect(Collectors.toList());
+
+		if(mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem()!= null ) {
+
+
+			boolean validOtpSystem = enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem());
+
+			if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
+					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+				validOtpSystem = false;
+			}
+			if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+				validOtpSystem = false;
+			}
+			if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+				validOtpSystem = false;
+			}
+			return validOtpSystem;
+		}
+		else if(mobileOrEmailOtpRequestDto.getOtpSystem()==null || !enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem()))
 			return false;
-		}
-		List<OtpSystem> enumNames = Stream.of(OtpSystem.values()).filter(name -> {
-			return !name.equals(OtpSystem.WRONG);
-		}).collect(Collectors.toList());
-
-		boolean validOtpSystem =  new HashSet<>(enumNames).contains(mobileOrEmailOtpRequestDto.getOtpSystem());
-
-		if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
-				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
-			validOtpSystem = false;
-		}
-		if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
-				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM))
-		{
-			validOtpSystem = false;
-		}
-		if(Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
-				&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM))
-		{
-			validOtpSystem = false;
-		}
-		return validOtpSystem;
+		else
+			return true;
 	}
 }

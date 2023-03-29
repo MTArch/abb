@@ -33,4 +33,8 @@ public enum LoginHint {
 	    return LoginHint.WRONG;
 	}
 
+	public String getValue(){
+		return value;
+	}
+
 }

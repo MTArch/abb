@@ -138,7 +138,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             transactionService.mapTransactionWithEkyc(transactionDto, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature())
                     .flatMap(existingAccount -> {
-                        return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                        if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
+                            return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
+                        } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                            throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                        } else {
+                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                        }
                     })
                     .switchIfEmpty(Mono.defer(() -> {
                         return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
@@ -345,7 +351,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> {
-                return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
+                if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
+                    return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
+                } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                    throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                } else {
+                    return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
+                }
             }).switchIfEmpty(Mono.defer(() -> {
                 return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
             }));
@@ -353,9 +365,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
 
-
     private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingFAceAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
-        Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(),transactionDto.getStateName())
+        Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());

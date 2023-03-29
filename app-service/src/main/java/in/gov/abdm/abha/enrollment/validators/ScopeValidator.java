@@ -27,6 +27,8 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, List<Scop
      */
     @Override
     public boolean isValid(List<Scopes> requestScopes, ConstraintValidatorContext context) {
+        if(requestScopes==null)
+            return false;
         List<Scopes> enumNames = Stream.of(Scopes.values())
                 .filter(name -> {
                     return !name.equals(Scopes.WRONG);

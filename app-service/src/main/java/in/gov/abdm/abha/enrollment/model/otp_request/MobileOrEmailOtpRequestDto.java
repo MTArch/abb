@@ -1,18 +1,15 @@
 package in.gov.abdm.abha.enrollment.model.otp_request;
-import java.util.List;
 
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginHint;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidOtpSystem;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidScope;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
+import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.List;
 
 /**
  * Entity class which enables OTP auth/verfication using either Aadhaar or ABDM OTP systems.
