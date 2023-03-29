@@ -7,6 +7,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,10 @@ public class AccountAuthMethodsServiceImpl implements AccountAuthMethodsService 
             accountAuthMethodsDtos.add(modelMapper.map(accountAuthMethods1, AccountAuthMethodsDto.class));
         });
         return Flux.fromIterable(accountAuthMethodsDtos);
+    }
 
+    @Override
+    public Mono<Void> deleteAccountAuthMethodsByHealthId(String txnId) {
+        return accountAuthMethodsRepository.deleteByHealthId(txnId);
     }
 }

@@ -14,5 +14,8 @@ public interface AccountAuthMethodsRepository extends R2dbcRepository<AccountAut
     @Query("INSERT INTO account_auth_methods(health_id_number, auth_methods) " +
             "VALUES (:#{#accountAuthMethods.healthIdNumber}, :#{#accountAuthMethods.authMethods}) ON CONFLICT DO NOTHING")
     Mono<AccountAuthMethods> saveIfNotExist(@Param("accountAuthMethods") AccountAuthMethods accountAuthMethods);
+
+    @Query("DELETE FROM account_auth_methods WHERE health_id_number = :healthIdNumber")
+    Mono<Void> deleteByHealthId(@Param("healthIdNumber") String healthIdNumber);
 }
 

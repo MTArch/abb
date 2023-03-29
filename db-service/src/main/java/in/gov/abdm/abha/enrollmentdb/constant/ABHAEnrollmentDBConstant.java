@@ -9,6 +9,7 @@ public interface ABHAEnrollmentDBConstant {
     String UPDATE_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
     String GET_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     String DELETE_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
+    String DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = "/delete/{healthIdNumber}";
     String UPDATE_TRANSACTION_BY_ID = "/{id}";
     String ENROLLMENT_LOG_PREFIX = "ENROLLMENT_DB: ";
     String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " + "Valid Format Reference:" +

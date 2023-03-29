@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.facility;
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
@@ -55,6 +56,7 @@ import java.util.UUID;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
 import static in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService.OTP_VERIFIED_SUCCESSFULLY;
+import static in.gov.abdm.error.ABDMError.INVALID_TRANSACTION_ID;
 import static java.time.LocalDateTime.now;
 
 /**
@@ -281,10 +283,10 @@ public class FacilityEnrolByEnrollmentNumberService {
                 log.info(MOBILE_NUMBER_IS_VERIFIED);
                 return accountService.getAccountByHealthIdNumber(txnDto.getHealthIdNumber()).flatMap(accountDto -> {
                     if (accountDto.getVerificationStatus() == null) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ACTION_ALREADY_MADE);
+                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
                     }
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED.getCode(), ACTION_ALREADY_MADE);
+                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
                     }
                     EnrollmentResponse enrollmentResponse;
                     if (status.equalsIgnoreCase(ACCEPT)) {
@@ -305,7 +307,12 @@ public class FacilityEnrolByEnrollmentNumberService {
                         notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE, jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
+                        if(enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
+                            throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(),ABDMError.INVALID_REASON.getMessage());
+                        }
                         formatAccountDto(accountDto);
+                        formatHidPhr(accountDto.getHealthIdNumber());
+                        accountAuthMethodService.deleteAccountAuthMethodByHealthId(accountDto.getHealthIdNumber()).subscribe();
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
                         AccountActionDto newAccountActionDto = new AccountActionDto();
                         newAccountActionDto.setAction(DELETION);
@@ -376,5 +383,15 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setProfilePhoto(null);
         accountDto.setType(null);
         accountDto.setYearOfBirth(YEAR_OF_BIRTH);
+    }
+
+    private void formatHidPhr(String healthIdNumber) {
+        hidPhrAddressService.findByHealthIdNumber(healthIdNumber)
+                .flatMap(hidPhrAddressDto -> {
+                    hidPhrAddressDto.setStatus(DELETED);
+                    hidPhrAddressDto.setLastModifiedDate(LocalDateTime.now());
+                    hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getClientId());
+                    return hidPhrAddressService.updateHidPhrAddressById(hidPhrAddressDto, hidPhrAddressDto.getHidPhrAddressId());
+                }).subscribe();
     }
 }
