@@ -3,8 +3,6 @@ package in.gov.abdm.abha.enrollmentdb.domain.account;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +25,9 @@ import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static in.gov.abdm.abha.constant.ABHAConstants.DRIVING_LICENCE;
+import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
 
 @Service
 @Slf4j
@@ -51,9 +52,6 @@ public class AccountServiceImpl implements AccountService {
     private PatientEventPublisher patientEventPublisher;
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
-
-    private static final String DRIVING_LICENCE = "DRIVING_LICENCE";
-    private static final String STATUS = "VERIFIED";
 
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
@@ -94,7 +92,7 @@ public class AccountServiceImpl implements AccountService {
                 .flatMap(accountToBePublished -> {
                     User userToBePublished =null;
                     Patient patientToBePublished = null;
-                    if (accountToBePublished.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE) && accountToBePublished.getVerificationStatus().equalsIgnoreCase(STATUS)) {
+                    if (accountToBePublished.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE) && accountToBePublished.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
                         userToBePublished = setUserToPublish(accountToBePublished);
                         patientToBePublished = setPatientToPublish(accountToBePublished);
                         phrEventPublisher.publish(userToBePublished.setAsNew(true), requestId);
