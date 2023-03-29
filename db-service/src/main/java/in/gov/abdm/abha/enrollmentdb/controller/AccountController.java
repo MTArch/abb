@@ -59,4 +59,9 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getMobileLinkedAccountsCount(mobileNumber));
     }
 
+    @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
+    public ResponseEntity<?> getEmailLinkedAccountCount(@PathVariable("email") String email){
+        return ResponseEntity.ok(accountService.getEmailLinkedAccountsCount(email));
+    }
+
 }

@@ -30,4 +30,5 @@ public interface AccountService {
 
     Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
 
+    Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
 }

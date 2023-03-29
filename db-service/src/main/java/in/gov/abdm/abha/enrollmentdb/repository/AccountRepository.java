@@ -33,4 +33,7 @@ public interface AccountRepository extends R2dbcRepository<Accounts, String> {
 
     @Query(value = "select count(health_id_number) from accounts where mobile = :mobileNumber and (status ='ACTIVE' or status ='DEACTIVATED');")
     Mono<Integer> getAccountsCountByMobileNumber(String mobileNumber);
+
+    @Query(value = "select count(health_id_number) from accounts where email_verified = :email and (status ='ACTIVE' or status ='DEACTIVATED');")
+    Mono<Integer> getAccountsCountByEmailNumber(String email);
 }

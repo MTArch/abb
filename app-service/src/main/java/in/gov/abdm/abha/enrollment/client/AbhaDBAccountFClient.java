@@ -32,4 +32,7 @@ public interface AbhaDBAccountFClient {
 
     @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
     public Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
+
+    @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
+    public Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
 }
