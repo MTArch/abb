@@ -49,6 +49,8 @@ public interface URIConstant {
     String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 
     String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
+    String DB_DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = DB_BASE_URI+"/accountauthmethods/delete/{healthIdNumber}";
+
 
     String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
     String DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/accountaction/{id}";
