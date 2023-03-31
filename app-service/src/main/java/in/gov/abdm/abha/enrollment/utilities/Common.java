@@ -267,4 +267,8 @@ public class Common {
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
         return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, abdmError));
     }
+    public String hideEmail(String email) {
+        return email.replaceAll("(^[^@]{3}|(?!^)\\G)[^@]", "$1*");
+    }
+
 }
