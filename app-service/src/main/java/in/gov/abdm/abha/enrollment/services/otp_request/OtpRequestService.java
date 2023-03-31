@@ -300,7 +300,7 @@ public class OtpRequestService {
                                                 handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
                                                 return Mono.just(MobileOrEmailOtpResponseDto.builder()
                                                         .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                                        .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hidePhoneNumber(email))
+                                                        .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hideEmail(email))
                                                         .build());
                                             });
                                 } else {
