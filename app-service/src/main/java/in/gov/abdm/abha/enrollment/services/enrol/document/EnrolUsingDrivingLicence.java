@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundExceptio
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
@@ -43,6 +44,8 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
+
+import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
 
 @Slf4j
 @Service
@@ -301,9 +304,17 @@ public class EnrolUsingDrivingLicence {
                 .build();
         if (FacilityContextHolder.getSubject() != null) {
             EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS, jwtUtil.generateToken(txnId, accountDto));
-            return Mono.just(new EnrolByDocumentResponseDto(null, enrollmentResponse, isNewAccount));
+            return Mono.just(new EnrolByDocumentResponseDto(null, enrollmentResponse, null, isNewAccount));
+        } else if (!isNewAccount && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
+            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                    .token(jwtUtil.generateToken(txnId, accountDto))
+                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                    .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                    .build();
+            return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null, responseTokensDto, false));
         }
-        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null, isNewAccount));
+        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null, null, isNewAccount));
     }
 
     private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId) {
