@@ -52,6 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
                 } catch (ParseException e) {
                     log.error(PARSER_EXCEPTION_OCCURRED_DURING_PARSING, e);
                 } catch (Exception ex) {
+                    log.error(ex.getMessage());
                     log.error(EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB, kycData.getBirthdate());
                 }
             } else if (kycData.getBirthdate().length() == 4) {

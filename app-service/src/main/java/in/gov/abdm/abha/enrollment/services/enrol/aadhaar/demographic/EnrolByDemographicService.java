@@ -47,7 +47,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Autowired
     private AadhaarAppService aadhaarAppService;
     @Autowired
-    private RSAUtil rsaUtil;
+
+    private RSAUtil rsaUtils;
     @Autowired
     private AccountService accountService;
     @Autowired
@@ -68,7 +69,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
-        verifyDemographicRequest.setAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
         verifyDemographicRequest.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
         verifyDemographicRequest.setGender(demographic.getGender());
         return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
@@ -86,10 +87,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                         return respondExistingAccount(existingAccount);
                                     }
                                 })
-                                .switchIfEmpty(Mono.defer(() -> {
-                                    //create new account
-                                    return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
-                                }));
+                                .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid())));
                     } else {
                         throw new AbhaUnProcessableException(ABDMError.INVALID_DEMOGRAPHIC_DETAILS);
                     }
@@ -152,10 +150,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(AccountDto accountDto, String consentFormImage) {
         return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
             HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
-            return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
-                return addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
-                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto));
-            });
+            return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
+                    .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto)));
         });
     }
 

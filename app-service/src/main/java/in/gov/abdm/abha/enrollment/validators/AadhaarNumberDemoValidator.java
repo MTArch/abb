@@ -3,6 +3,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.DemoDto;
 import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberDemo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Validating aadhaar number should be valid and encrypted for abha creation using aadhaar
  */
+@Slf4j
 public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNumberDemo, DemoDto> {
 
     @Autowired
@@ -54,6 +56,7 @@ public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNu
         }
         catch (Exception ex)
         {
+            log.error(ex.getMessage());
             return false;
         }
     }
