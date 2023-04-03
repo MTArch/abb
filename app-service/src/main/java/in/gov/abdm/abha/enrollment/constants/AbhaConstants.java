@@ -6,7 +6,7 @@ public class AbhaConstants {
 
     public static final String VALIDATION_EMPTY_KEY_FIELD = "Key cannot be null or empty";
     public static final String VALIDATION_EMPTY_VALUE_FIELD = "Value cannot be null or empty";
-
+    public static final String VALIDATION_ERROR_TRANSACTION_FIELD = "Invalid Transaction Id";
     public static final String VALIDATION_ERROR_SCOPE_FIELD = "Invalid Scope";
     public static final String VALIDATION_ERROR_LOGIN_HINT_FIELD = "Invalid Login Hint";
     public static final String VALIDATION_ERROR_LOGIN_ID_FIELD = "Invalid LoginId";
