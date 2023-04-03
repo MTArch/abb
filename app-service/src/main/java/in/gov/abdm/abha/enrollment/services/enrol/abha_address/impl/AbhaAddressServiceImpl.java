@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -226,7 +225,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                             Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
                                     = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
                             return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
-                                return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
+                                return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto);
                             });
                         }
                         return Mono.empty();
@@ -238,14 +237,14 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
                         = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
                 return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
-                    return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
+                    return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto);
                 });
             }));
         }
         return Mono.empty();
     }
 
-    private Mono<AbhaAddressResponseDto> handleCreateAbhaResponse(HidPhrAddressDto hidPhrAddressDto, TransactionDto transactionDto,AbhaAddressRequestDto abhaAddressRequestDto) {
+    private Mono<AbhaAddressResponseDto> handleCreateAbhaResponse(HidPhrAddressDto hidPhrAddressDto, TransactionDto transactionDto) {
         return Mono.just(AbhaAddressResponseDto.builder()
                 .txnId(String.valueOf(transactionDto.getTxnId()))
                 .healthIdNumber(hidPhrAddressDto.getHealthIdNumber())

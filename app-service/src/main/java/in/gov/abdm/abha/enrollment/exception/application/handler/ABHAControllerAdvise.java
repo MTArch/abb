@@ -43,7 +43,6 @@ public class ABHAControllerAdvise {
 
     private static final String FEIGN = "feign";
     private static final String BAD_REQUEST = "BAD_REQUEST";
-    private static final String MESSAGE = "\"message\":";
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";

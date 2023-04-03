@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.enrol.facility;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.enums.EnrollmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

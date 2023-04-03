@@ -17,11 +17,6 @@ public class AccountActionServiceImpl extends AbhaDBClient implements AccountAct
     AbhaDBAccountActionFClient abhaDBAccountActionFClient;
 
     @Override
-    public Mono<AccountActionDto> getAccountActionByHealthIdNumber(String healthIdNumber) {
-        return abhaDBAccountActionFClient.getAccountActionByHealthId(healthIdNumber);
-    }
-
-    @Override
     public Mono<AccountActionDto> createAccountActionEntity(AccountActionDto accountActionDto) {
         accountActionDto.setNewAccount(true);
         return abhaDBAccountActionFClient.postAccountAction(accountActionDto);

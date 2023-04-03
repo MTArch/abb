@@ -239,7 +239,6 @@ public class Common {
     }
 
     public boolean isValidateISOTimeStamp(String timestamp) {
-        //log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + VALIDATE_TIMESTAMP_LOG, timestamp);
         if (timestamp != null && !timestamp.isBlank()) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(AbhaConstants.TIMESTAMP_FORMAT);
