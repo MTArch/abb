@@ -36,4 +36,8 @@ public interface AccountRepository extends R2dbcRepository<Accounts, String> {
 
     @Query(value = "select count(health_id_number) from accounts where email_verified = :email and (status ='ACTIVE' or status ='DEACTIVATED');")
     Mono<Integer> getAccountsCountByEmailNumber(String email);
+
+    @Query(value = "SELECT health_id_number, address, origin, created_date, day_of_birth, district_code, district_name, email, facility_id, first_name, gender, health_id, kycdob, encode(lo_get(kyc_photo), 'escape') as kyc_photo, kyc_verified, last_name, middle_name, mobile, month_of_birth, name, okyc_verified, password, pincode, encode(lo_get(profile_photo), 'escape') as profile_photo, state_code, state_name, status, sub_district_code, subdistrict_name, town_code, town_name, update_date, village_code, village_name, ward_code, ward_name, hip_id, xmluid as xmlUID, year_of_birth, consent_date, profile_photo_compressed, email_verification_date, email_verified, document_code, verification_status, verification_type, lst_updated_by, consent_version, cm_migrated, phr_migrated, health_worker_mobile, health_worker_name, mobile_type, type, mig_denom FROM accounts a where lower(a.first_name) = :firstName AND lower(a.last_name) = :lastName AND CAST (a.day_of_birth AS INTEGER) = :dob AND CAST (a.month_of_birth AS INTEGER) = :mob AND CAST (a.year_of_birth AS INTEGER) = :yob AND a.gender = :gender AND a.status != 'DELETED'")
+    Mono<Accounts> checkDeDuplication(@Param("firstName") String firstName, @Param("lastName") String lastName, @Param("dob") Integer dob ,@Param("mob") Integer mob,@Param("yob") Integer yob,@Param("gender") String gender);
+
 }

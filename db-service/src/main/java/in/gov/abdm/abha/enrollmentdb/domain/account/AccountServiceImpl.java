@@ -278,4 +278,10 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.getAccountsCountByEmailNumber(email);
     }
 
+    @Override
+    public Mono<AccountDto> checkDeDuplication(String firstName, String lastName, Integer dob,Integer mob,Integer yob,String gender) {
+        return accountRepository.checkDeDuplication(firstName,lastName,dob,mob,yob,gender)
+                .map(account -> modelMapper.map(account, AccountDto.class));
+    }
+
 }

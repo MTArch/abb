@@ -55,13 +55,19 @@ public class AccountController {
     }
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
-    public ResponseEntity<?> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber){
+    public ResponseEntity<?> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber) {
         return ResponseEntity.ok(accountService.getMobileLinkedAccountsCount(mobileNumber));
     }
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
-    public ResponseEntity<?> getEmailLinkedAccountCount(@PathVariable("email") String email){
+    public ResponseEntity<?> getEmailLinkedAccountCount(@PathVariable("email") String email) {
         return ResponseEntity.ok(accountService.getEmailLinkedAccountsCount(email));
     }
 
+    @GetMapping(value = ABHAEnrollmentDBConstant.DB_GET_DUPLICATE_ACCOUNT)
+    public ResponseEntity<?> checkDeDuplication(@PathVariable("firstName") String firstName, @PathVariable("lastName") String lastName,
+                                                  @PathVariable("dob") Integer dob, @PathVariable("mob") Integer mob, @PathVariable("yob") Integer yob,
+                                                  @PathVariable("gender") String gender) {
+        return ResponseEntity.ok(accountService.checkDeDuplication(firstName, lastName, dob, mob, yob, gender));
+    }
 }

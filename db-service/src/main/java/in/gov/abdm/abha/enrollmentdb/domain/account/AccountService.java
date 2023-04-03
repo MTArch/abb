@@ -58,4 +58,6 @@ public interface AccountService {
 
     Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber);
     Mono<Integer> getEmailLinkedAccountsCount(String email);
+    Mono<AccountDto> checkDeDuplication(String firstName, String lastName, Integer dob,Integer mob,Integer yob, String gender);
+
 }

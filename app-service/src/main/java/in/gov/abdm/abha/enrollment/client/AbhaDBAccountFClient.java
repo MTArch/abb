@@ -35,4 +35,9 @@ public interface AbhaDBAccountFClient {
 
     @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
     public Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
+
+    @GetMapping(URIConstant.FDB_GET_DUPLICATE_ACCOUNT)
+    Mono<AccountDto> checkDeDuplication(@PathVariable("firstName") String firstName,@PathVariable("lastName") String lastName,
+                                          @PathVariable("dob") Integer dob,@PathVariable("mob") Integer mob,@PathVariable("yob") Integer yob ,
+                                          @PathVariable("gender") String gender);
 }
