@@ -53,7 +53,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     private LinkedHashMap<String, String> errors;
 
     public static final String TXN_ID = "txnId";
-    private final String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+    private static final String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
     @Override
     public Mono<SuggestAbhaResponseDto> getAbhaAddress(String txnId) {

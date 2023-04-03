@@ -21,7 +21,7 @@ public class DependentAccountRelationshipSubscriberImpl implements DependentAcco
     /**
      * number of rows to be inserted.
      */
-    public static Long rowCount = 1L;
+    static Long rowCount;
 
     /**
      * Invoked after calling Publisher.subscribe(Subscriber).
@@ -33,7 +33,7 @@ public class DependentAccountRelationshipSubscriberImpl implements DependentAcco
     @Override
     public void onSubscribe(Subscription s) {
 
-        s.request(rowCount);
+        s.request(1L);
     }
 
     /**
