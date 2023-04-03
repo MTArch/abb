@@ -35,7 +35,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_HIDE_REGEX;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_MASK_CHAR;
 import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
+import static in.gov.abdm.constant.ABDMConstant.VALIDATE_TIMESTAMP_LOG;
 
 @UtilityClass
 @Slf4j
@@ -45,9 +48,9 @@ public class Common {
     public static final String EXCEPTION_OCCURRED_WHILE_CONVERTING_XML_TO_JSON_STRING = "Exception occurred while converting xml to json String";
     public static final String HIDDEN_DIGIT = "******";
     public static final String FILE_LOADED_SUCCESSFULLY = "{} file loaded successfully";
-    public static final String EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG = "Exception occurred while reading file: {} Error Msg : ";
-    public static final String YYYY_MM_DD_T_HH_MM_SS_MMM = "YYYY-MM-dd'T'HH:MM:ss.mmm";
-    public static final String YYYY_MM_DD_HH_MM_SS = "YYYYMMddHHMMss";
+    public static final String EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG = "Exception occurred while reading file: {} Error Msg : {}";
+    public static final String YYYY_MM_DD_T_HH_MM_SS_MMM = "yyyy-MM-dd'T'HH:MM:ss.mmm";
+    public static final String YYYY_MM_DD_HH_MM_SS = "yyyyMMddHHMMss";
 
     private static final long SMS_TEMPLATE_ID = 1007164181681962323L;
     private static final String ABHA = "ABHA";
@@ -74,7 +77,7 @@ public class Common {
      */
     public String timeStampWithT(){
         //Don't change date format
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).toString();
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     public static String loadFileData(String fileName) {
@@ -91,7 +94,7 @@ public class Common {
         } catch (Exception e) {
             log.error(EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG, fileName, e.getMessage());
         }
-        return content.replace(StringConstants.SLASH_N, StringConstants.EMPTY).replace(StringConstants.SLASH_R, StringConstants.EMPTY).trim();
+        return content!=null?content.replace(StringConstants.SLASH_N, StringConstants.EMPTY).replace(StringConstants.SLASH_R, StringConstants.EMPTY).trim():null;
     }
 
     public String xmlToJson(String xmlPayload) {
@@ -176,9 +179,10 @@ public class Common {
     public LgdDistrictResponse getLGDDetails(List<LgdDistrictResponse> lgdDistrictResponses){
         LgdDistrictResponse lgdDistrictResponse = new LgdDistrictResponse();
         try {
-            lgdDistrictResponse = lgdDistrictResponses.stream()
+            Optional<LgdDistrictResponse> lgdDistrictResponseNew = lgdDistrictResponses.stream()
                     .filter(lgd -> lgd.getDistrictCode() != null)
-                    .findAny().get();
+                    .findAny();
+            lgdDistrictResponse = lgdDistrictResponseNew.orElse(null);
         } catch (NoSuchElementException noSuchElementException) {
             if (!lgdDistrictResponses.isEmpty()) {
                 lgdDistrictResponse = lgdDistrictResponses.get(0);
@@ -239,7 +243,7 @@ public class Common {
     }
 
     public boolean isValidateISOTimeStamp(String timestamp) {
-        //log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + VALIDATE_TIMESTAMP_LOG, timestamp);
+        log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + VALIDATE_TIMESTAMP_LOG, timestamp);
         if (timestamp != null && !timestamp.isBlank()) {
             try {
                 SimpleDateFormat dateFormat = new SimpleDateFormat(AbhaConstants.TIMESTAMP_FORMAT);
@@ -266,7 +270,7 @@ public class Common {
         return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, abdmError));
     }
     public String hideEmail(String email) {
-        return email.replaceAll("(^[^@]{3}|(?!^)\\G)[^@]", "$1*");
+        return email.replaceAll(EMAIL_HIDE_REGEX, EMAIL_MASK_CHAR);
     }
 
 }
