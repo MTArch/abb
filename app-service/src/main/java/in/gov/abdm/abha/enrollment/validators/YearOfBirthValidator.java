@@ -4,12 +4,14 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import in.gov.abdm.abha.enrollment.validators.annotations.YOB;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Validates year of birth
  *
  * it should be valid 4-digit number , cannot be greater than current year
  */
+@Slf4j
 public class YearOfBirthValidator implements ConstraintValidator<YOB, String> {
 
 	private static final String YOB_REGEX_PATTERN = "^(\\d{4})$";
@@ -23,7 +25,7 @@ public class YearOfBirthValidator implements ConstraintValidator<YOB, String> {
 			}
 		}
 		catch (Exception e){
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return true;
 	}

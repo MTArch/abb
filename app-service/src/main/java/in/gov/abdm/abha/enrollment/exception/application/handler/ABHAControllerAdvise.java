@@ -31,10 +31,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -43,7 +40,6 @@ public class ABHAControllerAdvise {
 
     private static final String FEIGN = "feign";
     private static final String BAD_REQUEST = "BAD_REQUEST";
-    private static final String MESSAGE = "\"message\":";
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";
@@ -248,11 +244,25 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        if(ex.getMessage().contains("preferred"))
-            errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
-        else
-            errorMap.put(StringConstants.MESSAGE, ex.getMessage());
-        log.info(EXCEPTIONS + ex.getMessage());
+        Optional.ofNullable(ex)
+                .map(Throwable::getMessage)
+                .filter(msg -> msg.contains("preferred"))
+                .ifPresentOrElse(
+                        msg -> {
+                            errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
+                            log.info(EXCEPTIONS + msg);
+                        },
+                        () -> {
+                            Optional.ofNullable(ex)
+                                    .map(Throwable::getMessage)
+                                    .ifPresent(msg -> {
+                                        errorMap.put(StringConstants.MESSAGE, msg);
+                                        log.info(EXCEPTIONS + msg);
+                                    });
+                        }
+                );
+
+
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }

@@ -93,6 +93,7 @@ public class JWTUtil {
         } catch (ExpiredJwtException e) {
             return true;
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             return false;
         }
     }
