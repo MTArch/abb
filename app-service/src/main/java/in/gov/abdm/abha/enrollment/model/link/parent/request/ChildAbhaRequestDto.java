@@ -1,12 +1,8 @@
 package in.gov.abdm.abha.enrollment.model.link.parent.request;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.validators.annotations.AbhaNumber;
 import in.gov.abdm.abha.enrollment.validators.annotations.AbhaNumberChild;
 import lombok.AllArgsConstructor;
 import lombok.Data;

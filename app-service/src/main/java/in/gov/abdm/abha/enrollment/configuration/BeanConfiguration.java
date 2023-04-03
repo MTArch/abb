@@ -12,8 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactivefeign.ReactiveOptions;
-import reactivefeign.webclient.WebReactiveOptions;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;

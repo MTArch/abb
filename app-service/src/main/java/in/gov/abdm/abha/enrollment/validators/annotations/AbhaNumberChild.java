@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators.annotations;
 
 import in.gov.abdm.abha.enrollment.validators.AbhaNumberChildValidator;
-import in.gov.abdm.abha.enrollment.validators.AbhaNumberValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

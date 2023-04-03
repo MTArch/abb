@@ -13,8 +13,6 @@ import reactor.core.publisher.Mono;
 
 @ReactiveFeignClient(name= AbhaConstants.ABHA_DB_ACCOUNT_ACTION_CLIENT, url="${enrollment.gateway.enrollmentdb.baseuri}", configuration = BeanConfiguration.class)
 public interface AbhaDBAccountActionFClient {
-    @GetMapping(URIConstant.DB_GET_ACCOUNT_ACTION_BY_HEALTH_ID_NUMBER)
-    Mono<AccountActionDto> getAccountActionByHealthId(@PathVariable("id") String healthIdNumber);
 
     @PostMapping(URIConstant.DB_ADD_ACCOUNT_ACTION_URI)
     Mono<AccountActionDto> postAccountAction(@RequestBody AccountActionDto accountActionDto);

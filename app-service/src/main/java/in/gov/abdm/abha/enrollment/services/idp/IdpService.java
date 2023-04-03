@@ -30,7 +30,6 @@ public class IdpService {
 	SimpleDateFormat dateTimeFormatter = new SimpleDateFormat(DATE_TIME_FORMATTER);
 
 	private static final String AUTHORIZATION = "123344";
-	//	private static final String REQUEST_ID = "abha_ee2cf4ef-b3d3-494e-8d3a-27c75100e036";
 	private static final String HIP_REQUEST_ID = "22222";
 
 	@Autowired

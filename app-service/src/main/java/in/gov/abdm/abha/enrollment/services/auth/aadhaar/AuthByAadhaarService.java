@@ -36,8 +36,6 @@ public class AuthByAadhaarService {
 
     private static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
     private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
-    private static final String CAN_NOT_LINK_WITH_SAME_ABHA_NUMBER = "Cannot link with same ABHA Number";
-    private static final String CAN_NOT_LINK_WITH_CHILD_ABHA_NUMBER = "Cannot link with CHILD ABHA Number";
     public static final String OTP_VERIFIED_SUCCESSFULLY = "OTP verified successfully";
 
     @Autowired
