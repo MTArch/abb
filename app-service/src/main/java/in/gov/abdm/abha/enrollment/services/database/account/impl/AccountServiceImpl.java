@@ -261,6 +261,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
                 log.error(PARSER_EXCEPTION_OCCURRED_DURING_PARSING, e);
             } catch (Exception ex) {
                 log.error(EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB, birthdate);
+                log.error(ex.getMessage());
             }
         } else if (birthdate != null && birthdate.length() == 4) {
             accountDto.setYearOfBirth(birthdate);

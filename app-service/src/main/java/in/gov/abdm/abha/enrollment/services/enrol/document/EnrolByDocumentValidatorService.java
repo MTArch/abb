@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class EnrolByDocumentValidatorService {
 
     public static final String TXN_ID = "TxnId";
@@ -191,6 +193,7 @@ public class EnrolByDocumentValidatorService {
                 return false;
             }
         } catch (Exception e) {
+            log.error(e.getMessage());
             return false;
         }
     }

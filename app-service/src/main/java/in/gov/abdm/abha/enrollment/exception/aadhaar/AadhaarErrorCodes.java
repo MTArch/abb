@@ -3,6 +3,8 @@ package in.gov.abdm.abha.enrollment.exception.aadhaar;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.AADHAAR_TECHNICAL_ERROR_MSG;
+
 @AllArgsConstructor
 @Getter
 public enum AadhaarErrorCodes {
@@ -88,16 +90,16 @@ public enum AadhaarErrorCodes {
     E_911("Invalid “mv” value in the “Pfa” element."),
     E_912("Invalid “ms” value."),
     E_913("Both “Pa” and “Pfa” are present in the authentication request (Pa and Pfa are mutually exclusive)."),
-    E_930("Technical error that are internal to authentication server."),
-    E_931("Technical error that are internal to authentication server."),
-    E_932("Technical error that are internal to authentication server."),
-    E_933("Technical error that are internal to authentication server."),
-    E_934("Technical error that are internal to authentication server."),
-    E_935("Technical error that are internal to authentication server."),
-    E_936("Technical error that are internal to authentication server."),
-    E_937("Technical error that are internal to authentication server."),
-    E_938("Technical error that are internal to authentication server."),
-    E_939("Technical error that are internal to authentication server."),
+    E_930(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_931(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_932(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_933(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_934(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_935(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_936(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_937(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_938(AADHAAR_TECHNICAL_ERROR_MSG),
+    E_939(AADHAAR_TECHNICAL_ERROR_MSG),
     E_940("Unauthorized ASA channel."),
     E_941("Unspecified ASA channel."),
     E_950("OTP store related technical error."),

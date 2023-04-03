@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.validators.annotations.Timestamp;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -9,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Validating timestamp should not be greater than current date
  */
+@Slf4j
 public class TimestampValidator implements ConstraintValidator<Timestamp, String> {
 
     private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
@@ -24,6 +26,7 @@ public class TimestampValidator implements ConstraintValidator<Timestamp, String
           }
         catch (Exception ex)
         {
+            log.error(ex.getMessage());
             return false;
         }
     }

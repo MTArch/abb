@@ -38,7 +38,7 @@ public class EnrolmentCipher {
 
 			return new String(original);
 		} catch (Exception exp) {
-			log.error("Error while decrypting", exp);
+			log.error(exp.getMessage());
 		}
 		return null;
 	}
@@ -54,7 +54,7 @@ public class EnrolmentCipher {
 			cipher.init(1, secretKeySpec, ivParameterSpec);
 			return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception exp) {
-			log.error("Error while encrypting", exp);
+			log.error(exp.getMessage());
 		}
 		return null;
 	}
