@@ -178,24 +178,6 @@ public class AbhaDBClient<T> {
         return fluxPostDatabase(t, URIConstant.DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT, rows);
     }
 
-    private Mono<ResponseEntity<Void>> deleteDatabaseRow(Class<T> t, String uri) {
-        return webClient.baseUrl(ENROLLMENT_DB_BASE_URI)
-                .build()
-                .delete()
-                .uri(uri)
-                .retrieve()
-                .toBodilessEntity();
-    }
-
-    protected Mono<ResponseEntity<Void>> deleteEntity(Class<T> t, String id) {
-        switch (t.getSimpleName()) {
-            case "TransactionDto":
-                return deleteDatabaseRow(t, URIConstant.DB_DELETE_TRANSACTION_URI + id);
-        }
-        return Mono.empty();
-    }
-
-
     public Flux<T> getFluxEntity(Class<T> t, List<String> list) {
         switch (t.getSimpleName()) {
             case "AccountDto":

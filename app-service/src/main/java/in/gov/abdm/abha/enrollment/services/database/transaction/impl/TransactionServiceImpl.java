@@ -100,12 +100,8 @@ public class TransactionServiceImpl implements TransactionService {
         }
         transactionId = prefix + host + "-" + Common.getTimeStamp(true);
         String clientId = null;
-        //TODO find client id
+
         clientId = "abha";
-        /*if (!StringUtils.isEmpty(HealthIdContextHolder.clientId())) {
-            clientId = HealthIdContextHolder.clientId().replaceAll("_", "");
-            clientId = clientId.length() > 8 ? clientId.substring(0, 8) : clientId;
-        }*/
         transactionId = !clientId.isEmpty() ? transactionId.replace("NDHM", clientId) : transactionId;
         return transactionId;
     }

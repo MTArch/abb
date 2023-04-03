@@ -204,4 +204,10 @@ public interface AbhaConstants {
     String UTC_TIMEZONE_ID = "UTC";
 
     String AUTHORIZATION = "Authorization";
+
+    String EMAIL_HIDE_REGEX = "(^[^@]{3}|(?!^)\\G)[^@]";
+
+    String EMAIL_MASK_CHAR = "$1*";
+
+    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 }

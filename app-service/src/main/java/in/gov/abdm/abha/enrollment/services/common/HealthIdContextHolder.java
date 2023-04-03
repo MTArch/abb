@@ -180,5 +180,6 @@ public class HealthIdContextHolder {
 		MAP.remove();
 		TOKEN_TYPE.remove();
 		FLOW.remove();
+		ACCESS_TOKEN.remove();
 	}
 }

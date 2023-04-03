@@ -5,9 +5,11 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_REGEX_PATTERN;
+
 public class EmailValidator implements ConstraintValidator<Email, String> {
 
-    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
 
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context) {

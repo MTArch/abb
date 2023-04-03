@@ -139,8 +139,6 @@ public class LinkParentServiceImpl implements LinkParentService {
 						.lastName(accountDto.getLastName())
 						.dob(accountDto.getKycdob())
 						.gender(accountDto.getGender())
-						// TODO
-//						.photo(accountDto.getPhoto())
 						.mobile(accountDto.getMobile())
 						.email(accountDto.getEmail())
 						.phrAddress(phrAddress)
@@ -148,9 +146,6 @@ public class LinkParentServiceImpl implements LinkParentService {
 						.districtCode(accountDto.getDistrictCode())
 						.stateCode(accountDto.getStateCode())
 						.pinCode(accountDto.getPincode())
-						// TODO
-						// .qrCode(null)
-						// .pdfData(null)
 						.build())
 				.build());
 	}
