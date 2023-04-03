@@ -15,10 +15,7 @@ public class AbhaNumberGenerator {
      */
     private static final int ABHA_NUMBER_LENGTH = 14;
     private static final String NUMBER_IS_NULL_OR_EMPTY = "Number is null or empty";
-    /**
-     * ABHA Number Hyphen structure is xx-xxxx-xxxx-xxxx
-     */
-    private static String HYPHEN = "-";
+
     /**
      * ABHA Number pattern is XX-XXXX-XXXX-XXXX
      */
@@ -36,8 +33,6 @@ public class AbhaNumberGenerator {
      * ABHA Number Must not be Palindrome and must be unique.
      * Hence taking bin as Random between 1-8 only and keep generating a number.
      * until it's not palindrome and This number is not already in use.
-     *
-     * @return
      */
     public String generateAbhaNumber() {
         long randomInteger = RandomUtil.getRandomInteger(8, 1);
@@ -69,7 +64,6 @@ public class AbhaNumberGenerator {
      * @return
      */
     private boolean UserExistWithAbhaNumber(String abhaNumber) {
-        //TODO check abha number available in db
         return false;
     }
 

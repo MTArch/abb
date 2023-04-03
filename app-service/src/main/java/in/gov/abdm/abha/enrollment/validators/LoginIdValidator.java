@@ -20,6 +20,8 @@ import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_REGEX_PATTERN;
+
 /**
  * Validating login Id as Aadhaar number or mobile number based on proposed otp system
  */
@@ -38,9 +40,6 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * Starting from 91
      */
     private static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
-
-    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-
 
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.

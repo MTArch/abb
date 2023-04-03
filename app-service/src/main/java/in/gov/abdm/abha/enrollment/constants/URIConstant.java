@@ -1,12 +1,11 @@
 package in.gov.abdm.abha.enrollment.constants;
 
-public class URIConstant {
-    public static final String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";
-    public static final String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal";
+public class URIConstant {    
 
-    public static final String API_VERSION = "/v3";
+    private URIConstant() {
+    }
 
-    public static final String INTERNAL = "/internal";
+    public static final String API_VERSION = "/v3";   
     public static final String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
     //enrol endpoints
@@ -122,6 +121,5 @@ public class URIConstant {
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
     public static final String ENROL_ABHA_RD_PID = "/pid";
 
-    private URIConstant() {
-    }
+    
 }
