@@ -1,12 +1,9 @@
 package in.gov.abdm.abha.enrollment.constants;
 
 public interface URIConstant {
-    String GLOBAL_SERVICE_BASE_URI = "http://global2dev.abdm.gov.internal";//"http://localhost:9292"; //
-    String ABHA_DB_BASE_URI = "http://abha2dev.abdm.gov.internal"; //"http://localhost:9188"; //
 
     String API_VERSION = "/v3";
 
-    String INTERNAL = "/internal";
     String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
     //enrol endpoints
@@ -35,7 +32,6 @@ public interface URIConstant {
 
     String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
     String DB_UPDATE_TRANSACTION_URI = DB_BASE_URI + "/transaction/{id}";
-    String DB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/";
     String FDB_DELETE_TRANSACTION_URI = DB_BASE_URI + "/transaction/txnId/{txnId}";
     String DB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/";
     String FDB_GET_TRANSACTION_BY_TXN_ID = DB_BASE_URI + "/transaction/txnId/{txnId}";

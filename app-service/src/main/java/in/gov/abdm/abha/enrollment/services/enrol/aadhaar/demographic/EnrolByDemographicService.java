@@ -66,8 +66,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Autowired
     LgdUtility lgdUtility;
 
-    public static final String DISTRICT = "District";
-
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
