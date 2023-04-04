@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;

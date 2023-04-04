@@ -28,7 +28,6 @@ public class EnrolByDocumentValidatorService {
     private static final String FIRST_NAME = "FirstName";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
-    private static final String ADDRESS = "Address";
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
@@ -36,13 +35,12 @@ public class EnrolByDocumentValidatorService {
     private static final String BACK_SIDE_PHOTO = "BackSidePhoto";
     private static final String CONSENT = "Consent";
     public static final int MAX_NAME_SIZE = 255;
-    private String TxnId = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
-    private String Dob = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
+    private String txnIdRegex = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+    private String dobRegex = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
 
-    private LinkedHashMap<String, String> errors;
 
     @Value("${enrollment.photo.minSizeInKB}")
     private String photoMinSizeLimit;
@@ -57,6 +55,7 @@ public class EnrolByDocumentValidatorService {
     private String documentPhotoMaxSizeLimit;
 
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
         if (!isValidTxnId(enrolByDocumentRequestDto)) {
             errors.put(TXN_ID, AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD);
@@ -162,22 +161,18 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        if (enrolByDocumentRequestDto.getDocumentType().equals(DRIVING_LICENCE)) {
-            return true;
-        } else {
-            return false;
-        }
+        return enrolByDocumentRequestDto.getDocumentType().equals(DRIVING_LICENCE);
     }
 
     private boolean isValidDob(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         try {
-            if (Pattern.compile(Dob).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
-                LocalDate DOB = LocalDate.parse(enrolByDocumentRequestDto.getDob());
+            if (Pattern.compile(dobRegex).matcher(enrolByDocumentRequestDto.getDob()).matches()) {
+                LocalDate inputDob = LocalDate.parse(enrolByDocumentRequestDto.getDob());
                 LocalDate today = LocalDate.now();
 
-                if (DOB.getYear() != 0) {
+                if (inputDob.getYear() != 0) {
 
-                    int diff = today.compareTo(DOB);
+                    int diff = today.compareTo(inputDob);
                     if (diff > 0 || diff == 0) {
                         return true;
                     } else if (diff < 0) {
@@ -196,20 +191,12 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidGender(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        if (enrolByDocumentRequestDto.getGender().equals(M) ||
+        return enrolByDocumentRequestDto.getGender().equals(M) ||
                 enrolByDocumentRequestDto.getGender().equals(F) ||
-                enrolByDocumentRequestDto.getGender().equals(O)) {
-            return true;
-        } else {
-            return false;
-        }
+                enrolByDocumentRequestDto.getGender().equals(O);
     }
 
     private boolean isValidTxnId(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        if (Pattern.compile(TxnId).matcher(enrolByDocumentRequestDto.getTxnId()).matches()) {
-            return true;
-        } else {
-            return false;
-        }
+        return Pattern.compile(txnIdRegex).matcher(enrolByDocumentRequestDto.getTxnId()).matches();
     }
 }

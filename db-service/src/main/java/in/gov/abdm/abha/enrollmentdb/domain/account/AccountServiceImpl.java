@@ -53,13 +53,13 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
+    private static final String ABHA_SYNC = "ABHA_SYNC";
+
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-                // TODO ANAND
-//                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto));
     }
 
@@ -85,7 +85,6 @@ public class AccountServiceImpl implements AccountService {
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
                     syncAcknowledgement.setCreatedDate(timeStamp);
-//                    syncAcknowledgementService.addNewAcknowledgement(requestId, timeStamp, syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
                     return Mono.just(accountUpdated);
                 })
                 .flatMap(this::findHidPhrAddressFromAccount)
@@ -146,7 +145,7 @@ public class AccountServiceImpl implements AccountService {
         userToBePublished.setMobileNumberVerified(null != accountDto.getMobile());
         userToBePublished.setEmailId(accountDto.getEmail());
         userToBePublished.setEmailIdVerified(null != accountDto.getEmailVerified());
-        userToBePublished.setUpdatedBy("ABHA_SYNC");
+        userToBePublished.setUpdatedBy(ABHA_SYNC);
         userToBePublished.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
         return userToBePublished;
     }
@@ -187,15 +186,10 @@ public class AccountServiceImpl implements AccountService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
-            address.setCreatedBy("ABHA_SYNC");
-            address.setUpdatedBy("ABHA_SYNC");
+            address.setCreatedBy(ABHA_SYNC);
+            address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
-            if (null != accounts.getCreatedDate()) {
-                LocalDateTime localDateTime = accounts.getCreatedDate();
-                //TODO - Correct the below logic to enter correct date, else leave it blank as user table has default values for this entry.
-//                user.setCreatedDate(new Timestamp(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
             user.setDayOfBirth(accounts.getDayOfBirth());
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
@@ -207,23 +201,18 @@ public class AccountServiceImpl implements AccountService {
             user.setMobileNumberVerified(accounts.getMobile()!=null);
             user.setMonthOfBirth(accounts.getMonthOfBirth());
             user.setFullName(accounts.getName());
-            user.setPassword(accounts.getPassword()); //TODO - Verify if password can be reused or not
+            user.setPassword(accounts.getPassword());
             user.setStatus(accounts.getStatus());
-            if(null != accounts.getUpdateDate()) {
-                LocalDateTime localDateTime = accounts.getUpdateDate();
-                //TODO - Correct the below logic to enter correct date, else leave it blank as user table has default values for this entry.
-//                user.setUpdatedDate(new Timestamp(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
             user.setYearOfBirth(accounts.getYearOfBirth());
             user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYNC");
-            user.setUpdatedBy("ABHA_SYNC");
+            user.setCreatedBy(ABHA_SYNC);
+            user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
-            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
+            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
@@ -250,20 +239,9 @@ public class AccountServiceImpl implements AccountService {
             patient.setStateCode(accounts.getStateCode());
             patient.setDistrictCode(accounts.getDistrictCode());
             patient.setStatus(accounts.getStatus());
-            if(null != accounts.getCreatedDate()) {
-                LocalDateTime localDateTime = accounts.getCreatedDate();
-                //TODO - Correct the below logic to enter correct date.
-//                patient.setDateCreated(new Timestamp(localDateTime.getYear()-1900, localDateTime.getMonthValue()+1, localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
-            if(null != accounts.getUpdateDate()) {
-                LocalDateTime localDateTime = accounts.getUpdateDate();
-                //TODO - Correct the below logic to enter correct date.
-//                patient.setDateModified(new Timestamp(localDateTime.getYear()-1900, localDateTime.getMonthValue()+1, localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
-//            patient.setKycVerified(accounts.isKycVerified()); //TODO: Uncomment the code once kyc_verified column is added in patient table of sandbox.
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
             patient.setMobileVerified(accounts.getMobile()!=null);

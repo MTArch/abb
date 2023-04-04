@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.dependent_account_relationship.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBDependentAccountRelationshipFClient;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
@@ -26,7 +25,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DependentAccountRelationshipServiceImpl extends AbhaDBClient implements DependentAccountRelationshipService {
+public class DependentAccountRelationshipServiceImpl implements DependentAccountRelationshipService {
 
     @Autowired
     AbhaDBDependentAccountRelationshipFClient abhaDBDependentAccountRelationshipFClient;
