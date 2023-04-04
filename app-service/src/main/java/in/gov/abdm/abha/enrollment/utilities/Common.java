@@ -93,6 +93,7 @@ public class Common {
             content = contentBuilder.toString();
         } catch (Exception e) {
             log.error(EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG, fileName, e.getMessage());
+            log.error(e.getMessage());
         }
         return content!=null?content.replace(StringConstants.SLASH_N, StringConstants.EMPTY).replace(StringConstants.SLASH_R, StringConstants.EMPTY).trim():null;
     }

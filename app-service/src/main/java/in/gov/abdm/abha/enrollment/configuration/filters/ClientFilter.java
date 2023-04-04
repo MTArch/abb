@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.configuration.filters;
 
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
-import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;

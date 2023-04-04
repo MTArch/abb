@@ -10,12 +10,12 @@ import javax.validation.ConstraintValidatorContext;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
-import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
 
@@ -24,6 +24,7 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_REGEX_PA
 /**
  * Validating login Id as Aadhaar number or mobile number based on proposed otp system
  */
+@Slf4j
 public class LoginIdValidator implements ConstraintValidator<ValidLoginId, MobileOrEmailOtpRequestDto> {
 
     /**
@@ -103,6 +104,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             new String(Base64.getDecoder().decode(loginId));
             return true;
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             return false;
         }
     }

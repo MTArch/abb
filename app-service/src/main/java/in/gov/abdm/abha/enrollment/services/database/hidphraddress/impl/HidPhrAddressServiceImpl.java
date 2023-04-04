@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.hidphraddress.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBHidPhrAddressFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
@@ -9,7 +8,6 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableExc
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

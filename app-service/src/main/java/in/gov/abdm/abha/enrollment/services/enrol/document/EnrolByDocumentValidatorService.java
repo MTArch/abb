@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class EnrolByDocumentValidatorService {
 
     public static final String TXN_ID = "TxnId";
@@ -28,7 +30,6 @@ public class EnrolByDocumentValidatorService {
     private static final String FIRST_NAME = "FirstName";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
-    private static final String ADDRESS = "Address";
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
@@ -191,6 +192,7 @@ public class EnrolByDocumentValidatorService {
                 return false;
             }
         } catch (Exception e) {
+            log.error(e.getMessage());
             return false;
         }
     }

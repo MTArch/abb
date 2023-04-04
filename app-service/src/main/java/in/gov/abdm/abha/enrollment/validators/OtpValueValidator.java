@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
@@ -13,6 +14,7 @@ import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
 /**
  * Validating otp value should be valid 6-digit number and must be encrypted
  */
+@Slf4j
 public class OtpValueValidator implements ConstraintValidator<OtpValue, String> {
 
     @Autowired
@@ -49,6 +51,7 @@ public class OtpValueValidator implements ConstraintValidator<OtpValue, String> 
         }
         catch (Exception ex)
         {
+            log.error(ex.getMessage());
             return false;
         }
     }

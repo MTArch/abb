@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.DemoDto;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
  * Validating mobile number should be encrypted and valid
  *
  */
+@Slf4j
 public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
 
     @Autowired
@@ -56,6 +58,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
         }
         catch (Exception ex)
         {
+            log.error(ex.getMessage());
             return false;
         }
     }

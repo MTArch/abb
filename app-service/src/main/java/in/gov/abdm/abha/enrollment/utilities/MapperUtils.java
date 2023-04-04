@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;

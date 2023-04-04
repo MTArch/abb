@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 
 import in.gov.abdm.abha.enrollment.validators.annotations.AbhaId;
-import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

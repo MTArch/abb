@@ -51,7 +51,6 @@ import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
 @Service
 public class EnrolUsingDrivingLicence {
 
-    private static final String MOBILE_NUMBER_VERIFICATION_IS_PENDING = "Mobile number verification is pending.";
     private static final String FAILED_TO_DELETE_TRANSACTION = "Failed to delete Transaction: ";
     private static final String TRANSACTION = "Transaction ";
     private static final String FOUND = " found.";
@@ -66,10 +65,8 @@ public class EnrolUsingDrivingLicence {
     private static final String NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB = "new enrollment account created and updated in DB";
     private static final String TRANSACTION_DELETED = "transaction deleted";
     private static final String DL_DOCUMENTS_STORED_IN_ADV_DB = "DL documents stored in ADV DB";
-    private static final String FAILED_TO_STORE_DOCUMENTS = "Failed to store Documents";
     private static final String ACCOUNT_AUTH_METHODS_ADDED = "Account Auth methods added";
     public static final String DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE = "Default PHR Address Updated In HID PHR Address Table";
-    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
     private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
     private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
