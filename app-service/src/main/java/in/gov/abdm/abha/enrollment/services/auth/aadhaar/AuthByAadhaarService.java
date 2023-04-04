@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,10 +66,10 @@ public class AuthByAadhaarService {
                         .build());
 
         return aadhaarResponseDtoMono
-                .flatMap(res -> HandleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res, transactionDto));
+                .flatMap(res -> handleAChildAbhaAadhaarOtpResponse(authByAadhaarRequestDto, res, transactionDto));
     }
 
-    private Mono<AuthResponseDto> HandleAChildAbhaAadhaarOtpResponse(AuthRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<AuthResponseDto> handleAChildAbhaAadhaarOtpResponse(AuthRequestDto authByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
         AuthResponseDto authResponseDto = handleAadhaarExceptions(aadhaarResponseDto, transactionDto.getTxnId().toString());
         if (authResponseDto != null) {
             return Mono.just(authResponseDto);
@@ -91,20 +92,20 @@ public class AuthByAadhaarService {
         
         Flux<String> fluxPhrAaddress = hidPhrAddressService
 				.getHidPhrAddressByHealthIdNumbersAndPreferredIn(new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),
-						new ArrayList<>(Collections.singleton(1))).map(h -> h.getPhrAddress());
+						new ArrayList<>(Collections.singleton(1))).map(HidPhrAddressDto::getPhrAddress);
 
-		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
-			return Mono.just(
+		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList ->
+			Mono.just(
 					AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber()).name(accountDto.getName())
 							.preferredAbhaAddress(phrAddressList.get(0)).yearOfBirth(accountDto.getYearOfBirth())
 							.gender(accountDto.getGender()).mobile(accountDto.getMobile()).email(accountDto.getEmail())
-							.kycPhoto(accountDto.getKycPhoto()).build());
-		}).switchIfEmpty(Mono.defer(() -> {
-			return Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
+							.kycPhoto(accountDto.getKycPhoto()).build())
+		).switchIfEmpty(Mono.defer(() ->
+			Mono.just(AccountResponseDto.builder().ABHANumber(accountDto.getHealthIdNumber())
 					.name(accountDto.getName()).preferredAbhaAddress(null).yearOfBirth(accountDto.getYearOfBirth())
 					.gender(accountDto.getGender()).mobile(accountDto.getMobile()).email(accountDto.getEmail())
-					.kycPhoto(accountDto.getKycPhoto()).build());
-		}));
+					.kycPhoto(accountDto.getKycPhoto()).build())
+		));
         
     }
 

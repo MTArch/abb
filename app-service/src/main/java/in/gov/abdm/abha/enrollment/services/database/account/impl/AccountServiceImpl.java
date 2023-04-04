@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
@@ -33,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class AccountServiceImpl extends AbhaDBClient implements AccountService {
+public class AccountServiceImpl implements AccountService {
 
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;

@@ -41,8 +41,7 @@ public class AbhaNumberGenerator {
         do {
             generatedNumber = generate(randomInteger);
             generatedNumberWithHyphon = formatAbhaNumber(generatedNumber);
-        } while (GeneralUtils.isPalindrome(generatedNumber) || !passesLuhnCheck(generatedNumber)
-                || UserExistWithAbhaNumber(generatedNumberWithHyphon));
+        } while (GeneralUtils.isPalindrome(generatedNumber) || !passesLuhnCheck(generatedNumber));
         return generatedNumberWithHyphon;
     }
 
@@ -55,16 +54,6 @@ public class AbhaNumberGenerator {
      */
     private String formatAbhaNumber(String AbhaNumber) {
         return AbhaNumber.replaceAll(ABHA_NUMBER_PATTERN, ABHA_NUMBER_PATTERN_GROUPS);
-    }
-
-    /**
-     * If the user is already exist with ABHA Number or not
-     *
-     * @param abhaNumber
-     * @return
-     */
-    private boolean UserExistWithAbhaNumber(String abhaNumber) {
-        return false;
     }
 
     /**
