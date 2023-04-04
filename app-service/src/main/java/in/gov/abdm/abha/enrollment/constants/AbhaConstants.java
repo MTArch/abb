@@ -1,8 +1,8 @@
 package in.gov.abdm.abha.enrollment.constants;
 
 public class AbhaConstants {
-    private AbhaConstants() {
-    }
+
+    private AbhaConstants() {}
 
     public static final String VALIDATION_EMPTY_KEY_FIELD = "Key cannot be null or empty";
     public static final String VALIDATION_EMPTY_VALUE_FIELD = "Value cannot be null or empty";
@@ -21,7 +21,7 @@ public class AbhaConstants {
     public static final String AADHAAR_NUMBER_INVALID = "Invalid Aadhaar Number";
     public static final String YEAR_OF_BIRTH_INVALID = "Invalid Year of birth";
     public static final String MOBILE_NUMBER_MISSMATCH = "Invalid Mobile Number";
-    public static final String ABHA_ID = "ABHA_ID";
+
     public static final String INVALID_NAME_FORMAT = "Invalid Name format";
     public static final String VALIDATION_ERROR_GENDER_FIELD = "Invalid Gender";
 

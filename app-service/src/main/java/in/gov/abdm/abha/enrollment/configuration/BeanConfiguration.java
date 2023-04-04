@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.configuration;
 
-import in.gov.abdm.abha.enrollment.client.NotificationDBClient;
 import in.gov.abdm.abha.enrollment.client.NotificationDbFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationDBGatewayUnavailableException;
@@ -21,8 +20,6 @@ import java.util.UUID;
 @Configuration
 public class BeanConfiguration {
 
-//    @Autowired
-//    NotificationDBClient<Templates> notificationoldDBClient;
     @Autowired
     NotificationDbFClient notificationDBClient;
 
@@ -30,15 +27,6 @@ public class BeanConfiguration {
     public WebClient getClient() {
         return WebClient.builder().build();
     }
-
-//    @Bean(AbhaConstants.MESSAGE_TEMPLATES)
-//    List<Templates> loadTemplate() {
-//        List<Templates> templates = new ArrayList<>();
-//        return notificationoldDBClient.getAll(Templates.class).collectList().onErrorResume(throwable -> {
-//            templates.addAll(Common.loadDummyTemplates());
-//            return Mono.error(new NotificationDBGatewayUnavailableException());
-//        }).block();
-//    }
 
     @Bean(AbhaConstants.MESSAGE_TEMPLATES)
     List<Templates> loadTemplate() {

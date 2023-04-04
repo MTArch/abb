@@ -2,8 +2,7 @@ package in.gov.abdm.abha.enrollment.constants;
 
 public class URIConstant {    
 
-    private URIConstant() {
-    }
+    private URIConstant() {}
 
     public static final String API_VERSION = "/v3";   
     public static final String BASE_URI = "/api" + API_VERSION + "/enrollment";
