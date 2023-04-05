@@ -46,6 +46,7 @@ public class ABHAControllerAdvise {
     private static final String CODE = "code";
     private static final String AADHAAR_ERROR_PREFIX = "UIDAI Error code : ";
     private static final String TRACKING_ID = "Tracking Id : ";
+    private static final String MESSAGE_KEY = "message";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
