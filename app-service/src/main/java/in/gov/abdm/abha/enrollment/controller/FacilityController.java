@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.controller;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
@@ -9,6 +10,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthR
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
 import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
+import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
@@ -17,6 +19,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -43,6 +46,7 @@ public class FacilityController {
     @Autowired
     AuthByAbdmService authByAbdmService;
 
+
     /**
      * endpoint to generate mobile or email otp for abha creation using aadhaar
      *
@@ -51,7 +55,6 @@ public class FacilityController {
      */
     @PostMapping(URIConstant.FACILITY_OTP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
-
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
         // If scope -abha-enrol and verify-enrolment and otpSystem -abdm

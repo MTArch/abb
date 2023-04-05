@@ -19,7 +19,7 @@ public class AccountSubscriberImpl implements AccountSubscriber {
 	/**
 	 * number of rows to be inserted.
 	 */
-	public static Long rowCount = 1L;
+	private static final Long ROW_COUNT = 1L;
 
 	/**
 	 * Invoked after calling Publisher.subscribe(Subscriber).
@@ -29,7 +29,7 @@ public class AccountSubscriberImpl implements AccountSubscriber {
 	 */
 	@Override
 	public void onSubscribe(Subscription s) {
-		s.request(rowCount);
+		s.request(ROW_COUNT);
 	}
 
 	/**

@@ -69,7 +69,6 @@ public class FacilityEnrolByEnrollmentNumberService {
 
 
     private static final String MOBILE_NUMBER_IS_VERIFIED = "Mobile Number is Verified";
-    private static final String ACTION_ALREADY_MADE = "Action already made for this transaction";
     private static final String MOBILE_NUMBER_NOT_VERIFIED = "Mobile Number Not Verified";
     private static final String ENROL_VERIFICATION_STATUS = "success";
     private static final String ACCEPT = "ACCEPT";
@@ -90,10 +89,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
-    private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
     public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
-    private static final String VERIFICATION_NULL = "Account verification status is null";
-    private static final String INVALID_STATUS = "Account verification status is not provisional";
     private static final String YEAR_OF_BIRTH = "9999";
     private static final String GENDER = "XXX";
 
@@ -192,7 +188,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     }
 
     private void handleNewOtpRedisObjectCreation(String txnId, String receiver, String aadhaarTxn, String otpValue) {
-        RedisOtp redisOtp = RedisOtp.builder().txnId(txnId).otpValue(otpValue).aadhaarTxnId(aadhaarTxn).receiver(receiver).build();
+        RedisOtp otpRedis = RedisOtp.builder().txnId(txnId).otpValue(otpValue).aadhaarTxnId(aadhaarTxn).receiver(receiver).build();
 
         ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(receiver);
 
@@ -207,7 +203,7 @@ public class FacilityEnrolByEnrollmentNumberService {
             receiverOtpTracker.setBlocked(false);
         }
         redisService.saveReceiverOtpTracker(receiver, receiverOtpTracker);
-        redisService.saveRedisOtp(txnId, redisOtp);
+        redisService.saveRedisOtp(txnId, otpRedis);
     }
 
     public Mono<AuthResponseDto> verifyOtpViaNotificationFlow(AuthRequestDto authByAbdmRequest) {

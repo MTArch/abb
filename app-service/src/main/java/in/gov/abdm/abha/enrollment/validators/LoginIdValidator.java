@@ -10,18 +10,21 @@ import javax.validation.ConstraintValidatorContext;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
-import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginId;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_REGEX_PATTERN;
 
 /**
  * Validating login Id as Aadhaar number or mobile number based on proposed otp system
  */
+@Slf4j
 public class LoginIdValidator implements ConstraintValidator<ValidLoginId, MobileOrEmailOtpRequestDto> {
 
     /**
@@ -37,9 +40,6 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      */
     private static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
 
-    public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-
-
     /**
      * Injected Utility class to utilise RSA encryption and decryption for aadhaar no.
      */
@@ -53,7 +53,6 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      *
      * @param mobileOrEmailOtpRequestDto object to validate
      * @param context in which the constraint is evaluated
-     * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
@@ -63,22 +62,8 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
                     && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
 
-                String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+                return isValidEmailOrMobileOrAadhaarOrAbha(mobileOrEmailOtpRequestDto);
 
-                if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
-                    return isValidMobile(loginId);
-                } else if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
-                    return isValidEmail(loginId);
-                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
-                        && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
-                        || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
-                    return isValidAadhaar(loginId);
-                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-                    return isValidAbha(loginId);
-                }
-                else {
-                    return true;
-                }
             }
             else return true;
         }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())) {
@@ -89,48 +74,88 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
     }
 
+    /**
+     * Validates a given MobileOrEmailOtpRequestDto object by checking whether the loginId
+     * is a valid mobile number, email address, Aadhaar number, or ABHA number based on the loginHint and scope values.
+     * @param mobileOrEmailOtpRequestDto the MobileOrEmailOtpRequestDto object to validate
+     * @return true if the loginId is a valid mobile number, email address, Aadhaar number, or ABHA number
+     */
+    private boolean isValidEmailOrMobileOrAadhaarOrAbha(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
+        String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+
+        if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
+            return isValidMobile(loginId);
+        } else if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
+            return isValidEmail(loginId);
+        } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+                && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
+                || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
+            return isValidAadhaar(loginId);
+        } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
+            return isValidAbha(loginId);
+        }
+        else {
+            return true;
+        }
+    }
+
+    /**
+     * Validates a given string as a valid email address.
+     * @param email the string to validate
+     * @return true if the given string is a valid email address, false otherwise
+     */
     private boolean isValidEmail(String email) {
         return Pattern.compile(EMAIL_REGEX_PATTERN).matcher(email).matches();
     }
 
+    /**
+     * Checks whether a given string is a valid input.
+     * A valid input should not consist of only digits or only letters.
+     * @param loginId the string to check
+     * @return true if the given string is a valid input, false otherwise
+     */
     private boolean isValidInput(String loginId) {
         return !Pattern.compile("[0-9]+").matcher(loginId).matches()
                 && !Pattern.compile("[a-zA-Z]+").matcher(loginId).matches();
     }
 
-
+    /**
+     * Checks whether a given string is RSA encrypted.
+     * @param loginId the string to check
+     * @return true if the given string is RSA encrypted, false otherwise
+     */
     private boolean isRSAEncrypted(String loginId) {
         try {
             new String(Base64.getDecoder().decode(loginId));
             return true;
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             return false;
         }
     }
 
     /**
-     * implements Mobile Number Validation
-     *
-     * @param mobileNo
-     * @return
+     * Validates a given string as a valid 10-digit mobile number.
+     * @param mobileNo the string to validate
+     * @return true if the given string is a valid 10-digit mobile number, false otherwise
      */
     private boolean isValidMobile(String mobileNo) {
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(mobileNo).matches();
     }
 
     /**
-     * implements aadhaar number validation
-     *
-     * @param aadhaar
-     * @return
+     * Validates a given string as a valid Aadhaar number.
+     * @param aadhaar the string to validate
+     * @return true if the given string is a valid Aadhaar number, false otherwise
      */
     private boolean isValidAadhaar(String aadhaar) {
         return GeneralUtils.isValidAadhaarNumber(aadhaar);
     }
 
     /**
-     * @param abha
-     * @return
+     * Validates a given string as a valid Abha number.
+     * @param abha the string to validate
+     * @return true if the given string is a valid Abha number, false otherwise
      */
     private boolean isValidAbha(String abha) {
         return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();

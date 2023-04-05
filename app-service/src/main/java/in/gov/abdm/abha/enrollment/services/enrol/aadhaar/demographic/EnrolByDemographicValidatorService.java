@@ -39,7 +39,6 @@ public class EnrolByDemographicValidatorService {
     private static final String MOBILE = "mobile";
     private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
-    private static final String CONSENT = "Consent";
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
@@ -48,7 +47,7 @@ public class EnrolByDemographicValidatorService {
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
 
-    private LinkedHashMap<String, String> errors;
+
 
     @Value("${enrollment.documentPhoto.minSizeInKB}")
     private String documentPhotoMinSizeLimit;
@@ -61,6 +60,7 @@ public class EnrolByDemographicValidatorService {
 
     public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
+        LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
         if (!isValidAadhaar(demographic)) {
             errors.put(AADHAAR, AbhaConstants.AADHAAR_NUMBER_INVALID);
@@ -192,12 +192,8 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidGender(Demographic demographic) {
-        if (demographic.getGender().equals(M) ||
+        return demographic.getGender().equals(M) ||
                 demographic.getGender().equals(F) ||
-                demographic.getGender().equals(O)) {
-            return true;
-        } else {
-            return false;
-        }
+                demographic.getGender().equals(O);
     }
 }

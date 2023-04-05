@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.DemoDto;
 import in.gov.abdm.abha.enrollment.validators.annotations.TimestampDemo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintValidator;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Validating timestamp should not be greater than current date
  */
+@Slf4j
 public class TimestampDemoValidator implements ConstraintValidator<TimestampDemo, DemoDto> {
     private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
@@ -21,6 +23,7 @@ public class TimestampDemoValidator implements ConstraintValidator<TimestampDemo
             try {
                 return LocalDateTime.parse(demoDto.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
             } catch (Exception ex) {
+                log.error(ex.getMessage());
                 return false;
             }
         }
