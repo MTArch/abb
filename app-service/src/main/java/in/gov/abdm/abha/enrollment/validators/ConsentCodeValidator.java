@@ -9,9 +9,9 @@ import javax.validation.ConstraintValidatorContext;
  * It should match 'abha-enrollment'
  */
 public class ConsentCodeValidator implements ConstraintValidator<ConsentCode, String> {
-    private String CONSENT_CODE = "abha-enrollment";
+    private String consentCode = "abha-enrollment";
     @Override
     public boolean isValid(String str, ConstraintValidatorContext context) {
-                return (str!=null && str.equals(CONSENT_CODE));
+                return (str!=null && str.equals(consentCode));
     }
 }

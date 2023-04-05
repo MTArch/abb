@@ -43,10 +43,8 @@ public class ABHAControllerAdvise {
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";
-    private static final String CODE = "code";
     private static final String AADHAAR_ERROR_PREFIX = "UIDAI Error code : ";
     private static final String TRACKING_ID = "Tracking Id : ";
-    private static final String MESSAGE_KEY = "message";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
@@ -205,7 +203,7 @@ public class ABHAControllerAdvise {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
     public Map<String, String> runtimeBadRequestHandler(BadRequestException ex) {
-        LinkedHashMap<String, String> errorMap = ex.getErrors();
+        Map<String, String> errorMap = ex.getErrors();
         log.info(EXCEPTIONS + ex.getErrors());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
@@ -236,14 +234,12 @@ public class ABHAControllerAdvise {
                             errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
                             log.info(EXCEPTIONS + msg);
                         },
-                        () -> {
-                            Optional.ofNullable(ex)
-                                    .map(Throwable::getMessage)
-                                    .ifPresent(msg -> {
-                                        errorMap.put(StringConstants.MESSAGE, msg);
-                                        log.info(EXCEPTIONS + msg);
-                                    });
-                        }
+                        () -> Optional.ofNullable(ex)
+                                .map(Throwable::getMessage)
+                                .ifPresent(msg -> {
+                                    errorMap.put(StringConstants.MESSAGE, msg);
+                                    log.info(EXCEPTIONS + msg);
+                                })
                 );
 
 

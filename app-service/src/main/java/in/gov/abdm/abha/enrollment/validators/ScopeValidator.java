@@ -30,9 +30,7 @@ public class ScopeValidator implements ConstraintValidator<ValidScope, List<Scop
         if(requestScopes==null)
             return false;
         List<Scopes> enumNames = Stream.of(Scopes.values())
-                .filter(name -> {
-                    return !name.equals(Scopes.WRONG);
-                })
+                .filter(name -> !name.equals(Scopes.WRONG))
                 .collect(Collectors.toList());
         return requestScopes != null &&  !requestScopes.isEmpty() && Common.isAllScopesAvailable(enumNames, requestScopes);
     }

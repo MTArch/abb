@@ -39,7 +39,7 @@ public class AccountServiceImpl implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
-    private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+    private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
@@ -175,7 +175,7 @@ public class AccountServiceImpl implements AccountService {
         if (birthdate != null && birthdate.length() > 4) {
             try {
 
-                LocalDate birthDate = KYC_DATE_FORMAT.parse(birthdate).toInstant()
+                LocalDate birthDate = kycDateFormat.parse(birthdate).toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
 

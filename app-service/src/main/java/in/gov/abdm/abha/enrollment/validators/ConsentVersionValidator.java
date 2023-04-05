@@ -10,9 +10,9 @@ import javax.validation.ConstraintValidatorContext;
  */
 public class ConsentVersionValidator implements ConstraintValidator<ConsentVersion, String> {
 
-    private String CONSENT_VERSION = "1.4";
+    private String consentVersion = "1.4";
     @Override
     public boolean isValid(String str, ConstraintValidatorContext context) {
-        return str!=null && str.equals(CONSENT_VERSION);
+        return str!=null && str.equals(consentVersion);
     }
 }

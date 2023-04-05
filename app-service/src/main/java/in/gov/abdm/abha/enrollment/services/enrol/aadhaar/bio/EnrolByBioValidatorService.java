@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 
 public class EnrolByBioValidatorService {
     private static final String AADHAAR = "Aadhaar";
-    private static final String RD_PID = "RdPidData";
     private static final String TIMESTAMP = "Timestamp";
     private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     @Autowired
