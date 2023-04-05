@@ -197,9 +197,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                                     {
                                                         throw new AbhaConflictException(ABDMError.ABHA_ADDRESS_EXIST.getCode(), ABDMError.ABHA_ADDRESS_EXIST.getMessage());
                                                     }
-                                                }).switchIfEmpty(Mono.defer(()-> {
-                                                    return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
-                                                }));
+                                                }).switchIfEmpty(Mono.defer(()-> updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto)));
                                     }
                                     return Mono.empty();
                                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -225,9 +223,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                         {
                             Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
                                     = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
-                            return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
-                                return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
-                            });
+                            return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto));
                         }
                         return Mono.empty();
                     });
@@ -237,9 +233,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
                 Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
                         = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
-                return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> {
-                    return handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto);
-                });
+                return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto,abhaAddressRequestDto));
             }));
         }
         return Mono.empty();

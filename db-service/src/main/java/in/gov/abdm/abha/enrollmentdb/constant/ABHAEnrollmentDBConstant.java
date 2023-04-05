@@ -10,29 +10,31 @@ public interface ABHAEnrollmentDBConstant {
     String GET_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     String DELETE_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     String DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = "/delete/{healthIdNumber}";
-    String UPDATE_TRANSACTION_BY_ID = "/{id}";
+    String ID ="/{id}";
+    String HID_PHR_ADDRESS_ID= "/{hidPhrAddressId}";
+    String UPDATE_TRANSACTION_BY_ID = ID;
     String ENROLLMENT_LOG_PREFIX = "ENROLLMENT_DB: ";
     String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " + "Valid Format Reference:" +
             " 1. The specified field is mandatory (not null), 2. The specified field shouldn't be Blank, 3. The specified field shouldn't be Empty.";
 
     String DEPENDENT_ACCOUNT_RELATIONSHIP_ENDPOINT = API_VERSION + "/dependentaccountrelationship";
 
-    String UPDATE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+    String UPDATE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = ID;
 
-    String DELETE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+    String DELETE_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = ID;
 
-    String GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = "/{id}";
+    String GET_DEPENDENT_ACCOUNT_RELATIONSHIP_BY_ID = ID;
 
     String HID_PHR_ADDRESS_ENDPOINT = API_VERSION + "/hidphraddress";
 
-    String GET_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+    String GET_HID_PHR_ADDRESS_BY_ID = HID_PHR_ADDRESS_ID;
     String GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS = "/byPhrAddress/{phrAddress}";
 
-    String DELETE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+    String DELETE_HID_PHR_ADDRESS_BY_ID = HID_PHR_ADDRESS_ID;
 
     String GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = "/byHealthIdNumber/{healthIdNumber}";
 
-    String UPDATE_HID_PHR_ADDRESS_BY_ID = "/{hidPhrAddressId}";
+    String UPDATE_HID_PHR_ADDRESS_BY_ID = HID_PHR_ADDRESS_ID;
 
     String UPDATE_PREFERRED_FLAG_BY_HEALTH_ID_NUMBER = "/update/{healthIdNumber}";
 
@@ -57,4 +59,8 @@ public interface ABHAEnrollmentDBConstant {
     public static final String MSG_ABHA_PUBLISH_USER_TO_PHR = "User about to be published from ABHA";
     public static final String MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR = "User published to PHR successfully from ABHA";
     public static final String MSG_SYNC_ACKNOWLEDGMENT_ADDED_ABHA = "Acknowledgment object added at ABHA system with request id: ";
+
+    String ABHA_SYNC ="ABHA_SYNC";
+    String VERIFIED ="VERIFIED";
+    String PENDING = "PENDING";
 }
