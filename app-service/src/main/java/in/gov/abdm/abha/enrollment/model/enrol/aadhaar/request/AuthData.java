@@ -55,4 +55,8 @@ public class AuthData {
     @JsonProperty("face")
     @Valid
     private FaceDto face;
+
+    @JsonProperty("bio")
+    @Valid
+    private BioDto bio;
 }
