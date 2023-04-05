@@ -53,7 +53,6 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      *
      * @param mobileOrEmailOtpRequestDto object to validate
      * @param context in which the constraint is evaluated
-     * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
@@ -75,6 +74,12 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
     }
 
+    /**
+     * Validates a given MobileOrEmailOtpRequestDto object by checking whether the loginId
+     * is a valid mobile number, email address, Aadhaar number, or ABHA number based on the loginHint and scope values.
+     * @param mobileOrEmailOtpRequestDto the MobileOrEmailOtpRequestDto object to validate
+     * @return true if the loginId is a valid mobile number, email address, Aadhaar number, or ABHA number
+     */
     private boolean isValidEmailOrMobileOrAadhaarOrAbha(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
         String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
 
@@ -94,16 +99,31 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
         }
     }
 
+    /**
+     * Validates a given string as a valid email address.
+     * @param email the string to validate
+     * @return true if the given string is a valid email address, false otherwise
+     */
     private boolean isValidEmail(String email) {
         return Pattern.compile(EMAIL_REGEX_PATTERN).matcher(email).matches();
     }
 
+    /**
+     * Checks whether a given string is a valid input.
+     * A valid input should not consist of only digits or only letters.
+     * @param loginId the string to check
+     * @return true if the given string is a valid input, false otherwise
+     */
     private boolean isValidInput(String loginId) {
         return !Pattern.compile("[0-9]+").matcher(loginId).matches()
                 && !Pattern.compile("[a-zA-Z]+").matcher(loginId).matches();
     }
 
-
+    /**
+     * Checks whether a given string is RSA encrypted.
+     * @param loginId the string to check
+     * @return true if the given string is RSA encrypted, false otherwise
+     */
     private boolean isRSAEncrypted(String loginId) {
         try {
             new String(Base64.getDecoder().decode(loginId));
@@ -115,28 +135,27 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
     }
 
     /**
-     * implements Mobile Number Validation
-     *
-     * @param mobileNo
-     * @return
+     * Validates a given string as a valid 10-digit mobile number.
+     * @param mobileNo the string to validate
+     * @return true if the given string is a valid 10-digit mobile number, false otherwise
      */
     private boolean isValidMobile(String mobileNo) {
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(mobileNo).matches();
     }
 
     /**
-     * implements aadhaar number validation
-     *
-     * @param aadhaar
-     * @return
+     * Validates a given string as a valid Aadhaar number.
+     * @param aadhaar the string to validate
+     * @return true if the given string is a valid Aadhaar number, false otherwise
      */
     private boolean isValidAadhaar(String aadhaar) {
         return GeneralUtils.isValidAadhaarNumber(aadhaar);
     }
 
     /**
-     * @param abha
-     * @return
+     * Validates a given string as a valid Abha number.
+     * @param abha the string to validate
+     * @return true if the given string is a valid Abha number, false otherwise
      */
     private boolean isValidAbha(String abha) {
         return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();

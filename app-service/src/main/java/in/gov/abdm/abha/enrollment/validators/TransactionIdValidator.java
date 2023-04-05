@@ -38,7 +38,6 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
      *
      * @param mobileOrEmailOtpRequestDto object to validate
      * @param context                    in which the constraint is evaluated
-     * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {

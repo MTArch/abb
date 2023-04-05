@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
@@ -104,7 +103,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddressDto> getHidPhrAddressById(Long hidPhrAddressId) {
         return hidPhrAddressRepository.findById(hidPhrAddressId).
-                map(HidPhrAddress -> modelMapper.map(HidPhrAddress, HidPhrAddressDto.class));
+                map(hidPhrAddress -> modelMapper.map(hidPhrAddress, HidPhrAddressDto.class));
     }
 
     @Override

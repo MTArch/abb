@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.DRIVING_LICENCE;
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ABHA_SYNC;
 
 @Service
 @Slf4j

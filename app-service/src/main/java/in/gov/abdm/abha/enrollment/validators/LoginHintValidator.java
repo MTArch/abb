@@ -25,7 +25,6 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
      * @param mobileOrEmailOtpRequestDto object to validate
      * @param context                    context in which the constraint is
      *                                   evaluated
-     * @return
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
