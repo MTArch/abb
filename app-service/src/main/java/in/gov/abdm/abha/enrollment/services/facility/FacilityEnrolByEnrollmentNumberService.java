@@ -188,7 +188,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     }
 
     private void handleNewOtpRedisObjectCreation(String txnId, String receiver, String aadhaarTxn, String otpValue) {
-        RedisOtp redisOtp = RedisOtp.builder().txnId(txnId).otpValue(otpValue).aadhaarTxnId(aadhaarTxn).receiver(receiver).build();
+        RedisOtp otpRedis = RedisOtp.builder().txnId(txnId).otpValue(otpValue).aadhaarTxnId(aadhaarTxn).receiver(receiver).build();
 
         ReceiverOtpTracker receiverOtpTracker = redisService.getReceiverOtpTracker(receiver);
 
@@ -203,7 +203,7 @@ public class FacilityEnrolByEnrollmentNumberService {
             receiverOtpTracker.setBlocked(false);
         }
         redisService.saveReceiverOtpTracker(receiver, receiverOtpTracker);
-        redisService.saveRedisOtp(txnId, redisOtp);
+        redisService.saveRedisOtp(txnId, otpRedis);
     }
 
     public Mono<AuthResponseDto> verifyOtpViaNotificationFlow(AuthRequestDto authByAbdmRequest) {
