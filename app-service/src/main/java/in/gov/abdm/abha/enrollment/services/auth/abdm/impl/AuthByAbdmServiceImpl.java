@@ -2,10 +2,8 @@ package in.gov.abdm.abha.enrollment.services.auth.abdm.impl;
 
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.EnrollErrorConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;

@@ -35,12 +35,8 @@ public class AadhaarNumberValidator implements ConstraintValidator<AadhaarNumber
 
         if (checkAadhar) {
             if (isEncrypted) {
-               // value = DecryptRSAUtil.decrypt(value);
-              //  value = RSAUtil.decrypt(value);
             }
             getConfig();
-         //   return (verhoeff_check.equalsIgnoreCase("disable")) ? true
-           //         : (StringUtils.isEmpty(value) ? false : VerhoeffAlgorithm.validateVerhoeff(value));
 
         }
         return true;

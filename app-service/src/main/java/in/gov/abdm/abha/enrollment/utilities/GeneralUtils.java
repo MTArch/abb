@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollment.utilities;
 
 import in.gov.abdm.error.ABDMError;
 import in.gov.abdm.error.ErrorResponse;
-import liquibase.pro.packaged.P;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;

@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 
 @Getter
 public class BadRequestException extends RuntimeException {
-    private LinkedHashMap<String, String> errors;
+    private final LinkedHashMap<String, String> errors;
 
     public BadRequestException(LinkedHashMap<String, String> message) {
         errors = message;

@@ -19,7 +19,7 @@ public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
     /**
      * number of rows to be inserted.
      */
-    public static Long rowCount = 1L;
+    public static final Long ROW_COUNT = 1L;
 
     /**
      * Invoked after calling Publisher.subscribe(Subscriber).
@@ -31,7 +31,7 @@ public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
     @Override
     public void onSubscribe(Subscription s) {
 
-        s.request(rowCount);
+        s.request(ROW_COUNT);
     }
 
     /**
