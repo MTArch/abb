@@ -68,24 +68,7 @@ public class EnrolByDemographicValidatorService {
         if (!isValidGender(demographic)) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
-        if (!isValidDayOfBirth(demographic)) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
-        }
-        if (!isValidMonthOfBirth(demographic)) {
-            errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
-        }
-        if (!isValidYearOfBirth(demographic)) {
-            errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
-        }
-        if (!isValidFirstName(demographic)) {
-            errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
-        }
-        if (!isValidMiddleName(demographic)) {
-            errors.put(MIDDLE_NAME, AbhaConstants.INVALID_MIDDLE_NAME);
-        }
-        if (!isValidLastName(demographic)) {
-            errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
-        }
+        validateNameAndDob(demographic, errors);
         if (!isValidPinCode(demographic)) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
@@ -111,6 +94,27 @@ public class EnrolByDemographicValidatorService {
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
+        }
+    }
+
+    private void validateNameAndDob(Demographic demographic, LinkedHashMap<String, String> errors) {
+        if (!isValidDayOfBirth(demographic)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+        }
+        if (!isValidMonthOfBirth(demographic)) {
+            errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
+        }
+        if (!isValidYearOfBirth(demographic)) {
+            errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
+        }
+        if (!isValidFirstName(demographic)) {
+            errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
+        }
+        if (!isValidMiddleName(demographic)) {
+            errors.put(MIDDLE_NAME, AbhaConstants.INVALID_MIDDLE_NAME);
+        }
+        if (!isValidLastName(demographic)) {
+            errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
         }
     }
 
