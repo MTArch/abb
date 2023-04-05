@@ -21,6 +21,11 @@ spring:
     url: r2dbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    pool:
+      enabled: ${POOL_ENABLED}
+      initial: ${POOL_INIT}
+      max-size: ${POOL_MAX}
+      maxIdleTime: ${POOL_TIMEOUT}
 kafka:
   group:
     id: ${KAFKA_GROUP_ID}
@@ -35,11 +40,6 @@ kafka:
         topic: ${KAFKA_ABHA_PHR_SYNC_TOPIC}
         ack:
           topic: ${KAFKA_ABHA_PHR_SYNC_ACK_TOPIC}
-management:
-  endpoints:
-    web:
-      exposure:
-        include: ${ACTUATOR_KEYS}
 logging:
   pattern:
     level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
