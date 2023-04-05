@@ -13,14 +13,13 @@ public class DeDuplicationUtils {
 
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;
-
-    public Mono<AccountDto> checkDeDuplication(String firstName, String lastName, Integer dob, Integer mob, Integer yob, String gender) {
-        return abhaDBAccountFClient.checkDeDuplication(firstName,lastName,dob,mob,yob,gender);
+    public Mono<AccountDto> checkDeDuplication(DeDuplicationRequest request) {
+        return abhaDBAccountFClient.checkDeDuplication(request);
     }
     public DeDuplicationRequest prepareRequest(AccountDto accountDto) {
         return DeDuplicationRequest.builder()
-                .fName(accountDto.getFirstName().toLowerCase())
-                .lName(accountDto.getLastName().toLowerCase())
+                .firstName(accountDto.getFirstName().toLowerCase())
+                .lastName(accountDto.getLastName().toLowerCase())
                 .dob(Integer.valueOf(accountDto.getDayOfBirth()))
                 .mob(Integer.valueOf(accountDto.getMonthOfBirth()))
                 .yob(Integer.valueOf(accountDto.getYearOfBirth()))

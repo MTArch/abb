@@ -9,6 +9,7 @@ import java.util.UUID;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
+import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.address.Address;
@@ -279,9 +280,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Mono<AccountDto> checkDeDuplication(String firstName, String lastName, Integer dob,Integer mob,Integer yob,String gender) {
-        return accountRepository.checkDeDuplication(firstName,lastName,dob,mob,yob,gender)
+    public Mono<AccountDto> checkDeDuplication(DeDuplicationRequest request) {
+        return accountRepository.checkDeDuplication(request.getFirstName(),request.getLastName(),request.getDob(),request.getMob(),request.getYob(),request.getGender())
                 .map(account -> modelMapper.map(account, AccountDto.class));
     }
-
 }

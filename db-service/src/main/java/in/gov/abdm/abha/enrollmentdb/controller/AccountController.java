@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -65,9 +66,7 @@ public class AccountController {
     }
 
     @GetMapping(value = ABHAEnrollmentDBConstant.DB_GET_DUPLICATE_ACCOUNT)
-    public ResponseEntity<?> checkDeDuplication(@PathVariable("firstName") String firstName, @PathVariable("lastName") String lastName,
-                                                  @PathVariable("dob") Integer dob, @PathVariable("mob") Integer mob, @PathVariable("yob") Integer yob,
-                                                  @PathVariable("gender") String gender) {
-        return ResponseEntity.ok(accountService.checkDeDuplication(firstName, lastName, dob, mob, yob, gender));
+    public ResponseEntity<?> checkDeDuplication(@RequestBody DeDuplicationRequest request) {
+        return ResponseEntity.ok(accountService.checkDeDuplication(request));
     }
 }

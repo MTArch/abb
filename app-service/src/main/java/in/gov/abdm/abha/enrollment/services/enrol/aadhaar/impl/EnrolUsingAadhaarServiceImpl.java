@@ -208,9 +208,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
 
-            DeDuplicationRequest request = deDuplicationUtils.prepareRequest(accountDto);
-            return deDuplicationUtils.checkDeDuplication(request.getFName(),request.getLName(),request.getDob(),request.getMob(),request.getYob(),request.getGender())
-             .flatMap(duplicateAccount -> {
+            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+            .flatMap(duplicateAccount -> {
                 if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                     throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                 } else {
@@ -398,8 +397,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
 
-            DeDuplicationRequest request = deDuplicationUtils.prepareRequest(accountDto);
-            return deDuplicationUtils.checkDeDuplication(request.getFName(),request.getLName(),request.getDob(),request.getMob(),request.getYob(),request.getGender())
+            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
                     .flatMap(duplicateAccount -> {
                         if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);

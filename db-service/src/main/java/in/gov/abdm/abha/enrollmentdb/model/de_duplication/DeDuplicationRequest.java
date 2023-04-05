@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.model.de_duplication;
+package in.gov.abdm.abha.enrollmentdb.model.de_duplication;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

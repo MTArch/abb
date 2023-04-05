@@ -61,7 +61,7 @@ public interface URIConstant {
     String FDB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
     String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = DB_BASE_URI + "/account/linkedAccountCount/{mobileNumber}";
     String GET_LINKED_ACCOUNT_COUNT_BY_EMAIL = DB_BASE_URI + "/account/linkedAccountCount/email/{email}";
-    String FDB_GET_DUPLICATE_ACCOUNT = DB_BASE_URI + "/account/{firstName}/{lastName}/{dob}/{mob}/{yob}/{gender}";
+    String FDB_GET_DUPLICATE_ACCOUNT = DB_BASE_URI + "/account/check/de-duplicate";
     String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
 
     String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
