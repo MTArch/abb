@@ -272,7 +272,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     }
 
     private AccountDto findUserAlreadyExist() {
-        //TODO find user using xmluid or demographic details
         return new AccountDto();
     }
 
