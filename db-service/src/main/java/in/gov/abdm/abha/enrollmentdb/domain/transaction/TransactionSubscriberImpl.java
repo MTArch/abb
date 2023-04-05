@@ -19,7 +19,7 @@ public class TransactionSubscriberImpl implements TransactionSubscriber {
 	/**
 	 * number of rows to be inserted.
 	 */
-	private static final Long rowCount = 1L;
+	private static final Long ROW_COUNT = 1L;
 
 	/**
 	 * Invoked after calling Publisher.subscribe(Subscriber).
@@ -29,7 +29,7 @@ public class TransactionSubscriberImpl implements TransactionSubscriber {
 	 */
 	@Override
 	public void onSubscribe(Subscription s) {
-		s.request(rowCount);
+		s.request(ROW_COUNT);
 	}
 
 	/**

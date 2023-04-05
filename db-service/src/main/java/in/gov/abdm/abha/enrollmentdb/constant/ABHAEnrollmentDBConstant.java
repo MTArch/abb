@@ -57,4 +57,6 @@ public interface ABHAEnrollmentDBConstant {
     public static final String MSG_ABHA_PUBLISH_USER_TO_PHR = "User about to be published from ABHA";
     public static final String MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR = "User published to PHR successfully from ABHA";
     public static final String MSG_SYNC_ACKNOWLEDGMENT_ADDED_ABHA = "Acknowledgment object added at ABHA system with request id: ";
+    public static final String ABHA_SYNC = "ABHA_SYNC";
+
 }

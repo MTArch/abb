@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.DRIVING_LICENCE;
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ABHA_SYNC;
 
 @Service
 @Slf4j
@@ -134,7 +135,7 @@ public class AccountServiceImpl implements AccountService {
         userToBePublished.setMobileNumberVerified(null != accountDto.getMobile());
         userToBePublished.setEmailId(accountDto.getEmail());
         userToBePublished.setEmailIdVerified(null != accountDto.getEmailVerified());
-        userToBePublished.setUpdatedBy("ABHA_SYNC");
+        userToBePublished.setUpdatedBy(ABHA_SYNC);
         userToBePublished.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
         return userToBePublished;
     }
@@ -175,13 +176,10 @@ public class AccountServiceImpl implements AccountService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
-            address.setCreatedBy("ABHA_SYNC");
-            address.setUpdatedBy("ABHA_SYNC");
+            address.setCreatedBy(ABHA_SYNC);
+            address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
-            if (null != accounts.getCreatedDate()) {
-                LocalDateTime localDateTime = accounts.getCreatedDate();
-                   }
             user.setDayOfBirth(accounts.getDayOfBirth());
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
@@ -195,9 +193,6 @@ public class AccountServiceImpl implements AccountService {
             user.setFullName(accounts.getName());
             user.setPassword(accounts.getPassword());
             user.setStatus(accounts.getStatus());
-            if(null != accounts.getUpdateDate()) {
-                LocalDateTime localDateTime = accounts.getUpdateDate();
-                   }
             user.setYearOfBirth(accounts.getYearOfBirth());
             user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
@@ -234,12 +229,6 @@ public class AccountServiceImpl implements AccountService {
             patient.setStateCode(accounts.getStateCode());
             patient.setDistrictCode(accounts.getDistrictCode());
             patient.setStatus(accounts.getStatus());
-            if(null != accounts.getCreatedDate()) {
-                LocalDateTime localDateTime = accounts.getCreatedDate();
-                   }
-            if(null != accounts.getUpdateDate()) {
-                LocalDateTime localDateTime = accounts.getUpdateDate();
-                   }
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
