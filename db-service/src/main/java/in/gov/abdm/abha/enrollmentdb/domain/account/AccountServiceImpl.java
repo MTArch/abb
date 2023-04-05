@@ -46,6 +46,8 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
+    private static final String ABHA_SYNC = "ABHA_SYNC";
+
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
         Accounts account = map(accountDto);
@@ -198,8 +200,8 @@ public class AccountServiceImpl implements AccountService {
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYNC");
-            user.setUpdatedBy("ABHA_SYNC");
+            user.setCreatedBy(ABHA_SYNC);
+            user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
             user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
