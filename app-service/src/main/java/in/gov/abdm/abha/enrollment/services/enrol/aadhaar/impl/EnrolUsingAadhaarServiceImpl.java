@@ -137,9 +137,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
                         }
                     })
-                    .switchIfEmpty(Mono.defer(() -> {
-                        return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
-                    }));
+                    .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto)));
         });
     }
 
@@ -343,9 +341,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 } else {
                     return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
                 }
-            }).switchIfEmpty(Mono.defer(() -> {
-                return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
-            }));
+            }).switchIfEmpty(Mono.defer(() -> createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction)));
         });
     }
 

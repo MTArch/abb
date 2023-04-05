@@ -45,6 +45,8 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
+    private static final String ABHA_SYNC = "ABHA_SYNC";
+
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
         Accounts account = map(accountDto);
@@ -134,7 +136,7 @@ public class AccountServiceImpl implements AccountService {
         userToBePublished.setMobileNumberVerified(null != accountDto.getMobile());
         userToBePublished.setEmailId(accountDto.getEmail());
         userToBePublished.setEmailIdVerified(null != accountDto.getEmailVerified());
-        userToBePublished.setUpdatedBy("ABHA_SYNC");
+        userToBePublished.setUpdatedBy(ABHA_SYNC);
         userToBePublished.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
         return userToBePublished;
     }
@@ -175,8 +177,8 @@ public class AccountServiceImpl implements AccountService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
-            address.setCreatedBy("ABHA_SYNC");
-            address.setUpdatedBy("ABHA_SYNC");
+            address.setCreatedBy(ABHA_SYNC);
+            address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
             if (null != accounts.getCreatedDate()) {
@@ -203,8 +205,8 @@ public class AccountServiceImpl implements AccountService {
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYNC");
-            user.setUpdatedBy("ABHA_SYNC");
+            user.setCreatedBy(ABHA_SYNC);
+            user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
             user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
