@@ -203,7 +203,7 @@ public class ABHAControllerAdvise {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException.class)
     public Map<String, String> runtimeBadRequestHandler(BadRequestException ex) {
-        LinkedHashMap<String, String> errorMap = ex.getErrors();
+        Map<String, String> errorMap = ex.getErrors();
         log.info(EXCEPTIONS + ex.getErrors());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
@@ -234,14 +234,12 @@ public class ABHAControllerAdvise {
                             errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
                             log.info(EXCEPTIONS + msg);
                         },
-                        () -> {
-                            Optional.ofNullable(ex)
-                                    .map(Throwable::getMessage)
-                                    .ifPresent(msg -> {
-                                        errorMap.put(StringConstants.MESSAGE, msg);
-                                        log.info(EXCEPTIONS + msg);
-                                    });
-                        }
+                        () -> Optional.ofNullable(ex)
+                                .map(Throwable::getMessage)
+                                .ifPresent(msg -> {
+                                    errorMap.put(StringConstants.MESSAGE, msg);
+                                    log.info(EXCEPTIONS + msg);
+                                })
                 );
 
 

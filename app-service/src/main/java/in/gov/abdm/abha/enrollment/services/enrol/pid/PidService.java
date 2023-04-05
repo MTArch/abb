@@ -25,11 +25,11 @@ public class PidService {
     RSAUtil rsaUtil;
 
     @Value("${redis.expireTimeInMinutes: 30}")
-    private int REDIS_OTP_OBJECT_TIMEOUT;
+    private int redisOtpObjectTimeout;
 
     public Mono<EnrolByAadhaarResponseDto> addPidAndScanStatus(PidDto pidDto){
         redisTemplate.opsForHash().put(ENROL_PID,pidDto.getTxnId(),pidDto);
-        redisTemplate.expire(ENROL_PID,REDIS_OTP_OBJECT_TIMEOUT, TimeUnit.MINUTES);
+        redisTemplate.expire(ENROL_PID, redisOtpObjectTimeout, TimeUnit.MINUTES);
         return Mono.just(EnrolByAadhaarResponseDto.builder().message(StringConstants.SUCCESS).txnId(pidDto.getTxnId()).build());
     }
 

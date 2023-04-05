@@ -27,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
-    private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+    private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Autowired
     AbhaDBTransactionFClient abhaDBTransactionFClient;
@@ -44,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionDto.setKycdob(kycData.getBirthdate());
             if (kycData.getBirthdate().length() > 4) {
                 try {
-                    LocalDate birthDate = KYC_DATE_FORMAT.parse(kycData.getBirthdate()).toInstant()
+                    LocalDate birthDate = kycDateFormat.parse(kycData.getBirthdate()).toInstant()
                             .atZone(ZoneId.systemDefault()).toLocalDate();
                     transactionDto.setMonthOfBirth(String.valueOf(birthDate.getMonth().getValue()));
                     transactionDto.setDayOfBirth(String.valueOf(birthDate.getDayOfMonth()));
