@@ -18,7 +18,7 @@ public class AccountActionSubscriberImpl implements AccountActionSubscriber {
 	/**
 	 * number of rows to be inserted.
 	 */
-	public static Long rowCount = 1L;
+	public static final Long  rowCount = 1L;
 
 	/**
 	 * Invoked after calling Publisher.subscribe(Subscriber).

@@ -61,7 +61,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
     private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
-    public static final String DISTRICT = "District";
 
     @Autowired
     AccountService accountService;
@@ -164,7 +163,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                                             .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                             .build();
-                                    //Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .responseTokensDto(responseTokensDto)
@@ -207,15 +205,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 accountDto.setMobile(userEnteredPhoneNumber);
                                 abhaProfileDto.setMobile(userEnteredPhoneNumber);
                             }
-                            //update transaction table and create account in account table
-                            //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                         });
             } else {
-                //update transaction table and create account in account table
-                //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                         .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
@@ -376,8 +370,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
             {
-                //update transaction table and create account in account table
-                //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                         .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
@@ -440,7 +432,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                                             .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                             .build();
-                                    //Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .responseTokensDto(responseTokensDto)

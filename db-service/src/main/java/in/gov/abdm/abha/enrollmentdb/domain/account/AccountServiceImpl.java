@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
-import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.address.Address;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,13 +35,7 @@ public class AccountServiceImpl implements AccountService {
     AccountRepository accountRepository;
 
     @Autowired
-    private SyncAcknowledgementService syncAcknowledgementService;
-
-    @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private AccountSubscriber accountSubscriber;
 
     @Autowired
     private PHREventPublisher phrEventPublisher;
@@ -76,7 +68,6 @@ public class AccountServiceImpl implements AccountService {
         account.setNewAccount(false);
         return accountRepository.updateAccounts(account.getHealthIdNumber(), account)
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
-//                .onErrorResume(throwable -> log.error(throwable.getMessage()))
                 .switchIfEmpty(Mono.just(accountDto))
                 .flatMap(accountUpdated -> {
                     SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
@@ -190,6 +181,9 @@ public class AccountServiceImpl implements AccountService {
             address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
+            if (null != accounts.getCreatedDate()) {
+                LocalDateTime localDateTime = accounts.getCreatedDate();
+                   }
             user.setDayOfBirth(accounts.getDayOfBirth());
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
@@ -203,6 +197,9 @@ public class AccountServiceImpl implements AccountService {
             user.setFullName(accounts.getName());
             user.setPassword(accounts.getPassword());
             user.setStatus(accounts.getStatus());
+            if(null != accounts.getUpdateDate()) {
+                LocalDateTime localDateTime = accounts.getUpdateDate();
+                   }
             user.setYearOfBirth(accounts.getYearOfBirth());
             user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
@@ -239,6 +236,12 @@ public class AccountServiceImpl implements AccountService {
             patient.setStateCode(accounts.getStateCode());
             patient.setDistrictCode(accounts.getDistrictCode());
             patient.setStatus(accounts.getStatus());
+            if(null != accounts.getCreatedDate()) {
+                LocalDateTime localDateTime = accounts.getCreatedDate();
+                   }
+            if(null != accounts.getUpdateDate()) {
+                LocalDateTime localDateTime = accounts.getUpdateDate();
+                   }
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());

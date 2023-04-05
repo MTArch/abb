@@ -1,9 +1,6 @@
 package in.gov.abdm.abha.enrollment.validators;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,7 +12,6 @@ import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.annotations.ValidLoginHint;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Validating login hint should be empty for abha creation using aadhaar

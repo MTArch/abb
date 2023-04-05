@@ -68,8 +68,6 @@ public class AadhaarUserKycDto {
 
     private String actionCode;
 
-//    private DOAuthOTP auth;
-
     private String migrated;
 
     private String txnId;

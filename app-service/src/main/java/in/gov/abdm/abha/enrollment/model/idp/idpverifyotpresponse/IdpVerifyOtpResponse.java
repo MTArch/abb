@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.ErrorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +26,6 @@ public class IdpVerifyOtpResponse {
      * It is Kyc
      */
     @JsonProperty("kyc")
-//    public Kyc kyc;
     private List<Kyc> kyc;
 
     /**
