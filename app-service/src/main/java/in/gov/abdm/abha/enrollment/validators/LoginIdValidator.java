@@ -63,22 +63,8 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
                     && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
 
-                String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+                return isValidEmailOrMobileOrAadhaarOrAbha(mobileOrEmailOtpRequestDto);
 
-                if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
-                    return isValidMobile(loginId);
-                } else if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
-                    return isValidEmail(loginId);
-                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
-                        && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
-                        || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
-                    return isValidAadhaar(loginId);
-                } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
-                    return isValidAbha(loginId);
-                }
-                else {
-                    return true;
-                }
             }
             else return true;
         }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())) {
@@ -87,6 +73,25 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
         else
             return true;
 
+    }
+
+    private boolean isValidEmailOrMobileOrAadhaarOrAbha(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
+        String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
+
+        if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
+            return isValidMobile(loginId);
+        } else if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
+            return isValidEmail(loginId);
+        } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+                && (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL))
+                || Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.CHILD_ABHA_ENROL)))) {
+            return isValidAadhaar(loginId);
+        } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
+            return isValidAbha(loginId);
+        }
+        else {
+            return true;
+        }
     }
 
     private boolean isValidEmail(String email) {

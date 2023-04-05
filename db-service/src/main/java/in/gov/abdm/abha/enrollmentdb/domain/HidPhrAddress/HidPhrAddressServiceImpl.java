@@ -28,6 +28,8 @@ import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
+
 /**
  * A class which implements Business logic.
  */
@@ -161,8 +163,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
-            address.setCreatedBy("ABHA_SYNC");
-            address.setUpdatedBy("ABHA_SYNC");
+            address.setCreatedBy(ABHA_SYNC);
+            address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
             if (null != accounts.getCreatedDate()) {
@@ -189,11 +191,11 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYNC");
-            user.setUpdatedBy("ABHA_SYNC");
+            user.setCreatedBy(ABHA_SYNC);
+            user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
-            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
+            user.setKycStatus(accounts.isKycVerified() ? VERIFIED : "NOT VERIFIED");
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
@@ -230,7 +232,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
             patient.setEmailVerified(null != accounts.getEmailVerified());
-            patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
+            patient.setKycStatus(accounts.isKycVerified() ? VERIFIED : PENDING);
             patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {

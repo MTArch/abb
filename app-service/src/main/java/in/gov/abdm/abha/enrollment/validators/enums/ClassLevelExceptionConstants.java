@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * enum constant for key containing request body validations error message
+ * enum constant for key containing request body validation error message
  */
 @Getter
 @AllArgsConstructor
