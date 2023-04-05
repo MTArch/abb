@@ -282,12 +282,7 @@ public class FacilityEnrolByEnrollmentNumberService {
             if (txnDto.isMobileVerified()) {
                 log.info(MOBILE_NUMBER_IS_VERIFIED);
                 return accountService.getAccountByHealthIdNumber(txnDto.getHealthIdNumber()).flatMap(accountDto -> {
-                    if (accountDto.getVerificationStatus() == null) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
-                    }
-                    if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
-                    }
+                    validateVerificationStatus(accountDto);
                     EnrollmentResponse enrollmentResponse;
                     if (status.equalsIgnoreCase(ACCEPT)) {
                         accountDto.setVerificationStatus(VERIFIED);
@@ -332,6 +327,15 @@ public class FacilityEnrolByEnrollmentNumberService {
                 throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED);
             }
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private static void validateVerificationStatus(AccountDto accountDto) {
+        if (accountDto.getVerificationStatus() == null) {
+            throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+        }
+        if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
+            throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+        }
     }
 
     private void formatAccountDto(AccountDto accountDto) {
