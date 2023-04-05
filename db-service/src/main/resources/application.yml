@@ -26,6 +26,8 @@ spring:
       initial: ${POOL_INIT}
       max-size: ${POOL_MAX}
       maxIdleTime: ${POOL_TIMEOUT}
+      validation:
+        idle-timeout: ${POOL_VALIDATION_TIMEOUT}
 kafka:
   group:
     id: ${KAFKA_GROUP_ID}
