@@ -43,6 +43,7 @@ public class ABHAControllerAdvise {
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";
+    private static final String CODE = "code";
     private static final String AADHAAR_ERROR_PREFIX = "UIDAI Error code : ";
     private static final String TRACKING_ID = "Tracking Id : ";
 
