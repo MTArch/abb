@@ -252,7 +252,7 @@ public class ABHAControllerAdvise {
         if (ex.getMessage().contains("preferred")) {
             errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
         } else {
-            errorMap.put(in.gov.abdm.abha.profile.constants.StringConstants.MESSAGE, ABDMError.BAD_REQUEST.getMessage());
+            errorMap.put(MESSAGE, ABDMError.BAD_REQUEST.getMessage());
             errorMap.put(CODE, ABDMError.BAD_REQUEST.getCode().split(":")[0]);
             return errorMap;
         }
