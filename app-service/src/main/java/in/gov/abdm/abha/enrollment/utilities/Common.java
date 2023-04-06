@@ -1,13 +1,12 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
-import in.gov.abdm.abha.enrollment.model.notification.template.TemplateType;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
-import in.gov.abdm.abha.enrollment.services.common.HealthIdContextHolder;
 import in.gov.abdm.error.ABDMError;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -56,9 +54,6 @@ public class Common {
     private static final String ABHA = "ABHA";
     private static final String MESSAGE = "OTP for creating your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, National Health Authority";
     private static final String SUBJECT = "OTP verification";
-
-    @Autowired
-    HealthIdContextHolder healthIdContextHolder;
 
     public String getTimeStamp(boolean isTS) {
         SimpleDateFormat sdf;
@@ -114,7 +109,7 @@ public class Common {
     }
 
     public String getIpAddress() {
-        return HealthIdContextHolder.clientIp();
+        return ContextHolder.getClientIp();
     }
 
     public int calculateYearDifference(String startYear, String startMonth, String startDay) {
