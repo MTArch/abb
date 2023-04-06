@@ -5,7 +5,7 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberFace;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Base64;
@@ -22,7 +22,7 @@ public class AadhaarNumberFaceValidator implements ConstraintValidator<AadhaarNu
 
     @Override
     public boolean isValid(FaceDto faceDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(faceDto)
+        if (!ObjectUtils.isEmpty(faceDto)
                 && faceDto != null && aadhaarNotNullorEmpty(faceDto.getAadhaar())) {
             if (faceDto.getAadhaar() != null && isValidInput(faceDto.getAadhaar()) && isRSAEncrypted(faceDto.getAadhaar())) {
                 String decryptedAadhaar = rsaUtil.decrypt(faceDto.getAadhaar());

@@ -44,7 +44,6 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -156,7 +155,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             .flatMap(res -> {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
                                 Flux<String> fluxPhrAddress = hidPhrAddressService
-                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(HidPhrAddressDto::getPhrAddress);
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
@@ -460,7 +459,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             .flatMap(res -> {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
                                 Flux<String> fluxPhrAddress = hidPhrAddressService
-                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(HidPhrAddressDto::getPhrAddress);
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
