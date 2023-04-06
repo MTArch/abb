@@ -232,18 +232,19 @@ public class ABHAControllerAdvise {
                 .ifPresentOrElse(
                         msg -> {
                             errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
+                            errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
                             log.info(EXCEPTIONS + msg);
                         },
-                        () -> Optional.ofNullable(ex)
-                                .map(Throwable::getMessage)
-                                .ifPresent(msg -> {
-                                    errorMap.put(StringConstants.MESSAGE, msg);
-                                    log.info(EXCEPTIONS + msg);
-                                })
-                );
-
-
-        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+                        () -> {
+                            Optional.ofNullable(ex)
+                                    .map(Throwable::getMessage)
+                                    .ifPresent(msg -> {
+                                        errorMap.put(MESSAGE_KEY, ABDMError.BAD_REQUEST.getMessage());
+                                        errorMap.put(CODE, ABDMError.BAD_REQUEST.getCode().split(":")[0]);
+                                        log.info(EXCEPTIONS + msg);
+                                    });
+                        }
+                );        
         return errorMap;
     }
 }

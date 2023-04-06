@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.client;
 import in.gov.abdm.abha.enrollment.configuration.BeanConfiguration;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
+import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import org.springframework.web.bind.annotation.*;
 import reactivefeign.spring.config.ReactiveFeignClient;
@@ -35,4 +36,8 @@ public interface AbhaDBAccountFClient {
 
     @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
     public Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
+
+    @GetMapping(URIConstant.FDB_GET_DUPLICATE_ACCOUNT)
+    Mono<AccountDto> checkDeDuplication(@RequestBody DeDuplicationRequest request);
+
 }

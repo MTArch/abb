@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class EnrolByDocumentResponseDto {
+    private String message;
     @JsonProperty("enrolProfile")
     EnrolProfileDto enrolProfileDto;
     EnrollmentResponse enrollmentResponse;
