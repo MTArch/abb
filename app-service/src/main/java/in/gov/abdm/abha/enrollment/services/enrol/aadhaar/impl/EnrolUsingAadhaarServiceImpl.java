@@ -14,7 +14,6 @@ import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendO
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
-import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -31,11 +30,11 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
-import in.gov.abdm.abha.enrollment.utilities.DeDuplicationUtils;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
@@ -84,7 +83,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     NotificationService notificationService;
 
     @Autowired
-    DeDuplicationUtils deDuplicationUtils;
+    DeDuplicationService deDuplicationService;
 
     private RedisOtp redisOtp;
 
@@ -163,12 +162,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                     redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-                                    ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                                            .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
-                                            .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                                            .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
-                                            .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                            .build();
+
                                     //Final response for existing user
                                     if(isDeDuplicate)
                                     {
@@ -179,6 +173,12 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                                 .isNew(false)
                                                 .build());
                                     }else {
+                                        ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                                .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
+                                                .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                                .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                                                .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                                .build();
                                         return Mono.just(EnrolByAadhaarResponseDto.builder()
                                                 .txnId(transactionDto.getTxnId().toString())
                                                 .responseTokensDto(responseTokensDto)
@@ -197,7 +197,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
 
-            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+            return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
             .flatMap(duplicateAccount -> {
                 if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                     throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
@@ -371,7 +371,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
 
-            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+            return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                     .flatMap(duplicateAccount -> {
                         if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);

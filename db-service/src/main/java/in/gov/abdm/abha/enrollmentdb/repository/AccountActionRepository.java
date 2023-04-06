@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface AccountActionRepository extends R2dbcRepository<AccountActions, BigInteger> {
 
-    @Query(value = "SELECT  action, created_date, field, health_id_number, new_value, previous_value, reactivation_date, reason, reasons FROM public.account_actions a where a.health_id_number = :healthIdNumber order by a.created_date desc limit 1")
+    @Query(value = "SELECT  action, created_date, field, health_id_number, new_value, previous_value, reactivation_date, reason, reasons FROM account_actions a where a.health_id_number = :healthIdNumber order by a.created_date desc limit 1")
     Mono<AccountActionDto> getAccountsByHealthIdNumber(@Param("healthIdNumber") String healthIdNumber);
 
     @Query(value = "INSERT INTO account_actions(action, created_date, field, health_id_number, new_value, previous_value, reactivation_date, reason, reasons) VALUES (:#{#accountAction.action}, :#{#accountAction.createdDate}, :#{#accountAction.field}, :#{#accountAction.healthIdNumber}, :#{#accountAction.newValue}, :#{#accountAction.previousValue}, :#{#accountAction.reactivationDate}, :#{#accountAction.reason}, :#{#accountAction.reasons})")
