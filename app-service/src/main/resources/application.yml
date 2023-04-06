@@ -60,7 +60,7 @@ enrollment:
 rsa:
   algorithm: RSA
   transformation:
-    algorithm: RSA/ECB/OAEPWithSHA-1AndMGF1Padding
+    algorithm: RSA/ECB/PKCS1Padding
   private:
     key: nha_rsa_private_key.pem
   public:
