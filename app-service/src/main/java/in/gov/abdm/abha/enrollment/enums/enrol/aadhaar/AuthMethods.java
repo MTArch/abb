@@ -17,6 +17,7 @@ public enum AuthMethods {
     DEMO("demo"),
     PI("pi"),
     FACE("face"),
+    BIO("bio"),
     WRONG("wrong");
     private final String value;
 

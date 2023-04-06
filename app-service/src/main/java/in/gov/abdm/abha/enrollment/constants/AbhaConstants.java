@@ -204,4 +204,6 @@ public interface AbhaConstants {
     String UTC_TIMEZONE_ID = "UTC";
 
     String AUTHORIZATION = "Authorization";
+
+    String PID_INVALID = "Invalid PID";
 }

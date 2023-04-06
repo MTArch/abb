@@ -47,8 +47,10 @@ public class ABHAControllerAdvise {
     private static final String CONTROLLER_ADVICE_EXCEPTION_CLASS = "API Request Body Exception : ";
     private static final String RESPONSE_TIMESTAMP = "timestamp";
     private static final String EXCEPTIONS = "Exceptions : ";
+    private static final String CODE = "code";
     private static final String AADHAAR_ERROR_PREFIX = "UIDAI Error code : ";
     private static final String TRACKING_ID = "Tracking Id : ";
+    private static final String MESSAGE_KEY = "message";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
@@ -248,10 +250,13 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        if(ex.getMessage().contains("preferred"))
+        if (ex.getMessage().contains("preferred")) {
             errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
-        else
-            errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        } else {
+            errorMap.put(MESSAGE_KEY, ABDMError.BAD_REQUEST.getMessage());
+            errorMap.put(CODE, ABDMError.BAD_REQUEST.getCode().split(":")[0]);
+            return errorMap;
+        }
         log.info(EXCEPTIONS + ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
