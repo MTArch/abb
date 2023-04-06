@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
@@ -27,6 +26,8 @@ import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
 /**
  * A class which implements Business logic.
@@ -77,7 +78,6 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
                     syncAcknowledgement.setSyncedWithPatient(false);
                     syncAcknowledgement.setSyncedWithPhr(false);
                     syncAcknowledgement.setCreatedDate(timeStamp);
-//                    syncAcknowledgementService.addNewAcknowledgement(requestId, timeStamp, syncAcknowledgement); //TODO - Uncomment the logic to save the sync acknowledgement object after table creation
                     return Mono.just(hidPhrAddressAdded);
                 })
                 .flatMap(this::findAccountFromHidPhrAddress)
@@ -103,7 +103,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddressDto> getHidPhrAddressById(Long hidPhrAddressId) {
         return hidPhrAddressRepository.findById(hidPhrAddressId).
-                map(HidPhrAddress -> modelMapper.map(HidPhrAddress, HidPhrAddressDto.class));
+                map(hidPhrAddress -> modelMapper.map(hidPhrAddress, HidPhrAddressDto.class));
     }
 
     @Override
@@ -162,15 +162,13 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             address.setVillageName(accounts.getVillageName());
             address.setWardCode(accounts.getWardCode());
             address.setWardName(accounts.getWardName());
-            address.setCreatedBy("ABHA_SYNC");
-            address.setUpdatedBy("ABHA_SYNC");
+            address.setCreatedBy(ABHA_SYNC);
+            address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
             if (null != accounts.getCreatedDate()) {
                 LocalDateTime localDateTime = accounts.getCreatedDate();
-                //TODO - Correct the below logic to enter correct date, else leave it blank as user table has default values for this entry.
-//                user.setCreatedDate(new Timestamp(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
+               }
             user.setDayOfBirth(accounts.getDayOfBirth());
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
@@ -182,23 +180,21 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setMobileNumberVerified(accounts.getMobile()!=null);
             user.setMonthOfBirth(accounts.getMonthOfBirth());
             user.setFullName(accounts.getName());
-            user.setPassword(accounts.getPassword()); //TODO - Verify if password can be reused or not
+            user.setPassword(accounts.getPassword());
             user.setStatus(accounts.getStatus());
             if(null != accounts.getUpdateDate()) {
                 LocalDateTime localDateTime = accounts.getUpdateDate();
-                //TODO - Correct the below logic to enter correct date, else leave it blank as user table has default values for this entry.
-//                user.setUpdatedDate(new Timestamp(localDateTime.getYear(), localDateTime.getMonthValue(), localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
+               }
             user.setYearOfBirth(accounts.getYearOfBirth());
             user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
-            user.setCreatedBy("ABHA_SYNC");
-            user.setUpdatedBy("ABHA_SYNC");
+            user.setCreatedBy(ABHA_SYNC);
+            user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
-            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED"); //TODO: Move the hard coded values to constants
+            user.setKycStatus(accounts.isKycVerified() ? VERIFIED : "NOT VERIFIED");
         }
         catch (Exception ex) {
             log.error(ex.getMessage());
@@ -227,20 +223,15 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             patient.setStatus(accounts.getStatus());
             if(null != accounts.getCreatedDate()) {
                 LocalDateTime localDateTime = accounts.getCreatedDate();
-                //TODO - Correct the below logic to enter correct date.
-//                patient.setDateCreated(new Timestamp(localDateTime.getYear()-1900, localDateTime.getMonthValue()+1, localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
+                }
             if(null != accounts.getUpdateDate()) {
                 LocalDateTime localDateTime = accounts.getUpdateDate();
-                //TODO - Correct the below logic to enter correct date.
-//                patient.setDateModified(new Timestamp(localDateTime.getYear()-1900, localDateTime.getMonthValue()+1, localDateTime.getDayOfMonth(), localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSecond(), localDateTime.getNano()));
-            }
+             }
             patient.setEmailId(accounts.getEmail());
             patient.setAdd1(accounts.getAddress());
             patient.setPinCode(accounts.getPincode());
-//            patient.setKycVerified(accounts.isKycVerified()); //TODO: Uncomment the code once kyc_verified column is added in patient table of sandbox.
             patient.setEmailVerified(null != accounts.getEmailVerified());
-            patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
+            patient.setKycStatus(accounts.isKycVerified() ? VERIFIED : PENDING);
             patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {

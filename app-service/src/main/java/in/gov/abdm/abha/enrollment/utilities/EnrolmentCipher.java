@@ -18,7 +18,7 @@ import java.util.Base64;
 public class EnrolmentCipher {
 
 	private static final String ALGO = "AES/CBC/PKCS5Padding";
-	
+
 	@Value("${cipher.secretKey}")
 	private String secretKey;
 
@@ -33,12 +33,12 @@ public class EnrolmentCipher {
 		try {
 			initialize(secret);
 			Cipher cipher = Cipher.getInstance(ALGO);
-			cipher.init(2, secretKeySpec, ivParameterSpec);
+			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 			byte[] original = cipher.doFinal(Base64.getDecoder().decode(strToDecrypt));
 
 			return new String(original);
 		} catch (Exception exp) {
-			log.error("Error while decrypting", exp);
+			log.error(exp.getMessage());
 		}
 		return null;
 	}
@@ -51,10 +51,10 @@ public class EnrolmentCipher {
 		try {
 			initialize(secret);
 			Cipher cipher = Cipher.getInstance(ALGO);
-			cipher.init(1, secretKeySpec, ivParameterSpec);
+			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 			return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception exp) {
-			log.error("Error while encrypting", exp);
+			log.error(exp.getMessage());
 		}
 		return null;
 	}

@@ -8,7 +8,6 @@ import javax.validation.Payload;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_ID;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

@@ -18,7 +18,7 @@ public class AccountAuthMethodsSubscriberImpl implements AccountAuthMethodsSubsc
     /**
      * number of rows to be inserted.
      */
-    public static Long rowCount = 1L;
+     private static final Long ROW_COUNT = 1L;
 
     /**
      * Invoked after calling Publisher.subscribe(Subscriber).
@@ -30,7 +30,7 @@ public class AccountAuthMethodsSubscriberImpl implements AccountAuthMethodsSubsc
     @Override
     public void onSubscribe(Subscription s) {
 
-        s.request(rowCount);
+        s.request(ROW_COUNT);
     }
 
     /**

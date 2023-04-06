@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import in.gov.abdm.abha.enrollment.client.AbhaDBClient;
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
@@ -31,11 +30,9 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static in.gov.abdm.constant.ABDMConstant.SUB;
-
 @Service
 @Slf4j
-public class AccountServiceImpl extends AbhaDBClient implements AccountService {
+public class AccountServiceImpl implements AccountService {
 
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;
@@ -52,44 +49,13 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public Mono<AccountDto> prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<LgdDistrictResponse> lgdDistrictResponses) {
-        // AccountEntity searchedUserByMobile = null;
         AccountDto newUser = new AccountDto();
-        // UserDto user = new UserDto();
-        //DistrictDTO districtDTO = null;
-
-
-//        if (!transactionDto.isKycVerified()) {
-//            throw new UidaiException("KYC_NOT_DONE");
-//        }
-        // TODO check user account against same mobile no. if account exist more than 10 with
-        // same number
-        //
-        //userDetailsComponent.validateMaxAccountsByMobile(transactionDto.getMobile());
-        //TODO(check) no need to check KYC verified again
-//        if (StringUtils.isEmpty(transactionDto.getHealthIdNumber())) {
-//            if (!StringUtils.isEmpty(transactionDto.getKycType()) && !KycAuthType.FINGERSCAN.name().equals(transactionDto.getKycType()) && !transactionDto.isMobileVerified()) {
-//                throw new MobileNotVerifiedException();
-//            }
-//        }
-        //UserKycData kycData = transactionEnitityToUserKycData.apply(transactionDto);
-        //TODO user should not create multiple accounts
-        //TODO search user by some demographic details
-//        if (!StringUtils.isEmpty(transactionDto.getMobile())) {
-//            searchedUserByMobile = fuzzySearchService.findByFuzzySearch(transactionDto.getMobile(), transactionDto.getName(), transactionDto.getGender(), transactionDto.getYearOfBirth());
-//
-//            // to segregate hid creation using other id document
-//            if (!Objects.isNull(searchedUserByMobile) && StringUtils.hasLength(searchedUserByMobile.getVerificationStatus())) {
-//                searchedUserByMobile = null;
-//            }
-//
-//        }
 
         AccountDto accountDto = findUserAlreadyExist(transactionDto);
         if (isItNewUser(accountDto)) {
             newUser.setAddress(transactionDto.getAddress());
             newUser.setName(transactionDto.getName());
             newUser.setGender(transactionDto.getGender());
-            // Stor storing kycPhoto.
 
             if (accountDto.getKycPhoto() == null) {
                 newUser.setKycPhoto(transactionDto.getKycPhoto());
@@ -121,30 +87,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
             if (!StringUtils.isBlank(transactionDto.getEmail())) {
                 newUser.setEmail(transactionDto.getEmail());
             }
-            // TODO Note :- this variable consume email address instead of boolean need to
-            // change in future
-//            newUser.setEmail_verified(transactionDto.isEmailVerified() ? transactionDto.getEmail() : null);
-
-            //TODO user inputs on user details
-//            if (!StringUtils.isBlank(accountRequest.getFirstName())) {
-//                newUser.setFirstName(accountRequest.getFirstName());
-//            }
-//            if (!isBlank(accountRequest.getLastName())) {
-//                newUser.setLastName(accountRequest.getLastName());
-//            }
-//            if (!isBlank(accountRequest.getMiddleName())) {
-//                newUser.setMiddleName(accountRequest.getMiddleName());
-//            }
-//            if (!isBlank(accountRequest.getPassword())) {
-//                newUser.setPassword(bcryptEncoder.encode(accountRequest.getPassword()));
-//            }
-//            if (!isBlank(accountRequest.getProfilePhoto())) {
-//                newUser.setProfilePhoto(accountRequest.getProfilePhoto().getBytes());
-//                byte[] compressedProfilePhoto = transactionEnitityToUserKycData.checkImageValidationAndCompressImage(newUser, accountRequest.getProfilePhoto(), true);
-//                compressedProfilePhoto = Objects.nonNull(compressedProfilePhoto) ? compressedProfilePhoto : newUser.getProfilePhoto();
-//                newUser.setProfilePhoto(compressedProfilePhoto);
-//                newUser.setProfilePhotoCompressed(true);
-//            }
 
             newUser.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
             newUser.setConsentDate(LocalDateTime.now());
@@ -157,26 +99,10 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
                 newUser.setMobile(transactionDto.getMobile());
                 accountAuthMethods.add(AccountAuthMethods.MOBILE_OTP);
             }
-            //TODO check what to set here
-            //newUser.setKycData(kycData);
-            //TODO set account Auth method
-            //newUser.setAccountAuthMethods(accountAuthMethods);
             newUser.setKycVerified(true);
             newUser.setStatus(AccountStatus.ACTIVE.toString());
             breakName(newUser);
         }
-//        fetchDefaultPhrAddress(newUser.getHealthIdNumber());
-//        BeanUtils.copyProperties(newUser, user);
-//        if (!ObjectUtils.isEmpty(newUser.getKycPhoto())) {
-//            user.setKycPhoto(new String(newUser.getKycPhoto()));
-//        }
-//        if (newUser.getProfilePhoto() != null) {
-//            user.setProfilePhoto(new String(newUser.getProfilePhoto()));
-//        }
-//        user.setHealthId(phrAddressService.fetchPhrAdress(newUser.getHealthIdNumber()));
-        //TODO notify user with sms
-        //smsService.sendHealthIdSuccessNotification(user);
-
 
         newUser.setCreatedDate(LocalDateTime.now());
         return Mono.just(newUser);
@@ -184,7 +110,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
 
     @Override
     public boolean isItNewUser(AccountDto accountDto) {
-        //todo check existing user
         return accountDto == null || accountDto.getName() == null;
     }
 
@@ -261,6 +186,7 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
                 log.error(PARSER_EXCEPTION_OCCURRED_DURING_PARSING, e);
             } catch (Exception ex) {
                 log.error(EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB, birthdate);
+                log.error(ex.getMessage());
             }
         } else if (birthdate != null && birthdate.length() == 4) {
             accountDto.setYearOfBirth(birthdate);
@@ -268,7 +194,6 @@ public class AccountServiceImpl extends AbhaDBClient implements AccountService {
     }
 
     private AccountDto findUserAlreadyExist(TransactionDto transactionDto) {
-        //TODO find user using xmluid or demographic details
         return new AccountDto();
     }
 

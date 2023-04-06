@@ -61,18 +61,9 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 @Slf4j
 public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
-    private static final String FAILED_TO_VERIFY_AADHAAR_OTP = "Failed to Verify Aadhaar OTP";
-
-    private static final String AADHAAR_OTP_INCORRECT_ERROR_CODE = "400";
-
-    private static final String AADHAAR_OTP_EXPIRED_ERROR_CODE = "403";
-
-    private static final String FAILED_TO_SEND_SMS_ON_ACCOUNT_CREATION = "Failed to Send SMS on Account Creation";
-
     private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
     private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
-    public static final String DISTRICT = "District";
 
     @Autowired
     AccountService accountService;
@@ -152,9 +143,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount,false);
                         }
                     })
-                    .switchIfEmpty(Mono.defer(() -> {
-                        return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
-                    }));
+                    .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto)));
         });
     }
 
@@ -385,9 +374,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 } else {
                     return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount,false);
                 }
-            }).switchIfEmpty(Mono.defer(() -> {
-                return createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
-            }));
+            }).switchIfEmpty(Mono.defer(() -> createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction)));
         });
     }
 

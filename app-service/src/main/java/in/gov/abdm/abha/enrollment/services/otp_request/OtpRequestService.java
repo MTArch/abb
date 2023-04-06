@@ -63,8 +63,6 @@ public class OtpRequestService {
     private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with ";
     private static final String OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING = "OTP is sent to ABHA registered mobile number ending with ";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
-    private static final String FAILED_TO_SEND_OTP_FOR_MOBILE_VERIFICATION = "Failed to Send OTP for Mobile verification";
-    private static final String FAILED_TO_CALL_IDP_SERVICE = "Failed to call IDP service";
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
     private static final String EMAIL_OTP_SUBJECT = "email verification";
 
