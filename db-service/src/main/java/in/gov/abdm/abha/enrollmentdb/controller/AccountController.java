@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -55,13 +56,17 @@ public class AccountController {
     }
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
-    public ResponseEntity<?> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber){
+    public ResponseEntity<?> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber) {
         return ResponseEntity.ok(accountService.getMobileLinkedAccountsCount(mobileNumber));
     }
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
-    public ResponseEntity<?> getEmailLinkedAccountCount(@PathVariable("email") String email){
+    public ResponseEntity<?> getEmailLinkedAccountCount(@PathVariable("email") String email) {
         return ResponseEntity.ok(accountService.getEmailLinkedAccountsCount(email));
     }
 
+    @GetMapping(value = ABHAEnrollmentDBConstant.DB_GET_DUPLICATE_ACCOUNT)
+    public ResponseEntity<?> checkDeDuplication(@RequestBody DeDuplicationRequest request) {
+        return ResponseEntity.ok(accountService.checkDeDuplication(request));
+    }
 }
