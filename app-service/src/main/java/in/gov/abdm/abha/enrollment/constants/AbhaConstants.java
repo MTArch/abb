@@ -164,22 +164,5 @@ public class AbhaConstants {
 
     public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
-    //Demographic validations
-    public static final String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
-    public static final String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
-    public static final String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";
-    public static final String INVALID_MOBILE_NUMBER = "Invalid Mobile Number";
-    public static final String INVALID_MOBILE_TYPE = "Invalid Mobile Type";
-    public static final String INVALID_HEALTH_WORKER_NAME = "Invalid Health Health Worker Name";
-    public static final String INVALID_HEALTH_WORKER_MOBILE_NUMBER = "Invalid Health Worker Mobile Number";
-    public static final String INVALID_CONSENT_FORM_IMAGE = "Invalid Consent Form Image";
-    public static final String THIS_ACCOUNT_ALREADY_EXIST = "This account already exist";
-    public static final String ACCOUNT_CREATED_SUCCESSFULLY = "Account created successfully";
-
-    public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    public static final String UTC_TIMEZONE_ID = "UTC";
-
-    public static final String AUTHORIZATION = "Authorization";
-
     public static final String PID_INVALID = "Invalid PID";
 }
