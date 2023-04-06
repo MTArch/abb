@@ -11,7 +11,6 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundExceptio
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
-import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
@@ -24,6 +23,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
@@ -107,7 +107,7 @@ public class EnrolUsingDrivingLicence {
     LgdUtility lgdUtility;
 
     @Autowired
-    DeDuplicationUtils deDuplicationUtils;
+    DeDuplicationService deDuplicationService;
 
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, String fToken) {
         FacilityContextHolder.removeAll();
@@ -206,7 +206,7 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .build();
 
-            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+            return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount -> {
                     if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                         throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
