@@ -33,8 +33,8 @@ public class RSAUtil {
     private String privateKeyContent;
     private String publicKeyContent;
 
-    @Value("${rsa.transformation.algorithm: RSA/ECB/PKCS1Padding}")
-    private String rsaTransformationAlgorithm;
+    @Value("${rsa.transformation.algorithm: RSA/ECB/OAEPWithSHA-1AndMGF1Padding}")
+    private String RSA_TRANSFORMATION_ALGORITHM;
 
     @Value("${rsa.algorithm: RSA}")
     private String RSA_ALGORITHM;
