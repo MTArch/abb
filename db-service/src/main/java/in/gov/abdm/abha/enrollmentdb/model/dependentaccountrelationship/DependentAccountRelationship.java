@@ -11,9 +11,6 @@ import org.springframework.data.domain.Persistable;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-//import javax.persistence.GeneratedValue;
-//import javax.persistence.GenerationType;
-
 /**
  * It's a Dependent_account_relationship POJO class
  */

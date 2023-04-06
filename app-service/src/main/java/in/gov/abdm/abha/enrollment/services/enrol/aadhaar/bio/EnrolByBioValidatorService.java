@@ -7,7 +7,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,7 +40,7 @@ public class EnrolByBioValidatorService {
     }
     private boolean isValidTimeStamp(BioDto bioData) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
-        if(!StringUtils.isEmpty(bioData)
+        if(!ObjectUtils.isEmpty(bioData)
                  && timestampNotNullOrEmpty(bioData.getTimestamp())) {
             try {
                 return LocalDateTime.parse(bioData.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());

@@ -38,11 +38,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
@@ -128,22 +130,7 @@ public class EnrolUsingDrivingLicence {
                         return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                                 .flatMap(accountDto -> {
                                     log.info(FOUND_ACCOUNT + accountDto.getHealthIdNumber() + WITH_SAME_DL + enrolByDocumentRequestDto.getDocumentId() + CLOSING);
-                                    return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> {
-                                        if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-                                            log.warn(FAILED_TO_DELETE_TRANSACTION + enrolByDocumentRequestDto.getTxnId());
-                                        } else {
-                                            log.info(TRANSACTION_DELETED);
-                                        }
-                                        if (accountDto.getStatus().equals(AccountStatus.DELETED.getValue())) {
-                                            log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
-                                            return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto);
-                                        } else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                                            throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
-                                        } else {
-                                            //return existing account
-                                            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false);
-                                        }
-                                    });
+                                    return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> getEnrolByDocumentResponseDtoMono(enrolByDocumentRequestDto, txnDto, accountDto, responseEntity));
                                 }).switchIfEmpty(Mono.defer(() -> {
                                     //verify DL and create new account
                                     log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
@@ -154,6 +141,23 @@ public class EnrolUsingDrivingLicence {
                         throw new AbhaUnProcessableException(ABDMError.MOBILE_NUMBER_NOT_VERIFIED);
                     }
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private Mono<EnrolByDocumentResponseDto> getEnrolByDocumentResponseDtoMono(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto, AccountDto accountDto, ResponseEntity<Mono<Void>> responseEntity) {
+        if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+            log.warn(FAILED_TO_DELETE_TRANSACTION + enrolByDocumentRequestDto.getTxnId());
+        } else {
+            log.info(TRANSACTION_DELETED);
+        }
+        if (accountDto.getStatus().equals(AccountStatus.DELETED.getValue())) {
+            log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
+            return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto);
+        } else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+            throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+        } else {
+            //return existing account
+            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false);
+        }
     }
 
     private Mono<EnrolByDocumentResponseDto> verifyDrivingLicence(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto) {
@@ -222,37 +226,41 @@ public class EnrolUsingDrivingLicence {
                     return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
                         log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
                         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
-                        return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> {
-                            if (phrAddressDto != null) {
-                                log.info(DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE);
-                                return addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByDocumentRequestDto).flatMap(idDocumentResponse -> {
-                                    if (idDocumentResponse != null) {
-                                        log.info(DL_DOCUMENTS_STORED_IN_ADV_DB);
-                                        return accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()))).flatMap(res -> {
-                                            if (!res.isEmpty()) {
-                                                log.info(ACCOUNT_AUTH_METHODS_ADDED);
-                                                return transactionService.deleteTransactionEntity(transactionDto.getTxnId().toString()).flatMap(responseEntity -> {
-                                                    if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-                                                        log.warn(FAILED_TO_DELETE_TRANSACTION + transactionDto.getTxnId().toString());
-                                                    } else {
-                                                        log.info(TRANSACTION_DELETED);
-                                                    }
-                                                    return sendSucessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString());
-                                                });
-                                            } else {
-                                                throw new AbhaDBGatewayUnavailableException();
-                                            }
-                                        });
-                                    } else {
-                                        throw new DocumentGatewayUnavailableException();
-                                    }
-                                });
-                            } else {
-                                throw new AbhaDBGatewayUnavailableException();
-                            }
-                        });
+                        return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> getEnrolByDocumentResponseDtoMono(enrolByDocumentRequestDto, transactionDto, accountDto, accountDtoResponse, phrAddressDto));
                     });
                 });
+    }
+
+    private Mono<EnrolByDocumentResponseDto> getEnrolByDocumentResponseDtoMono(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto, AccountDto accountDto, AccountDto accountDtoResponse, HidPhrAddressDto phrAddressDto) {
+        if (phrAddressDto != null) {
+            log.info(DEFAULT_PHR_ADDRESS_UPDATED_IN_HID_PHR_ADDRESS_TABLE);
+            return addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByDocumentRequestDto).flatMap(idDocumentResponse -> {
+                if (idDocumentResponse != null) {
+                    log.info(DL_DOCUMENTS_STORED_IN_ADV_DB);
+                    return accountAuthMethodService.addAccountAuthMethods(Collections.singletonList(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()))).flatMap(res -> getEnrolByDocumentResponseDtoMono(transactionDto, accountDto, res));
+                } else {
+                    throw new DocumentGatewayUnavailableException();
+                }
+            });
+        } else {
+            throw new AbhaDBGatewayUnavailableException();
+        }
+    }
+
+    private Mono<EnrolByDocumentResponseDto> getEnrolByDocumentResponseDtoMono(TransactionDto transactionDto, AccountDto accountDto, List<AccountAuthMethodsDto> res) {
+        if (!res.isEmpty()) {
+            log.info(ACCOUNT_AUTH_METHODS_ADDED);
+            return transactionService.deleteTransactionEntity(transactionDto.getTxnId().toString()).flatMap(responseEntity -> {
+                if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+                    log.warn(FAILED_TO_DELETE_TRANSACTION + transactionDto.getTxnId().toString());
+                } else {
+                    log.info(TRANSACTION_DELETED);
+                }
+                return sendSucessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString());
+            });
+        } else {
+            throw new AbhaDBGatewayUnavailableException();
+        }
     }
 
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {

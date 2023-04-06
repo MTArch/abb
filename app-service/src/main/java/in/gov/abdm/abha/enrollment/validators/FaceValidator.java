@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AuthData;
 import in.gov.abdm.abha.enrollment.validators.annotations.Face;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -37,7 +37,7 @@ public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     }
 
     private boolean bioNullorEmpty(AuthData authData) {
-        return (StringUtils.isEmpty(authData.getFace())
+        return (ObjectUtils.isEmpty(authData.getFace())
                 || authData.getFace() == null)
                 || ((authData.getFace().getTimestamp() ==null
                 || authData.getFace().getTimestamp().isEmpty())
@@ -48,7 +48,7 @@ public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     }
 
     private boolean bioNotNullorEmpty(AuthData authData) {
-        return !StringUtils.isEmpty(authData.getFace())
+        return !ObjectUtils.isEmpty(authData.getFace())
                 && authData.getFace()!=null
                 && authData.getFace().getTimestamp()!=null
                 && !authData.getFace().getTimestamp().isEmpty()

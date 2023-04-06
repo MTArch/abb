@@ -59,12 +59,11 @@ public class EnrolByDocumentValidatorService {
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
-        if (!isValidTxnId(enrolByDocumentRequestDto)) {
-            errors.put(TXN_ID, AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD);
-        }
-        if (!isValidDocumentType(enrolByDocumentRequestDto)) {
-            errors.put(DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE);
-        }
+
+        isValidTxnId(enrolByDocumentRequestDto,errors);
+
+        isValidDocumentType(enrolByDocumentRequestDto,errors);
+
         if (!isValidDob(enrolByDocumentRequestDto)) {
             errors.put(DOB, AbhaConstants.INVALID_DOB);
         }
@@ -110,6 +109,17 @@ public class EnrolByDocumentValidatorService {
         }
     }
 
+    private void isValidTxnId(EnrolByDocumentRequestDto enrolByDocumentRequestDto,  LinkedHashMap<String, String> errors){
+        if (!isValidTxnId(enrolByDocumentRequestDto)) {
+            errors.put(TXN_ID, AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD);
+        }
+    }
+
+    private void isValidDocumentType(EnrolByDocumentRequestDto enrolByDocumentRequestDto, LinkedHashMap<String, String> errors){
+        if (!isValidDocumentType(enrolByDocumentRequestDto)) {
+            errors.put(DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE);
+        }
+    }
     private boolean isSameFrontSideBackSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         byte[] imageBytes1 = Common.base64Decode(enrolByDocumentRequestDto.getFrontSidePhoto());
         byte[] imageBytes2 = Common.base64Decode(enrolByDocumentRequestDto.getBackSidePhoto());
