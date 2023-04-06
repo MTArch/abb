@@ -23,13 +23,11 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
+import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.document.DocumentAppService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
-import in.gov.abdm.abha.enrollment.utilities.Common;
-import in.gov.abdm.abha.enrollment.utilities.EnrolmentCipher;
-import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
-import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
+import in.gov.abdm.abha.enrollment.utilities.*;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
@@ -110,6 +108,9 @@ public class EnrolUsingDrivingLicence {
     @Autowired
     LgdUtility lgdUtility;
 
+    @Autowired
+    DeDuplicationService deDuplicationService;
+
     public Mono<EnrolByDocumentResponseDto> verifyAndCreateAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, String fToken) {
         FacilityContextHolder.removeAll();
         if (fToken != null && !fToken.isBlank()) {
@@ -156,7 +157,7 @@ public class EnrolUsingDrivingLicence {
             throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
         } else {
             //return existing account
-            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false);
+            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false,false);
         }
     }
 
@@ -209,26 +210,34 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .build();
 
-        return lgdUtility.getLgdData(enrolByDocumentRequestDto.getPinCode(), enrolByDocumentRequestDto.getState())
-                .flatMap(lgdDistrictResponses -> {
-                    if (!lgdDistrictResponses.isEmpty()) {
-                        LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-                        accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-                        accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? enrolByDocumentRequestDto.getDistrict() : lgdDistrictResponse.getDistrictName());
-                        accountDto.setStateCode(lgdDistrictResponse.getStateCode());
-                        accountDto.setStateName(lgdDistrictResponse.getStateName());
+            return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
+                .flatMap(duplicateAccount -> {
+                    if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                        throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                     } else {
-                        accountDto.setDistrictName(enrolByDocumentRequestDto.getDistrict());
-                        accountDto.setStateName(enrolByDocumentRequestDto.getState());
+                        return prepareErolByDLResponse(duplicateAccount, transactionDto.getTxnId().toString(), false,true);
                     }
-                    accountDto.setCreatedDate(LocalDateTime.now());
-                    accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
-                    return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
-                        log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
-                        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
-                        return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> getEnrolByDocumentResponseDtoMono(enrolByDocumentRequestDto, transactionDto, accountDto, accountDtoResponse, phrAddressDto));
-                    });
-                });
+                }).switchIfEmpty(Mono.defer(()->
+                            lgdUtility.getLgdData(enrolByDocumentRequestDto.getPinCode(), enrolByDocumentRequestDto.getState())
+                                    .flatMap(lgdDistrictResponses -> {
+                                        if (!lgdDistrictResponses.isEmpty()) {
+                                            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                                            accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                                            accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? enrolByDocumentRequestDto.getDistrict() : lgdDistrictResponse.getDistrictName());
+                                            accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+                                            accountDto.setStateName(lgdDistrictResponse.getStateName());
+                                        } else {
+                                            accountDto.setDistrictName(enrolByDocumentRequestDto.getDistrict());
+                                            accountDto.setStateName(enrolByDocumentRequestDto.getState());
+                                        }
+                                        accountDto.setCreatedDate(LocalDateTime.now());
+                                        accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+                                        return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
+                                            log.info(NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB);
+                                            HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
+                                            return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> getEnrolByDocumentResponseDtoMono(enrolByDocumentRequestDto, transactionDto, accountDto, accountDtoResponse, phrAddressDto));
+                                        });
+                                    })));
     }
 
     private Mono<EnrolByDocumentResponseDto> getEnrolByDocumentResponseDtoMono(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto, AccountDto accountDto, AccountDto accountDtoResponse, HidPhrAddressDto phrAddressDto) {
@@ -283,7 +292,15 @@ public class EnrolUsingDrivingLicence {
         return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
     }
 
-    private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto, String txnId, boolean isNewAccount) {
+    private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto, String txnId, boolean isNewAccount,boolean isDuplicate) {
+        String message="";
+        if(!isDuplicate)
+        {
+            if(isNewAccount)
+                message=AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY;
+            else
+                message=AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST;
+        }
 
         EnrolProfileDto enrolProfileDto = EnrolProfileDto.builder()
                 .enrolmentNumber(accountDto.getHealthIdNumber())
@@ -309,7 +326,7 @@ public class EnrolUsingDrivingLicence {
                 .build();
         if (FacilityContextHolder.getSubject() != null) {
             EnrollmentResponse enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ABHA_CREATED_SUCCESS, jwtUtil.generateToken(txnId, accountDto));
-            return Mono.just(new EnrolByDocumentResponseDto(null, enrollmentResponse, null, isNewAccount));
+            return Mono.just(new EnrolByDocumentResponseDto(null,null, enrollmentResponse, null, isNewAccount));
         } else if (!isNewAccount && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
             ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                     .token(jwtUtil.generateToken(txnId, accountDto))
@@ -317,9 +334,12 @@ public class EnrolUsingDrivingLicence {
                     .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                     .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                     .build();
-            return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null, responseTokensDto, false));
+            return Mono.just(new EnrolByDocumentResponseDto(null,enrolProfileDto, null, responseTokensDto, false));
         }
-        return Mono.just(new EnrolByDocumentResponseDto(enrolProfileDto, null, null, isNewAccount));
+        if(isDuplicate)
+            return Mono.just(new EnrolByDocumentResponseDto(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST,enrolProfileDto, null,null, isNewAccount));
+        else
+            return Mono.just(new EnrolByDocumentResponseDto(message,enrolProfileDto, null, null, isNewAccount));
     }
 
     private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId) {
@@ -327,7 +347,7 @@ public class EnrolUsingDrivingLicence {
                 .flatMap(notificationResponseDto -> {
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
                         log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
-                        return prepareErolByDLResponse(accountDto, txnId, true);
+                        return prepareErolByDLResponse(accountDto, txnId, true,false);
                     } else {
                         throw new NotificationGatewayUnavailableException();
                     }
