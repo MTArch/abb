@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
+import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -24,6 +25,7 @@ import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddress
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.DeDuplicationUtils;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
@@ -31,6 +33,7 @@ import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -41,6 +44,7 @@ import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 
+@Slf4j
 @Service
 public class EnrolByDemographicService extends EnrolByDemographicValidatorService {
 
@@ -65,6 +69,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     IdentityDocumentDBService identityDocumentDBService;
     @Autowired
     LgdUtility lgdUtility;
+    @Autowired
+    DeDuplicationUtils deDuplicationUtils;
 
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
@@ -84,7 +90,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                         throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                                     } else {
                                         //existing account
-                                        return respondExistingAccount(existingAccount);
+                                        return respondExistingAccount(existingAccount,false);
                                     }
                                 })
                                 .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid())));
@@ -125,26 +131,36 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setStatus(AccountStatus.ACTIVE.getValue());
         accountDto.setMobileType(demographic.getMobileType().getValue());
 
-        int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
-        if (age >= 18) {
-            accountDto.setType(AbhaType.STANDARD);
-        } else {
-            accountDto.setType(AbhaType.CHILD);
-        }
-        return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
-                .flatMap(lgdDistrictResponses -> {
-                    if (!lgdDistrictResponses.isEmpty()) {
-                        LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-                        accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-                        accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
-                        accountDto.setStateCode(lgdDistrictResponse.getStateCode());
-                        accountDto.setStateName(lgdDistrictResponse.getStateName());
+        return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+                .flatMap(duplicateAccount -> {
+                    if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                        throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                     } else {
-                        accountDto.setDistrictName(demographic.getDistrict());
-                        accountDto.setStateName(demographic.getState());
+                        //existing account
+                        return respondExistingAccount(duplicateAccount,true);
                     }
-                    return saveAccountDetails(accountDto, demographic.getConsentFormImage());
-                });
+                }).switchIfEmpty(Mono.defer(()->{
+                    int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
+                    if (age >= 18) {
+                        accountDto.setType(AbhaType.STANDARD);
+                    } else {
+                        accountDto.setType(AbhaType.CHILD);
+                    }
+                    return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
+                            .flatMap(lgdDistrictResponses -> {
+                                if (!lgdDistrictResponses.isEmpty()) {
+                                    LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                                    accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                                    accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
+                                    accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+                                    accountDto.setStateName(lgdDistrictResponse.getStateName());
+                                } else {
+                                    accountDto.setDistrictName(demographic.getDistrict());
+                                    accountDto.setStateName(demographic.getState());
+                                }
+                                return saveAccountDetails(accountDto, demographic.getConsentFormImage());
+                            });
+                }));
     }
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(AccountDto accountDto, String consentFormImage) {
@@ -207,7 +223,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto,boolean isDuplicate) {
         ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
         String txnId = UUID.randomUUID().toString();
         Flux<String> fluxPhrAddress = hidPhrAddressService
@@ -223,12 +239,19 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                     .build();
             //Final response for existing user
-            return Mono.just(EnrolByAadhaarResponseDto.builder()
-                    .responseTokensDto(responseTokensDto)
-                    .abhaProfileDto(abhaProfileDto)
-                    .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
-                    .isNew(false)
-                    .build());
+            if(isDuplicate)
+                return Mono.just(EnrolByAadhaarResponseDto.builder()
+                        .abhaProfileDto(abhaProfileDto)
+                        .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                        .isNew(false)
+                        .build());
+            else
+                return Mono.just(EnrolByAadhaarResponseDto.builder()
+                        .responseTokensDto(responseTokensDto)
+                        .abhaProfileDto(abhaProfileDto)
+                        .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                        .isNew(false)
+                        .build());
         });
     }
 }

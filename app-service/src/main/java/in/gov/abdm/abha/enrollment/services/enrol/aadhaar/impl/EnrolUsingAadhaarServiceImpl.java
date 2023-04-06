@@ -14,6 +14,7 @@ import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendO
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
+import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -34,12 +35,14 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarServi
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.DeDuplicationUtils;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -79,6 +82,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Autowired
     NotificationService notificationService;
+
+    @Autowired
+    DeDuplicationUtils deDuplicationUtils;
 
     private RedisOtp redisOtp;
 
@@ -134,14 +140,14 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                         } else {
-                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount);
+                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount,false);
                         }
                     })
                     .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto)));
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto,boolean isDeDuplicate) {
 
         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
@@ -163,13 +169,24 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                                             .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                             .build();
-                                    return Mono.just(EnrolByAadhaarResponseDto.builder()
-                                            .txnId(transactionDto.getTxnId().toString())
-                                            .responseTokensDto(responseTokensDto)
-                                            .abhaProfileDto(abhaProfileDto)
-                                            .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
-                                            .isNew(false)
-                                            .build());
+                                    //Final response for existing user
+                                    if(isDeDuplicate)
+                                    {
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                .txnId(transactionDto.getTxnId().toString())
+                                                .abhaProfileDto(abhaProfileDto)
+                                                .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                                                .isNew(false)
+                                                .build());
+                                    }else {
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                .txnId(transactionDto.getTxnId().toString())
+                                                .responseTokensDto(responseTokensDto)
+                                                .abhaProfileDto(abhaProfileDto)
+                                                .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                                                .isNew(false)
+                                                .build());
+                                    }
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -179,41 +196,57 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
-            if (age >= 18) {
-                accountDto.setType(AbhaType.STANDARD);
-                accountDto.setStatus(AccountStatus.ACTIVE.toString());
-            } else {
-                accountDto.setType(AbhaType.CHILD);
-                accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
-            }
 
-            String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
-            transactionDto.setHealthIdNumber(newAbhaNumber);
-            accountDto.setHealthIdNumber(newAbhaNumber);
-            ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
-            accountDto.setHealthId(defaultAbhaAddress);
-            abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
-            abhaProfileDto.setStateCode(accountDto.getStateCode());
-            abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-            String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile();
-            if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
-                return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
-                        .flatMap(verifyDemographicResponse -> {
-                            if (verifyDemographicResponse.isVerified()) {
-                                accountDto.setMobile(userEnteredPhoneNumber);
-                                abhaProfileDto.setMobile(userEnteredPhoneNumber);
-                            }
+            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+            .flatMap(duplicateAccount -> {
+                if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                    throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                } else {
+                    return existingAccount(transactionDto, aadhaarResponseDto, duplicateAccount,true);
+                }
+            }).switchIfEmpty(Mono.defer(()->{
+                        int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
+                        if (age >= 18) {
+                            accountDto.setType(AbhaType.STANDARD);
+                            accountDto.setStatus(AccountStatus.ACTIVE.toString());
+                        } else {
+                            accountDto.setType(AbhaType.CHILD);
+                            accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
+                        }
+
+                        String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+                        transactionDto.setHealthIdNumber(newAbhaNumber);
+                        accountDto.setHealthIdNumber(newAbhaNumber);
+                        ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
+                        String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
+                        accountDto.setHealthId(defaultAbhaAddress);
+                        abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
+                        abhaProfileDto.setStateCode(accountDto.getStateCode());
+                        abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
+                        // TODO if standard abha
+                        String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile();
+                        if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+                            return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                                    .flatMap(verifyDemographicResponse -> {
+                                        if (verifyDemographicResponse.isVerified()) {
+                                            accountDto.setMobile(userEnteredPhoneNumber);
+                                            abhaProfileDto.setMobile(userEnteredPhoneNumber);
+                                        }
+                                        //update transaction table and create account in account table
+                                        //account status is active
+                                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                                .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
+                                    });
+                        } else {
+                            //update transaction table and create account in account table
+                            //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
-                        });
-            } else {
-                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
-                        .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
-            }
+                        }
+
+            }));
         });
     }
 
@@ -339,7 +372,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                     throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
                 } else {
-                    return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount);
+                    return existingAccountFaceAuth(transaction, aadhaarResponseDto, existingAccount,false);
                 }
             }).switchIfEmpty(Mono.defer(() -> createNewAccountUsingFAceAuth(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction)));
         });
@@ -350,30 +383,43 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
-            if (age >= 18) {
-                accountDto.setType(AbhaType.STANDARD);
-                accountDto.setStatus(AccountStatus.ACTIVE.toString());
-            } else {
-                accountDto.setType(AbhaType.CHILD);
-                accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
-            }
 
-            String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
-            transactionDto.setHealthIdNumber(newAbhaNumber);
-            accountDto.setHealthIdNumber(newAbhaNumber);
-            accountDto.setMobile(transactionDto.getMobile());
-            ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
-            String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
-            accountDto.setHealthId(defaultAbhaAddress);
-            abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
-            abhaProfileDto.setStateCode(accountDto.getStateCode());
-            abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-            {
-                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
-                        .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
-            }
+            return deDuplicationUtils.checkDeDuplication(deDuplicationUtils.prepareRequest(accountDto))
+                    .flatMap(duplicateAccount -> {
+                        if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                            throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                        } else {
+                            return existingAccountFaceAuth(transactionDto, aadhaarResponseDto, duplicateAccount,true);
+                        }
+                    }).switchIfEmpty(Mono.defer(()->{
+                        int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
+                        if (age >= 18) {
+                            accountDto.setType(AbhaType.STANDARD);
+                            accountDto.setStatus(AccountStatus.ACTIVE.toString());
+                        } else {
+                            accountDto.setType(AbhaType.CHILD);
+                            accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
+                        }
+
+                        String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+                        transactionDto.setHealthIdNumber(newAbhaNumber);
+                        accountDto.setHealthIdNumber(newAbhaNumber);
+                        accountDto.setMobile(transactionDto.getMobile());
+                        ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
+                        String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
+                        accountDto.setHealthId(defaultAbhaAddress);
+                        abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
+                        abhaProfileDto.setStateCode(accountDto.getStateCode());
+                        abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
+                        // TODO if standard abha
+                        {
+                            //update transaction table and create account in account table
+                            //account status is active
+                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                    .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
+                        }
+                    }));
         });
     }
 
@@ -400,8 +446,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
                                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                         .build();
-                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).build());
+                                return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                        .txnId(transactionDto.getTxnId().toString())
+                                        .abhaProfileDto(abhaProfileDto)
+                                        .responseTokensDto(responseTokensDto)
+                                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                                        .isNew(true)
+                                        .build());
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
                             }
@@ -412,7 +463,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> existingAccountFaceAuth(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> existingAccountFaceAuth(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto,boolean isDuplicate) {
 
         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
@@ -432,11 +483,22 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                                             .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                             .build();
-                                    return Mono.just(EnrolByAadhaarResponseDto.builder()
-                                            .txnId(transactionDto.getTxnId().toString())
-                                            .responseTokensDto(responseTokensDto)
-                                            .abhaProfileDto(abhaProfileDto)
-                                            .build());
+                                    //Final response for existing user
+                                    if(isDuplicate)
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                .txnId(transactionDto.getTxnId().toString())
+                                                .abhaProfileDto(abhaProfileDto)
+                                                .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                                                .isNew(false)
+                                                .build());
+                                    else
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                .txnId(transactionDto.getTxnId().toString())
+                                                .responseTokensDto(responseTokensDto)
+                                                .abhaProfileDto(abhaProfileDto)
+                                                .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
+                                                .isNew(false)
+                                                .build());
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));

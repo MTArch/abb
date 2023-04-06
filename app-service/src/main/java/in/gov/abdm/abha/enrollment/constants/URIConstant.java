@@ -61,9 +61,10 @@ public class URIConstant {
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_EMAIL = DB_BASE_URI + "/account/linkedAccountCount/email/{email}";
 
     public static final String DB_UPDATE_ACCOUNT_URI = DB_BASE_URI + "/account/{id}";
+    public static final String FDB_GET_DUPLICATE_ACCOUNT = DB_BASE_URI + "/account/check/de-duplicate";
 
     public static final String DB_ADD_HID_PHR_ADDRESS_URI = DB_BASE_URI + "/hidphraddress";
-
+x
     public static final String DB_GET_ACCOUNTS_BY_HEALTH_ID_NUMBER_LIST = DB_BASE_URI + "/account/";
 
     public static final String DB_GET_HID_PHR_ADDRESS_BY_PHR_ADDRESS_LIST = DB_BASE_URI + "/hidphraddress/check/";
@@ -120,5 +121,5 @@ public class URIConstant {
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
     public static final String ENROL_ABHA_RD_PID = "/pid";
 
-    
+    public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
 }

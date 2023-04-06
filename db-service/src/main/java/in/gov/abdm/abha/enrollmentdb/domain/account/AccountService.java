@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollmentdb.domain.account;
 import java.util.List;
 
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -58,4 +59,6 @@ public interface AccountService {
 
     Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber);
     Mono<Integer> getEmailLinkedAccountsCount(String email);
+    Mono<AccountDto> checkDeDuplication(DeDuplicationRequest request);
+
 }
