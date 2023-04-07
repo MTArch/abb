@@ -86,10 +86,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                     if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                                         return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
                                     } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                                        throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
+                                        return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                     } else {
                                         //existing account
-                                        return respondExistingAccount(existingAccount,false);
+                                        return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                     }
                                 })
                                 .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid())));
@@ -132,13 +132,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount -> {
-                    if (duplicateAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                        throw new AbhaUnProcessableException(ABDMError.DEACTIVATED_ABHA_ACCOUNT);
-                    } else {
-                        //existing account
-                        return respondExistingAccount(duplicateAccount,true);
-                    }
-                }).switchIfEmpty(Mono.defer(()->{
+                    return respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
+                }).switchIfEmpty(Mono.defer(() -> {
                     int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
                     if (age >= 18) {
                         accountDto.setType(AbhaType.STANDARD);
@@ -222,7 +217,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto,boolean isDuplicate) {
+    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto, boolean generateToken, String responseMessage) {
         ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
         String txnId = UUID.randomUUID().toString();
         Flux<String> fluxPhrAddress = hidPhrAddressService
@@ -231,28 +226,24 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
         return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
             abhaProfileDto.setPhrAddress(phrAddressList);
+
+            EnrolByAadhaarResponseDto enrolByAadhaarResponseDto = EnrolByAadhaarResponseDto.builder()
+                    .abhaProfileDto(abhaProfileDto)
+                    .message(responseMessage)
+                    .isNew(false)
+                    .build();
+
             //Final response for existing user
-            if(isDuplicate) {
-                return Mono.just(EnrolByAadhaarResponseDto.builder()
-                        .abhaProfileDto(abhaProfileDto)
-                        .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
-                        .isNew(false)
-                        .build());
-            }
-            else {
+            if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(txnId, accountDto))
                         .expiresIn(jwtUtil.jwtTokenExpiryTime())
                         .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                         .build();
-                return Mono.just(EnrolByAadhaarResponseDto.builder()
-                        .responseTokensDto(responseTokensDto)
-                        .abhaProfileDto(abhaProfileDto)
-                        .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)
-                        .isNew(false)
-                        .build());
+                enrolByAadhaarResponseDto.setResponseTokensDto(responseTokensDto);
             }
+            return Mono.just(enrolByAadhaarResponseDto);
         });
     }
 }
