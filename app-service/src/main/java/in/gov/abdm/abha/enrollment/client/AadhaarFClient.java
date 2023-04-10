@@ -7,6 +7,8 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyFaceAuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +31,9 @@ public interface AadhaarFClient {
     public Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest);
 
     @PostMapping(AADHAAR_VERIFY_FACE)
-    public Mono<AadhaarResponseDto> faceAuth(@RequestBody AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
+    public Mono<AadhaarResponseDto> faceAuth(@RequestBody AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto);
 
     @PostMapping(AADHAAR_VERIFY_BIO)
-    public Mono<AadhaarResponseDto> verifyBio(@RequestBody AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
+    public Mono<AadhaarResponseDto> verifyBio(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
 
 }

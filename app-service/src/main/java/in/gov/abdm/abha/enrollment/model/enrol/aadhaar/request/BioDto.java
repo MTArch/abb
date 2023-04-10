@@ -34,6 +34,6 @@ public class BioDto {
     /**
      * It is a rdPidData
      */
-    @JsonProperty("rdPidData")
-    private String rdPidData;
+    @JsonProperty("fingerPrintAuthPid")
+    private String fingerPrintAuthPid;
 }
