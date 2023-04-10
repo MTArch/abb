@@ -135,6 +135,7 @@ public class AbhaConstants {
     public static final String NOTIFICATION_APP_SERVICE = "notification-app-service";
 
     public static final String NOTIFICATION_DB_SERVICE = "notification-db-service";
+    public static final String PHR_APP_CLIENT = "phr-app-client";
 
     public static final String TOKEN_TYPE_TRANSACTION = "Transaction";
     public static final String TOKEN_TYPE_REFRESH = "Refresh";

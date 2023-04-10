@@ -88,6 +88,8 @@ public class URIConstant {
     public static final String IDP_SEND_OTP_URI = IDP_BASE_URI + "/authentication";
     public static final String IDP_VERIFY_OTP_URI = IDP_BASE_URI + "/verify";
 
+    public static final String IDENTITY_VERIFY_ABHA_EXISTS = IDP_BASE_URI + "/verify/abhaExists/{abhaAddress}";
+
     //    Notification Service
     public static final String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
@@ -114,6 +116,11 @@ public class URIConstant {
     public static final String VERIFY_ENROLLMENT_ENDPOINT = "/byEnrollmentNumber";
 
     public static final String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT = "/{enrollmentNumber}";
+
+    //    PHR DB Service
+    public static final String PHR_DB_BASE_URI = "/internal/api/v3/phr/profiledb";
+    public static final String GET_USERS_BY_ABHA_ADDRESS_LIST_URI = PHR_DB_BASE_URI + "/user/getUsersByAbhaAddressList";
+
     //Feign Client
     public static final String REQUEST_ID = "REQUEST_ID";
     public static final String TIMESTAMP = "TIMESTAMP";
