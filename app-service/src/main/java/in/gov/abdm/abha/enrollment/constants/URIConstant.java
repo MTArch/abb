@@ -119,7 +119,6 @@ public class URIConstant {
     public static final String TIMESTAMP = "TIMESTAMP";
     public static final String REQUESTER_ID = "REQUESTER_ID";
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
-    public static final String ENROL_ABHA_RD_PID = "/pid";
 
     public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
 }

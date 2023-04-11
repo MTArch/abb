@@ -20,21 +20,21 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
     AadhaarFClient aadhaarFClient;
 
     public Mono<AadhaarResponseDto> sendOtp(AadhaarOtpRequestDto aadhaarOtpRequestDto){
-        return aadhaarFClient.sendOtp(aadhaarOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.sendOtp(aadhaarOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable))));
     }
 
     public Mono<AadhaarResponseDto> verifyOtp(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto){
-        return aadhaarFClient.verifyOtp(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.verifyOtp(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable))));
     }
 
     public Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest){
-        return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable))));
     }
 
     public Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto){
-        return aadhaarFClient.faceAuth(aadhaarVerifyFaceAuthRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.faceAuth(aadhaarVerifyFaceAuthRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable))));
     }
     public Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto){
-        return aadhaarFClient.verifyBio(aadhaarVerifyBioRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+        return aadhaarFClient.verifyBio(aadhaarVerifyBioRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable))));
     }
 }
