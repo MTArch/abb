@@ -6,6 +6,8 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyFaceAuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +31,10 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
         return aadhaarFClient.verifyDemographicDetails(verifyDemographicRequest).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
 
-    public Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto){
-        return aadhaarFClient.faceAuth(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+    public Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto){
+        return aadhaarFClient.faceAuth(aadhaarVerifyFaceAuthRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
-    public Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto){
-        return aadhaarFClient.verifyBio(aadhaarVerifyOtpRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
+    public Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto){
+        return aadhaarFClient.verifyBio(aadhaarVerifyBioRequestDto).onErrorResume(throwable -> Mono.error(new AadhaarGatewayUnavailableException()));
     }
 }

@@ -4,6 +4,8 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyFaceAuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import reactor.core.publisher.Mono;
 
@@ -15,5 +17,7 @@ public interface AadhaarAppService {
 
     Mono<VerifyDemographicResponse> verifyDemographicDetails(VerifyDemographicRequest verifyDemographicRequest);
 
-    Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyOtpRequestDto aadhaarVerifyOtpRequestDto);
+    Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto);
+
+    Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
 }
