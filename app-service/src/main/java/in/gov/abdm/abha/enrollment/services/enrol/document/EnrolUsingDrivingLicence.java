@@ -312,7 +312,7 @@ public class EnrolUsingDrivingLicence {
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
 
-        if (isFacilityRequest) {//TODO what if Facility creating new account and that is existing account
+        if (isFacilityRequest) {
             EnrollmentResponse enrollmentResponse = EnrollmentResponse.builder()
                     .message(ABHA_CREATED_SUCCESS)
                     .status(ENROL_VERIFICATION_STATUS)

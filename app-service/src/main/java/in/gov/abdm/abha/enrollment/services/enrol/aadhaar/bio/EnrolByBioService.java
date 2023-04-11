@@ -142,7 +142,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-            // TODO if standard abha
+            
             {
                 //update transaction table and create account in account table
                 //account status is active
