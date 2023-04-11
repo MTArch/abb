@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.UTC_TIMEZONE_ID;
 
 @Service
 public class IdpAppService {
@@ -32,6 +34,7 @@ public class IdpAppService {
     {
         UUID requestId = UUID.randomUUID();
         SimpleDateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
         String timestamp = dateFormat.format(new Date());
         return idpAppFClient.verifyAbhaAddressExists(abhaAddress,requestId,timestamp)
                 .onErrorResume(throwable -> Mono.error(new IdpGatewayUnavailableException()));
