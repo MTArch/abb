@@ -215,7 +215,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
                         abhaProfileDto.setStateCode(accountDto.getStateCode());
                         abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-                        // TODO if standard abha
+
                         String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile();
                         if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
                             return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
@@ -399,7 +399,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
                         abhaProfileDto.setStateCode(accountDto.getStateCode());
                         abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-                        // TODO if standard abha
+
                         {
                             //update transaction table and create account in account table
                             //account status is active

@@ -22,8 +22,7 @@ public class AadhaarNumberFaceValidator implements ConstraintValidator<AadhaarNu
 
     @Override
     public boolean isValid(FaceDto faceDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(faceDto)
-                && faceDto != null && aadhaarNotNullorEmpty(faceDto.getAadhaar())) {
+        if (faceDto != null && aadhaarNotNullorEmpty(faceDto.getAadhaar())) {
             if (faceDto.getAadhaar() != null && isValidInput(faceDto.getAadhaar()) && isRSAEncrypted(faceDto.getAadhaar())) {
                 String decryptedAadhaar = rsaUtil.decrypt(faceDto.getAadhaar());
                 if (Pattern.compile("\\d{12}").matcher(decryptedAadhaar).matches())
