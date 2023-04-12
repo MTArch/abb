@@ -31,8 +31,7 @@ public class AppConfigurations implements WebFluxConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
         corsRegistry.addMapping("/**")
-//                .allowedOrigins("http://abha2dev.abdm.gov.in","http://wso2gw.abdm.gov.in","http://abha2dev.abdm.gov.internal")
-                .allowedOriginPatterns("http(s)?://(.+\\.)?(abdm\\.gov\\.in)")
+                .allowedOrigins("http://abha2dev.abdm.gov.in","http://wso2gw.abdm.gov.in","http://abha2dev.abdm.gov.internal")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .maxAge(3600);
