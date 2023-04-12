@@ -24,7 +24,8 @@ public class SecurityConfig {
                         .addFilterAfter(webFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .addFilterAfter(new ClientFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
                         .httpBasic().disable()
-                        .formLogin().disable())
+                        .formLogin().disable()
+                        .csrf().disable())
                 .build();
     }
 }
