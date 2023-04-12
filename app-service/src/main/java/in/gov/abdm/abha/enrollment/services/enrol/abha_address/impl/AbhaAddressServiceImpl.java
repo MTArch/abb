@@ -205,7 +205,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     private Mono<AbhaAddressResponseDto> updateHidAbhaAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto,TransactionDto transactionDto)
     {
-        if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred()==1)
+        if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred().equals("1"))
         {
             Mono<HidPhrAddressDto> hidPhrAddressDtoMono
                     = hidPhrAddressService.findByHealthIdNumber(accountDto.getHealthIdNumber());
@@ -249,7 +249,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 .healthIdNumber(accountDto.getHealthIdNumber())
                 .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT+ abhaAddressExtension)
                 .status(AccountStatus.ACTIVE.getValue())
-                .preferred(abhaAddressRequestDto.getPreferred())
+                .preferred(Integer.valueOf(abhaAddressRequestDto.getPreferred()))
                 .lastModifiedBy(ABHA_APP)
                 .lastModifiedDate(LocalDateTime.now())
                 .hasMigrated("N")
