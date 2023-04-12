@@ -14,13 +14,13 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, RequestConverter converter, RequestManager manager) {
         AuthenticationWebFilter webFilter = new AuthenticationWebFilter(manager);
         webFilter.setServerAuthenticationConverter(converter);
+        http.headers().contentSecurityPolicy("form-action 'self'");
         return http.authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec.anyExchange().authenticated()
                         .and()
                         .addFilterAfter(webFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .addFilterAfter(new ClientFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
                         .httpBasic().disable()
                         .formLogin().disable()
-                        .cors().disable()
                         .csrf().disable())
                 .build();
     }

@@ -28,7 +28,7 @@ public class AppConfigurations implements WebFluxConfigurer {
     public void addCorsMappings(CorsRegistry corsRegistry) {
         corsRegistry.addMapping("/**")
                 .allowedOrigins("http://wso2gw.abdm.gov.in")
-                .allowedMethods("*")
+                .allowedMethods("GET")
                 .allowedHeaders("*")
                 .maxAge(3600);
     }
