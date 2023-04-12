@@ -9,6 +9,8 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 
 import in.gov.abdm.abha.enrollment.configuration.filters.ClientFilter;
 
+import java.time.Duration;
+
 @EnableWebFluxSecurity
 public class SecurityConfig {
     @Bean
@@ -17,7 +19,7 @@ public class SecurityConfig {
         webFilter.setServerAuthenticationConverter(converter);
         http.headers().contentSecurityPolicy("form-action 'self'").and()
                 .permissionsPolicy().policy("geolocation=(self)").and()
-                .hsts();
+                .hsts().includeSubdomains(true).preload(true).maxAge(Duration.ofDays(365));
 		
         return http.authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec.anyExchange().authenticated()
                         .and()
