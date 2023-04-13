@@ -145,7 +145,7 @@ public class EnrolUsingDrivingLicence {
                                             return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                         } else {
                                             //return existing account
-                                            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
+                                            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                         }
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
