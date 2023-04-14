@@ -36,8 +36,8 @@ enrollment:
     maxSizeInKB: 150
   otp:
     userBlockTimeInMinutes: 5
-    maxSendOtpCount: 3
-    maxVerifyOtpCount: 3
+    maxSendOtpCount: 90000
+    maxVerifyOtpCount: 90000
   maxMobileLinkingCount: 6
   gateway:
     aadhaar:
