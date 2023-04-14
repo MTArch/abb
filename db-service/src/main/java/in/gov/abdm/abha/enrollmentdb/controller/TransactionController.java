@@ -17,6 +17,7 @@ import in.gov.abdm.abha.enrollmentdb.model.transaction.TransactionDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequestMapping(ABHAEnrollmentDBConstant.TRANSACTION_ENDPOINT)
@@ -34,7 +35,7 @@ public class TransactionController {
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_TRANSACTION_BY_TXN_ID)
     public ResponseEntity<?> getTransactionByTxnId(@PathVariable("txnId") String txnId) {
         log.info(SEARCHING_FOR_TRANSACTION +txnId);
-        return ResponseEntity.ok(transactionService.getTransactionByTxnId(txnId));
+        return ResponseEntity.ok(transactionService.getTransactionByTxnId(txnId).publishOn(Schedulers.boundedElastic()));
     }
 
     @PostMapping

@@ -13,16 +13,17 @@ import java.time.LocalDateTime;
 @Repository
 public interface TransactionRepository extends R2dbcRepository<Transection, Long> {
 
-	@Query("SELECT * FROM transection t where t.txn_id = :txnId AND t.created_date BETWEEN :fromDateTime AND :toDateTime")
-	public Mono<Transection> findByTxnId(@Param("txnId") String txnId, @Param("fromDateTime") LocalDateTime fromDateTime,
-			@Param("toDateTime") LocalDateTime toDateTime);
+    //@Query("SELECT * FROM transection t where t.txn_id = :txnId AND t.created_date BETWEEN :fromDateTime AND :toDateTime")
+    @Query(value = "SELECT * FROM public.fn_get_by_txnid(:txnId,:fromDateTime,:toDateTime)")
+    public Mono<Transection> findByTxnId(@Param("txnId") String txnId, @Param("fromDateTime") LocalDateTime fromDateTime,
+                                         @Param("toDateTime") LocalDateTime toDateTime);
 
-	@Query(value = "UPDATE transection SET kyc_photo=lo_from_bytea(0, :kycPhoto) where id = :id")
-	Mono<TransactionDto> updateKycPhoto(@Param("kycPhoto") byte[] kycPhoto, @Param("id") Long id);
+    @Query(value = "UPDATE transection SET kyc_photo=lo_from_bytea(0, :kycPhoto) where id = :id")
+    Mono<TransactionDto> updateKycPhoto(@Param("kycPhoto") byte[] kycPhoto, @Param("id") Long id);
 
-	@Query(value = "SELECT encode(lo_get(kyc_photo), 'base64') FROM transection t where t.id = :id")
+    @Query(value = "SELECT encode(lo_get(kyc_photo), 'base64') FROM transection t where t.id = :id")
     Mono<String> getProfilePhoto(@Param("id") Long id);
 
-	@Query("DELETE FROM transection WHERE transection.txn_id = :txnId")
-	Mono<Void> deleteByTxnId(@Param("txnId") String txnId);
+    @Query("DELETE FROM transection WHERE transection.txn_id = :txnId")
+    Mono<Void> deleteByTxnId(@Param("txnId") String txnId);
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Base64;
 import java.util.List;
@@ -41,7 +42,7 @@ public class AccountController {
 
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNT_BY_XML_UID)
     public ResponseEntity<?> getAccountByXmlUid(@PathVariable("xmluid") String xmluid) {
-        return ResponseEntity.ok(accountService.getAccountByXmlUid(new String(Base64.getDecoder().decode(xmluid))));
+        return ResponseEntity.ok(accountService.getAccountByXmlUid(new String(Base64.getDecoder().decode(xmluid))).publishOn(Schedulers.boundedElastic()));
     }
 
 
@@ -57,7 +58,7 @@ public class AccountController {
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
     public ResponseEntity<?> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber) {
-        return ResponseEntity.ok(accountService.getMobileLinkedAccountsCount(mobileNumber));
+        return ResponseEntity.ok(accountService.getMobileLinkedAccountsCount(mobileNumber).publishOn(Schedulers.boundedElastic()));
     }
 
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_EMAIL)
