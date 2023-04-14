@@ -173,9 +173,11 @@ public class FacilityEnrolByEnrollmentNumberService {
     public Mono<GetByDocumentResponseDto> fetchDetailsByEnrollmentNumber(String enrollmentNumber) {
         Mono<AccountDto> accountDtoMono = accountService.getAccountByHealthIdNumber(enrollmentNumber);
         return accountDtoMono.flatMap(accountDto -> {
-            if(!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)
-                && !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()))
+            if (!accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && (accountDto.getVerificationStatus() == null || !accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL))
+                    || !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus() == null
+                    || accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
                 return Mono.error(new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE));
+            }
             EnrolProfileDetailsDto enrolProfileDto = EnrolProfileDetailsDto.builder().enrolmentNumber(accountDto.getHealthIdNumber()).enrolmentState(accountDto.getVerificationStatus()).firstName(accountDto.getFirstName()).middleName(accountDto.getMiddleName()).lastName(accountDto.getLastName()).dob(accountDto.getYearOfBirth() + StringConstants.DASH + accountDto.getMonthOfBirth() + StringConstants.DASH + accountDto.getDayOfBirth()).gender(accountDto.getGender()).photo(accountDto.getProfilePhoto()).mobile(accountDto.getMobile()).email(accountDto.getEmail()).address(accountDto.getAddress()).districtCode(accountDto.getDistrictCode()).stateCode(accountDto.getStateCode()).abhaType(accountDto.getType() == null ? null : StringUtils.upperCase(accountDto.getType().getValue())).pinCode(accountDto.getPincode()).state(accountDto.getStateName()).district(accountDto.getDistrictName()).phrAddress(Collections.singletonList(accountDto.getHealthId())).abhaStatus(StringUtils.upperCase(accountDto.getStatus())).build();
             Mono<IdentityDocumentsDto> response = documentClient.getIdentityDocuments(accountDto.getHealthIdNumber());
             return response.flatMap(res -> {
@@ -303,8 +305,8 @@ public class FacilityEnrolByEnrollmentNumberService {
                         notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE, jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
-                        if(enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
-                            throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(),ABDMError.INVALID_REASON.getMessage());
+                        if (enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
+                            throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(), ABDMError.INVALID_REASON.getMessage());
                         }
                         formatAccountDto(accountDto);
                         formatHidPhr(accountDto.getHealthIdNumber());

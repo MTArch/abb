@@ -202,7 +202,6 @@ public class EnrolUsingDrivingLicence {
                 .pincode(enrolByDocumentRequestDto.getPinCode())
                 .kycVerified(FacilityContextHolder.getSubject() != null)
                 .status(AccountStatus.ACTIVE.getValue())
-                .kycPhoto(StringConstants.EMPTY)
                 .consentVersion(enrolByDocumentRequestDto.getConsent().getVersion())
                 .consentDate(LocalDateTime.now())
                 .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
