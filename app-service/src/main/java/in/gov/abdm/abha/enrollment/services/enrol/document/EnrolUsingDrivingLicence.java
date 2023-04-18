@@ -123,7 +123,7 @@ public class EnrolUsingDrivingLicence {
             FacilityContextHolder.setUserType(claims.get(USER_TYPE).toString());
             FacilityContextHolder.setRole(claims.get(ROLES) != null ? claims.get(ROLES).toString() : null);
         }
-
+        enrolByDocumentRequestDto.setDocumentId(GeneralUtils.formatDlNumber(enrolByDocumentRequestDto.getDocumentId()));
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
                 .flatMap(txnDto -> {

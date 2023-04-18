@@ -9,6 +9,6 @@ public class DLNumberValidator implements ConstraintValidator<ValidDLNumber, Str
 
     @Override
     public boolean isValid(String dlNumber, ConstraintValidatorContext context) {
-        return dlNumber.matches("^(([A-Z]{2}[\\d]{2})( )|([A-Z]{2}-[\\d]{2}))((19|20)[\\d][\\d])[\\d]{7}$");
+        return dlNumber.matches("^(([A-Z]{2}[\\d]{2})( )|([A-Z]{2}-[\\d]{2}))((19|20)[\\d][\\d])[\\d]{1,7}$");
     }
 }
