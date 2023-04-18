@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.model.enrol.document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidDLNumber;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class EnrolByDocumentRequestDto {
     private String documentType;
 
     @NotEmpty(message = AbhaConstants.INVALID_DOCUMENT_ID)
+    @ValidDLNumber
     private String documentId;
     
     @NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
