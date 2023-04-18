@@ -25,6 +25,7 @@ public class JWTUtil {
     private static final String CLIENT_ID = "clientId";
     private static final String SYSTEM = "system";
     private static final String MOBILE = "mobile";
+    private static final String KYC_VERIFIED = "isKycVerified";
     private static final String ABHA_NUMBER = "abhaNumber";
     private static final String TYPE = "typ";
 
@@ -46,6 +47,7 @@ public class JWTUtil {
         claims.put(TYPE, AbhaConstants.TOKEN_TYPE_TRANSACTION);
         claims.put(ABHA_NUMBER, account.getHealthIdNumber());
         claims.put(MOBILE, account.getMobile());
+        claims.put(KYC_VERIFIED,account.isKycVerified());
 
         return new JWTTokenRequest(account.getHealthIdNumber(), JWT_USER_TOKEN_VALIDITY_IN_SEC / 60, claims);
     }
