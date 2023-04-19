@@ -86,10 +86,10 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String TRANSACTION = " Transaction.";
     private RedisOtp redisOtp;
 
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final int OTP_EXPIRE_TIME = 10;
-    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
-    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
+    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
+    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final String YEAR_OF_BIRTH = "9999";
     private static final String GENDER = "XXX";
 
