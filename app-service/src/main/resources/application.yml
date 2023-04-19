@@ -56,6 +56,8 @@ enrollment:
       baseuri: ${DOCUMENT_SERVICE_BASE_URI}
     documentdb:
       baseuri: ${DOCUMENT_DB_BASE_URI}
+    phr:
+      baseuri: ${PHR_DB_BASE_URI}
 
 rsa:
   algorithm: RSA

@@ -56,7 +56,7 @@ import java.util.UUID;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
 import static in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService.OTP_VERIFIED_SUCCESSFULLY;
-import static in.gov.abdm.error.ABDMError.INVALID_TRANSACTION_ID;
+import static in.gov.abdm.error.ABDMError.ENROLLMENT_ID_NOT_FOUND;
 import static java.time.LocalDateTime.now;
 
 /**
@@ -78,8 +78,8 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String DELETION = "DELETION";
     private static final String DELETED = "DELETED";
     private static final String STATUS = "status";
-    private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Successfully verified";
-    private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "Successfully rejected";
+    private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Congratulations! Your ABHA has been created successfully";
+    private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "We're sorry, but we were unable to process your registration at this time. Please re-register with the correct and accurate details to successfully complete your registration process.";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
     private static final String SENT = "sent";
     private static final String FOUND = " found.";
@@ -281,10 +281,10 @@ public class FacilityEnrolByEnrollmentNumberService {
                 log.info(MOBILE_NUMBER_IS_VERIFIED);
                 return accountService.getAccountByHealthIdNumber(txnDto.getHealthIdNumber()).flatMap(accountDto -> {
                     if (accountDto.getVerificationStatus() == null) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+                        throw new AbhaUnProcessableException(ENROLLMENT_ID_NOT_FOUND.getCode(), ENROLLMENT_ID_NOT_FOUND.getMessage());
                     }
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+                        throw new AbhaUnProcessableException(ENROLLMENT_ID_NOT_FOUND.getCode(), ENROLLMENT_ID_NOT_FOUND.getMessage());
                     }
                     EnrollmentResponse enrollmentResponse;
                     if (status.equalsIgnoreCase(ACCEPT)) {

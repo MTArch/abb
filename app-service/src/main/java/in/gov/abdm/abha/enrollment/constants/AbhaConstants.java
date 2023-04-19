@@ -50,6 +50,7 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     public static final String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
+    public static final String VALIDATION_ERROR_DL_NUMBER = "Please enter a valid Driving Licence number in any of following formats DL-1420110012345 or DL14 20110012345.";
     public static final String INVALID_REASON = "Maximum length allowed is 255";
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
@@ -135,6 +136,7 @@ public class AbhaConstants {
     public static final String NOTIFICATION_APP_SERVICE = "notification-app-service";
 
     public static final String NOTIFICATION_DB_SERVICE = "notification-db-service";
+    public static final String PHR_APP_CLIENT = "phr-app-client";
 
     public static final String TOKEN_TYPE_TRANSACTION = "Transaction";
     public static final String TOKEN_TYPE_REFRESH = "Refresh";

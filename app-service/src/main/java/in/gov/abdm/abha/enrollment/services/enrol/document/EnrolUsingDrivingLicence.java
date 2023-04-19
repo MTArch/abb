@@ -61,6 +61,7 @@ public class EnrolUsingDrivingLicence {
     private static final String FOUND_ACCOUNT = "Found account (";
     private static final String ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS = "Account not found with DL, verifying DL details";
     private static final String MOBILE_NUMBER_NOT_VERIFIED = "mobile number not verified";
+    private static final String DL_VERIFICATION_FAILED = "The details provided by you do not match against your Documents details. Please provide the correct details";
     private static final String DL_DETAILS_VERIFIED_CREATING_NEW_ENROLLMENT_ACCOUNT = "DL details verified, creating new Enrollment Account";
     private static final String DL_DETAILS_NOT_VERIFIED = "DL details not verified";
     private static final String NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB = "new enrollment account created and updated in DB";
@@ -122,7 +123,7 @@ public class EnrolUsingDrivingLicence {
             FacilityContextHolder.setUserType(claims.get(USER_TYPE).toString());
             FacilityContextHolder.setRole(claims.get(ROLES) != null ? claims.get(ROLES).toString() : null);
         }
-
+        enrolByDocumentRequestDto.setDocumentId(GeneralUtils.formatDlNumber(enrolByDocumentRequestDto.getDocumentId()));
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
                 .flatMap(txnDto -> {
@@ -173,7 +174,7 @@ public class EnrolUsingDrivingLicence {
             } else {
                 //failure response
                 log.info(DL_DETAILS_NOT_VERIFIED);
-                throw new AbhaUnProcessableException(ABDMError.DRIVING_LICENSE_EXCEPTIONS.getCode(), verifyDLResponse.getMessage());
+                throw new AbhaUnProcessableException(ABDMError.DRIVING_LICENSE_EXCEPTIONS.getCode(), DL_VERIFICATION_FAILED);
             }
         });
     }
