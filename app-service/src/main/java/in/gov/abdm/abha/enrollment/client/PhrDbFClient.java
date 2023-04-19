@@ -10,7 +10,9 @@ import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Flux;
 import java.sql.Timestamp;
 
-@ReactiveFeignClient(name = AbhaConstants.PHR_APP_CLIENT, url = "${enrollment.gateway.phr.baseuri}", configuration = BeanConfiguration.class)
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_PHR_BASEURI;
+
+@ReactiveFeignClient(name = AbhaConstants.PHR_APP_CLIENT, url = ENROLLMENT_GATEWAY_PHR_BASEURI, configuration = BeanConfiguration.class)
 public interface PhrDbFClient {
 
     public static final String REQUEST_ID = "REQUEST_ID";

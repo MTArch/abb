@@ -13,13 +13,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.CIPHER_SECRET_KEY;
+
 @Component
 @Slf4j
 public class EnrolmentCipher {
 
 	private static final String ALGO = "AES/CBC/PKCS5Padding";
 
-	@Value("${cipher.secretKey}")
+	@Value(CIPHER_SECRET_KEY)
 	private String secretKey;
 
 	private IvParameterSpec ivParameterSpec;

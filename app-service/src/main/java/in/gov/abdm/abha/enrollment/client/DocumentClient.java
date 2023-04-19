@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
@@ -25,10 +26,10 @@ public class DocumentClient {
     @Autowired
     private WebClient.Builder webClient;
 
-    @Value("${enrollment.gateway.document.baseuri}")
+    @Value(PropertyConstants.ENROLLMENT_GATEWAY_DOCUMENT_BASEURI)
     private String DOCUMENT_SERVICE_BASE_URI;
 
-    @Value("${enrollment.gateway.documentdb.baseuri}")
+    @Value(PropertyConstants.ENROLLMENT_GATEWAY_DOCUMENTDB_BASEURI)
     private String DOCUMENT_DB_SERVICE_BASE_URI;
 
     /**

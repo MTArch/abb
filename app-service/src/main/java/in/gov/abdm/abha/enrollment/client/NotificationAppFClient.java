@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_NOTIFICATION_BASEURI;
 import static in.gov.abdm.abha.enrollment.constants.URIConstant.TIMESTAMP;
 import static in.gov.abdm.constant.ABDMConstant.REQUEST_ID;
 
-@ReactiveFeignClient(name= AbhaConstants.NOTIFICATION_APP_SERVICE, url="${enrollment.gateway.notification.baseuri}", configuration = BeanConfiguration.class)
+@ReactiveFeignClient(name= AbhaConstants.NOTIFICATION_APP_SERVICE, url=ENROLLMENT_GATEWAY_NOTIFICATION_BASEURI, configuration = BeanConfiguration.class)
 public interface NotificationAppFClient {
     @PostMapping(URIConstant.NOTIFICATION_SEND_OTP_URI)
     public Mono<NotificationResponseDto> sendOtp(@RequestBody NotificationRequestDto notificationRequestDto, @RequestHeader(REQUEST_ID) String requestId,

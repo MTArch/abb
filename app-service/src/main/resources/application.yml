@@ -62,7 +62,7 @@ enrollment:
 rsa:
   algorithm: RSA
   transformation:
-    algorithm: ${RSA_ALGORITHM}
+    algorithm: ${RSA_ENC_ALGORITHM}
   private:
     key: ${RSA_PRIVATE_KEY}
   public:

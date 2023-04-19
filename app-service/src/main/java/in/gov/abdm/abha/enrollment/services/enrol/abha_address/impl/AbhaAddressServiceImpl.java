@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
@@ -42,7 +43,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     public static final String ABHA_APP = "ABHA_APP";
 
-    @Value("${enrollment.domain}")
+    @Value(PropertyConstants.ENROLLMENT_DOMAIN)
     private String abhaAddressExtension;
 
     @Autowired

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
-@ReactiveFeignClient(name= AbhaConstants.ABHA_DB_ACCOUNT_ACTION_CLIENT, url="${enrollment.gateway.enrollmentdb.baseuri}", configuration = BeanConfiguration.class)
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI;
+
+@ReactiveFeignClient(name= AbhaConstants.ABHA_DB_ACCOUNT_ACTION_CLIENT, url=ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI, configuration = BeanConfiguration.class)
 public interface AbhaDBAccountActionFClient {
 
     @PostMapping(URIConstant.DB_ADD_ACCOUNT_ACTION_URI)

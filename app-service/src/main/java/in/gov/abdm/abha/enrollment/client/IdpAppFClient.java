@@ -12,11 +12,12 @@ import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_IDP_BASEURI;
 import static in.gov.abdm.abha.enrollment.constants.URIConstant.*;
 import static in.gov.abdm.constant.ABDMConstant.REQUEST_ID;
 import static in.gov.abdm.constant.ABDMConstant.TIMESTAMP;
 
-@ReactiveFeignClient(name= AbhaConstants.IDP_APP_CLIENT, url="${enrollment.gateway.idp.baseuri}", configuration = BeanConfiguration.class)
+@ReactiveFeignClient(name= AbhaConstants.IDP_APP_CLIENT, url=ENROLLMENT_GATEWAY_IDP_BASEURI, configuration = BeanConfiguration.class)
 public interface IdpAppFClient {
 
     @PostMapping(URIConstant.IDP_SEND_OTP_URI)

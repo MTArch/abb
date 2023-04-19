@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.de_duplication;
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class DeDuplicationService {
 
-    @Value("${enrollment.enableDeduplication: false}")
+    @Value(PropertyConstants.ENROLLMENT_ENABLE_DEDUPLICATION)
     private boolean ENABLE_DEDUPLICATION;
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;
