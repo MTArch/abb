@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +23,7 @@ public class AadhaarClient {
     @Autowired
     private WebClient.Builder webClient;
 
-    @Value("${enrollment.gateway.aadhaar.baseuri}")
+    @Value(PropertyConstants.ENROLLMENT_GATEWAY_AADHAAR_BASEURI)
     private String AADHAAR_SERVICE_BASE_URI;
 
     public Mono<AadhaarResponseDto> sendOtp(AadhaarOtpRequestDto aadhaarOtpRequestDto) {

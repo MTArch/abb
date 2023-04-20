@@ -50,7 +50,8 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     public static final String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
-    public static final String INVALID_REASON = "Maximum length allowed is 255";
+    public static final String VALIDATION_ERROR_DL_NUMBER = "Please enter a valid Driving Licence number in any of following formats DL-1420110012345 or DL14 20110012345.";
+    public static final String INVALID_REASON = "Maximum limit is 255 characters";
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
@@ -60,7 +61,7 @@ public class AbhaConstants {
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
     public static final String INVALID_EMAIL_ID = "Invalid Email Id";
-    public static final String INVALID_AADHAAR_OTP = "Invalid Aadhaar OTP";
+    public static final String INVALID_AADHAAR_OTP = "Please enter a valid OTP ";
     public static final String AADHAAR_OTP_EXPIRED = "Aadhaar OTP expired";
     public static final String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 
@@ -70,15 +71,15 @@ public class AbhaConstants {
     public static final String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
     public static final String INVALID_DOCUMENT_ID = "Invalid Document Id";
     public static final String INVALID_FIRST_NAME = "Invalid First Name";
-    public static final String FIRST_NAME_EXCEED = "First Name exceeded 255 characters";
+    public static final String FIRST_NAME_EXCEED = "First name should not exceed limit of 255 characters";
 
     public static final String INVALID_MIDDLE_NAME = "Invalid Middle Name";
 
-    public static final String MIDDLE_NAME_EXCEED = "Middle Name exceeded 255 characters";
+    public static final String MIDDLE_NAME_EXCEED = "Middle name should not exceed limit of 255 characters";
 
     public static final String INVALID_LAST_NAME = "Invalid Last Name";
 
-    public static final String LAST_NAME_EXCEED = "Last Name exceeded 255 characters";
+    public static final String LAST_NAME_EXCEED = "Last name should not exceed limit of 255 characters";
 
     public static final String INVALID_DOB = "Invalid DOB";
 
@@ -88,7 +89,7 @@ public class AbhaConstants {
 
     public static final String INVALID_ADDRESS = "Invalid Address";
 
-    public static final String ADDRESS_EXCEED = "Address exceeded 255 characters";
+    public static final String ADDRESS_EXCEED = "Address should not exceed limit of 255 characters";
 
     public static final String INVALID_STATE = "Invalid State";
 
@@ -135,6 +136,7 @@ public class AbhaConstants {
     public static final String NOTIFICATION_APP_SERVICE = "notification-app-service";
 
     public static final String NOTIFICATION_DB_SERVICE = "notification-db-service";
+    public static final String PHR_APP_CLIENT = "phr-app-client";
 
     public static final String TOKEN_TYPE_TRANSACTION = "Transaction";
     public static final String TOKEN_TYPE_REFRESH = "Refresh";

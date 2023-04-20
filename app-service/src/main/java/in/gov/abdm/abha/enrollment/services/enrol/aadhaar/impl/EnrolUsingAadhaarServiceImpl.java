@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
@@ -96,7 +97,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     LgdUtility lgdUtility;
 
-    @Value("${enrollment.maxMobileLinkingCount:6}")
+    @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
 
     @Override

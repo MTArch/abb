@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollment.utilities.rsa;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
-import liquibase.pro.packaged.E;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.*;
+
 @Slf4j
 @Component
 @NoArgsConstructor
@@ -33,22 +34,22 @@ public class RSAUtil {
     private String privateKeyContent;
     private String publicKeyContent;
 
-    @Value("${rsa.transformation.algorithm: RSA/ECB/OAEPWithSHA-1AndMGF1Padding}")
-    private String RSA_TRANSFORMATION_ALGORITHM;
+    @Value(RSA_TRANSFORMATION_ALGORITHM)
+    private String rsaEncryptionAlgo;
 
-    @Value("${rsa.algorithm: RSA}")
-    private String RSA_ALGORITHM;
+    @Value(ENCRYPTION_ALGORITHM)
+    private String encryptionAlgorithm;
 
     @Autowired
-    RSAUtil(@Value("${rsa.private.key: nha_rsa_private_key.pem}") String rsaPrivateKeyFileName
-            , @Value("${rsa.public.key: nha_rsa_public_key.pem}") String rsaPublicKeyFileName) {
+    RSAUtil(@Value(RSA_PRIVATE_KEY_NHA_RSA_PRIVATE_KEY_PEM) String rsaPrivateKeyFileName
+            , @Value(RSA_PUBLIC_KEY_NHA_RSA_PUBLIC_KEY_PEM) String rsaPublicKeyFileName) {
         privateKeyContent = Common.loadFileData(rsaPrivateKeyFileName);
         publicKeyContent = Common.loadFileData(rsaPublicKeyFileName);
     }
 
     public String encrypt(String data) {
         try {
-            Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION_ALGORITHM);
+            Cipher cipher = Cipher.getInstance(rsaEncryptionAlgo);
             cipher.init(Cipher.ENCRYPT_MODE, getPublicKey());
             return Base64.getEncoder().encodeToString(cipher.doFinal(data.getBytes()));
         } catch (InvalidKeyException | NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException |
@@ -63,7 +64,7 @@ public class RSAUtil {
             return StringConstants.EMPTY;
         } else {
             try {
-                Cipher cipher = Cipher.getInstance(RSA_TRANSFORMATION_ALGORITHM);
+                Cipher cipher = Cipher.getInstance(rsaEncryptionAlgo);
                 cipher.init(Cipher.DECRYPT_MODE, getPrivateKey());
                 return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes())));
             } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
@@ -77,7 +78,7 @@ public class RSAUtil {
     private PublicKey getPublicKey() {
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent.getBytes()));
-            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
+            KeyFactory keyFactory = KeyFactory.getInstance(encryptionAlgorithm);
             return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
             log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage());
@@ -90,7 +91,7 @@ public class RSAUtil {
     private PrivateKey getPrivateKey() {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyContent.getBytes()));
         try {
-            return KeyFactory.getInstance(RSA_ALGORITHM).generatePrivate(keySpec);
+            return KeyFactory.getInstance(encryptionAlgorithm).generatePrivate(keySpec);
         } catch (NoSuchAlgorithmException e) {
             log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PRIVATE_KEY, e);
         } catch (InvalidKeySpecException e) {

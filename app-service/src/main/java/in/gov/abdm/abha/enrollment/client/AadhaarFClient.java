@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_AADHAAR_BASEURI;
 import static in.gov.abdm.abha.enrollment.constants.URIConstant.*;
 
 
-@ReactiveFeignClient(name= AbhaConstants.AADHAAR_SERVICE_CLIENT, url="${enrollment.gateway.aadhaar.baseuri}", configuration = BeanConfiguration.class)
+@ReactiveFeignClient(name= AbhaConstants.AADHAAR_SERVICE_CLIENT, url=ENROLLMENT_GATEWAY_AADHAAR_BASEURI, configuration = BeanConfiguration.class)
 public interface AadhaarFClient {
 
     @PostMapping(URIConstant.AADHAAR_SEND_OTP_URI)

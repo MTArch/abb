@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetByDocumentResponseDto {
-    @JsonProperty("EnrolProfile")
+    @JsonProperty("enrolProfile")
     EnrolProfileDetailsDto enrolProfileDto;
 }

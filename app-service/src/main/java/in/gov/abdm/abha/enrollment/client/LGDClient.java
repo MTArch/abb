@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
@@ -23,7 +24,7 @@ public class LGDClient {
     @Autowired
     private WebClient.Builder webClient;
 
-    @Value("${enrollment.gateway.lgd.baseuri}")
+    @Value(PropertyConstants.ENROLLMENT_GATEWAY_LGD_BASEURI)
     private String LGD_SERVICE_BASE_URI;
 
     public Mono<List<LgdDistrictResponse>> getLgdDistrictDetails(String pinCode) {
