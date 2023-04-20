@@ -23,8 +23,10 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 
@@ -77,6 +79,8 @@ public class EnrolByAadhaarTests {
             mobileOrEmailOtpRequestDto.setOtpSystem(OtpSystem.AADHAAR.getValue());
 
             String jsonStringResponse = new String(webTestClient.post().uri(API_V_3_ENROLLMENT_REQUEST_OTP)
+                    .header("REQUEST-ID", UUID.randomUUID().toString())
+                    .header("TIMESTAMP", String.valueOf(LocalDateTime.now()))
                     .body(BodyInserters.fromValue(mobileOrEmailOtpRequestDto))
                     .exchange()
                     .expectStatus().is2xxSuccessful()
