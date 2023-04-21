@@ -31,10 +31,6 @@ public class OtpRequestController {
     @Autowired
     OtpRequestService otpRequestService;
 
-    @Autowired
-    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
-    private List<IntegratedProgramDto> integratedProgramDtos;
-
     /**
      * endpoint to generate mobile or email otp for abha creation using aadhaar
      *
