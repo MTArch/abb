@@ -129,6 +129,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
         accountDto.setStatus(AccountStatus.ACTIVE.getValue());
         accountDto.setMobileType(demographic.getMobileType().getValue());
+        accountDto.setKycVerified(true);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount -> {
