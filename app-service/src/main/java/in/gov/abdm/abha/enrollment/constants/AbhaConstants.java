@@ -57,6 +57,7 @@ public class AbhaConstants {
 
 
     public static final String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
+    public static final String INTEGRATED_PROGRAMS = "INTEGRATED_PROGRAMS";
     public static final String INVALID_OTP = "Invalid OTP, Please try again.";
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
@@ -126,6 +127,7 @@ public class AbhaConstants {
     public static final String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
     public static final String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
     public static final String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
+    public static final String ABHA_DB_INTEGRATED_PROGRAM_CLIENT = "abha-db-integrated-program-client";
 
     public static final String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     public static final String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";

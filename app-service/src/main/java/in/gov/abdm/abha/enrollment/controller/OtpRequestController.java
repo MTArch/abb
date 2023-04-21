@@ -1,15 +1,18 @@
 package in.gov.abdm.abha.enrollment.controller;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
+import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.otp_request.OtpRequestService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -27,6 +30,10 @@ public class OtpRequestController {
 
     @Autowired
     OtpRequestService otpRequestService;
+
+    @Autowired
+    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
+    private List<IntegratedProgramDto> integratedProgramDtos;
 
     /**
      * endpoint to generate mobile or email otp for abha creation using aadhaar
