@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -13,6 +14,9 @@ import reactivefeign.webclient.WebReactiveOptions;
 @Configuration
 @EnableWebFlux
 public class AppConfigurations implements WebFluxConfigurer {
+
+    @Value("${enrollment.corsWhitelistURLs}")
+    private String[] uiUrls;
 
     @Bean
     public ReactiveOptions reactiveOptions() {
@@ -31,7 +35,7 @@ public class AppConfigurations implements WebFluxConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
         corsRegistry.addMapping("/**")
-                .allowedOrigins("http://abha2dev.abdm.gov.in","http://wso2gw.abdm.gov.in","http://abha2dev.abdm.gov.internal")
+                .allowedOriginPatterns(uiUrls)
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .maxAge(3600);
