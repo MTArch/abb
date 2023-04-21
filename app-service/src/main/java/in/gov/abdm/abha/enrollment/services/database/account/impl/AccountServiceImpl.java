@@ -208,7 +208,6 @@ public class AccountServiceImpl implements AccountService {
         }
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
-
         return abhaDBAccountFClient.createAccount(accountDto)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
     }
