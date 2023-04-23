@@ -16,7 +16,7 @@ public interface AccountService {
 
     Mono<AccountDto> prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<LgdDistrictResponse> lgdDistrictResponse);
 
-    Mono<AccountDto> createAccountEntity(AccountDto accountDto);
+    Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto ,AccountDto accountDto,String benefitName,List<String> roleList, String clientId);
 
     boolean isItNewUser(AccountDto accountDto);
 

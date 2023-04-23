@@ -71,7 +71,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Autowired
     DeDuplicationService deDuplicationService;
 
-    public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,String benefitName,List<String> roleList, String clientId) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
         verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
@@ -84,7 +84,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                 .flatMap(existingAccount -> {
                                     if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
-                                        return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
+                                        return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(),benefitName,roleList,clientId);
                                     } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                         return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                     } else {
@@ -92,14 +92,14 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                         return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                     }
                                 })
-                                .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid())));
+                                .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(),benefitName,roleList,clientId)));
                     } else {
                         throw new AbhaUnProcessableException(ABDMError.INVALID_DEMOGRAPHIC_DETAILS);
                     }
                 });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid) {
+    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid,String benefitName,List<String> roleList, String clientId) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
@@ -152,13 +152,13 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                     accountDto.setDistrictName(demographic.getDistrict());
                                     accountDto.setStateName(demographic.getState());
                                 }
-                                return saveAccountDetails(accountDto, demographic.getConsentFormImage());
+                                return saveAccountDetails(enrolByAadhaarRequestDto,accountDto, demographic.getConsentFormImage(),benefitName,roleList,clientId);
                             });
                 }));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(AccountDto accountDto, String consentFormImage) {
-        return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
+    private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto ,AccountDto accountDto, String consentFormImage,String benefitName,List<String> roleList, String clientId) {
+        return accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,benefitName,roleList,clientId).flatMap(accountDtoResponse -> {
             HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
             return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
                     .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto)));

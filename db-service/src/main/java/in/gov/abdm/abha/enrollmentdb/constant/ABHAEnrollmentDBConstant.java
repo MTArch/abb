@@ -8,6 +8,8 @@ public class ABHAEnrollmentDBConstant {
     public static final String ACCOUNT_ENDPOINT = API_VERSION + "/account";
     public static final String ACCOUNT_ACTION_ENDPOINT = API_VERSION + "/accountaction";
     public static final String INTEGRATED_PROGRAM_ENDPOINT = API_VERSION + "/integratedProgram";
+
+    public static final String HID_BENEFIT_ENDPOINT = API_VERSION + "/hidBenefit";
     public static final String TRANSACTION_ENDPOINT = API_VERSION + "/transaction";
     public static final String GET_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
     public static final String UPDATE_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";

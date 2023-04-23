@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.controller;
 
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
@@ -55,18 +56,21 @@ public class EnrollmentController {
     EnrolByBioService enrolByBioService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
-    public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,@RequestHeader(value = "Benefit-Name", required = false) String benefitName) {
+        List<String> roleList = ContextHolder.getBenefitRoles();
+        String clientId = ContextHolder.getClientId();
+
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
         if (authMethods.contains(AuthMethods.OTP)) {
-            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
+            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,benefitName,roleList,clientId);
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
-            return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto);
+            return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,benefitName,roleList,clientId);
         } else if (authMethods.contains(AuthMethods.FACE)) {
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto);
         }else if(authMethods.contains(AuthMethods.BIO)){
             enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto);
-            return enrolByBioService.verifyBio(enrolByAadhaarRequestDto);
+            return enrolByBioService.verifyBio(enrolByAadhaarRequestDto,benefitName,roleList,clientId);
         }
         throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
     }

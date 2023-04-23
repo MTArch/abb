@@ -67,7 +67,8 @@ public class AbhaConstants {
     public static final String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 
     public static final String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
-    public static final String DRIVING_LICENCE = "DRIVING_LICENCE";
+    public static final String
+            DRIVING_LICENCE = "DRIVING_LICENCE";
     public static final String PROVISIONAL = "PROVISIONAL";
     public static final String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
     public static final String INVALID_DOCUMENT_ID = "Invalid Document Id";
@@ -128,6 +129,8 @@ public class AbhaConstants {
     public static final String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
     public static final String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
     public static final String ABHA_DB_INTEGRATED_PROGRAM_CLIENT = "abha-db-integrated-program-client";
+
+    public static final String ABHA_DB_HID_BENEFIT_CLIENT = "abha-db-hid-benefit-client";
 
     public static final String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     public static final String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";

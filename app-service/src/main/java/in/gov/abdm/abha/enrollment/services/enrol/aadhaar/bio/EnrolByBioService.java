@@ -73,15 +73,15 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     @Autowired
     LgdUtility lgdUtility;
 
-    public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,String benefitName,List<String> roleList, String clientId) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
                 .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
                 .build());
-        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto,benefitName,roleList,clientId));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
+    private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto,String benefitName,List<String> roleList, String clientId) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
         TransactionDto transactionDto = new TransactionDto();
@@ -99,7 +99,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> {
                 return existingAccountBio(transaction, aadhaarResponseDto, existingAccount);
             }).switchIfEmpty(Mono.defer(() -> {
-                return createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
+                return createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction,benefitName,roleList,clientId);
             }));
         });
     }
@@ -119,7 +119,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto,String benefitName,List<String> roleList, String clientId) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
@@ -147,7 +147,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                 //update transaction table and create account in account table
                 //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,benefitName,roleList,clientId))
                         .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
             }
         });

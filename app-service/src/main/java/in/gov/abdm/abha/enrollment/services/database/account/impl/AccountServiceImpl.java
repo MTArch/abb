@@ -1,22 +1,31 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
+import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
+import in.gov.abdm.abha.enrollment.client.IntegratedProgramDBFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+import in.gov.abdm.abha.enrollment.enums.hidbenefit.HidBenefitStatus;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidBenefitDto;
+import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,12 +39,24 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
+
 @Service
 @Slf4j
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;
+
+    @Autowired
+    HidBenefitDBFClient hidBenefitDBFClient;
+
+    @Autowired
+    IntegratedProgramDBFClient integratedProgramDBFClient;
+
+    @Autowired
+    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
+    private List<IntegratedProgramDto> integratedProgramDtos;
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
@@ -197,7 +218,8 @@ public class AccountServiceImpl implements AccountService {
         return new AccountDto();
     }
 
-    public Mono<AccountDto> createAccountEntity(AccountDto accountDto) {
+    public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto ,AccountDto accountDto,String benefitName,List<String> roleList, String clientId) {
+
         if (FacilityContextHolder.getSubject() == null) {
             accountDto.setOrigin(ContextHolder.getClientId());
             accountDto.setLstUpdatedBy(ContextHolder.getClientId());
@@ -208,8 +230,66 @@ public class AccountServiceImpl implements AccountService {
         }
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
-        return abhaDBAccountFClient.createAccount(accountDto)
-                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
+
+        if (accountDto.getVerificationType() != DRIVING_LICENCE
+                && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)))
+        {
+            //HID benefit Flow
+            return handleAccountByBenefit(benefitName,accountDto,roleList,clientId);
+        }
+        else {
+            //normal flow
+            return abhaDBAccountFClient.createAccount(accountDto)
+                    .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
+        }
+    }
+
+
+    private Mono<AccountDto> handleAccountByBenefit(String benefitName, AccountDto accountDto, List<String> roleList, String clientId) {
+
+        if(!integratedProgramDtos.isEmpty() &&
+                !integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(benefitName)))
+        {
+            if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(clientId))
+                    && roleList.contains("HidIntegratedProgram")) {
+
+                return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(benefitName, accountDto, clientId))
+                        .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
+                                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
+            } else {
+                throw new UnAuthorizedException("Benefit Not Found");
+            }
+        }
+        else {
+            String requestId = UUID.randomUUID().toString();
+            String timestamp = String.valueOf(LocalDateTime.now());
+            return integratedProgramDBFClient.getIntegratedProgramByBenefitName(requestId,timestamp,benefitName)
+                    .collectList().flatMap(Mono::just).flatMap(integratedProgramDtoList -> {
+                        integratedProgramDtos.addAll(integratedProgramDtoList);
+                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(benefitName, accountDto, clientId))
+                                .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
+                                        .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
+
+                    }).switchIfEmpty(Mono.defer(() -> {
+                        throw new UnAuthorizedException("Benefit Not Found");
+                    }));
+        }
+    }
+
+    private HidBenefitDto prepareHidBenefitDto(String benefitName,AccountDto accountDto,String clientId) {
+        return HidBenefitDto.builder()
+                .benefitName(benefitName)
+                .benefitId(UUID.randomUUID().toString())
+                .validTill(LocalDateTime.now())
+                .status(HidBenefitStatus.LINKED.value())
+                .createdBy(clientId)
+                .stateCode(accountDto.getStateCode())
+                .linkedBy(clientId)
+                .linkedDate(LocalDateTime.now())
+                .healthIdNumber(accountDto.getHealthIdNumber())
+                .build();
     }
 
     @Override

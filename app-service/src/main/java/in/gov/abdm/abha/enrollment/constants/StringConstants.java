@@ -22,4 +22,5 @@ public class StringConstants {
      public static final String MESSAGE = "message";
      public static final String UNKNOWN = "Unknown";
      public static final String COMMA_SPACE = ", ";
+
 }

@@ -101,7 +101,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private int maxMobileLinkingCount;
 
     @Override
-    public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,String benefitName,List<String> roleList, String clientId) {
         redisOtp = redisService.getRedisOtp(enrolByAadhaarRequestDto.getAuthData().getOtp().getTxnId());
         if (redisOtp == null) {
             throw new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE);
@@ -121,13 +121,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
                                             .build());
 
-                            return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+                            return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto,benefitName,roleList,clientId));
                         }
                     });
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> handleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
+    private Mono<EnrolByAadhaarResponseDto> handleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto,String benefitName,List<String> roleList, String clientId) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
 
@@ -136,14 +136,14 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature())
                     .flatMap(existingAccount -> {
                         if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
-                            return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto);
+                            return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto,benefitName,roleList,clientId);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                         }
                     })
-                    .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto)));
+                    .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto,benefitName,roleList,clientId)));
         });
     }
 
@@ -189,7 +189,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto,String benefitName,List<String> roleList, String clientId) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
@@ -227,15 +227,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         }
                                         //update transaction table and create account in account table
                                         //account status is active
+                                        //TODO - adhar -integrated program
                                         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,benefitName,roleList,clientId))
                                                 .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                                     });
                         } else {
                             //update transaction table and create account in account table
                             //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,benefitName,roleList,clientId))
                                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                         }
 
@@ -405,7 +406,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             //update transaction table and create account in account table
                             //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,null,null,null))
                                     .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
                         }
                     }));

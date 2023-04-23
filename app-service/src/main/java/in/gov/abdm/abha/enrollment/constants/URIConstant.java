@@ -45,6 +45,8 @@ public class URIConstant {
     public static final String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
     public static final String DB_ADD_ACCOUNT_ACTION_URI = DB_BASE_URI + "/accountaction";
 
+    public static final String DB_ADD_HID_BENEFIT_URI = DB_BASE_URI + "/hidBenefit";
+
     public static final String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 
     public static final String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
