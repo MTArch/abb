@@ -33,11 +33,14 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	private Mono<TransactionDto> updatePic(TransactionDto transactionDto, Transection transection) {
-		return transactionRepository.updateKycPhoto(transactionDto.getKycPhoto().getBytes(), transection.getId())
-				.switchIfEmpty(Mono.defer(() -> {
-					transactionDto.setId(transection.getId());
-					return Mono.just(transactionDto);
-				}));
+		if (transactionDto.getKycPhoto() != null) {
+			return transactionRepository.updateKycPhoto(transactionDto.getKycPhoto().getBytes(), transection.getId())
+					.switchIfEmpty(Mono.defer(() -> {
+						transactionDto.setId(transection.getId());
+						return Mono.just(transactionDto);
+					}));
+		}
+		return Mono.just(transactionDto);
 	}
 
 	@Override

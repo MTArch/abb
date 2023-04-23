@@ -61,6 +61,7 @@ public enum ClassLevelExceptionConstants {
     mobileType(AbhaConstants.INVALID_MOBILE_TYPE),
     verificationStatus(AbhaConstants.INVALID_VERIFICATION_STATUS),
     message(AbhaConstants.INVALID_REASON),
+    documentID(AbhaConstants.VALIDATION_ERROR_DL_NUMBER),
     preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
     private final String value;
 

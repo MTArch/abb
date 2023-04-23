@@ -22,8 +22,7 @@ public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNu
 
     @Override
     public boolean isValid(DemoDto demoDto, ConstraintValidatorContext context) {
-        if(!ObjectUtils.isEmpty(demoDto)
-                && demoDto!=null && aadhaarNotNullorEmpty(demoDto.getAadhaar())) {
+        if(demoDto !=null && aadhaarNotNullorEmpty(demoDto.getAadhaar())) {
             if (demoDto.getAadhaar() != null && isValidInput(demoDto.getAadhaar()) && isRSAEncrypted(demoDto.getAadhaar())) {
                 String decryptedAadhaar = rsaUtil.decrypt(demoDto.getAadhaar());
                 if (Pattern.compile("\\d{12}").matcher(decryptedAadhaar).matches())

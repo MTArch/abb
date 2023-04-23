@@ -24,8 +24,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
 
     @Override
     public boolean isValid(DemoDto demoDto, ConstraintValidatorContext cvc) {
-        if(demoDto!=null && !ObjectUtils.isEmpty(demoDto)
-                && mobileNotNullorEmpty(demoDto)) {
+        if(demoDto!=null && mobileNotNullorEmpty(demoDto)) {
             if (isValidInput(demoDto.getMobile()) && isRSAEncrypted(demoDto.getMobile())) {
                 String decryptedMobile = rsaUtil.decrypt(demoDto.getMobile());
                 return Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(decryptedMobile).matches();

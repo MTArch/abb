@@ -69,6 +69,12 @@ public class GeneralUtils {
         return str.replaceAll("[^a-zA-Z0-9]", "").toUpperCase();
     }
 
+    public String formatDlNumber(String dlNumber) {
+        int zeros = 7 - (dlNumber.substring(9).length());
+        String zeroString = "0".repeat(Math.max(0, zeros));
+        return dlNumber.substring(0, 9) + zeroString + dlNumber.substring(9);
+    }
+
     public double fileSize(String base64) {
         double sizeInBytes = 4 * Math.ceil((base64.length() / 3)) * 0.5624896334383812;
         double sizeInKb = sizeInBytes / 1024;

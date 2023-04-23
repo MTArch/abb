@@ -1,5 +1,0 @@
-spring:
-  r2dbc:
-    url: r2dbc:postgresql://100.65.137.200:5432/ndhm_beta
-    username: ndhmbeta
-    password: 1IdNdhm#Beta

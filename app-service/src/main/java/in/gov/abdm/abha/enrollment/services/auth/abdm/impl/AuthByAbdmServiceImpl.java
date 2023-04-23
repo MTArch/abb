@@ -42,17 +42,17 @@ import static java.time.LocalDateTime.now;
 @Service
 public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
-    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
+    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final String OTP_VERIFIED_SUCCESSFULLY = "OTP verified successfully.";
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String AUTHORIZATION = "1233";
     private static final String HIP_REQUEST_ID = "22222";
 
-    private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
-    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
+    private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile number is now successfully linked to your Account";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
+    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
 
-    private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
+    private static final String EMAIL_LINKED_SUCCESSFULLY = "Email address linked successfully";
 
     @Autowired
     IdpAppService idpAppService;

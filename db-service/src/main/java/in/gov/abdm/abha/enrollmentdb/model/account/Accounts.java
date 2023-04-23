@@ -166,6 +166,9 @@ public class Accounts implements Persistable<String>{
      */
     private String stateName;
 
+    /**
+     * status of abha user
+     */
 	private String status;
 
     /**

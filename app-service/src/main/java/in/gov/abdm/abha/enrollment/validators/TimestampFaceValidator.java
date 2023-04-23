@@ -14,13 +14,12 @@ import java.time.format.DateTimeFormatter;
  */
 @Slf4j
 public class TimestampFaceValidator implements ConstraintValidator<TimestampBio, FaceDto> {
-    private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 
     @Override
     public boolean isValid(FaceDto faceDto, ConstraintValidatorContext context) {
-        if(!StringUtils.isEmpty(faceDto)
-                && faceDto !=null && timestampNotNullorEmpty(faceDto.getTimestamp())) {
+        if(faceDto !=null && timestampNotNullorEmpty(faceDto.getTimestamp())) {
             try {
                 return LocalDateTime.parse(faceDto.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
             } catch (Exception ex) {

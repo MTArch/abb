@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.JWT_TOKEN_REFRESH_VALIDITY_IN_SEC;
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.JWT_TOKEN_VALIDITY_IN_SEC;
+
 @Slf4j
 @Service
 public class JWTUtil {
@@ -23,14 +26,15 @@ public class JWTUtil {
     private static final String CLIENT_ID = "clientId";
     private static final String SYSTEM = "system";
     private static final String MOBILE = "mobile";
+    private static final String KYC_VERIFIED = "isKycVerified";
     private static final String ABHA_NUMBER = "abhaNumber";
     private static final String TYPE = "typ";
 
-    @Value("${jwt.token.validityInSec: 1800}") // Defaults to 30 min
-    private long jwtUserTokenValidityInSec;
+    @Value(JWT_TOKEN_VALIDITY_IN_SEC) // Defaults to 30 min
+    private long JWT_USER_TOKEN_VALIDITY_IN_SEC;
 
-    @Value("${jwt.token.refresh.validityInSec: 1296000}") // Defaults to 15 days
-    private long jwtUserRefreshTokenValidityInSec;
+    @Value(JWT_TOKEN_REFRESH_VALIDITY_IN_SEC) // Defaults to 15 days
+    private long JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC;
 
     @Autowired
     RSAUtil rsaUtil;
@@ -44,6 +48,7 @@ public class JWTUtil {
         claims.put(TYPE, AbhaConstants.TOKEN_TYPE_TRANSACTION);
         claims.put(ABHA_NUMBER, account.getHealthIdNumber());
         claims.put(MOBILE, account.getMobile());
+        claims.put(KYC_VERIFIED,account.isKycVerified());
 
         return new JWTTokenRequest(account.getHealthIdNumber(), jwtUserTokenValidityInSec / 60, claims);
     }

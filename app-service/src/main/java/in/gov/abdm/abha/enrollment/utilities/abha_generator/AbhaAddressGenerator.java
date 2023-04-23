@@ -5,12 +5,14 @@ import org.springframework.stereotype.Service;
 
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_DOMAIN;
+
 @Service
 public class AbhaAddressGenerator {
 
 
-    @Value("${enrollment.domain}")
-    private String abhaAddressExtension;
+    @Value(ENROLLMENT_DOMAIN)
+    private String ABHA_ADDRESS_EXTENSION;
 
     public String generateDefaultAbhaAddress(String abhaNumber){
         return new StringBuffer(abhaNumber.replaceAll(StringConstants.DASH, StringConstants.EMPTY))

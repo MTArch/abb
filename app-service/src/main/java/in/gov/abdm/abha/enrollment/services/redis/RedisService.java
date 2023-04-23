@@ -9,23 +9,25 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.*;
+
 @Service
 public class RedisService {
     private static final String ENROL_OTP = "ENROL_OTP";
     private static final String RECEIVER_OTP_TRACKER = "RECEIVER_OTP_TRACKER";
 
 
-    @Value("${redis.expireTimeInMinutes: 30}")
-    private int redisOtpObjectTimeout;
+    @Value(REDIS_EXPIRE_TIME_IN_MINUTES)
+    private int REDIS_OTP_OBJECT_TIMEOUT;
 
-    @Value("${enrollment.otp.userBlockTimeInMinutes: 30}")
-    private int userBlockTime;
+    @Value(ENROLLMENT_OTP_USER_BLOCK_TIME_IN_MINUTES)
+    private int USER_BLOCK_TIME;
 
-    @Value("${enrollment.otp.maxSendOtpCount: 3}")
-    private int maxSendOtpCount;
+    @Value(ENROLLMENT_OTP_MAX_SEND_OTP_COUNT)
+    private int MAX_SEND_OTP_COUNT;
 
-    @Value("${enrollment.otp.maxVerifyOtpCount: 3}")
-    private int maxVerifyOtpCount;
+    @Value(ENROLLMENT_OTP_MAX_VERIFY_OTP_COUNT)
+    private int MAX_VERIFY_OTP_COUNT;
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;

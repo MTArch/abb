@@ -1,16 +1,19 @@
 package in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Generated;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
 /**
  * It's a Dependent_account_relationship POJO class
  */

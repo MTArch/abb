@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
@@ -49,10 +50,10 @@ public class EnrolByDemographicValidatorService {
 
 
 
-    @Value("${enrollment.documentPhoto.minSizeInKB}")
+    @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
     private String documentPhotoMinSizeLimit;
 
-    @Value("${enrollment.documentPhoto.maxSizeInKB}")
+    @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MAX_SIZE_IN_KB)
     private String documentPhotoMaxSizeLimit;
 
     @Autowired

@@ -11,7 +11,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@ReactiveFeignClient(name= AbhaConstants.ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT, url="${enrollment.gateway.enrollmentdb.baseuri}", configuration = BeanConfiguration.class)
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI;
+
+@ReactiveFeignClient(name= AbhaConstants.ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT, url=ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI, configuration = BeanConfiguration.class)
 public interface AbhaDBDependentAccountRelationshipFClient {
 
     @PostMapping(URIConstant.DB_ADD_DEPENDENT_ACCOUNT_URI)

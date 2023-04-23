@@ -140,7 +140,8 @@ public class ABHAControllerAdvise {
     }
     
     @ExceptionHandler(AadhaarGatewayUnavailableException.class)
-    private ResponseEntity<Mono<ErrorResponse>> handleAadhaarGatewayUnavailableException() {
+    private ResponseEntity<Mono<ErrorResponse>> handleAadhaarGatewayUnavailableException(Exception e) {
+        log.error(e.getMessage(),e.fillInStackTrace());
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getCode()

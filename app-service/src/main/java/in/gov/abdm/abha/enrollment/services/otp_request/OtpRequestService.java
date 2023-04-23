@@ -46,6 +46,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT;
 
 /**
  * service for OTP Request coming from ui
@@ -88,7 +89,7 @@ public class OtpRequestService {
     @Autowired
     AadhaarAppService aadhaarAppService;
 
-    @Value("${enrollment.maxMobileLinkingCount:6}")
+    @Value(ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
@@ -323,7 +324,7 @@ public class OtpRequestService {
                         transactionDto.setClientIp(Common.getIpAddress());
                         transactionDto.setTxnId(UUID.randomUUID());
                         transactionDto.setOtp(Argon2Util.encode(newOtp));
-                        transactionDto.setKycPhoto(StringConstants.EMPTY);
+                        transactionDto.setKycPhoto(null);
 
                         Mono<NotificationResponseDto> notificationResponseDtoMono
                                 = notificationService.sendRegistrationOtp(phoneNumber, newOtp);

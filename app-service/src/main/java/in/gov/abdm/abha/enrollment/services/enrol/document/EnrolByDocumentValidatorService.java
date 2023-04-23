@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.*;
+
 @Service
 @Slf4j
 public class EnrolByDocumentValidatorService {
@@ -44,16 +46,16 @@ public class EnrolByDocumentValidatorService {
     private String onlyDigitRegex = "^[0-9]{6}$";
 
 
-    @Value("${enrollment.photo.minSizeInKB}")
+    @Value(ENROLLMENT_PHOTO_MIN_SIZE_IN_KB)
     private String photoMinSizeLimit;
 
-    @Value("${enrollment.photo.maxSizeInKB}")
+    @Value(ENROLLMENT_PHOTO_MAX_SIZE_IN_KB)
     private String photoMaxSizeLimit;
 
-    @Value("${enrollment.documentPhoto.minSizeInKB}")
+    @Value(ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
     private String documentPhotoMinSizeLimit;
 
-    @Value("${enrollment.documentPhoto.maxSizeInKB}")
+    @Value(ENROLLMENT_DOCUMENT_PHOTO_MAX_SIZE_IN_KB)
     private String documentPhotoMaxSizeLimit;
 
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {

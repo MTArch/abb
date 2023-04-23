@@ -11,7 +11,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@ReactiveFeignClient(name = AbhaConstants.LGD_APP_CLIENT, url = "${enrollment.gateway.lgd.baseuri}", configuration = BeanConfiguration.class)
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_LGD_BASEURI;
+
+@ReactiveFeignClient(name = AbhaConstants.LGD_APP_CLIENT, url = ENROLLMENT_GATEWAY_LGD_BASEURI, configuration = BeanConfiguration.class)
 public interface LgdAppFClient {
 
     public static final String PIN_CODE = "pinCode";
