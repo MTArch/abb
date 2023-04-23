@@ -329,7 +329,7 @@ public class OtpRequestService {
                         transactionDto.setClientIp(Common.getIpAddress());
                         transactionDto.setTxnId(UUID.randomUUID());
                         transactionDto.setOtp(Argon2Util.encode(newOtp));
-                        transactionDto.setKycPhoto(StringConstants.EMPTY);
+                        transactionDto.setKycPhoto(null);
 
                         Mono<NotificationResponseDto> notificationResponseDtoMono
                                 = notificationService.sendRegistrationOtp(phoneNumber, newOtp);
