@@ -31,10 +31,10 @@ public class JWTUtil {
     private static final String TYPE = "typ";
 
     @Value(JWT_TOKEN_VALIDITY_IN_SEC) // Defaults to 30 min
-    private long JWT_USER_TOKEN_VALIDITY_IN_SEC;
+    private long jwtUserTokenValidityInSec;
 
     @Value(JWT_TOKEN_REFRESH_VALIDITY_IN_SEC) // Defaults to 15 days
-    private long JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC;
+    private long jwtUserRefreshTokenValidityInSec;
 
     @Autowired
     RSAUtil rsaUtil;

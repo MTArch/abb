@@ -329,15 +329,6 @@ public class FacilityEnrolByEnrollmentNumberService {
         }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private static void validateVerificationStatus(AccountDto accountDto) {
-        if (accountDto.getVerificationStatus() == null) {
-            throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
-        }
-        if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-            throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
-        }
-    }
-
     private void formatAccountDto(AccountDto accountDto) {
         accountDto.setStatus(REJECTED);
         accountDto.setStatus(DELETED);

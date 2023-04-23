@@ -18,16 +18,16 @@ public class RedisService {
 
 
     @Value(REDIS_EXPIRE_TIME_IN_MINUTES)
-    private int REDIS_OTP_OBJECT_TIMEOUT;
+    private int redisOtpObjectTimeout;
 
     @Value(ENROLLMENT_OTP_USER_BLOCK_TIME_IN_MINUTES)
-    private int USER_BLOCK_TIME;
+    private int userBlockTime;
 
     @Value(ENROLLMENT_OTP_MAX_SEND_OTP_COUNT)
-    private int MAX_SEND_OTP_COUNT;
+    private int maxSendOtpCount;
 
     @Value(ENROLLMENT_OTP_MAX_VERIFY_OTP_COUNT)
-    private int MAX_VERIFY_OTP_COUNT;
+    private int maxVerifyOtpCount;
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
