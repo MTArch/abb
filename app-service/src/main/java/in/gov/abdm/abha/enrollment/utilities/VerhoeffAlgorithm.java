@@ -50,7 +50,6 @@ public class VerhoeffAlgorithm {
             }
             myArray = Reverse(myArray);
         }catch(NumberFormatException ex){
-           // myArray=new int[0];
         }
         return myArray;
     }

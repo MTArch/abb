@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollment.validators;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthData;
@@ -41,7 +41,7 @@ public class ChildAuthOtpValidator implements ConstraintValidator<Otp, AuthData>
     }
 
     private boolean otpNotNullorEmpty(AuthData authData) {
-        return !StringUtils.isEmpty(authData.getOtp())
+        return !ObjectUtils.isEmpty(authData.getOtp())
                 && authData.getOtp()!=null
                 && authData.getOtp().getTimeStamp()!=null
                 && !authData.getOtp().getTimeStamp().isEmpty()
@@ -52,7 +52,7 @@ public class ChildAuthOtpValidator implements ConstraintValidator<Otp, AuthData>
     }
 
     private boolean otpNullorEmpty(AuthData authData) {
-        return StringUtils.isEmpty(authData.getOtp())
+        return ObjectUtils.isEmpty(authData.getOtp())
                 || authData.getOtp() == null
                 || authData.getOtp().getTimeStamp() ==null
                 || authData.getOtp().getTimeStamp().isEmpty()

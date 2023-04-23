@@ -96,11 +96,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> {
-                return existingAccountBio(transaction, aadhaarResponseDto, existingAccount);
-            }).switchIfEmpty(Mono.defer(() -> {
-                return createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction);
-            }));
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction)));
         });
     }
 
@@ -144,8 +140,6 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
             
             {
-                //update transaction table and create account in account table
-                //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                         .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));

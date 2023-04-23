@@ -2,8 +2,7 @@ package in.gov.abdm.abha.enrollment.validators;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AuthData;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
-import org.springframework.util.StringUtils;
-
+import org.springframework.util.ObjectUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 /**
@@ -29,10 +28,9 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
                 && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
                 && authData.getAuthMethods().stream().noneMatch(v->v.equals(AuthMethods.OTP)))
         {
-            if(otpNullorEmpty(authData))
+            if(otpNullorEmpty(authData)|| otpNotNullorEmpty(authData)) {
                 return true;
-            else if(otpNotNullorEmpty(authData))
-                return true;
+            }
         }
        else
            return true;
@@ -40,7 +38,7 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
     }
 
     private boolean otpNotNullorEmpty(AuthData authData) {
-        return !StringUtils.isEmpty(authData.getOtp())
+        return !ObjectUtils.isEmpty(authData.getOtp())
                 && authData.getOtp()!=null
                 && authData.getOtp().getTimeStamp()!=null
                 && !authData.getOtp().getTimeStamp().isEmpty()
@@ -51,7 +49,7 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
     }
 
     private boolean otpNullorEmpty(AuthData authData) {
-        return StringUtils.isEmpty(authData.getOtp())
+        return ObjectUtils.isEmpty(authData.getOtp())
                 || authData.getOtp() == null
                 || authData.getOtp().getTimeStamp() ==null
                 || authData.getOtp().getTimeStamp().isEmpty()

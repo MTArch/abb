@@ -45,7 +45,6 @@ import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -157,7 +156,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             .flatMap(res -> {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
                                 Flux<String> fluxPhrAddress = hidPhrAddressService
-                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(HidPhrAddressDto::getPhrAddress);
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
@@ -243,22 +242,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> updateTransactionEntity(TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
-        Mono<TransactionDto> transactionDtoMono = transactionService.updateTransactionEntity(transactionDto, transactionDto.getTxnId().toString());
-        return transactionDtoMono.flatMap(response -> handleUpdateTransactionResponse(response, abhaProfileDto));
-    }
-
-    private Mono<EnrolByAadhaarResponseDto> handleUpdateTransactionResponse(TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
-        if (!StringUtils.isEmpty(transactionDto.getAadharNo())) {
-            return Mono.just(EnrolByAadhaarResponseDto.builder()
-                    .txnId(transactionDto.getTxnId().toString())
-                    .abhaProfileDto(abhaProfileDto)
-                    .responseTokensDto(new ResponseTokensDto())
-                    .build());
-        } else {
-            throw new AbhaDBGatewayUnavailableException();
-        }
-    }
 
     private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
 
@@ -280,27 +263,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
 
-                                return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
-                                        .flatMap(notificationResponseDto -> {
-                                            if (notificationResponseDto.getStatus().equals(SENT)) {
-                                                log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());
-                                                ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                                                        .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
-                                                        .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                                                        .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
-                                                        .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                                        .build();
-                                                //final create new account response
-                                                return Mono.just(EnrolByAadhaarResponseDto.builder()
-                                                        .txnId(transactionDto.getTxnId().toString())
-                                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
-                                                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
-                                                        .isNew(true)
-                                                        .build());
-                                            } else {
-                                                throw new NotificationGatewayUnavailableException();
-                                            }
-                                        });
+                                return addAccountAuthMethods(transactionDto,accountDtoResponse,abhaProfileDto);
 
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
@@ -312,6 +275,29 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         });
     }
 
+    private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto,AccountDto accountDtoResponse,ABHAProfileDto abhaProfileDto){
+        return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
+                .flatMap(notificationResponseDto -> {
+                    if (notificationResponseDto.getStatus().equals(SENT)) {
+                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());
+                        ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                                .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                                .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                .build();
+                        //final create new account response
+                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                .txnId(transactionDto.getTxnId().toString())
+                                .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
+                                .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                                .isNew(true)
+                                .build());
+                    } else {
+                        throw new NotificationGatewayUnavailableException();
+                    }
+                });
+    }
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
         if (!aadhaarResponseDto.isSuccessful()) {
             if (aadhaarResponseDto.getAadhaarAuthOtpDto() != null) {
@@ -462,7 +448,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             .flatMap(res -> {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
                                 Flux<String> fluxPhrAddress = hidPhrAddressService
-                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+                                        .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(HidPhrAddressDto::getPhrAddress);
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);

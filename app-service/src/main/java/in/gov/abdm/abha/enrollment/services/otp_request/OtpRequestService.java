@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.otp_request;
 
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
@@ -74,8 +73,6 @@ public class OtpRequestService {
      */
     @Autowired
     TransactionService transactionService;
-    @Autowired
-    AadhaarClient aadhaarClient;
     @Autowired
     NotificationService notificationService;
     @Autowired
@@ -169,9 +166,7 @@ public class OtpRequestService {
                         transactionDto.setKycPhoto(res1.getKycPhoto());
                         Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
-                                {
-                                    return handleAadhaarOtpResponse(res, transactionDto);
-                                }
+                                handleAadhaarOtpResponse(res, transactionDto)
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
         } else { //standard abha send aadhaar otp flow

@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.document;
 
-import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -75,11 +74,7 @@ public class EnrolUsingDrivingLicence {
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
     private static final String ENROL_VERIFICATION_STATUS = "success";
     private static final String ABHA_CREATED_SUCCESS = "ABHA created successfully";
-    private static final String CLIENT_ID = "clientId";
-    private static final String SYSTEM = "system";
     private static final String SUB = "sub";
-    private static final String USER_TYPE = "userType";
-    private static final String ROLES = "roles";
     @Autowired
     TransactionService transactionService;
 
@@ -158,7 +153,7 @@ public class EnrolUsingDrivingLicence {
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<EnrolByDocumentResponseDto> verifyDrivingLicence(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto, Map claims) {
+    private Mono<EnrolByDocumentResponseDto> verifyDrivingLicence(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto txnDto, Map<String, Object> claims) {
         return documentAppService.verify(VerifyDLRequest.builder()
                 .documentType(AbhaConstants.DRIVING_LICENCE)
                 .documentId(enrolByDocumentRequestDto.getDocumentId())
@@ -176,7 +171,7 @@ public class EnrolUsingDrivingLicence {
         });
     }
 
-    private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto, Map claims) {
+    private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto, Map<String, Object> claims) {
         String enrollmentNumber = AbhaNumberGenerator.generateAbhaNumber();
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
@@ -207,11 +202,10 @@ public class EnrolUsingDrivingLicence {
                 .build();
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                .flatMap(duplicateAccount -> {
-                    return prepareErolByDLResponse(duplicateAccount, transactionDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, claims);
-                }).switchIfEmpty(Mono.defer(() ->
-                {
-                    return lgdUtility.getLgdData(enrolByDocumentRequestDto.getPinCode(), enrolByDocumentRequestDto.getState())
+                .flatMap(duplicateAccount ->
+                    prepareErolByDLResponse(duplicateAccount, transactionDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, claims)
+                ).switchIfEmpty(Mono.defer(() ->
+                    lgdUtility.getLgdData(enrolByDocumentRequestDto.getPinCode(), enrolByDocumentRequestDto.getState())
                             .flatMap(lgdDistrictResponses -> {
                                 if (!lgdDistrictResponses.isEmpty()) {
                                     LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
@@ -258,8 +252,8 @@ public class EnrolUsingDrivingLicence {
                                         }
                                     });
                                 });
-                            });
-                }));
+                            })
+                ));
     }
 
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
@@ -345,7 +339,7 @@ public class EnrolUsingDrivingLicence {
         return Mono.just(enrolByDocumentResponseDto);
     }
 
-    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId, Map claims) {
+    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId, Map<String, Object> claims) {
         return notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
                 .flatMap(notificationResponseDto -> {
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {

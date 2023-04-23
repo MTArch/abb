@@ -39,7 +39,7 @@ public class AccountServiceImpl implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
-    private DateFormat KYC_DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+    private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
@@ -51,19 +51,13 @@ public class AccountServiceImpl implements AccountService {
     public Mono<AccountDto> prepareNewAccount(TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<LgdDistrictResponse> lgdDistrictResponses) {
         AccountDto newUser = new AccountDto();
 
-        AccountDto accountDto = findUserAlreadyExist(transactionDto);
+        AccountDto accountDto = findUserAlreadyExist();
         if (isItNewUser(accountDto)) {
             newUser.setAddress(transactionDto.getAddress());
             newUser.setName(transactionDto.getName());
             newUser.setGender(transactionDto.getGender());
 
-            if (accountDto.getKycPhoto() == null) {
-                newUser.setKycPhoto(transactionDto.getKycPhoto());
-            }
-            newUser.setProfilePhoto(transactionDto.getKycPhoto());
-            if (!StringUtils.isBlank(transactionDto.getPincode())) {
-                newUser.setPincode(transactionDto.getPincode());
-            }
+            validateKycAndProfilePhoto(transactionDto, newUser, accountDto);
             newUser.setKycdob(transactionDto.getKycdob());
             setDateOfBrith(transactionDto.getKycdob(), newUser);
             newUser.setDistrictName(transactionDto.getDistrictName());
@@ -106,6 +100,16 @@ public class AccountServiceImpl implements AccountService {
 
         newUser.setCreatedDate(LocalDateTime.now());
         return Mono.just(newUser);
+    }
+
+    private static void validateKycAndProfilePhoto(TransactionDto transactionDto, AccountDto newUser, AccountDto accountDto) {
+        if (accountDto.getKycPhoto() == null) {
+            newUser.setKycPhoto(transactionDto.getKycPhoto());
+        }
+        newUser.setProfilePhoto(transactionDto.getKycPhoto());
+        if (!StringUtils.isBlank(transactionDto.getPincode())) {
+            newUser.setPincode(transactionDto.getPincode());
+        }
     }
 
     @Override
@@ -175,7 +179,7 @@ public class AccountServiceImpl implements AccountService {
         if (birthdate != null && birthdate.length() > 4) {
             try {
 
-                LocalDate birthDate = KYC_DATE_FORMAT.parse(birthdate).toInstant()
+                LocalDate birthDate = kycDateFormat.parse(birthdate).toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
 
@@ -193,7 +197,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private AccountDto findUserAlreadyExist(TransactionDto transactionDto) {
+    private AccountDto findUserAlreadyExist() {
         return new AccountDto();
     }
 
