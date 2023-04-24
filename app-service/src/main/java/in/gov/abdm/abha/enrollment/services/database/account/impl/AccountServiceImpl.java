@@ -234,7 +234,7 @@ public class AccountServiceImpl implements AccountService {
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
 
-        if (accountDto.getVerificationType() != DRIVING_LICENCE
+        if (benefitName!=null && accountDto.getVerificationType() != DRIVING_LICENCE
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)))
