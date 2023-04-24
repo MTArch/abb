@@ -173,4 +173,5 @@ public class AbhaConstants {
     public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
     public static final String PID_INVALID = "Invalid PID";
+    public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
 }
