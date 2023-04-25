@@ -73,7 +73,7 @@ public class EnrolmentCipher {
 			key = sha.digest(key);
 			key = Arrays.copyOf(key, 16);
 			secretKeySpec = new SecretKeySpec(key, "AES");
-			ivParameterSpec = new IvParameterSpec(key);
+			gcmParameterSpec = new GCMParameterSpec(128, key);
 		} catch (NoSuchAlgorithmException exp) {
 			log.error("No such algo found exception.", exp);
 		}
