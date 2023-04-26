@@ -126,7 +126,7 @@ public class EnrolUsingDrivingLicence {
                         return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                                 .flatMap(accountDto -> {
                                     log.info(FOUND_ACCOUNT + accountDto.getHealthIdNumber() + WITH_SAME_DL + enrolByDocumentRequestDto.getDocumentId() + CLOSING);
-                                    return transactionService.deleteTransactionEntity("enrolByDocumentRequestDto.getTxnId()").flatMap(responseEntity -> {
+                                    return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> {
                                         if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                                             log.warn(FAILED_TO_DELETE_TRANSACTION + enrolByDocumentRequestDto.getTxnId());
                                         } else {
