@@ -5,4 +5,4 @@ WORKDIR /APP
 COPY db-service/target/db-service-1.0.0.jar  /APP/db-service-1.0.0.jar
 EXPOSE 9188
 RUN chmod -R 777 /APP
-ENTRYPOINT ["java","-jar","/APP/db-service-1.0.0.jar"]
+ENTRYPOINT ["java","-XX:ActiveProcessorCount=2","-Xms1g","-Xmx2g","-XX:+UseG1GC","-XX:+UseStringDeduplication","-jar","/APP/db-service-1.0.0.jar"]
