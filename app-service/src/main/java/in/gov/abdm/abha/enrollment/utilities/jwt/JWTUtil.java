@@ -1,10 +1,8 @@
 package in.gov.abdm.abha.enrollment.utilities.jwt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.jwt.util.JWTToken;
@@ -33,10 +31,10 @@ public class JWTUtil {
     private static final String TYPE = "typ";
 
     @Value(JWT_TOKEN_VALIDITY_IN_SEC) // Defaults to 30 min
-    private long JWT_USER_TOKEN_VALIDITY_IN_SEC;
+    private long jwtUserTokenValidityInSec;
 
     @Value(JWT_TOKEN_REFRESH_VALIDITY_IN_SEC) // Defaults to 15 days
-    private long JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC;
+    private long jwtUserRefreshTokenValidityInSec;
 
     @Autowired
     RSAUtil rsaUtil;
@@ -52,7 +50,7 @@ public class JWTUtil {
         claims.put(MOBILE, account.getMobile());
         claims.put(KYC_VERIFIED,account.isKycVerified());
 
-        return new JWTTokenRequest(account.getHealthIdNumber(), JWT_USER_TOKEN_VALIDITY_IN_SEC / 60, claims);
+        return new JWTTokenRequest(account.getHealthIdNumber(), jwtUserTokenValidityInSec / 60, claims);
     }
 
     private JWTTokenRequest prepareClaimsForRefreshToken(String subject) {
@@ -61,7 +59,7 @@ public class JWTUtil {
         refreshClaims.put(SYSTEM, AbhaConstants.SYSTEM_VALUE);
         refreshClaims.put(TYPE, AbhaConstants.TOKEN_TYPE_REFRESH);
 
-        return new JWTTokenRequest(subject, JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC / 60, refreshClaims);
+        return new JWTTokenRequest(subject, jwtUserRefreshTokenValidityInSec / 60, refreshClaims);
     }
 
     public String generateToken(String txnId, AccountDto accountDto) {
@@ -73,11 +71,11 @@ public class JWTUtil {
     }
 
     public long jwtTokenExpiryTime() {
-        return JWT_USER_TOKEN_VALIDITY_IN_SEC;
+        return jwtUserTokenValidityInSec;
     }
 
     public long jwtRefreshTokenExpiryTime() {
-        return JWT_USER_REFRESH_TOKEN_VALIDITY_IN_SEC;
+        return jwtUserRefreshTokenValidityInSec;
     }
 
     public boolean isTokenExpired(String token) {

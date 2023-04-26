@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.facility;
 
 import com.password4j.BadParametersException;
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
@@ -96,8 +95,6 @@ public class FacilityEnrolByEnrollmentNumberService {
 
     @Autowired
     TransactionService transactionService;
-    @Autowired
-    AadhaarClient aadhaarClient;
     @Autowired
     NotificationService notificationService;
     @Autowired

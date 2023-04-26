@@ -12,11 +12,11 @@ public class AbhaAddressGenerator {
 
 
     @Value(ENROLLMENT_DOMAIN)
-    private String ABHA_ADDRESS_EXTENSION;
+    private String abhaAddressExtension;
 
     public String generateDefaultAbhaAddress(String abhaNumber){
         return new StringBuffer(abhaNumber.replaceAll(StringConstants.DASH, StringConstants.EMPTY))
-                .append(StringConstants.AT)+ ABHA_ADDRESS_EXTENSION;
+                .append(StringConstants.AT)+ abhaAddressExtension;
     }
     
     

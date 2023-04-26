@@ -18,9 +18,7 @@ public class ParentScopeValidator implements ConstraintValidator<ValidParentScop
     public boolean isValid(LinkParentRequestDto linkParentRequestDto, ConstraintValidatorContext context) {
         List<Scopes> requestScopes = linkParentRequestDto.getScope();
         List<Scopes> enumNames = Stream.of(Scopes.values())
-                .filter(name -> {
-                    return name.equals(Scopes.PARENT_ABHA_LINK);
-                })
+                .filter(name -> name.equals(Scopes.PARENT_ABHA_LINK))
                 .collect(Collectors.toList());
         return requestScopes != null &&  !requestScopes.isEmpty() && Common.isAllScopesAvailable(enumNames, requestScopes);
     }

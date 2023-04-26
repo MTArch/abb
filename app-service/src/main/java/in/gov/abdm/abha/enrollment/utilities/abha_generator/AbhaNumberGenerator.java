@@ -49,11 +49,10 @@ public class AbhaNumberGenerator {
      * ABHA Number follows the pattern is {2}{4}{4}{4}.
      * ABHA Number pattern group is XX-XXXX-XXXX-XXXX
      *
-     * @param AbhaNumber
-     * @return
+     * @param abhaNumber
      */
-    private String formatAbhaNumber(String AbhaNumber) {
-        return AbhaNumber.replaceAll(ABHA_NUMBER_PATTERN, ABHA_NUMBER_PATTERN_GROUPS);
+    private String formatAbhaNumber(String abhaNumber) {
+        return abhaNumber.replaceAll(ABHA_NUMBER_PATTERN, ABHA_NUMBER_PATTERN_GROUPS);
     }
 
     /**

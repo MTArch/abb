@@ -43,7 +43,12 @@ public class ClientFilter implements WebFilter {
             String requestId = requestHeaders.getFirst(REQUEST_ID);
             String timestamp = requestHeaders.getFirst(TIMESTAMP);
 
-            validateRequestHeaders(requestId, timestamp, exchange);
+            if (!Common.isValidateISOTimeStamp(timestamp)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_TIMESTAMP);
+            }
+            if (!Common.isValidRequestId(requestId)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_REQUEST_ID);
+            }
 
             if (!StringUtils.isEmpty(authorization)) {
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
@@ -62,15 +67,5 @@ public class ClientFilter implements WebFilter {
             ContextHolder.setClientIp(clientIp);
         }
         return chain.filter(exchange);
-    }
-
-    private Mono<Void> validateRequestHeaders(String requestId, String timestamp, ServerWebExchange exchange) {
-        if (!Common.isValidateISOTimeStamp(timestamp)) {
-            return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_TIMESTAMP);
-        }
-        if (!Common.isValidRequestId(requestId)) {
-            return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_REQUEST_ID);
-        }
-        return Mono.empty();
     }
 }

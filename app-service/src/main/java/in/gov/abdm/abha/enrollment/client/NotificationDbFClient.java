@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.client;
 
 import in.gov.abdm.abha.enrollment.configuration.AppConfigurations;
-import in.gov.abdm.abha.enrollment.configuration.BeanConfiguration;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
