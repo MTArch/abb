@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -138,8 +139,23 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-            
-            {
+            String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getBio().getMobile();
+            if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+                return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                        .flatMap(verifyDemographicResponse -> {
+                            if (verifyDemographicResponse.isVerified()) {
+                                accountDto.setMobile(userEnteredPhoneNumber);
+                                abhaProfileDto.setMobile(userEnteredPhoneNumber);
+                            }
+                            //update transaction table and create account in account table
+                            //account status is active
+                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                    .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+                        });
+            } else {
+                //update transaction table and create account in account table
+                //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
                         .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
@@ -211,5 +227,13 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private VerifyDemographicRequest prepareVerifyDemographicRequest(AccountDto accountDto, TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+        return VerifyDemographicRequest.builder()
+                .aadhaarNumber(rsaUtil.decrypt(transactionDto.getAadharNo()))
+                .name(accountDto.getName())
+                .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
+                .build();
     }
 }
