@@ -32,5 +32,5 @@ public class AbhaAddressRequestDto {
     @NotNull(message = AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG)
     @Preferred
     @JsonProperty("preferred")
-    private Integer preferred;
+    private String preferred;
 }

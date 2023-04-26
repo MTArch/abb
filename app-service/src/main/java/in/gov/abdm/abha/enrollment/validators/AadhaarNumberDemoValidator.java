@@ -5,7 +5,7 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberDemo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -22,8 +22,7 @@ public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNu
 
     @Override
     public boolean isValid(DemoDto demoDto, ConstraintValidatorContext context) {
-        if(!StringUtils.isEmpty(demoDto)
-                && demoDto!=null && aadhaarNotNullorEmpty(demoDto.getAadhaar())) {
+        if(demoDto !=null && aadhaarNotNullorEmpty(demoDto.getAadhaar())) {
             if (demoDto.getAadhaar() != null && isValidInput(demoDto.getAadhaar()) && isRSAEncrypted(demoDto.getAadhaar())) {
                 String decryptedAadhaar = rsaUtil.decrypt(demoDto.getAadhaar());
                 if (Pattern.compile("\\d{12}").matcher(decryptedAadhaar).matches())

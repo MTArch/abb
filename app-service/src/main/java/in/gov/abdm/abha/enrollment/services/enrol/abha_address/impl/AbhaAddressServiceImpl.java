@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaConflictException;
@@ -12,11 +13,15 @@ import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbha
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.phr.User;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
+import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
+import in.gov.abdm.abha.enrollment.services.phr.PhrDbService;
 import in.gov.abdm.error.ABDMError;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,12 +37,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     public static final String ABHA_APP = "ABHA_APP";
 
-    @Value("${enrollment.domain}")
+    @Value(PropertyConstants.ENROLLMENT_DOMAIN)
     private String abhaAddressExtension;
 
     @Autowired
@@ -48,7 +54,11 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     @Autowired
     HidPhrAddressService hidPhrAddressService;
+    @Autowired
+    PhrDbService phrDbService;
 
+    @Autowired
+    IdpAppService idpAppService;
     public static final String TXN_ID = "txnId";
     private static final String TXN_ID_PATTERN = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
@@ -66,13 +76,14 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                         Set<String> listAbhaSuggestion = populatePHRAddress(accountDto);
                                         List<String> stringList = listAbhaSuggestion.stream().collect(Collectors.toList());
 
-                                        return hidPhrAddressService.findByPhrAddressIn(stringList)
+                                        return phrDbService.getUsersByAbhaAddressList(listAbhaSuggestion.stream().collect(Collectors.toList()))
                                                 .collectList().flatMap(Mono::just)
-                                                .flatMap(hidPhrAddressDtoList -> {
-                                                    List<String> listAbhaAddressDb = hidPhrAddressDtoList.stream()
-                                                            .map(HidPhrAddressDto::getPhrAddress)
+                                                .flatMap(userList -> {
+                                                    List<String> listAbhaAddressPhrDb = userList.stream()
+                                                            .map(User::getPhrAddress)
                                                             .collect(Collectors.toList());
-                                                    stringList.removeAll(listAbhaAddressDb);
+
+                                                    stringList.removeAll(listAbhaAddressPhrDb);
                                                     List<String> list1 = stringList.stream().collect(Collectors.toList());
                                                     List<String> list2= list1.stream()
                                                             .map(s -> s.replace(StringConstants.AT + abhaAddressExtension,""))
@@ -176,36 +187,24 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
         return transactionService.findTransactionDetailsFromDB(abhaAddressRequestDto.getTxnId())
                 .flatMap(transactionDto ->
                 {
-                    if(transactionDto!=null)
-                    {
                         return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
                                 .flatMap(accountDto ->
                                 {
-                                    if(accountDto!=null)
-                                    {
-                                        return hidPhrAddressService.getPhrAddressByPhrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+StringConstants.AT + abhaAddressExtension)
-                                                .flatMap(hidPhrAddressDto ->
+                                    return idpAppService.verifyAbhaAddressExists(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT + abhaAddressExtension)
+                                    .flatMap(exists ->
                                                 {
-                                                    if(StringUtils.isEmpty(hidPhrAddressDto.getHealthIdNumber()))
-                                                    {
-                                                        return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
-                                                    }
-                                                    else
-                                                    {
+                                                    if(exists)
                                                         throw new AbhaConflictException(ABDMError.ABHA_ADDRESS_EXIST.getCode(), ABDMError.ABHA_ADDRESS_EXIST.getMessage());
-                                                    }
-                                                }).switchIfEmpty(Mono.defer(()-> updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto)));
-                                    }
-                                    return Mono.empty();
+                                                    else
+                                                        return updateHidAbhaAddress(accountDto,abhaAddressRequestDto,transactionDto);
+                                                });
                                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-                    }
-                    return Mono.empty();
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
     private Mono<AbhaAddressResponseDto> updateHidAbhaAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto,TransactionDto transactionDto)
     {
-        if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred()==1)
+        if (abhaAddressRequestDto.getPreferred()!=null && abhaAddressRequestDto.getPreferred().equals("1"))
         {
             Mono<HidPhrAddressDto> hidPhrAddressDtoMono
                     = hidPhrAddressService.findByHealthIdNumber(accountDto.getHealthIdNumber());
@@ -249,7 +248,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 .healthIdNumber(accountDto.getHealthIdNumber())
                 .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT+ abhaAddressExtension)
                 .status(AccountStatus.ACTIVE.getValue())
-                .preferred(abhaAddressRequestDto.getPreferred())
+                .preferred(Integer.valueOf(abhaAddressRequestDto.getPreferred()))
                 .lastModifiedBy(ABHA_APP)
                 .lastModifiedDate(LocalDateTime.now())
                 .hasMigrated("N")

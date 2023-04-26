@@ -9,36 +9,37 @@ spring:
       type: web
     service:
       name: ${brave.localServiceName:${spring.application.name}}
-    check-timeout: 10000
+    check-timeout: ${ZIPKIN_CHECK_TIMEOUT}
   sleuth:
     sampler:
-      percentage: 1.0
+      percentage: ${SLEUTH_PERCENTAGE}
   redis:
-    database: 1
+    database: ${REDIS_DATABASE}
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
     password: ${REDIS_PASSWORD}
-    timeout: 60000
+    timeout: ${REDIS_CONNECTION_TIMEOUT}
   codec:
     max-in-memory-size: 10MB
 
 redis:
-  expireTimeInMinutes: 30
+  expireTimeInMinutes: ${REDIS_EXPIRE_TIMEOUT}
 
 enrollment:
   enableDeduplication: false
   domain: ${ABHA_DOMAIN}
+  corsWhitelistURLs: http://*.abdm.gov.in,https://*.abdm.gov.in,http://localhost:3000
   photo:
-    minSizeInKB: 0
-    maxSizeInKB: 100
+    minSizeInKB: ${PROFILE_PHOTO_MIN_SIZE}
+    maxSizeInKB: ${PROFILE_PHOTO_MAX_SIZE}
   documentPhoto:
-    minSizeInKB: 0
-    maxSizeInKB: 150
+    minSizeInKB: ${DOCUMENT_PHOTO_MIN_SIZE}
+    maxSizeInKB: ${DOCUMENT_PHOTO_MAX_SIZE}
   otp:
-    userBlockTimeInMinutes: 5
-    maxSendOtpCount: 3
-    maxVerifyOtpCount: 3
-  maxMobileLinkingCount: 6
+    userBlockTimeInMinutes: ${SEND_OTP_USER_BLOCKING_TIME}
+    maxSendOtpCount: ${MAX_SEND_OTP_COUNT}
+    maxVerifyOtpCount: ${MAX_VERIFY_OTP_COUNT}
+  maxMobileLinkingCount: ${MAX_MOBILE_LINKING_COUNT}
   gateway:
     aadhaar:
       baseuri: ${AADHAAR_SERVICE_BASE_URI}
@@ -56,21 +57,23 @@ enrollment:
       baseuri: ${DOCUMENT_SERVICE_BASE_URI}
     documentdb:
       baseuri: ${DOCUMENT_DB_BASE_URI}
+    phr:
+      baseuri: ${PHR_DB_BASE_URI}
 
 rsa:
   algorithm: RSA
   transformation:
-    algorithm: RSA/ECB/PKCS1Padding
+    algorithm: ${RSA_ENC_ALGORITHM}
   private:
-    key: nha_rsa_private_key.pem
+    key: ${RSA_PRIVATE_KEY}
   public:
-    key: nha_rsa_public_key.pem
+    key: ${RSA_PUBLIC_KEY}
 
 jwt:
   token:
-    validityInSec: 1800 #Defaults to 30 min
+    validityInSec: ${USER_TOKEN_VALIDITY}
     refresh:
-      validityInSec: 1296000 #Defaults to 15 days
+      validityInSec: ${REFRESH_TOKEN_VALIDITY}
 
 cipher:
   secretKey: ${ABHA_CIPHER}

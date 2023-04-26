@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.facility;
 
 import com.password4j.BadParametersException;
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
@@ -56,7 +55,7 @@ import java.util.UUID;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
 import static in.gov.abdm.abha.enrollment.services.auth.aadhaar.AuthByAadhaarService.OTP_VERIFIED_SUCCESSFULLY;
-import static in.gov.abdm.error.ABDMError.INVALID_TRANSACTION_ID;
+import static in.gov.abdm.error.ABDMError.ENROLLMENT_ID_NOT_FOUND;
 import static java.time.LocalDateTime.now;
 
 /**
@@ -78,26 +77,24 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String DELETION = "DELETION";
     private static final String DELETED = "DELETED";
     private static final String STATUS = "status";
-    private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Successfully verified";
-    private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "Successfully rejected";
+    private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Congratulations! Your ABHA has been created successfully";
+    private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "We're sorry, but we were unable to process your registration at this time. Please re-register with the correct and accurate details to successfully complete your registration process.";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
     private static final String SENT = "sent";
     private static final String FOUND = " found.";
     private static final String TRANSACTION = " Transaction.";
     private RedisOtp redisOtp;
 
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final int OTP_EXPIRE_TIME = 10;
-    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
-    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
+    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
+    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final String YEAR_OF_BIRTH = "9999";
     private static final String GENDER = "XXX";
 
 
     @Autowired
     TransactionService transactionService;
-    @Autowired
-    AadhaarClient aadhaarClient;
     @Autowired
     NotificationService notificationService;
     @Autowired
@@ -173,9 +170,11 @@ public class FacilityEnrolByEnrollmentNumberService {
     public Mono<GetByDocumentResponseDto> fetchDetailsByEnrollmentNumber(String enrollmentNumber) {
         Mono<AccountDto> accountDtoMono = accountService.getAccountByHealthIdNumber(enrollmentNumber);
         return accountDtoMono.flatMap(accountDto -> {
-            if(!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)
-                && !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()))
+            if (!accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && (accountDto.getVerificationStatus() == null || !accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL))
+                    || !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus() == null
+                    || accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
                 return Mono.error(new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE));
+            }
             EnrolProfileDetailsDto enrolProfileDto = EnrolProfileDetailsDto.builder().enrolmentNumber(accountDto.getHealthIdNumber()).enrolmentState(accountDto.getVerificationStatus()).firstName(accountDto.getFirstName()).middleName(accountDto.getMiddleName()).lastName(accountDto.getLastName()).dob(accountDto.getYearOfBirth() + StringConstants.DASH + accountDto.getMonthOfBirth() + StringConstants.DASH + accountDto.getDayOfBirth()).gender(accountDto.getGender()).photo(accountDto.getProfilePhoto()).mobile(accountDto.getMobile()).email(accountDto.getEmail()).address(accountDto.getAddress()).districtCode(accountDto.getDistrictCode()).stateCode(accountDto.getStateCode()).abhaType(accountDto.getType() == null ? null : StringUtils.upperCase(accountDto.getType().getValue())).pinCode(accountDto.getPincode()).state(accountDto.getStateName()).district(accountDto.getDistrictName()).phrAddress(Collections.singletonList(accountDto.getHealthId())).abhaStatus(StringUtils.upperCase(accountDto.getStatus())).build();
             Mono<IdentityDocumentsDto> response = documentClient.getIdentityDocuments(accountDto.getHealthIdNumber());
             return response.flatMap(res -> {
@@ -279,10 +278,10 @@ public class FacilityEnrolByEnrollmentNumberService {
                 log.info(MOBILE_NUMBER_IS_VERIFIED);
                 return accountService.getAccountByHealthIdNumber(txnDto.getHealthIdNumber()).flatMap(accountDto -> {
                     if (accountDto.getVerificationStatus() == null) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+                        throw new AbhaUnProcessableException(ENROLLMENT_ID_NOT_FOUND.getCode(), ENROLLMENT_ID_NOT_FOUND.getMessage());
                     }
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                        throw new AbhaUnProcessableException(INVALID_TRANSACTION_ID.getCode(), INVALID_TRANSACTION_ID.getMessage());
+                        throw new AbhaUnProcessableException(ENROLLMENT_ID_NOT_FOUND.getCode(), ENROLLMENT_ID_NOT_FOUND.getMessage());
                     }
                     EnrollmentResponse enrollmentResponse;
                     if (status.equalsIgnoreCase(ACCEPT)) {
@@ -303,8 +302,8 @@ public class FacilityEnrolByEnrollmentNumberService {
                         notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
                         enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE, jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
                     } else {
-                        if(enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
-                            throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(),ABDMError.INVALID_REASON.getMessage());
+                        if (enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
+                            throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(), ABDMError.INVALID_REASON.getMessage());
                         }
                         formatAccountDto(accountDto);
                         formatHidPhr(accountDto.getHealthIdNumber());

@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
-@ReactiveFeignClient(name= AbhaConstants.   DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT, url="${enrollment.gateway.documentdb.baseuri}", configuration = BeanConfiguration.class)
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_DOCUMENTDB_BASEURI;
+
+@ReactiveFeignClient(name= AbhaConstants.   DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT, url=ENROLLMENT_GATEWAY_DOCUMENTDB_BASEURI, configuration = BeanConfiguration.class)
 public interface DocumentDBIdentityDocumentFClient {
 
     @PostMapping(URIConstant.IDENTITY_DOCUMENT_ADD)

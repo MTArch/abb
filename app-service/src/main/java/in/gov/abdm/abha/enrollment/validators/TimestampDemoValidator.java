@@ -18,8 +18,7 @@ public class TimestampDemoValidator implements ConstraintValidator<TimestampDemo
 
     @Override
     public boolean isValid(DemoDto demoDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(demoDto)
-                && demoDto != null && timestampNotNullorEmpty(demoDto.getTimestamp())) {
+        if (demoDto != null && timestampNotNullorEmpty(demoDto.getTimestamp())) {
             try {
                 return LocalDateTime.parse(demoDto.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
             } catch (Exception ex) {

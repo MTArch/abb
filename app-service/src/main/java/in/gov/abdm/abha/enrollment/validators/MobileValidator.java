@@ -4,7 +4,7 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -24,8 +24,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
 
     @Override
     public boolean isValid(DemoDto demoDto, ConstraintValidatorContext cvc) {
-        if(!StringUtils.isEmpty(demoDto)
-                && demoDto!=null && mobileNotNullorEmpty(demoDto)) {
+        if(demoDto!=null && mobileNotNullorEmpty(demoDto)) {
             if (isValidInput(demoDto.getMobile()) && isRSAEncrypted(demoDto.getMobile())) {
                 String decryptedMobile = rsaUtil.decrypt(demoDto.getMobile());
                 return Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(decryptedMobile).matches();

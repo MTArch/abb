@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.otp_request;
 
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
@@ -47,6 +46,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT;
 
 /**
  * service for OTP Request coming from ui
@@ -74,8 +74,6 @@ public class OtpRequestService {
     @Autowired
     TransactionService transactionService;
     @Autowired
-    AadhaarClient aadhaarClient;
-    @Autowired
     NotificationService notificationService;
     @Autowired
     RSAUtil rsaUtil;
@@ -91,7 +89,7 @@ public class OtpRequestService {
     @Autowired
     AadhaarAppService aadhaarAppService;
 
-    @Value("${enrollment.maxMobileLinkingCount:6}")
+    @Value(ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
@@ -155,7 +153,7 @@ public class OtpRequestService {
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
-        transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
+        transactionDto.setKycPhoto(null);
 
         //Child abha parent Linking send parent aadhaar otp flow
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.CHILD_ABHA_ENROL)
@@ -168,9 +166,7 @@ public class OtpRequestService {
                         transactionDto.setKycPhoto(res1.getKycPhoto());
                         Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
                         return aadhaarResponseDto.flatMap(res ->
-                                {
-                                    return handleAadhaarOtpResponse(res, transactionDto);
-                                }
+                                handleAadhaarOtpResponse(res, transactionDto)
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
         } else { //standard abha send aadhaar otp flow
@@ -328,7 +324,7 @@ public class OtpRequestService {
                         transactionDto.setClientIp(Common.getIpAddress());
                         transactionDto.setTxnId(UUID.randomUUID());
                         transactionDto.setOtp(Argon2Util.encode(newOtp));
-                        transactionDto.setKycPhoto(StringConstants.EMPTY);
+                        transactionDto.setKycPhoto(null);
 
                         Mono<NotificationResponseDto> notificationResponseDtoMono
                                 = notificationService.sendRegistrationOtp(phoneNumber, newOtp);

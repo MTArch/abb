@@ -9,23 +9,25 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.*;
+
 @Service
 public class RedisService {
     private static final String ENROL_OTP = "ENROL_OTP";
     private static final String RECEIVER_OTP_TRACKER = "RECEIVER_OTP_TRACKER";
 
 
-    @Value("${redis.expireTimeInMinutes: 30}")
-    private int REDIS_OTP_OBJECT_TIMEOUT;
+    @Value(REDIS_EXPIRE_TIME_IN_MINUTES)
+    private int redisOtpObjectTimeout;
 
-    @Value("${enrollment.otp.userBlockTimeInMinutes: 30}")
-    private int USER_BLOCK_TIME;
+    @Value(ENROLLMENT_OTP_USER_BLOCK_TIME_IN_MINUTES)
+    private int userBlockTime;
 
-    @Value("${enrollment.otp.maxSendOtpCount: 3}")
-    private int MAX_SEND_OTP_COUNT;
+    @Value(ENROLLMENT_OTP_MAX_SEND_OTP_COUNT)
+    private int maxSendOtpCount;
 
-    @Value("${enrollment.otp.maxVerifyOtpCount: 3}")
-    private int MAX_VERIFY_OTP_COUNT;
+    @Value(ENROLLMENT_OTP_MAX_VERIFY_OTP_COUNT)
+    private int maxVerifyOtpCount;
 
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
@@ -45,12 +47,12 @@ public class RedisService {
 
     public void saveRedisOtp(String hashKey, RedisOtp redisOtp) {
         save(ENROL_OTP, hashKey, redisOtp);
-        redisTemplate.expire(ENROL_OTP, REDIS_OTP_OBJECT_TIMEOUT, TimeUnit.MINUTES);
+        redisTemplate.expire(ENROL_OTP, redisOtpObjectTimeout, TimeUnit.MINUTES);
     }
 
     public void saveReceiverOtpTracker(String hashKey, ReceiverOtpTracker receiverOtpTracker) {
         save(RECEIVER_OTP_TRACKER, hashKey, receiverOtpTracker);
-        redisTemplate.expire(RECEIVER_OTP_TRACKER, USER_BLOCK_TIME, TimeUnit.MINUTES);
+        redisTemplate.expire(RECEIVER_OTP_TRACKER, userBlockTime, TimeUnit.MINUTES);
     }
 
     public void deleteRedisOtp(String hashKey) {
@@ -90,7 +92,7 @@ public class RedisService {
             return false;
         } else {
             ReceiverOtpTracker receiverOtpTracker = getReceiverOtpTracker(receiver);
-            if (receiverOtpTracker != null && receiverOtpTracker.getSentOtpCount() >= MAX_SEND_OTP_COUNT) {
+            if (receiverOtpTracker != null && receiverOtpTracker.getSentOtpCount() >= maxSendOtpCount) {
                 receiverOtpTracker.setBlocked(true);
                 saveReceiverOtpTracker(receiver, receiverOtpTracker);
                 return false;
@@ -104,7 +106,7 @@ public class RedisService {
             return false;
         } else {
             ReceiverOtpTracker receiverOtpTracker = getReceiverOtpTracker(receiver);
-            if (receiverOtpTracker != null && receiverOtpTracker.getVerifyOtpCount() >= MAX_VERIFY_OTP_COUNT) {
+            if (receiverOtpTracker != null && receiverOtpTracker.getVerifyOtpCount() >= maxVerifyOtpCount) {
                 receiverOtpTracker.setBlocked(true);
                 saveReceiverOtpTracker(receiver, receiverOtpTracker);
                 return false;

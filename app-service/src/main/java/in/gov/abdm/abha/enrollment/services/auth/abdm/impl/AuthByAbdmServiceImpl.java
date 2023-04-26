@@ -42,17 +42,17 @@ import static java.time.LocalDateTime.now;
 @Service
 public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
-    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "OTP expired, please try again.";
+    private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
     private static final String OTP_VERIFIED_SUCCESSFULLY = "OTP verified successfully.";
     private static final int OTP_EXPIRE_TIME = 10;
     private static final String AUTHORIZATION = "1233";
     private static final String HIP_REQUEST_ID = "22222";
 
-    private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile Number linked successfully";
-    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Entered OTP is incorrect. Kindly re-enter valid OTP.";
-    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Failed to Validate OTP, please Try again.";
+    private static final String MOBILE_NUMBER_LINKED_SUCCESSFULLY = "Mobile number is now successfully linked to your Account";
+    private static final String OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
+    public static final String FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
 
-    private static final String EMAIL_LINKED_SUCCESSFULLY = "Email linked successfully";
+    private static final String EMAIL_LINKED_SUCCESSFULLY = "Email address linked successfully";
 
     @Autowired
     IdpAppService idpAppService;
@@ -96,9 +96,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                 .flatMap(transactionDto ->
-                {
-                    return verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto);
-                })
+                        verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -232,10 +230,10 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
         return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
-                .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
+                .flatMap(res -> handleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 
-    private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
+    private Mono<AuthResponseDto> handleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
                                                              IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
         if (idpVerifyOtpResponse.getError() != null) {
@@ -244,9 +242,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         } else {
             List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
                     .filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber().replace("-", "")))
-                    .map(kyc -> {
-                        return getHyphenAbhaNumber(kyc.getAbhaNumber());
-                    }).collect(Collectors.toList());
+                    .map(kyc -> getHyphenAbhaNumber(kyc.getAbhaNumber())).collect(Collectors.toList());
 
 
             if (healthIdNumbers.size() == 0)
@@ -261,20 +257,12 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                         .getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers,
                                 new ArrayList<>(Collections.singleton(1)));
 
-                return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
+                        transactionDto)).switchIfEmpty(Mono.defer(() -> handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
+                                healthIdNumbers, transactionDto)));
 
-                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
-                            transactionDto);
-                }).switchIfEmpty(Mono.defer(() -> {
-
-                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
-                            healthIdNumbers, transactionDto);
-                }));
-
-            }).switchIfEmpty(Mono.defer(() -> {
-                return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
-                        AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
-            }));
+            }).switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
+                    AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()))));
         }
     }
 
@@ -288,7 +276,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                     phrAddressList);
 
             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                    .flatMap(response -> AccountResponse(authByAbdmRequest, accountResponseDtoList))
+                    .flatMap(response -> accountResponse(authByAbdmRequest, accountResponseDtoList))
                     .switchIfEmpty(Mono.error(new AbhaDBGatewayUnavailableException()));
         }
         return Mono.empty();
@@ -309,7 +297,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return accountResponseDtos;
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto
+    private Mono<AuthResponseDto> accountResponse(AuthRequestDto
                                                           authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())

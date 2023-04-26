@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
@@ -28,15 +30,19 @@ public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, M
 	@Override
 	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 		List<OtpSystem> enumNames = Stream.of(OtpSystem.values())
-				.filter(name -> {
-					return !name.equals(OtpSystem.WRONG);
-				})
+				.filter(name -> !name.equals(OtpSystem.WRONG))
 				.collect(Collectors.toList());
 
-		if(mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem()!= null ) {
+		if(mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem()!= null &&  mobileOrEmailOtpRequestDto.getLoginHint() != null) {
+
 
 
 			boolean validOtpSystem = enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem());
+
+			if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
+				validOtpSystem = false;
+			}
 
 			if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
 					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {

@@ -165,9 +165,10 @@ public class Accounts implements Persistable<String>{
      * state name of abha user
      */
     private String stateName;
-    
-    // TODDO : ACTIVE("ACTIVE"), BLOCKED("BLOCKED"), LOCKED("LOCKED"), 
-    // CONSENTPENDING("CONSENTPENDING"), DEACTIVATED("DEACTIVATED"), DELETED("DELETED"), DELINKED("DELINKED");
+
+    /**
+     * status of abha user
+     */
 	private String status;
 
     /**
