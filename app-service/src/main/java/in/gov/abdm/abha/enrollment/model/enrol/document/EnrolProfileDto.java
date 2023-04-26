@@ -1,5 +1,7 @@
 package in.gov.abdm.abha.enrollment.model.enrol.document;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class EnrolProfileDto {
     private String enrolmentNumber;
+    private String abhaNumber;
     private String enrolmentState;
     private String firstName;
     private String middleName;

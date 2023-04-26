@@ -15,6 +15,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDt
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
+import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrolmentResponse;
 import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
@@ -46,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static in.gov.abdm.abha.constant.ABHAConstants.PROVISIONAL;
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
 
 @Slf4j
@@ -125,7 +127,7 @@ public class EnrolUsingDrivingLicence {
                         return accountService.getAccountByDocumentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                                 .flatMap(accountDto -> {
                                     log.info(FOUND_ACCOUNT + accountDto.getHealthIdNumber() + WITH_SAME_DL + enrolByDocumentRequestDto.getDocumentId() + CLOSING);
-                                    return transactionService.deleteTransactionEntity(enrolByDocumentRequestDto.getTxnId()).flatMap(responseEntity -> {
+                                    return transactionService.deleteTransactionEntity("enrolByDocumentRequestDto.getTxnId()").flatMap(responseEntity -> {
                                         if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
                                             log.warn(FAILED_TO_DELETE_TRANSACTION + enrolByDocumentRequestDto.getTxnId());
                                         } else {
@@ -136,6 +138,8 @@ public class EnrolUsingDrivingLicence {
                                             return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto, finalClaims);
                                         } else if (accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                             return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED, finalClaims);
+                                        } else if (accountDto.getVerificationStatus().equals(PROVISIONAL)) {
+                                            return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, finalClaims);
                                         } else {
                                             //return existing account
                                             return prepareErolByDLResponse(accountDto, txnDto.getTxnId().toString(), false, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, finalClaims);
@@ -280,7 +284,8 @@ public class EnrolUsingDrivingLicence {
 
         boolean isFacilityRequest = claims.get(SUB) != null;
         EnrolProfileDto enrolProfileDto = EnrolProfileDto.builder()
-                .enrolmentNumber(accountDto.getHealthIdNumber())
+                .enrolmentNumber(generateToken?null:accountDto.getHealthIdNumber())
+                .abhaNumber(generateToken?accountDto.getHealthIdNumber():null)
                 .enrolmentState(accountDto.getVerificationStatus())
                 .firstName(accountDto.getFirstName())
                 .middleName(accountDto.getMiddleName())
@@ -303,13 +308,16 @@ public class EnrolUsingDrivingLicence {
                 .build();
 
         if (isFacilityRequest) {
-            EnrollmentResponse enrollmentResponse = EnrollmentResponse.builder()
-                    .message(ABHA_CREATED_SUCCESS)
+            EnrolmentResponse enrolmentResponse = EnrolmentResponse.builder()
                     .status(ENROL_VERIFICATION_STATUS)
-                    .token(jwtUtil.generateToken(txnId, accountDto))
+                    .token(generateToken?jwtUtil.generateToken(txnId, accountDto):null)
+                    .expiresIn(generateToken?jwtUtil.jwtTokenExpiryTime():null)
+                    .refreshToken(generateToken?jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()):null)
+                    .refreshExpiresIn(generateToken?jwtUtil.jwtRefreshTokenExpiryTime():null)
                     .build();
             EnrolByDocumentResponseDto enrolByDocumentResponseDto = EnrolByDocumentResponseDto.builder()
-                    .enrollmentResponse(enrollmentResponse)
+                    .enrolProfileDto(enrolProfileDto)
+                    .enrolmentResponse(enrolmentResponse)
                     .message(responseMessage)
                     .isNew(isNewAccount)
                     .build();
@@ -344,7 +352,7 @@ public class EnrolUsingDrivingLicence {
                 .flatMap(notificationResponseDto -> {
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
                         log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
-                        return prepareErolByDLResponse(accountDto, txnId, true, false, AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY, claims);
+                        return prepareErolByDLResponse(accountDto, txnId, true, true, AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY, claims);
                     } else {
                         throw new NotificationGatewayUnavailableException();
                     }
