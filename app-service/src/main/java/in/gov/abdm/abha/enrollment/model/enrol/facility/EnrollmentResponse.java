@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class EnrolmentResponse {
+public class EnrollmentResponse {
     private String status;
     private String message;
     private String token;

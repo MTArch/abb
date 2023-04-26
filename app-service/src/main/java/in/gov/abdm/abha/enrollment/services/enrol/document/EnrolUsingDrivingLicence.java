@@ -15,7 +15,6 @@ import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDt
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
-import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrolmentResponse;
 import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
@@ -308,7 +307,7 @@ public class EnrolUsingDrivingLicence {
                 .build();
 
         if (isFacilityRequest) {
-            EnrolmentResponse enrolmentResponse = EnrolmentResponse.builder()
+            EnrollmentResponse enrolmentResponse = EnrollmentResponse.builder()
                     .status(ENROL_VERIFICATION_STATUS)
                     .token(generateToken?jwtUtil.generateToken(txnId, accountDto):null)
                     .expiresIn(generateToken?jwtUtil.jwtTokenExpiryTime():null)

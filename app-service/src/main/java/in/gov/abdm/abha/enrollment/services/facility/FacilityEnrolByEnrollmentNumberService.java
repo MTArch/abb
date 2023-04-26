@@ -300,7 +300,15 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_ACCEPT_MESSAGE, jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto));
+                        enrollmentResponse = EnrollmentResponse.builder()
+                                .status(ENROL_VERIFICATION_STATUS)
+                                .message(ENROL_VERIFICATION_ACCEPT_MESSAGE)
+                                .token(jwtUtil.generateToken(txnDto.getTxnId().toString(), accountDto))
+                                .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                                .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                .build();
+
                     } else {
                         if (enrollmentStatusUpdate.getMessage() == null || enrollmentStatusUpdate.getMessage().isBlank()) {
                             throw new AbhaUnProcessableException(ABDMError.INVALID_REASON.getCode(), ABDMError.INVALID_REASON.getMessage());
@@ -318,7 +326,9 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setPreviousValue(ACTIVE.getValue());
                         newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        enrollmentResponse = new EnrollmentResponse(ENROL_VERIFICATION_STATUS, ENROL_VERIFICATION_REJECT_MESSAGE, null);
+                        enrollmentResponse = EnrollmentResponse.builder()
+                                .status(ENROL_VERIFICATION_STATUS)
+                                .message(ENROL_VERIFICATION_ACCEPT_MESSAGE).build();
                     }
                     return Mono.just(enrollmentResponse);
                 });

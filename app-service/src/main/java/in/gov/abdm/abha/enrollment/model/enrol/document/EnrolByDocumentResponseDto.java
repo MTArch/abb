@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
-import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrolmentResponse;
+import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class EnrolByDocumentResponseDto {
     private String message;
     @JsonProperty("enrolProfile")
     EnrolProfileDto enrolProfileDto;
-    EnrolmentResponse enrolmentResponse;
+    EnrollmentResponse enrolmentResponse;
     @JsonProperty("tokens")
     private ResponseTokensDto responseTokensDto;
     @JsonProperty("isNew")
