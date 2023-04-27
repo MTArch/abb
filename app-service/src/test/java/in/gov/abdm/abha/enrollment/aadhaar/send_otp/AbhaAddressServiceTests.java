@@ -1,7 +1,5 @@
 package in.gov.abdm.abha.enrollment.aadhaar.send_otp;
-
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
-import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbhaResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -9,7 +7,6 @@ import in.gov.abdm.abha.enrollment.model.phr.User;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
-import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.impl.AbhaAddressServiceImpl;
 import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
 import in.gov.abdm.abha.enrollment.services.phr.PhrDbService;
@@ -23,10 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.time.LocalDateTime;
 import java.util.UUID;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -36,7 +30,6 @@ public class AbhaAddressServiceTests {
 
     @InjectMocks
     AbhaAddressServiceImpl abhaAddressService;
-
     @Mock
     TransactionService transactionService;
     @Mock
@@ -47,14 +40,11 @@ public class AbhaAddressServiceTests {
     IdpAppService idpAppService;
     @Mock
     HidPhrAddressService hidPhrAddressService;
-
     private TransactionDto transactionDto;
     private AccountDto accountDto;
     private User user;
     private AbhaAddressRequestDto abhaAddressRequestDto;
     private HidPhrAddressDto hidPhrAddressDto;
-
-
     @BeforeEach
     void setup()
     {

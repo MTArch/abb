@@ -4,7 +4,6 @@ import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthData;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.OtpDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.impl.AuthByAbdmServiceImpl;
@@ -20,12 +19,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +34,6 @@ public class AuthByAbdmServiceTests {
     TransactionService transactionService;
     @Mock
     RedisService redisService;
-
     private AuthRequestDto authRequestDto;
     private AuthData authData;
     private OtpDto otpDto;
@@ -54,7 +49,6 @@ public class AuthByAbdmServiceTests {
         authData = new AuthData();
         transactionDto = new TransactionDto();
         redisOtp = new RedisOtp();
-
     }
     @AfterEach
     void tearDown()
