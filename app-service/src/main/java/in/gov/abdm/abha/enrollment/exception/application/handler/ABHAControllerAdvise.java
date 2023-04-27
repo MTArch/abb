@@ -33,6 +33,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE;
+
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @Slf4j
@@ -181,7 +183,7 @@ public class ABHAControllerAdvise {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.ENROLLMENT_ID_NOT_FOUND.getCode()
-                                + ABDMError.ENROLLMENT_ID_NOT_FOUND.getMessage())
+                                + ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE)
                 )
         );
     }
