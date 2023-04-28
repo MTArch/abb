@@ -20,7 +20,7 @@ public class EnrolByDocumentResponseDto {
     private String message;
     @JsonProperty("enrolProfile")
     EnrolProfileDto enrolProfileDto;
-    EnrollmentResponse enrollmentResponse;
+    EnrollmentResponse enrolmentResponse;
     @JsonProperty("tokens")
     private ResponseTokensDto responseTokensDto;
     @JsonProperty("isNew")
