@@ -117,6 +117,7 @@ public class OtpRequestService {
                                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
                                     transactionDto.setCreatedDate(LocalDateTime.now());
+                                    transactionDto.setScope(Scopes.MOBILE_VERIFY.getValue());
                                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                                             .flatMap(res -> {
                                                 handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), phoneNumber, StringUtils.EMPTY, Argon2Util.encode(newOtp));
@@ -289,6 +290,7 @@ public class OtpRequestService {
                                     transactionDto.setOtp(Argon2Util.encode(newOtp));
                                     transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
                                     transactionDto.setCreatedDate(LocalDateTime.now());
+                                    transactionDto.setScope(Scopes.EMAIL_VERIFY.getValue());
                                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                                             .flatMap(res -> {
                                                 handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
