@@ -153,7 +153,7 @@ public class OtpRequestService {
         transactionDto.setAadharNo(mobileOrEmailOtpRequestDto.getLoginId());
         transactionDto.setClientIp(Common.getIpAddress());
         transactionDto.setTxnId(UUID.randomUUID());
-        transactionDto.setKycPhoto(Base64.getEncoder().encodeToString(new byte[1]));
+        transactionDto.setKycPhoto(null);
 
         //Child abha parent Linking send parent aadhaar otp flow
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.CHILD_ABHA_ENROL)
