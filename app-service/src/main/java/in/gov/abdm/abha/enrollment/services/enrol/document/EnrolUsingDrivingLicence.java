@@ -115,7 +115,6 @@ public class EnrolUsingDrivingLicence {
         if (fToken != null && !fToken.isBlank()) {
             claims = jwtUtil.getTokenClaims(fToken);
         }
-        enrolByDocumentRequestDto.setDocumentId(GeneralUtils.formatDlNumber(enrolByDocumentRequestDto.getDocumentId()));
         enrolByDocumentRequestDto.setDocumentId(GeneralUtils.removeSpecialChar(enrolByDocumentRequestDto.getDocumentId()));
         Map<String, Object> finalClaims = claims;
         return transactionService.findTransactionDetailsFromDB(enrolByDocumentRequestDto.getTxnId())
