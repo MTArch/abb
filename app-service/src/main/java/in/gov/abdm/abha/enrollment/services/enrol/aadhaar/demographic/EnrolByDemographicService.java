@@ -105,18 +105,18 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
 
         AccountDto accountDto = new AccountDto();
-        accountDto.setFirstName(demographic.getFirstName());
-        accountDto.setMiddleName(demographic.getMiddleName());
-        accountDto.setLastName(demographic.getLastName());
-        accountDto.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
+        accountDto.setFirstName(demographic.getFirstName()!=null?demographic.getFirstName().trim(): null);
+        accountDto.setMiddleName(demographic.getMiddleName()!=null?demographic.getMiddleName().trim():null);
+        accountDto.setLastName(demographic.getLastName()!=null?demographic.getLastName().trim():null);
+        accountDto.setName(Common.getName( accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName()));
         accountDto.setConsentDate(LocalDateTime.now());
         accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
         accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
         accountDto.setYearOfBirth(demographic.getYearOfBirth());
-        accountDto.setMonthOfBirth(demographic.getMonthOfBirth());
+        accountDto.setMonthOfBirth(preFixZero(demographic.getMonthOfBirth()));
+        accountDto.setDayOfBirth(preFixZero(demographic.getDayOfBirth()));
         accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
-        accountDto.setDayOfBirth(demographic.getDayOfBirth());
-        accountDto.setAddress(demographic.getAddress());
+        accountDto.setAddress(demographic.getAddress()!=null?demographic.getAddress().trim():null);
         accountDto.setGender(demographic.getGender());
         accountDto.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
         accountDto.setConsentDate(LocalDateTime.now());
@@ -247,4 +247,9 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             return Mono.just(enrolByAadhaarResponseDto);
         });
     }
+
+    private String preFixZero(String value){
+        return value!=null && value.length()==1?"0"+value:value;
+    }
+
 }

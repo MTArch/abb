@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class EnrolByDemographicValidatorService {
 
     private static final String M = "M";
@@ -151,7 +153,12 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidAadhaar(Demographic demographic) {
-        return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        try {
+           return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        }catch(Exception ex){
+            log.error("Invalid encryption value {}",ex.getMessage());
+            return false;
+        }
     }
 
     private boolean isValidConsentFormImage(Demographic demographic) {
