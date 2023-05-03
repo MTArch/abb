@@ -250,8 +250,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         });
     }
 
-    private String preFixZero(String value){
-        return value!=null && value.length()==1?"0"+value:value;
+    private String preFixZero(String value) {
+        return value != null && value.length() == 1 ? "0" + value : value;
     }
 
     private String formatDob(String year, String month, String day) {
