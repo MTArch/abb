@@ -17,15 +17,14 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidBenefitDto;
 import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
-import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -225,26 +224,26 @@ public class AccountServiceImpl implements AccountService {
         return new AccountDto();
     }
 
-    public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto ,AccountDto accountDto,String benefitName,List<String> roleList, String clientId) {
+    public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (FacilityContextHolder.getSubject() == null) {
-            accountDto.setOrigin(ContextHolder.getClientId());
-            accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+            accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
+            accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {
-            accountDto.setOrigin(ContextHolder.getClientId());
+            accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
             accountDto.setFacilityId(FacilityContextHolder.getSubject());
             accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
         }
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
 
-        if (benefitName!=null && accountDto.getVerificationType() != DRIVING_LICENCE
+        if (requestHeaders.getBenefitName()!=null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)))
         {
             //HID benefit Flow
-            return handleAccountByBenefitProgram(benefitName,accountDto,roleList,clientId);
+            return handleAccountByBenefitProgram(accountDto,requestHeaders);
         }
         else {
             //normal flow
@@ -253,19 +252,19 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgram(String benefitName, AccountDto accountDto, List<String> roleList, String clientId) {
+    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if(!integratedProgramDtos.isEmpty()
-                && integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(benefitName)))
+                && integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName())))
         {
-            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos,accountDto,benefitName,clientId,roleList);
+            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos,accountDto,requestHeaders);
         }
         else {
-           return findBenefitIfNotPresentAndCreateAccount(integratedProgramDtos,accountDto,benefitName,clientId,roleList);
+           return findBenefitIfNotPresentAndCreateAccount(integratedProgramDtos,accountDto,requestHeaders);
         }
     }
 
-    private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, String benefitName, String clientId, List<String> roleList) {
+    private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
             String requestId = UUID.randomUUID().toString();
             String timestamp = String.valueOf(LocalDateTime.now());
             return integratedProgramDBFClient.getAll(requestId,timestamp)
@@ -273,9 +272,9 @@ public class AccountServiceImpl implements AccountService {
                         integratedProgramDtos.clear();
                         integratedProgramDtos.addAll(integratedProgramDtoList);
 
-                        if(integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(benefitName) && res.getClientId().equals(clientId))
-                            && roleList.contains(INTEGRATED_PROGRAM_ROLE)){
-                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(benefitName, accountDto, clientId))
+                        if(integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
+                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)){
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders, integratedProgramDtos))
                                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
                         }
@@ -287,11 +286,13 @@ public class AccountServiceImpl implements AccountService {
                     }));
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, String benefitName, String clientId,List<String> roleList) {
-        if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(clientId))
-                && roleList.contains(INTEGRATED_PROGRAM_ROLE)) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(benefitName, accountDto, clientId))
+        //requestHeaders.setClientId("SBX_000124"); //TODO - for testing
+        if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
+                && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders,integratedProgramDtos))
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
@@ -299,15 +300,22 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private HidBenefitDto prepareHidBenefitDto(String benefitName,AccountDto accountDto,String clientId) {
+    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+        String benefitId  = String.valueOf(Common.systemGeneratedBenefitId());
+        List<IntegratedProgramDto> integratedProgramDtoList
+                = integratedProgramDtos.stream().filter(v->v.getBenefitName().equals(requestHeaders.getBenefitName())
+                                        && v.getClientId().equals(requestHeaders.getClientId())).collect(Collectors.toList());
+        List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto :: getProgramName).collect(Collectors.toList());
+
         return HidBenefitDto.builder()
-                .benefitName(benefitName)
-                .benefitId(UUID.randomUUID().toString())
+                .benefitName(requestHeaders.getBenefitName())
+                .programName(programName.get(0) != null ? programName.get(0) : null)
+                .benefitId(benefitId)
                 .validTill(LocalDateTime.now())
                 .status(HidBenefitStatus.LINKED.value())
-                .createdBy(clientId)
+                .createdBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .stateCode(accountDto.getStateCode())
-                .linkedBy(clientId)
+                .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .linkedDate(LocalDateTime.now())
                 .healthIdNumber(accountDto.getHealthIdNumber())
                 .build();

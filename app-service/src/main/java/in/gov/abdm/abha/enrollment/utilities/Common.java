@@ -32,6 +32,7 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_HIDE_REGEX;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_MASK_CHAR;
@@ -269,4 +270,9 @@ public class Common {
         return email.replaceAll(EMAIL_HIDE_REGEX, EMAIL_MASK_CHAR);
     }
 
+    public Long systemGeneratedBenefitId() {
+        long smallest = 1000_0000_0000_0000L;
+        long biggest =  9999_9999_9999_9999L;
+        return ThreadLocalRandom.current().nextLong(smallest, biggest+1);
+    }
 }
