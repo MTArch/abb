@@ -408,7 +408,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         //update transaction table and create account in account table
                                         //account status is active
                                         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders))
                                                 .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
                                     });
                         } else {
