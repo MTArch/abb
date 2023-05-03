@@ -397,7 +397,21 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         abhaProfileDto.setStateCode(accountDto.getStateCode());
                         abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
 
-                        {
+                        String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getFace().getMobile();
+                        if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+                            return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                                    .flatMap(verifyDemographicResponse -> {
+                                        if (verifyDemographicResponse.isVerified()) {
+                                            accountDto.setMobile(userEnteredPhoneNumber);
+                                            abhaProfileDto.setMobile(userEnteredPhoneNumber);
+                                        }
+                                        //update transaction table and create account in account table
+                                        //account status is active
+                                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                                                .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto));
+                                    });
+                        } else {
                             //update transaction table and create account in account table
                             //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
