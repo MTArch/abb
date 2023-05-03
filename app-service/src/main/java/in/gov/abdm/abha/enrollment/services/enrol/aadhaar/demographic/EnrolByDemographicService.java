@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -76,6 +77,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
         verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
         verifyDemographicRequest.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
+        verifyDemographicRequest.setDob(formatDob(demographic.getYearOfBirth(),demographic.getMonthOfBirth(),demographic.getDayOfBirth()));
         verifyDemographicRequest.setGender(demographic.getGender());
         return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
                 .flatMap(verifyDemographicResponse -> {
@@ -250,6 +252,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     private String preFixZero(String value){
         return value!=null && value.length()==1?"0"+value:value;
+    }
+
+    private String formatDob(String year, String month, String day) {
+        return year + StringConstants.DASH + preFixZero(month) + StringConstants.DASH + preFixZero(day);
     }
 
 }
