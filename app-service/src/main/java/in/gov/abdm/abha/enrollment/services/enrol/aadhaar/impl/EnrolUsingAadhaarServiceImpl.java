@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
@@ -25,10 +26,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
@@ -52,6 +50,7 @@ import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -102,6 +101,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Autowired
     LgdUtility lgdUtility;
+
+    @Autowired
+    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
+    private List<IntegratedProgramDto> integratedProgramDtos;
 
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
@@ -482,53 +485,70 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-
     @Override
     public void validateHeaders(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken) {
-        if(authMethods!=null && !authMethods.isEmpty()
-                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO)))
+        if (authMethods.contains(AuthMethods.OTP)) {
+            isValidBenefitProgram(requestHeaders);
+            isValidFacility(requestHeaders,fToken);
+        }
+        else if (authMethods.contains(AuthMethods.DEMO))
         {
-            if(requestHeaders.getClientId()!=null && requestHeaders.getBenefitName()!=null)
-            {
-                if(!requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE))
-                {
-                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
-                }
-            }
-            if(authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO)
-                    && (fToken == null || requestHeaders.getBenefitName() == null))
+            isAuthorized(requestHeaders,fToken);
+            isValidBenefitProgram(requestHeaders);
+            isValidFacilityForDemoAuth(requestHeaders,fToken);
+        }
+        else if(authMethods.contains(AuthMethods.BIO))
+        {
+            isAuthorized(requestHeaders,fToken);
+            isValidBenefitProgram(requestHeaders);
+            isValidFacility(requestHeaders,fToken);
+        }
+        else if (authMethods.contains(AuthMethods.FACE)) {
+            if(fToken == null || fToken.equals(StringConstants.EMPTY))
             {
                 throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
             }
-            if(authMethods.contains(AuthMethods.DEMO)
-                    && fToken!=null && requestHeaders.getFTokenClaims() != null
-                    && !requestHeaders.getFTokenClaims().get("roles").equals("OFFLINE_HID"))
+            isValidFacility(requestHeaders,fToken);
+        }
+        else {
+            if(fToken == null || fToken.equals(StringConstants.EMPTY))
             {
                 throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
             }
-            else if((authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.OTP))
-                    && fToken!=null && requestHeaders.getFTokenClaims() != null
-                    && (requestHeaders.getFTokenClaims().get("sub") == null || requestHeaders.getFTokenClaims().get("sub").equals("")))
-            {
-                throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
-            }
+            isValidFacility(requestHeaders,fToken);
         }
-        else if(authMethods!=null && !authMethods.isEmpty()
-                && authMethods.contains(AuthMethods.FACE))
+    }
+
+    private void isAuthorized(RequestHeaders requestHeaders, String fToken) {
+        if(requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().equals(StringConstants.EMPTY)
+            || fToken == null || fToken.equals(StringConstants.EMPTY))
         {
-            if(fToken == null || fToken.isEmpty())
-            {
-               throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
-            }
-            else if(fToken!=null && requestHeaders.getFTokenClaims() != null
-                    && (requestHeaders.getFTokenClaims().get("sub") == null || requestHeaders.getFTokenClaims().get("sub").equals("")))
-            {
-                throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
-            }
+            throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
         }
-        else if(authMethods.contains(null)
-                && fToken!=null && requestHeaders.getFTokenClaims().get("sub") == null){
+    }
+
+    private void isValidFacilityForDemoAuth(RequestHeaders requestHeaders, String fToken) {
+        if(fToken!=null && requestHeaders.getFTokenClaims() != null
+                && !requestHeaders.getFTokenClaims().get("roles").equals("OFFLINE_HID"))
+        {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
+        }
+    }
+
+    private void isValidFacility(RequestHeaders requestHeaders, String fToken) {
+        if (fToken!=null && requestHeaders.getFTokenClaims() != null
+                && requestHeaders.getFTokenClaims().get("sub") == null) {
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
+        }
+    }
+
+    private void isValidBenefitProgram(RequestHeaders requestHeaders) {
+        if(requestHeaders.getBenefitName()!=null && integratedProgramDtos!=null
+                && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
+                && res.getClientId().equals(requestHeaders.getClientId()))
+                || requestHeaders.getRoleList() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE))
+        {
+            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
         }
     }
 }

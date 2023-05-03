@@ -58,9 +58,9 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
-                                                             @RequestHeader(value = "Benefit-Name", required = false) String benefitName,
-                                                             @RequestHeader(value = "Authorization" ,required = false) String authorization,
-                                                             @RequestHeader(value = "F-token", required = false) String fToken) {
+                                                             @RequestHeader(value = AbhaConstants.BENEFIT_NAME, required = false) String benefitName,
+                                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION ,required = false) String authorization,
+                                                             @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName,authorization,fToken);
         enrolUsingAadhaarService.validateHeaders(requestHeaders,authMethods,fToken);
@@ -81,8 +81,8 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
     public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
-                                                            @RequestHeader(value = "F-token", required = false) String fToken,
-                                                            @RequestHeader(value = "Authorization",required = false) String authorization) {
+                                                            @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken,
+                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION,required = false) String authorization) {
 
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,fToken);
         enrolUsingAadhaarService.validateHeaders(requestHeaders, null,fToken);

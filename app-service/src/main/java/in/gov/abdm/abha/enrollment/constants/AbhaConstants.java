@@ -174,4 +174,6 @@ public class AbhaConstants {
 
     public static final String PID_INVALID = "Invalid PID";
     public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
+    public static final String BENEFIT_NAME = "Benefit-Name";
+    public static final String F_TOKEN = "F-token";
 }

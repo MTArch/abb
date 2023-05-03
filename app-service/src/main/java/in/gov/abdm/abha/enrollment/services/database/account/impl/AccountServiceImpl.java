@@ -64,6 +64,8 @@ public class AccountServiceImpl implements AccountService {
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
+    private static final String SUB = "sub";
+
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {
         return abhaDBAccountFClient.getAccountByXmlUid(Common.base64Encode(xmlUid))
@@ -231,8 +233,8 @@ public class AccountServiceImpl implements AccountService {
             accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
-            accountDto.setFacilityId(FacilityContextHolder.getSubject());
-            accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB) !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setLstUpdatedBy(requestHeaders.getFTokenClaims().get(SUB) !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
@@ -288,7 +290,6 @@ public class AccountServiceImpl implements AccountService {
 
     private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
-        //requestHeaders.setClientId("SBX_000124"); //TODO - for testing
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
