@@ -3,6 +3,9 @@ package in.gov.abdm.abha.enrollment.utilities;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
+import in.gov.abdm.abha.profile.utilities.Common;
+import in.gov.abdm.abha.profile.utilities.GetKeys;
+import in.gov.abdm.jwt.util.JWTToken;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,13 +27,14 @@ public class RequestMapper {
         Map<String, Object> fTokenClaims = null;
 
         if(authorization!=null) {
-            claims = jwtUtil.readJWTToken(authorization);
+            claims = JWTUtil.readJWTToken(authorization);
             clientId = claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString();
             Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get("realm_access");
             benefitRoles = realmMap.get("roles");
         }
         if(fToken!=null) {
-            fTokenClaims = jwtUtil.getTokenClaims(fToken);
+            fToken = Common.getValidToken(fToken, "Bearer ");
+            fTokenClaims = JWTToken.decodeJWTToken(fToken, GetKeys.getPrivateKey());
         }
 
         return RequestHeaders.builder()
