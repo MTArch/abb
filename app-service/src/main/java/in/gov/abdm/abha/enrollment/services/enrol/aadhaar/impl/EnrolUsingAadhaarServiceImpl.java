@@ -59,8 +59,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 
 @Service
 @Slf4j
@@ -540,7 +539,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private void isValidFacilityForDemoAuth(RequestHeaders requestHeaders, String fToken) {
         if(fToken!=null && requestHeaders.getFTokenClaims() != null
-                && !requestHeaders.getFTokenClaims().get("roles").equals("OFFLINE_HID"))
+                && ( requestHeaders.getFTokenClaims().get(ROLES) == null
+                || requestHeaders.getFTokenClaims().get(ROLES)!=null && !requestHeaders.getFTokenClaims().get(ROLES).equals(OFFLINE_HID)))
         {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
         }
@@ -548,7 +548,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private void isValidFacility(RequestHeaders requestHeaders, String fToken) {
         if (fToken!=null && requestHeaders.getFTokenClaims() != null
-                && requestHeaders.getFTokenClaims().get("sub") == null) {
+                && requestHeaders.getFTokenClaims().get(SUB) == null) {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(),ABDMError.INVALID_F_TOKEN.getMessage());
         }
     }

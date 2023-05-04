@@ -40,8 +40,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 
 @Service
 @Slf4j
@@ -63,8 +62,6 @@ public class AccountServiceImpl implements AccountService {
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
     private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-
-    private static final String SUB = "sub";
 
     @Override
     public Mono<AccountDto> findByXmlUid(String xmlUid) {

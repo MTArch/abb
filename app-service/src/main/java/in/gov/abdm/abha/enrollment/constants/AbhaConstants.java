@@ -176,4 +176,8 @@ public class AbhaConstants {
     public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
     public static final String BENEFIT_NAME = "Benefit-Name";
     public static final String F_TOKEN = "F-token";
+    public static final String SUB = "sub";
+    public static final String ROLES = "roles";
+
+    public static final String OFFLINE_HID = "OFFLINE_HID";
 }
