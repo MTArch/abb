@@ -525,10 +525,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             isValidFacility(requestHeaders,fToken);
         }
         else {
-            if(fToken == null || fToken.equals(StringConstants.EMPTY))
-            {
-                throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
-            }
+            //DL
             isValidFacility(requestHeaders,fToken);
         }
     }
