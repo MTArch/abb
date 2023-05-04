@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,8 +85,10 @@ public class EnrollmentController {
                                                             @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken,
                                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION,required = false) String authorization) {
 
+        List<AuthMethods> authMethods = new ArrayList<>();
+        authMethods.add(AuthMethods.WRONG);
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,fToken);
-        enrolUsingAadhaarService.validateHeaders(requestHeaders, null,fToken);
+        enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods,fToken);
 
         if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
             enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);

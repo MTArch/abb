@@ -228,7 +228,7 @@ public class AccountServiceImpl implements AccountService {
 
     public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, RequestHeaders requestHeaders) {
 
-        if (FacilityContextHolder.getSubject() == null) {
+        if (requestHeaders.getFTokenClaims() == null && requestHeaders.getFTokenClaims().get(SUB) == null) {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
             accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {

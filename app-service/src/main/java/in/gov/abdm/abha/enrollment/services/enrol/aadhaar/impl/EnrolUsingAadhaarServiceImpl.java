@@ -531,8 +531,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private void isAuthorized(RequestHeaders requestHeaders, String fToken) {
-        if(requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().equals(StringConstants.EMPTY)
-            || fToken == null || fToken.equals(StringConstants.EMPTY))
+        if((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().equals(StringConstants.EMPTY))
+            && (fToken == null || fToken.equals(StringConstants.EMPTY)))
         {
             throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),ABDMError.UNAUTHORIZED_ACCESS.getMessage());
         }
