@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class EnrollmentController {
         enrolUsingAadhaarService.validateHeaders(requestHeaders,authMethods,fToken);
 
         if (authMethods.contains(AuthMethods.OTP)) {
-            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders);
+            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders).subscribeOn(Schedulers.parallel());
         } else if (authMethods.contains(AuthMethods.DEMO)) {
             enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
