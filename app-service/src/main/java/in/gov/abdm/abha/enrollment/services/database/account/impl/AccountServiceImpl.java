@@ -224,14 +224,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, RequestHeaders requestHeaders) {
-
-        if (requestHeaders.getFTokenClaims() == null && requestHeaders.getFTokenClaims().get(SUB) == null) {
+        String subject = requestHeaders.getFTokenClaims() == null ? null:requestHeaders.getFTokenClaims().get(SUB).toString();
+        if (requestHeaders.getFTokenClaims() == null && subject == null) {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
             accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
-            accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB) !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
-            accountDto.setLstUpdatedBy(requestHeaders.getFTokenClaims().get(SUB) !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setFacilityId(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setLstUpdatedBy(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
         accountDto.setCreatedDate(LocalDateTime.now());
