@@ -328,7 +328,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         enrollmentResponse = EnrollmentResponse.builder()
                                 .status(ENROL_VERIFICATION_STATUS)
-                                .message(ENROL_VERIFICATION_ACCEPT_MESSAGE).build();
+                                .message(ENROL_VERIFICATION_REJECT_MESSAGE).build();
                     }
                     return Mono.just(enrollmentResponse);
                 });
