@@ -171,12 +171,13 @@ public class EnrolUsingDrivingLicence {
 
     private Mono<EnrolByDocumentResponseDto> createDLAccount(EnrolByDocumentRequestDto enrolByDocumentRequestDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         String enrollmentNumber = AbhaNumberGenerator.generateAbhaNumber();
+        String subject = requestHeaders.getFTokenClaims() == null ? null:requestHeaders.getFTokenClaims().get(SUB).toString();
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(enrollmentNumber);
         AccountDto accountDto = AccountDto.builder()
                 .healthIdNumber(enrollmentNumber)
                 .name(StringUtils.isEmpty(enrolByDocumentRequestDto.getMiddleName()) ? Common.getName(enrolByDocumentRequestDto.getFirstName()
                         , enrolByDocumentRequestDto.getLastName()) : Common.getName(enrolByDocumentRequestDto.getFirstName(), enrolByDocumentRequestDto.getMiddleName(), enrolByDocumentRequestDto.getLastName()))
-                .verificationStatus(requestHeaders.getFTokenClaims().get(SUB) != null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
+                .verificationStatus(subject != null ? AbhaConstants.VERIFIED : AbhaConstants.PROVISIONAL)
                 .verificationType(AbhaConstants.DRIVING_LICENCE)
                 .firstName(enrolByDocumentRequestDto.getFirstName())
                 .middleName(enrolByDocumentRequestDto.getMiddleName())
@@ -191,7 +192,7 @@ public class EnrolUsingDrivingLicence {
                 .stateName(enrolByDocumentRequestDto.getState())
                 .type(AbhaType.STANDARD)
                 .pincode(enrolByDocumentRequestDto.getPinCode())
-                .kycVerified(requestHeaders.getFTokenClaims().get(SUB) != null)
+                .kycVerified(subject != null)
                 .status(AccountStatus.ACTIVE.getValue())
                 .consentVersion(enrolByDocumentRequestDto.getConsent().getVersion())
                 .consentDate(LocalDateTime.now())
@@ -276,7 +277,7 @@ public class EnrolUsingDrivingLicence {
 
     private Mono<EnrolByDocumentResponseDto> prepareErolByDLResponse(AccountDto accountDto, String txnId, boolean isNewAccount, boolean generateToken, String responseMessage, RequestHeaders requestHeaders) {
 
-        boolean isFacilityRequest = requestHeaders.getFTokenClaims().get(SUB) != null;
+        boolean isFacilityRequest = requestHeaders.getFTokenClaims() != null;
         EnrolProfileDto enrolProfileDto = EnrolProfileDto.builder()
                 .enrolmentNumber(generateToken?null:accountDto.getHealthIdNumber())
                 .abhaNumber(generateToken?accountDto.getHealthIdNumber():null)
