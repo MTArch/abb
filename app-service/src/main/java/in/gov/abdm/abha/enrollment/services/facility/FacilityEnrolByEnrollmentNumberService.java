@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.facility;
 
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
@@ -286,6 +287,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         accountDto.setVerificationStatus(VERIFIED);
                         accountDto.setStatus(ACTIVE.getValue());
                         accountDto.setUpdateDate(now());
+                        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
                         accountDto.setKycVerified(true);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
                         AccountActionDto newAccountActionDto = new AccountActionDto();
@@ -341,6 +343,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setStatus(REJECTED);
         accountDto.setStatus(DELETED);
         accountDto.setUpdateDate(LocalDateTime.now());
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         accountDto.setAddress(null);
         accountDto.setDayOfBirth(null);
         accountDto.setDistrictCode(null);
