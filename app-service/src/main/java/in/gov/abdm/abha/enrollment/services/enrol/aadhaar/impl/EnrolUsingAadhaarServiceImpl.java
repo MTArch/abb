@@ -56,6 +56,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -120,7 +121,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
                     .flatMap(mobileLinkedAccountCount -> {
                         if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                            throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                            throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
                         } else {
                             Mono<AadhaarResponseDto> aadhaarResponseDtoMono =
                                     aadhaarAppService.verifyOtp(AadhaarVerifyOtpRequestDto.builder()
