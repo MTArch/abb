@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
@@ -9,6 +10,7 @@ import in.gov.abdm.jwt.util.JWTToken;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +28,17 @@ public class RequestMapper {
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
 
-        if(authorization!=null) {
+        if (authorization != null) {
             claims = JWTUtil.readJWTToken(authorization);
-            clientId = claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString();
+            if (claims.get(CLIENT_ID) != null) {
+                clientId = claims.get(CLIENT_ID).toString();
+            } else if (claims.get("application") != null) {
+                LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get("application");
+                clientId = application.get("name") != null ? application.get("name") : null;
+            }
             Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get("realm_access");
-            benefitRoles = realmMap.get("roles");
+            if (realmMap != null)
+                benefitRoles = realmMap.get("roles");
         }
         if(fToken!=null) {
             fToken = Common.getValidToken(fToken, "Bearer ");

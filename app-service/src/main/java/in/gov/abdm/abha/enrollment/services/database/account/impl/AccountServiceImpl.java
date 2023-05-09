@@ -234,6 +234,7 @@ public class AccountServiceImpl implements AccountService {
             accountDto.setLstUpdatedBy(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
+        accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());
 
         if (requestHeaders.getBenefitName()!=null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
