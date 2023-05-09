@@ -39,6 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_HIDE_REGEX;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_MASK_CHAR;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
 import static in.gov.abdm.abha.profile.constants.AbhaConstants.LOG_PREFIX;
 import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
 import static in.gov.abdm.constant.ABDMConstant.VALIDATE_TIMESTAMP_LOG;
@@ -271,7 +272,7 @@ public class Common {
         return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, abdmError));
     }
     public String hideEmail(String email) {
-        return email.replaceAll(EMAIL_HIDE_REGEX, EMAIL_MASK_CHAR);
+        return email.split(AT)[0].replaceAll(EMAIL_HIDE_REGEX,"*")+AT+email.split(AT)[1];
     }
 
     public Long systemGeneratedBenefitId() {
