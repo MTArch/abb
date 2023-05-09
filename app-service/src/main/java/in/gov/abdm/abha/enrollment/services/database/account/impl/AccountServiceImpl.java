@@ -148,6 +148,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
         accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        accountDto.setUpdateDate(LocalDateTime.now());
         return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
@@ -234,6 +235,7 @@ public class AccountServiceImpl implements AccountService {
             accountDto.setLstUpdatedBy(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
+        accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());
 
         if (requestHeaders.getBenefitName()!=null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)

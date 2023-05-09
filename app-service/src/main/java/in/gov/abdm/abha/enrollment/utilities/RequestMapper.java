@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
@@ -9,6 +10,7 @@ import in.gov.abdm.jwt.util.JWTToken;
 import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,10 @@ import static in.gov.abdm.constant.ABDMConstant.CLIENT_ID;
 public class RequestMapper {
     @Autowired
     JWTUtil jwtUtil;
+    public static final String REALM_ACCESS = "realm_access";
+    public static final String ROLES = "roles";
+    public static final String APPLICATION = "application";
+    public static final String NAME = "name";
 
     public static RequestHeaders prepareRequestHeaders(String benefitName, String authorization,String fToken) {
 
@@ -26,11 +32,18 @@ public class RequestMapper {
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
 
-        if(authorization!=null) {
+        if (authorization != null) {
+            authorization =authorization.split(" ")[1];
             claims = JWTUtil.readJWTToken(authorization);
-            clientId = claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString();
-            Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get("realm_access");
-            benefitRoles = realmMap.get("roles");
+            if (claims.get(CLIENT_ID) != null) {
+                clientId = claims.get(CLIENT_ID).toString();
+            } else if (claims.get(APPLICATION) != null) {
+                LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
+                clientId = application.get(NAME) != null ? application.get(NAME) : null;
+            }
+            Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get(REALM_ACCESS);
+            if (realmMap != null)
+                benefitRoles = realmMap.get(ROLES);
         }
         if(fToken!=null) {
             fToken = Common.getValidToken(fToken, "Bearer ");

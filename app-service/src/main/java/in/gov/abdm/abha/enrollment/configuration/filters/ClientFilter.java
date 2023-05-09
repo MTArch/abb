@@ -17,6 +17,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +27,8 @@ import static in.gov.abdm.constant.ABDMConstant.*;
 @Slf4j
 @Component
 public class ClientFilter implements WebFilter {
-
-    public static final String REALM_ACCESS = "realm_access";
-    public static final String ROLES = "roles";
+    public static final String APPLICATION = "application";
+    public static final String NAME = "name";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -64,10 +64,14 @@ public class ClientFilter implements WebFilter {
             }
 
             if (!StringUtils.isEmpty(authorization)) {
+                authorization =authorization.split(" ")[1];
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
-                ContextHolder.setClientId(claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString());
-                Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get(REALM_ACCESS);
-                ContextHolder.setBenefitRoles(realmMap.get(ROLES));
+                if(claims.get(CLIENT_ID) != null){
+                    ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
+                }else if(claims.get(APPLICATION)!=null){
+                    LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
+                    ContextHolder.setClientId((application.get(NAME)!=null? application.get(NAME) :null));
+                }
             }
             ContextHolder.setRequestId(requestId);
             ContextHolder.setTimestamp(timestamp);

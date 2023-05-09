@@ -285,27 +285,44 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto,AccountDto accountDtoResponse,ABHAProfileDto abhaProfileDto){
-        return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
-                .flatMap(notificationResponseDto -> {
-                    if (notificationResponseDto.getStatus().equals(SENT)) {
-                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());
-                        ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                                .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
-                                .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                                .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
-                                .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                .build();
-                        //final create new account response
-                        return Mono.just(EnrolByAadhaarResponseDto.builder()
-                                .txnId(transactionDto.getTxnId().toString())
-                                .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
-                                .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
-                                .isNew(true)
-                                .build());
-                    } else {
-                        throw new NotificationGatewayUnavailableException();
-                    }
-                });
+        if(accountDtoResponse.getMobile()!=null && !accountDtoResponse.getMobile().isBlank()){
+            return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
+                    .flatMap(notificationResponseDto -> {
+                        if (notificationResponseDto.getStatus().equals(SENT)) {
+                            log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());
+                            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                    .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                    .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                    .build();
+                            //final create new account response
+                            return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                    .txnId(transactionDto.getTxnId().toString())
+                                    .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
+                                    .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                                    .isNew(true)
+                                    .build());
+                        } else {
+                            throw new NotificationGatewayUnavailableException();
+                        }
+                    });
+        }else{
+            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                    .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                    .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                    .build();
+            //final create new account response
+            return Mono.just(EnrolByAadhaarResponseDto.builder()
+                    .txnId(transactionDto.getTxnId().toString())
+                    .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
+                    .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                    .isNew(true)
+                    .build());
+        }
+
     }
     private void handleAadhaarExceptions(AadhaarResponseDto aadhaarResponseDto) {
         if (!aadhaarResponseDto.isSuccessful()) {
