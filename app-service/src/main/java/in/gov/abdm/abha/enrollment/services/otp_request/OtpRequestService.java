@@ -40,11 +40,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT;
 
@@ -103,7 +106,7 @@ public class OtpRequestService {
         return accountService.getMobileLinkedAccountCount(phoneNumber)
                 .flatMap(mobileLinkedAccountCount -> {
                     if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
                     } else {
                         Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
                         return transactionDtoMono.flatMap(transactionDto -> {
@@ -272,7 +275,7 @@ public class OtpRequestService {
         return accountService.getEmailLinkedAccountCount(email)
                 .flatMap(emailLinkedAccountCount -> {
                     if (emailLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.EMAIL_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        throw new AbhaUnProcessableException(ABDMError.EMAIL_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
                     } else {
                         if (!redisService.isResendOtpAllowed(email)) {
                             throw new UnauthorizedUserToSendOrVerifyOtpException();
@@ -315,7 +318,7 @@ public class OtpRequestService {
         return accountService.getMobileLinkedAccountCount(phoneNumber)
                 .flatMap(mobileLinkedAccountCount -> {
                     if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
                     } else {
                         if (!redisService.isResendOtpAllowed(phoneNumber)) {
                             throw new UnauthorizedUserToSendOrVerifyOtpException();
