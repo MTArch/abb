@@ -27,9 +27,8 @@ import static in.gov.abdm.constant.ABDMConstant.*;
 @Slf4j
 @Component
 public class ClientFilter implements WebFilter {
-
-    public static final String REALM_ACCESS = "realm_access";
-    public static final String ROLES = "roles";
+    public static final String APPLICATION = "application";
+    public static final String NAME = "name";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -65,12 +64,13 @@ public class ClientFilter implements WebFilter {
             }
 
             if (!StringUtils.isEmpty(authorization)) {
+                authorization =authorization.split(" ")[1];
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
                 if(claims.get(CLIENT_ID) != null){
                     ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
-                }else if(claims.get("application")!=null){
-                    LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get("application");
-                    ContextHolder.setClientId((application.get("name")!=null? application.get("name") :null));
+                }else if(claims.get(APPLICATION)!=null){
+                    LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
+                    ContextHolder.setClientId((application.get(NAME)!=null? application.get(NAME) :null));
                 }
             }
             ContextHolder.setRequestId(requestId);
