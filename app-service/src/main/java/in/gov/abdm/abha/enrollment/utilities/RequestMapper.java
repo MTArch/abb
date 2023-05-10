@@ -33,7 +33,7 @@ public class RequestMapper {
         Map<String, Object> fTokenClaims = null;
 
         if (authorization != null) {
-            authorization =authorization.split(" ")[1];
+            authorization =authorization.substring("Bearer ".length());
             claims = JWTUtil.readJWTToken(authorization);
             if (claims.get(CLIENT_ID) != null) {
                 clientId = claims.get(CLIENT_ID).toString();

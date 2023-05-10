@@ -64,7 +64,7 @@ public class ClientFilter implements WebFilter {
             }
 
             if (!StringUtils.isEmpty(authorization)) {
-                authorization =authorization.split(" ")[1];
+                authorization =authorization.substring("Bearer ".length());
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
                 if(claims.get(CLIENT_ID) != null){
                     ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
