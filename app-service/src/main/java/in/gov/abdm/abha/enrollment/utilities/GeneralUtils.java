@@ -85,6 +85,7 @@ public class GeneralUtils {
         try {
             return ImageIO.read(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64))) != null;
         } catch (IOException e) {
+            log.error("Error while parsing the image file format",e);
             return false;
         }
     }

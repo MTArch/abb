@@ -232,6 +232,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
+            log.error("Error while validating otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }

@@ -84,6 +84,7 @@ public class JWTUtil {
             JWTToken.validateToken(token, rsaUtil.getJWTPrivateKey());
             return false;
         } catch (ExpiredJwtException e) {
+            log.error("Error while parsing token",e);
             return true;
         }
     }
@@ -94,9 +95,10 @@ public class JWTUtil {
             JWTToken.validateToken(token, rsaUtil.getJWTPrivateKey());
             return true;
         } catch (ExpiredJwtException e) {
+            log.error("Error while parsing token",e);
             return true;
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(), ex);
             return false;
         }
     }
@@ -115,7 +117,7 @@ public class JWTUtil {
             }
             return new ObjectMapper().readValue(new String(Base64.getDecoder().decode(token.split("\\.")[1])), Map.class);
         } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
         }
         return Collections.emptyMap();
     }
