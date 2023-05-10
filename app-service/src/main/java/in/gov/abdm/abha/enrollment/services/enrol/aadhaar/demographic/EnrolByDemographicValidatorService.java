@@ -107,10 +107,15 @@ public class EnrolByDemographicValidatorService {
 
     private void validateNameAndDob(Demographic demographic, LinkedHashMap<String, String> errors) {
         boolean isValidMonthAndYear=true;
+        if (!isValidDateOfBirth(demographic)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            isValidMonthAndYear=false;
+        }
         if (!isValidMonthOfBirth(demographic)) {
             errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
             isValidMonthAndYear=false;
         }
+
         if (!isValidYearOfBirth(demographic)) {
             errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
             isValidMonthAndYear=false;
@@ -143,11 +148,15 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidYearOfBirth(Demographic demographic) {
-        return demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth())>=1900;
+        return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth())>=1900);
     }
 
     private boolean isValidMonthOfBirth(Demographic demographic) {
-        return (StringUtils.isEmpty(demographic.getMonthOfBirth()) || demographic.getMonthOfBirth().matches(only2Digit)) && Integer.parseInt(demographic.getMonthOfBirth()) <= 12;
+        return (StringUtils.isNotBlank(demographic.getMonthOfBirth()) && demographic.getMonthOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getMonthOfBirth()) <= 12);
+    }
+
+    private boolean isValidDateOfBirth(Demographic demographic) {
+        return (StringUtils.isNotBlank(demographic.getDayOfBirth()) && demographic.getDayOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getDayOfBirth()) <= 31);
     }
 
     private boolean isValidDayOfBirth(Demographic demographic) {
