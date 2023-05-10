@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
