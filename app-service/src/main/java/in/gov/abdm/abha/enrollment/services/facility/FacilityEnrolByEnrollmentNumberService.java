@@ -78,7 +78,6 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String DELETED = "DELETED";
     private static final String STATUS = "status";
     private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Congratulations! Your ABHA has been created successfully";
-    private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "We're sorry, but we were unable to process your registration at this time. Please re-register with the correct and accurate details to successfully complete your registration process.";
     private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
     private static final String SENT = "sent";
     private static final String FOUND = " found.";
@@ -232,6 +231,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
+            log.error("Error while validating otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }

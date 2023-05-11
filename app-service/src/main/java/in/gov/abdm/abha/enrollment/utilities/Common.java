@@ -88,7 +88,7 @@ public class Common {
             content = contentBuilder.toString();
         } catch (Exception e) {
             log.error(EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG, fileName, e.getMessage());
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return content!=null?content.replace(StringConstants.SLASH_N, StringConstants.EMPTY).replace(StringConstants.SLASH_R, StringConstants.EMPTY).trim():null;
     }
@@ -183,6 +183,7 @@ public class Common {
             if (!lgdDistrictResponses.isEmpty()) {
                 lgdDistrictResponse = lgdDistrictResponses.get(0);
             }
+            log.error("Error while getting LGD details", noSuchElementException);
         }
         if (lgdDistrictResponse != null) {
             String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
@@ -248,7 +249,7 @@ public class Common {
                 return true;
             } catch (IllegalArgumentException | ParseException e) {
                 log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + INVALID_TIMESTAMP_LOG, timestamp);
-                log.error(AbhaConstants.ABHA_ENROL_LOG_PREFIX + e.getMessage());
+                log.error(AbhaConstants.ABHA_ENROL_LOG_PREFIX + e.getMessage(), e);
                 return false;
             }
         }

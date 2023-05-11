@@ -28,7 +28,7 @@ public class PatientEventConsumer implements EventConsumer {
             log.info(MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM + requestId);
         }
         catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error(exception.getMessage(), exception);
         }
     }
 }

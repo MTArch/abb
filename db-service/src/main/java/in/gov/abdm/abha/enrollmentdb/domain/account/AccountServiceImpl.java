@@ -208,7 +208,7 @@ public class AccountServiceImpl implements AccountService {
             user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
         }
         catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
         return user;
     }
@@ -240,7 +240,7 @@ public class AccountServiceImpl implements AccountService {
             patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
         return patient;
     }

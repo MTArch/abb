@@ -51,7 +51,7 @@ public class OtpValueValidator implements ConstraintValidator<OtpValue, String> 
         }
         catch (Exception ex)
         {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }

@@ -44,7 +44,7 @@ public class EnrolmentCipher {
 
 			return new String(original);
 		} catch (Exception exp) {
-			log.error(exp.getMessage());
+			log.error(exp.getMessage(), exp);
 		}
 		return null;
 	}
@@ -60,7 +60,7 @@ public class EnrolmentCipher {
 			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmParameterSpec);
 			return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception exp) {
-			log.error(exp.getMessage());
+			log.error(exp.getMessage(),exp);
 		}
 		return null;
 	}
