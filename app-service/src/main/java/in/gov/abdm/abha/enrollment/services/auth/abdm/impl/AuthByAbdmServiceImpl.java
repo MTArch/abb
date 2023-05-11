@@ -30,6 +30,7 @@ import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
+import lombok.extern.slf4j.Slf4j;
 
 import in.gov.abdm.error.ABDMError;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 import static java.time.LocalDateTime.now;
 
 @Service
+@Slf4j
 public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
@@ -146,6 +148,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
             }
         } catch (BadParametersException ex) {
+            log.error("Error while verifying otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -181,6 +184,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
+            log.error("Error while validating otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }

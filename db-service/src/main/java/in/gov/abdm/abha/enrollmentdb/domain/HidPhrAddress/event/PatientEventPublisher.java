@@ -39,7 +39,7 @@ public class PatientEventPublisher implements EventPublisher {
             log.info(MSG_ABHA_PUBLISH_PATIENT_TO_HIECM);
         }
         catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error(exception.getMessage(),exception);
         }
     }
 }

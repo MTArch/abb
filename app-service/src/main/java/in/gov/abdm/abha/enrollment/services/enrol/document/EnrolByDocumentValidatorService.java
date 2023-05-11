@@ -214,7 +214,7 @@ public class EnrolByDocumentValidatorService {
                 return false;
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             return false;
         }
     }

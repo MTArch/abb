@@ -69,7 +69,7 @@ public class RSAUtil {
                 return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes())));
             } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
                      NoSuchPaddingException exception) {
-                log.error(FAILED_TO_DECRYPT_DUE_TO + data + StringConstants.COLON, exception.getMessage());
+                log.error(FAILED_TO_DECRYPT_DUE_TO + data + StringConstants.COLON, exception.getMessage(),exception);
             }
         }
         return StringConstants.EMPTY;
@@ -81,9 +81,9 @@ public class RSAUtil {
             KeyFactory keyFactory = KeyFactory.getInstance(encryptionAlgorithm);
             return keyFactory.generatePublic(keySpec);
         } catch (NoSuchAlgorithmException e) {
-            log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage());
+            log.error(NO_SUCH_ALGORITHM_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage(),e);
         } catch (InvalidKeySpecException e) {
-            log.error(INVALID_KEY_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage());
+            log.error(INVALID_KEY_EXCEPTION_OCCURRED_DURING_GETTING_PUBLIC_KEY, e.getMessage(),e);
         }
         return null;
     }
