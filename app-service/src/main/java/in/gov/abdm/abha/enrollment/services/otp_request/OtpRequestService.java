@@ -65,7 +65,7 @@ public class OtpRequestService {
     private static final String FAILED_TO_GENERATE_AADHAAR_OTP_TRANSACTION_REASON = "Failed to Generate Aadhaar OTP : Transaction : {} : Reason : {}";
     private static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile number ending with ";
     private static final String OTP_IS_SENT_TO_ABHA_REGISTERED_MOBILE_ENDING = "OTP is sent to ABHA registered mobile number ending with ";
-    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
+    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to mobile number ending with ";
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
     private static final String EMAIL_OTP_SUBJECT = "email verification";
 
