@@ -40,7 +40,7 @@ public class EnrolByAadhaarTests {
     public static final String TXN_ID = "txnId";
     public static final String TXN_ID_IS_EMPTY = "txnId is empty";
     public static final String MESSAGE = "message";
-    public static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP is sent to Aadhaar registered mobile ending *******";
+    public static final String OTP_IS_SENT_TO_AADHAAR_REGISTERED_MOBILE_ENDING = "OTP sent to Aadhaar registered mobile ending *******";
     public static final String MESSAGE_IS_EMPTY = "message is empty";
     public static final String HID_NDHM_H_1_2023_02_17_T_17_02_27_013 = "HID-NDHM-H1-2023-02-17T17:02:27.013";
 
