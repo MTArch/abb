@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
@@ -9,6 +10,7 @@ import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
@@ -37,8 +39,10 @@ import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -75,12 +79,22 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     @Autowired
     LgdUtility lgdUtility;
 
+    @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
+    private int maxMobileLinkingCount;
+
     public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
-        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
-                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
-                .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
-                .build());
-        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto,requestHeaders));
+        return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getBio().getMobile())
+                .flatMap(mobileLinkedAccountCount -> {
+                    if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                    } else {
+                        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
+                                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
+                                .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
+                                .build());
+                        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
+                    }
+                });
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
@@ -151,14 +165,14 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                             //update transaction table and create account in account table
                             //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                     .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
                         });
             } else {
                 //update transaction table and create account in account table
                 //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders))
+                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                         .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
             }
         });
