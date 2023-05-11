@@ -69,7 +69,7 @@ public class OtpRequestService {
     private static final String SENT_AADHAAR_OTP = "Sent Aadhaar OTP";
     private static final String EMAIL_OTP_SUBJECT = "email verification";
 
-    private static final String OTP_IS_SENT_TO_EMAIL_ENDING = "OTP is sent to email ending with ";
+    private static final String OTP_IS_SENT_TO_EMAIL_ENDING = "OTP is sent to email address ending with ";
 
     /**
      * transaction service to helps to prepare transaction entity details
