@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -16,6 +17,7 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
@@ -71,11 +73,12 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Autowired
     DeDuplicationService deDuplicationService;
 
-    public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
         verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
         verifyDemographicRequest.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
+        verifyDemographicRequest.setDob(formatDob(demographic.getYearOfBirth(),demographic.getMonthOfBirth(),demographic.getDayOfBirth()));
         verifyDemographicRequest.setGender(demographic.getGender());
         return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
                 .flatMap(verifyDemographicResponse -> {
@@ -84,7 +87,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                 .flatMap(existingAccount -> {
                                     if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
-                                        return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid());
+                                        return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(),requestHeaders);
                                     } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                         return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                     } else {
@@ -92,31 +95,31 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                         return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                     }
                                 })
-                                .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid())));
+                                .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(),requestHeaders)));
                     } else {
                         throw new AbhaUnProcessableException(ABDMError.INVALID_DEMOGRAPHIC_DETAILS);
                     }
                 });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid) {
+    private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
         String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
 
         AccountDto accountDto = new AccountDto();
-        accountDto.setFirstName(demographic.getFirstName());
-        accountDto.setMiddleName(demographic.getMiddleName());
-        accountDto.setLastName(demographic.getLastName());
-        accountDto.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
+        accountDto.setFirstName(demographic.getFirstName()!=null?demographic.getFirstName().trim(): null);
+        accountDto.setMiddleName(demographic.getMiddleName()!=null?demographic.getMiddleName().trim():null);
+        accountDto.setLastName(demographic.getLastName()!=null?demographic.getLastName().trim():null);
+        accountDto.setName(Common.getName( accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName()));
         accountDto.setConsentDate(LocalDateTime.now());
         accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
         accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
         accountDto.setYearOfBirth(demographic.getYearOfBirth());
-        accountDto.setMonthOfBirth(demographic.getMonthOfBirth());
+        accountDto.setMonthOfBirth(preFixZero(demographic.getMonthOfBirth()));
+        accountDto.setDayOfBirth(preFixZero(demographic.getDayOfBirth()));
         accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
-        accountDto.setDayOfBirth(demographic.getDayOfBirth());
-        accountDto.setAddress(demographic.getAddress());
+        accountDto.setAddress(demographic.getAddress()!=null?demographic.getAddress().trim():null);
         accountDto.setGender(demographic.getGender());
         accountDto.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
         accountDto.setConsentDate(LocalDateTime.now());
@@ -153,13 +156,13 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                     accountDto.setDistrictName(demographic.getDistrict());
                                     accountDto.setStateName(demographic.getState());
                                 }
-                                return saveAccountDetails(accountDto, demographic.getConsentFormImage());
+                                return saveAccountDetails(enrolByAadhaarRequestDto,accountDto, demographic.getConsentFormImage(),requestHeaders);
                             });
                 }));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(AccountDto accountDto, String consentFormImage) {
-        return accountService.createAccountEntity(accountDto).flatMap(accountDtoResponse -> {
+    private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
+        return accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders).flatMap(accountDtoResponse -> {
             HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
             return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
                     .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto)));
@@ -247,4 +250,13 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             return Mono.just(enrolByAadhaarResponseDto);
         });
     }
+
+    private String preFixZero(String value) {
+        return value != null && value.length() == 1 ? "0" + value : value;
+    }
+
+    private String formatDob(String year, String month, String day) {
+        return year + StringConstants.DASH + preFixZero(month) + StringConstants.DASH + preFixZero(day);
+    }
+
 }

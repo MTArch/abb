@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -19,6 +20,7 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
@@ -73,15 +75,15 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     @Autowired
     LgdUtility lgdUtility;
 
-    public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
                 .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
                 .build());
-        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto));
+        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto,requestHeaders));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto) {
+    private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
         TransactionDto transactionDto = new TransactionDto();
@@ -96,7 +98,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction)));
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
         });
     }
 
@@ -115,7 +117,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto) {
+    private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
@@ -138,10 +140,25 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             abhaProfileDto.setPhrAddress(new ArrayList<>(Collections.singleton(defaultAbhaAddress)));
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
-            
-            {
+            String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getBio().getMobile();
+            if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+                return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
+                        .flatMap(verifyDemographicResponse -> {
+                            if (verifyDemographicResponse.isVerified()) {
+                                accountDto.setMobile(userEnteredPhoneNumber);
+                                abhaProfileDto.setMobile(userEnteredPhoneNumber);
+                            }
+                            //update transaction table and create account in account table
+                            //account status is active
+                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders))
+                                    .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+                        });
+            } else {
+                //update transaction table and create account in account table
+                //account status is active
                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(accountDto))
+                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto,accountDto,requestHeaders))
                         .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
             }
         });
@@ -211,5 +228,13 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+    }
+
+    private VerifyDemographicRequest prepareVerifyDemographicRequest(AccountDto accountDto, TransactionDto transactionDto, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+        return VerifyDemographicRequest.builder()
+                .aadhaarNumber(rsaUtil.decrypt(transactionDto.getAadharNo()))
+                .name(accountDto.getName())
+                .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
+                .build();
     }
 }

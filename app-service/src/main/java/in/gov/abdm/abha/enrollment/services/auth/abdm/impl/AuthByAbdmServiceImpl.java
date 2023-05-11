@@ -4,7 +4,9 @@ import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
@@ -29,6 +31,8 @@ import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
 import lombok.extern.slf4j.Slf4j;
+
+import in.gov.abdm.error.ABDMError;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,7 +90,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
 
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto, isMobile))
+                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest, transactionDto, isMobile))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -122,22 +126,26 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return null;
     }
 
-    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto,
+    private Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, TransactionDto transactionDto,
                                                            boolean isMobile) {
         try {
-            if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
-            } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
-                return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
-                        .flatMap(accountDto -> {
-                            if (isMobile) {
-                                return updatePhoneNumberInAccountEntity(accountDto, transactionDto);
-                            } else {
-                                return updateEmailInAccountEntity(accountDto, transactionDto);
-                            }
-                        });
-            } else {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+            if (authByAbdmRequest.getScope().contains(Scopes.fromText(transactionDto.getScope()))) {
+                if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
+                    return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
+                } else if (Argon2Util.verify(transactionDto.getOtp(), authByAbdmRequest.getAuthData().getOtp().getOtpValue())) {
+                    return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
+                            .flatMap(accountDto -> {
+                                if (isMobile) {
+                                    return updatePhoneNumberInAccountEntity(accountDto, transactionDto);
+                                } else {
+                                    return updateEmailInAccountEntity(accountDto, transactionDto);
+                                }
+                            });
+                } else {
+                    return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+                }
+            }else{
+                throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
             }
         } catch (BadParametersException ex) {
             log.error("Error while verifying otp",ex);

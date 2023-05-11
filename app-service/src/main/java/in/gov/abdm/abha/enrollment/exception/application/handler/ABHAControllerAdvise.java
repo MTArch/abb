@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.exception.application.*;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.idp.IdpGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.lgd.LgdGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationDBGatewayUnavailableException;
@@ -33,6 +34,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE;
+
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @Slf4j
@@ -54,7 +57,9 @@ public class ABHAControllerAdvise {
         log.error(trackingId + StringConstants.COLON + "Message : ", exception);
          if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE);
-        } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
+        } else if (exception.getClass() == BenefitNotFoundException.class) {
+             return handleAbhaExceptions(HttpStatus.UNAUTHORIZED, exception.getMessage());
+         } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.DOCUMENT_DB_GATEWAY_UNAVAILABLE);
@@ -181,7 +186,7 @@ public class ABHAControllerAdvise {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.ENROLLMENT_ID_NOT_FOUND.getCode()
-                                + ABDMError.ENROLLMENT_ID_NOT_FOUND.getMessage())
+                                + ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE)
                 )
         );
     }

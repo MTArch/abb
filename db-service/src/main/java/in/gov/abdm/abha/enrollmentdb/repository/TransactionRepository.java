@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface TransactionRepository extends R2dbcRepository<Transection, Long> {
 
-	@Query("SELECT * FROM transection t where t.txn_id = :txnId AND t.created_date BETWEEN :fromDateTime AND :toDateTime")
+	@Query(value = "SELECT * FROM fn_get_by_txnid(:txnId::text,:fromDateTime::text,:toDateTime::text)")
 	public Mono<Transection> findByTxnId(@Param("txnId") String txnId, @Param("fromDateTime") LocalDateTime fromDateTime,
 			@Param("toDateTime") LocalDateTime toDateTime);
 
