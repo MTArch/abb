@@ -3,7 +3,10 @@ package in.gov.abdm.abha.enrollment.constants;
 public class AbhaConstants {
 
     private AbhaConstants() {}
-
+    public static final String ABDM_REDIS_SERVER = "${abdm.redis.server}";
+    public static final String ABDM_REDIS_PORT = "${abdm.redis.port}";
+    public static final String ABDM_REDIS_PASSWORD = "${abdm.redis.password}";
+    public static final String ABDM_REDIS_DATABASE = "${abdm.redis.database}";
     public static final String VALIDATION_EMPTY_KEY_FIELD = "Key cannot be null or empty";
     public static final String VALIDATION_EMPTY_VALUE_FIELD = "Value cannot be null or empty";
     public static final String VALIDATION_ERROR_TRANSACTION_FIELD = "Invalid Transaction Id";

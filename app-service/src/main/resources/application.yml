@@ -12,7 +12,7 @@ spring:
     check-timeout: ${ZIPKIN_CHECK_TIMEOUT}
   sleuth:
     sampler:
-      percentage: ${SLEUTH_PERCENTAGE}
+      probability: ${SLEUTH_PERCENTAGE}
   redis:
     database: ${REDIS_DATABASE}
     host: ${REDIS_HOST}
@@ -21,7 +21,18 @@ spring:
     timeout: ${REDIS_CONNECTION_TIMEOUT}
   codec:
     max-in-memory-size: 10MB
-
+logging:
+  level:
+    root: ${LOGGING_LEVEL}
+  pattern:
+    level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
+abdm:
+  redis:
+    server: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${ABDM_REDIS_PASSWORD}
+    timeout: ${REDIS_CONNECTION_TIMEOUT}
+    database: ${REDIS_DATABASE}
 redis:
   expireTimeInMinutes: ${REDIS_EXPIRE_TIMEOUT}
 
@@ -78,6 +89,3 @@ jwt:
 cipher:
   secretKey: ${ABHA_CIPHER}
 
-logging:
-  pattern:
-    level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
