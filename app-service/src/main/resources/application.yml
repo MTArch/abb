@@ -30,7 +30,7 @@ abdm:
   redis:
     server: ${REDIS_HOST}
     port: ${REDIS_PORT}
-    password: ${ABDM_REDIS_PASSWORD}
+    password: ${REDIS_PASSWORD}
     timeout: ${REDIS_CONNECTION_TIMEOUT}
     database: ${REDIS_DATABASE}
 redis:
