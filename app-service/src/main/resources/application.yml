@@ -13,17 +13,11 @@ spring:
   sleuth:
     sampler:
       probability: ${SLEUTH_PERCENTAGE}
-  redis:
-    database: ${REDIS_DATABASE}
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    password: ${REDIS_PASSWORD}
-    timeout: ${REDIS_CONNECTION_TIMEOUT}
   codec:
     max-in-memory-size: 10MB
 logging:
   level:
-    root: INFO
+    root: ${LOG_LEVEL}
   pattern:
     level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
 abdm:

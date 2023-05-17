@@ -2,7 +2,7 @@ server:
   port: ${ENROLLMENT_DB_SERVICE_PORT}
 logging:
   level:
-    root: ${LOGGING_LEVEL}
+    root: ${LOG_LEVEL}
   pattern:
     level: "[%X{user_name}] [%X{traceId}/%X{spanId}] %-5p [%t] %C{2} - %m%n"
 spring:
