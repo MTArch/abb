@@ -31,7 +31,7 @@ public class TimestampOtpValidator implements ConstraintValidator<TimestampOtp, 
 						&& LocalDateTime.parse(timestamp, dateTimeFormatter)
 								.isAfter(currentTime.minusMinutes(minusMinutes));
 			} catch (Exception ex) {
-				log.error(ex.getMessage());
+				log.error(ex.getMessage(), ex);
 				return false;
 			}
 		}

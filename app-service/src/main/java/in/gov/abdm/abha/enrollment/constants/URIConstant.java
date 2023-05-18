@@ -1,10 +1,11 @@
 package in.gov.abdm.abha.enrollment.constants;
 
-public class URIConstant {    
+public class URIConstant {
 
-    private URIConstant() {}
+    private URIConstant() {
+    }
 
-    public static final String API_VERSION = "/v3";   
+    public static final String API_VERSION = "/v3";
     public static final String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
     //enrol endpoints
@@ -44,10 +45,12 @@ public class URIConstant {
     public static final String DB_ADD_ACCOUNT_URI = DB_BASE_URI + "/account";
     public static final String DB_ADD_ACCOUNT_ACTION_URI = DB_BASE_URI + "/accountaction";
 
+    public static final String DB_ADD_HID_BENEFIT_URI = DB_BASE_URI + "/hidBenefit";
+
     public static final String DB_ADD_DEPENDENT_ACCOUNT_URI = DB_BASE_URI + "/dependentaccountrelationship";
 
     public static final String DB_ADD_ACCOUNT_AUTH_METHODS_ENDPOINT = DB_BASE_URI + "/accountauthmethods";
-    public static final String DB_DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = DB_BASE_URI+"/accountauthmethods/delete/{healthIdNumber}";
+    public static final String DB_DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = DB_BASE_URI + "/accountauthmethods/delete/{healthIdNumber}";
 
 
     public static final String DB_GET_ACCOUNT_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/account/";
@@ -75,6 +78,8 @@ public class URIConstant {
     public static final String FDB_GET_HID_PHR_ADDRESS_BY_HEALTH_ID_NUMBER = DB_BASE_URI + "/hidphraddress/byHealthIdNumber/{healthIdNumber}";
 
     public static final String DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID = DB_BASE_URI + "/hidphraddress/{hidPhrAddressId}";
+    public static final String DB_GET_ALL_INTEGRATED_PROGRAMS_URI = DB_BASE_URI + "/integratedProgram";
+    public static final String DB_GET_INTEGRATED_PROGRAMS_BY_BENEFIT_NAME_URI = DB_BASE_URI + "/integratedProgram/{benefitName}";
 //    Aadhaar Service URI
 
     public static final String AADHAAR_BASE_URI = "/api/v3/aadhaar";
@@ -128,4 +133,6 @@ public class URIConstant {
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
 
     public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
+
+    public static final String BENEFIT_NAME = "benefitName";
 }

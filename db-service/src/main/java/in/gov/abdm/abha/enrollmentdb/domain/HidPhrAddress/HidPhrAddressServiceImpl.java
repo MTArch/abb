@@ -197,7 +197,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             user.setKycStatus(accounts.isKycVerified() ? VERIFIED : "NOT VERIFIED");
         }
         catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
         return user;
     }
@@ -235,7 +235,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
             patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
         }
         return patient;
     }

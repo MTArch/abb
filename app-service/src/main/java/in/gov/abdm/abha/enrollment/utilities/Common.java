@@ -7,7 +7,10 @@ import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
+import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.error.ABDMError;
+import in.gov.abdm.jwt.util.JWTToken;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +35,12 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_HIDE_REGEX;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_MASK_CHAR;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
+import static in.gov.abdm.abha.profile.constants.AbhaConstants.LOG_PREFIX;
 import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
 import static in.gov.abdm.constant.ABDMConstant.VALIDATE_TIMESTAMP_LOG;
 
@@ -88,7 +94,7 @@ public class Common {
             content = contentBuilder.toString();
         } catch (Exception e) {
             log.error(EXCEPTION_OCCURRED_WHILE_READING_FILE_ERROR_MSG, fileName, e.getMessage());
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
         return content!=null?content.replace(StringConstants.SLASH_N, StringConstants.EMPTY).replace(StringConstants.SLASH_R, StringConstants.EMPTY).trim():null;
     }
@@ -183,6 +189,7 @@ public class Common {
             if (!lgdDistrictResponses.isEmpty()) {
                 lgdDistrictResponse = lgdDistrictResponses.get(0);
             }
+            log.error("Error while getting LGD details", noSuchElementException);
         }
         if (lgdDistrictResponse != null) {
             String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
@@ -248,7 +255,7 @@ public class Common {
                 return true;
             } catch (IllegalArgumentException | ParseException e) {
                 log.info(AbhaConstants.ABHA_ENROL_LOG_PREFIX + INVALID_TIMESTAMP_LOG, timestamp);
-                log.error(AbhaConstants.ABHA_ENROL_LOG_PREFIX + e.getMessage());
+                log.error(AbhaConstants.ABHA_ENROL_LOG_PREFIX + e.getMessage(), e);
                 return false;
             }
         }
@@ -266,7 +273,60 @@ public class Common {
         return response.writeWith(GeneralUtils.prepareFilterExceptionResponse(exchange, abdmError));
     }
     public String hideEmail(String email) {
-        return email.replaceAll(EMAIL_HIDE_REGEX, EMAIL_MASK_CHAR);
+        return email.split(AT)[0].replaceAll(EMAIL_HIDE_REGEX,"*")+AT+email.split(AT)[1];
     }
 
+    public Long systemGeneratedBenefitId() {
+        long smallest = 1000_0000_0000_0000L;
+        long biggest =  9999_9999_9999_9999L;
+        return ThreadLocalRandom.current().nextLong(smallest, biggest+1);
+    }
+
+
+
+    public boolean isValidateFToken(String fToken) {
+        fToken = getValidToken(fToken, "Bearer ");
+        if (fToken != null && !fToken.isBlank()) {
+            return tokenValidation(fToken);
+        }
+        return false;
+    }
+
+    public static boolean isFTokenExpired(String fToken) {
+        fToken = getValidToken(fToken, "Bearer ");
+        if (fToken != null && !fToken.isBlank()) {
+            return expiryValidation(fToken);
+        }
+        return false;
+    }
+
+    public static String getValidToken(String token, String startsWith) {
+        return token != null && !token.isBlank() && token.startsWith(startsWith) && !token.substring(startsWith.length()).isBlank() ? token.substring(startsWith.length()) : null;
+    }
+
+    private boolean tokenValidation(String token) {
+        try {
+            JWTToken.validateToken(token, GetKeys.getPrivateKey());
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.error(LOG_PREFIX + e.getMessage());
+            return true;
+        } catch (Exception ex) {
+            log.error(LOG_PREFIX + ex.getMessage());
+            return false;
+        }
+    }
+
+    private boolean expiryValidation(String token) {
+        try {
+            if (JWTToken.validateToken(token, GetKeys.getPrivateKey())) {
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+        } catch (Exception ex) {
+            log.error(LOG_PREFIX + ex.getMessage());
+            return false;
+        }
+    }
 }

@@ -55,7 +55,7 @@ public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNu
         }
         catch (Exception ex)
         {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }

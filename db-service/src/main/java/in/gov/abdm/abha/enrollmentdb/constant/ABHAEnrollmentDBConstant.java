@@ -7,6 +7,9 @@ public class ABHAEnrollmentDBConstant {
     public static final String API_VERSION = "/api/v3/enrollmentdb";
     public static final String ACCOUNT_ENDPOINT = API_VERSION + "/account";
     public static final String ACCOUNT_ACTION_ENDPOINT = API_VERSION + "/accountaction";
+    public static final String INTEGRATED_PROGRAM_ENDPOINT = API_VERSION + "/integratedProgram";
+
+    public static final String HID_BENEFIT_ENDPOINT = API_VERSION + "/hidBenefit";
     public static final String TRANSACTION_ENDPOINT = API_VERSION + "/transaction";
     public static final String GET_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
     public static final String UPDATE_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
@@ -40,6 +43,8 @@ public class ABHAEnrollmentDBConstant {
     public static final String UPDATE_HID_PHR_ADDRESS_BY_ID = HID_PHR_ADDRESS_ID;
 
     public static final String GET_ACCOUNT_BY_XML_UID = "/getByXml/{xmluid}";
+
+    public static final String GET_INTEGRATED_PROGRAM_BY_BENEFIT_NAME = "/{benefitName}";
 
     public static final String GET_ACCOUNT_BY_DOCUMENT_CODE = "/documentCode/{documentCode}";
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = "/linkedAccountCount/{mobileNumber}";

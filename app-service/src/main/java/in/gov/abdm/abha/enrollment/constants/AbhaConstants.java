@@ -3,7 +3,10 @@ package in.gov.abdm.abha.enrollment.constants;
 public class AbhaConstants {
 
     private AbhaConstants() {}
-
+    public static final String ABDM_REDIS_SERVER = "${abdm.redis.server}";
+    public static final String ABDM_REDIS_PORT = "${abdm.redis.port}";
+    public static final String ABDM_REDIS_PASSWORD = "${abdm.redis.password}";
+    public static final String ABDM_REDIS_DATABASE = "${abdm.redis.database}";
     public static final String VALIDATION_EMPTY_KEY_FIELD = "Key cannot be null or empty";
     public static final String VALIDATION_EMPTY_VALUE_FIELD = "Value cannot be null or empty";
     public static final String VALIDATION_ERROR_TRANSACTION_FIELD = "Invalid Transaction Id";
@@ -11,6 +14,8 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_LOGIN_HINT_FIELD = "Invalid Login Hint";
     public static final String VALIDATION_ERROR_LOGIN_ID_FIELD = "Invalid LoginId";
     public static final String VALIDATION_ERROR_OTP_SYSTEM_FIELD = "Invalid Otp System";
+    public static final String MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The mobile number provided by you is already linked to {0} ABHA Numbers. Please provide a different Mobile Number.";
+    public static final String EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The email address provided by you is already linked to {0} ABHA Numbers. Please provide a different email address.";
 
 
     public static final String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " +
@@ -50,13 +55,14 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_RELATIONSHIP_FIELD = "Invalid Relationship";
 
     public static final String VALIDATION_ERROR_DOCUMENT_FIELD = "Invalid Document";
-    public static final String VALIDATION_ERROR_DL_NUMBER = "Please enter a valid Driving Licence number in any of following formats DL-1420110012345 or DL14 20110012345.";
+    public static final String VALIDATION_ERROR_DL_NUMBER = "Please enter a valid Driving Licence number.";
     public static final String INVALID_REASON = "Maximum limit is 255 characters";
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
 
     public static final String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
+    public static final String INTEGRATED_PROGRAMS = "INTEGRATED_PROGRAMS";
     public static final String INVALID_OTP = "Invalid OTP, Please try again.";
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
@@ -66,7 +72,8 @@ public class AbhaConstants {
     public static final String NO_ACCOUNT_FOUND_WITH_AADHAAR_NUMBER = "No account found with AADHAAR Number. Please, create a new account.";
 
     public static final String NO_ACCOUNT_FOUND = "No account found. Please, create a new account.";
-    public static final String DRIVING_LICENCE = "DRIVING_LICENCE";
+    public static final String
+            DRIVING_LICENCE = "DRIVING_LICENCE";
     public static final String PROVISIONAL = "PROVISIONAL";
     public static final String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
     public static final String INVALID_DOCUMENT_ID = "Invalid Document Id";
@@ -126,6 +133,9 @@ public class AbhaConstants {
     public static final String ABHA_DB_ACCOUNT_CLIENT = "abha-db-account-client";
     public static final String ABHA_DB_TRANSACTION_CLIENT = "abha-db-transaction-client";
     public static final String ABHA_DB_ACCOUNT_ACTION_CLIENT = "abha-db-account-action-client";
+    public static final String ABHA_DB_INTEGRATED_PROGRAM_CLIENT = "abha-db-integrated-program-client";
+
+    public static final String ABHA_DB_HID_BENEFIT_CLIENT = "abha-db-hid-benefit-client";
 
     public static final String ABHA_DB_DEPENDENT_ACCOUNT_RELATIONSHIP_CLIENT = "abha-db-dependent-account-relationship-client";
     public static final String DOCUMENT_DB_IDENTITY_DOCUMENT_CLIENT = "document-db-identity-document-client";
@@ -161,11 +171,18 @@ public class AbhaConstants {
 
     public static final String AUTHORIZATION = "Authorization";
     public static final String AADHAAR_TECHNICAL_ERROR_MSG = "Technical error that are internal to authentication server.";
-    public static final String EMAIL_HIDE_REGEX = "(^[^@]{3}|(?!^)\\G)[^@]";
+    public static final String EMAIL_HIDE_REGEX = ".(?=.{4})";
 
     public static final String EMAIL_MASK_CHAR = "$1*";
 
     public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
     public static final String PID_INVALID = "Invalid PID";
+    public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
+    public static final String BENEFIT_NAME = "Benefit-Name";
+    public static final String F_TOKEN = "F-token";
+    public static final String SUB = "sub";
+    public static final String ROLES = "roles";
+
+    public static final String OFFLINE_HID = "OFFLINE_HID";
 }

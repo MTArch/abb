@@ -57,7 +57,7 @@ public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
         }
         catch (Exception ex)
         {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }

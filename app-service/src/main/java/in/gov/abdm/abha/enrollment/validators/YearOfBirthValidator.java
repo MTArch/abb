@@ -25,7 +25,7 @@ public class YearOfBirthValidator implements ConstraintValidator<YOB, String> {
 			}
 		}
 		catch (Exception e){
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 		}
 		return true;
 	}

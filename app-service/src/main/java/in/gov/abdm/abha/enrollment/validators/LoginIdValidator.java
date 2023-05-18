@@ -129,7 +129,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             new String(Base64.getDecoder().decode(loginId));
             return true;
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }
