@@ -237,6 +237,7 @@ public class AccountServiceImpl implements AccountService {
             patient.setPinCode(accounts.getPincode());
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
+            patient.setKycVerified(accounts.isKycVerified());
             patient.setMobileVerified(accounts.getMobile()!=null);
         }
         catch (Exception ex) {
