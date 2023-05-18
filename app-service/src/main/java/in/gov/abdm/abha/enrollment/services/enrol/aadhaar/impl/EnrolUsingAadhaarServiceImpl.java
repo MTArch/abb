@@ -574,7 +574,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (requestHeaders.getBenefitName() != null && integratedProgramDtos != null
                 && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
                 && res.getClientId().equals(requestHeaders.getClientId()))
-                || requestHeaders.getRoleList() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+                || requestHeaders.getRoleList() != null && requestHeaders.getBenefitName() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
             throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
         }
     }
