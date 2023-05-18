@@ -68,11 +68,12 @@ public class RSAUtil {
                 cipher.init(Cipher.DECRYPT_MODE, getPrivateKey());
                 return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes())));
             } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException |
-                     NoSuchPaddingException exception) {
+                     NoSuchPaddingException | IllegalArgumentException exception) {
                 log.error(FAILED_TO_DECRYPT_DUE_TO + data + StringConstants.COLON, exception.getMessage(),exception);
+                return StringConstants.EMPTY;
             }
         }
-        return StringConstants.EMPTY;
+
     }
 
     private PublicKey getPublicKey() {
