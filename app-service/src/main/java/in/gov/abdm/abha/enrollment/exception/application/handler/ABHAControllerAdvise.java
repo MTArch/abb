@@ -235,13 +235,14 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
+
         Optional.ofNullable(ex)
                 .map(Throwable::getMessage)
-                .filter(msg -> msg.contains("preferred"))
+                .filter(msg -> msg.contains("F-token"))
                 .ifPresentOrElse(
                         msg -> {
-                            errorMap.put("preferred", AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
-                            errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+                            errorMap.put(CODE, ABDMError.INVALID_F_TOKEN.getCode().split(":")[0]);
+                            errorMap.put(MESSAGE_KEY, ABDMError.INVALID_F_TOKEN.getMessage());
                             log.info(EXCEPTIONS + msg);
                         },
                         () -> {
@@ -253,7 +254,7 @@ public class ABHAControllerAdvise {
                                         log.info(EXCEPTIONS + msg);
                                     });
                         }
-                );        
+                );
         return errorMap;
     }
 }
