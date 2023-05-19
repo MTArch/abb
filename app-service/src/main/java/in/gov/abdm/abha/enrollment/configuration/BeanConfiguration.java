@@ -8,11 +8,14 @@ import in.gov.abdm.abha.enrollment.exception.notification.NotificationDBGatewayU
 import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.protocol.ProtocolVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -81,7 +84,14 @@ public class BeanConfiguration {
         redisStandaloneConfiguration.setPort(redisPort);
         redisStandaloneConfiguration.setPassword(redisPassword);
         redisStandaloneConfiguration.setDatabase(redisDatabase);
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        return new LettuceConnectionFactory(redisStandaloneConfiguration,
+                                            LettuceClientConfiguration
+                                                    .builder()
+                                                    .clientOptions(ClientOptions
+                                                                           .builder()
+                                                                           .protocolVersion(ProtocolVersion.RESP2)
+                                                                           .build())
+                                                    .build());
     }
 
     @Bean
