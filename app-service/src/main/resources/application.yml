@@ -86,5 +86,12 @@ cipher:
 management:
   endpoint:
     health:
+      show-components: always
+      show-details: always
       probes:
         enabled: true
+  health:
+    readinessState:
+      enabled: true
+    livenessState:
+      enabled: true
