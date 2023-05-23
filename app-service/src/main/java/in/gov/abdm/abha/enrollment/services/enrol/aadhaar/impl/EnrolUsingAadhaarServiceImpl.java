@@ -147,7 +147,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                             return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                            throw new AbhaUnProcessableException(ABDMError.UN_PROCESSABLE_ENTITY.getCode(),
+                                    THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                         }
