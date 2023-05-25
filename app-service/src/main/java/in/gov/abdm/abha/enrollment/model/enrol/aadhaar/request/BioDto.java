@@ -37,7 +37,6 @@ public class BioDto {
     private String fingerPrintAuthPid;
 
     @JsonProperty("mobile")
-    @NotEmpty(message = AbhaConstants.MOBILE_NUMBER_MISSMATCH)
     @Mobile
     private String mobile;
 }
