@@ -1,6 +1,8 @@
 server:
   port: ${ENROLLMENT_APP_SERVICE_PORT}
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   application:
     name: ${ENROLLMENT_APP_SERVICE_NAME}
   zipkin:
@@ -83,3 +85,18 @@ jwt:
 cipher:
   secretKey: ${ABHA_CIPHER}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-components: always
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    readinessState:
+      enabled: true
+    livenessState:
+      enabled: true

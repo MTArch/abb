@@ -147,7 +147,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                             return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                            throw new AbhaUnProcessableException(ABDMError.UN_PROCESSABLE_ENTITY.getCode(),
+                                    THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                         }
@@ -575,7 +576,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (requestHeaders.getBenefitName() != null && integratedProgramDtos != null
                 && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
                 && res.getClientId().equals(requestHeaders.getClientId()))
-                || requestHeaders.getRoleList() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+                || requestHeaders.getRoleList() != null && requestHeaders.getBenefitName() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
             throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
         }
     }
