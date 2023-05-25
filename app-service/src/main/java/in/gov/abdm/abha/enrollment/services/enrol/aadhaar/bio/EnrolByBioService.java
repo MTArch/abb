@@ -83,18 +83,26 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     private int maxMobileLinkingCount;
 
     public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
-        return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getBio().getMobile())
-                .flatMap(mobileLinkedAccountCount -> {
-                    if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
-                    } else {
-                        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
-                                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
-                                .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
-                                .build());
-                        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
-                    }
-                });
+        if (enrolByAadhaarRequestDto.getAuthData().getBio().getMobile() == null || enrolByAadhaarRequestDto.getAuthData().getBio().getMobile().isBlank()) {
+            return verifyAadhaarBio(enrolByAadhaarRequestDto, requestHeaders);
+        } else {
+            return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getBio().getMobile())
+                    .flatMap(mobileLinkedAccountCount -> {
+                        if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                            throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        } else {
+                            return verifyAadhaarBio(enrolByAadhaarRequestDto, requestHeaders);
+                        }
+                    });
+        }
+    }
+
+    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders){
+        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
+                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
+                .fingerPrintAuthPid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
+                .build());
+        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleAadhaarBioResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
