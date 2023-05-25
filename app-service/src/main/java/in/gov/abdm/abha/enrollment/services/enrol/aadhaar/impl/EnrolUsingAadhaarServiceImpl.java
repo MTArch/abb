@@ -265,6 +265,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
                 accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
                 if (accountDtoResponse.getMobile() != null) {
+                    abhaProfileDto.setMobile(accountDtoResponse.getMobile());
                     accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
                 }
                 return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)

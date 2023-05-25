@@ -24,11 +24,12 @@ public class RequestMapper {
     public static final String ROLES = "roles";
     public static final String APPLICATION = "application";
     public static final String NAME = "name";
+    public static final String DEFAULT_CLIENT_ID = "healthid-api";
 
     public static RequestHeaders prepareRequestHeaders(String benefitName, String authorization,String fToken) {
 
         Map<String, Object> claims;
-        String clientId="";
+        String clientId=DEFAULT_CLIENT_ID;
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
 
@@ -39,7 +40,7 @@ public class RequestMapper {
                 clientId = claims.get(CLIENT_ID).toString();
             } else if (claims.get(APPLICATION) != null) {
                 LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
-                clientId = application.get(NAME) != null ? application.get(NAME) : null;
+                clientId = application.get(NAME) != null ? application.get(NAME) : DEFAULT_CLIENT_ID;
             }
             Map<String, List<String>> realmMap = (Map<String, List<String>>) claims.get(REALM_ACCESS);
             if (realmMap != null)
