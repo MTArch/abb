@@ -16,15 +16,10 @@ public class AbhaValidator implements ConstraintValidator<AbhaId, String> {
         if(value!=null && !value.isEmpty()) {
             if(!value.split("@")[0].equals("@abdm") || !value.split("@")[0].equals("@sbx")) {
                 if (value.length() >= 8 && value.length() <= 18) {
-                    return Pattern.compile(pattern).matcher(value).matches() && validateNumericInput(value);
-
+                    return Pattern.compile(pattern).matcher(value).matches();
                 }
             }
         }
         return false;
-    }
-
-    private boolean validateNumericInput(String value) {
-        return !(Pattern.compile("[0-9]+").matcher(value).matches() && value.length()==14);
     }
 }
