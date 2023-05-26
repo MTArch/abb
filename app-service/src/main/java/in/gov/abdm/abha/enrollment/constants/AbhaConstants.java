@@ -119,6 +119,8 @@ public class AbhaConstants {
 
     public static final String VALIDATION_ERROR_ABHA_ADDRESS_FIELD = "Invalid Abha Address";
 
+    public static final String VALIDATION_ERROR_ABHA_ADDRESS_CANNOT_14_DIGIT_NO = "The ABHA address cannot consist of a 14-digit number exclusively.";
+
     public static final String VALIDATION_ERROR_PREFERRED_FLAG = "Invalid Preferred Flag";
 
     public static final String ABHA_ENROL_LOG_PREFIX = "ABHA_ENROL_LOG_PREFIX: ";

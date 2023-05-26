@@ -108,6 +108,7 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.ENROL_ABHA_ADDRESS_ENDPOINT)
     public Mono<AbhaAddressResponseDto> createAbhaAddress(@Valid @RequestBody AbhaAddressRequestDto abhaAddressRequestDto) {
+        abhaAddressService.validateAbhaAddress(abhaAddressRequestDto);
         return abhaAddressService.createAbhaAddress(abhaAddressRequestDto);
     }
 }
