@@ -147,7 +147,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                             return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                            return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                            throw new AbhaUnProcessableException(ABDMError.UN_PROCESSABLE_ENTITY.getCode(),
+                                    THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                         }
@@ -265,6 +266,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
                 accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
                 if (accountDtoResponse.getMobile() != null) {
+                    abhaProfileDto.setMobile(accountDtoResponse.getMobile());
                     accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
                 }
                 return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)

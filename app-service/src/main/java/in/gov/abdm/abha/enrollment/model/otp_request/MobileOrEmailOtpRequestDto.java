@@ -20,7 +20,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ValidTransactionId
+@ValidTxnId
 @ValidLoginHint
 @ValidOtpSystem
 @ValidLoginId

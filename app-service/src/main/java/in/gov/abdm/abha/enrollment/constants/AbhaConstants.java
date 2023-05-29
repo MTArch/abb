@@ -119,6 +119,8 @@ public class AbhaConstants {
 
     public static final String VALIDATION_ERROR_ABHA_ADDRESS_FIELD = "Invalid Abha Address";
 
+    public static final String VALIDATION_ERROR_ABHA_ADDRESS_CANNOT_14_DIGIT_NO = "The ABHA address cannot consist of a 14-digit number exclusively.";
+
     public static final String VALIDATION_ERROR_PREFERRED_FLAG = "Invalid Preferred Flag";
 
     public static final String ABHA_ENROL_LOG_PREFIX = "ABHA_ENROL_LOG_PREFIX: ";
@@ -163,7 +165,7 @@ public class AbhaConstants {
     public static final String INVALID_HEALTH_WORKER_MOBILE_NUMBER = "Invalid Health Worker Mobile Number";
     public static final String INVALID_CONSENT_FORM_IMAGE = "Invalid Consent Form Image";
     public static final String THIS_ACCOUNT_ALREADY_EXIST = "This account already exist";
-    public static final String THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED = "This account is deactivated, kindly activate the account to continue";
+    public static final String THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED = "This account is deactivated. Please continue to reactivate.";
     public static final String ACCOUNT_CREATED_SUCCESSFULLY = "Account created successfully";
 
     public static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
