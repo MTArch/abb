@@ -1,31 +1,27 @@
 package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
 
 
+import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
+import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
+import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
+import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
+import in.gov.abdm.phr.enrollment.address.Address;
+import in.gov.abdm.phr.enrollment.user.User;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PHREventPublisher;
-import in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event.PatientEventPublisher;
-import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
-import in.gov.abdm.abha.enrollmentdb.domain.syncacknowledgement.SyncAcknowledgementService;
-import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
-import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
-import in.gov.abdm.phr.enrollment.address.Address;
-import in.gov.abdm.phr.enrollment.user.User;
-import in.gov.abdm.syncacknowledgement.SyncAcknowledgement;
-import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
@@ -37,22 +33,11 @@ import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 @Slf4j
 public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
-    private static final String PROVISIONAL = "PROVISIONAL";
-
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
 
     @Autowired
     private AccountService accountService;
-
-    @Autowired
-    private PHREventPublisher phrEventPublisher;
-
-    @Autowired
-    private PatientEventPublisher patientEventPublisher;
-
-    @Autowired
-    private SyncAcknowledgementService syncAcknowledgementService;
 
     /**
      * Here we are creating a ModelMapper object and putting into IOC
@@ -60,37 +45,17 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
      */
     @Autowired
     private ModelMapper modelMapper;
-
     @Autowired
-    private HidPhrAddressSubscriber hidPhrAddressSubscriber;
+    KafkaService kafkaService;
 
     @Override
     public Mono<HidPhrAddressDto> addHidPhrAddress(HidPhrAddressDto hidPhrAddressDto) {
-        String requestId = String.valueOf(UUID.randomUUID());
-        Timestamp timeStamp = Timestamp.valueOf(LocalDateTime.now());
         HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class).setAsNew();
         return hidPhrAddressRepository.save(hidPhrAddress)
-                .flatMap(hidPhrAddressAdded -> {
-                    SyncAcknowledgement syncAcknowledgement = new SyncAcknowledgement();
-                    syncAcknowledgement.setRequestID(requestId);
-                    syncAcknowledgement.setHealthIdNumber(hidPhrAddressAdded.getHealthIdNumber());
-                    syncAcknowledgement.setHidPhrAddress(hidPhrAddressAdded.getPhrAddress());
-                    syncAcknowledgement.setSyncedWithPatient(false);
-                    syncAcknowledgement.setSyncedWithPhr(false);
-                    syncAcknowledgement.setCreatedDate(timeStamp);
-                    return Mono.just(hidPhrAddressAdded);
-                })
-                .flatMap(this::findAccountFromHidPhrAddress)
-                .flatMap(accountToPublish -> {
-                    if (!accountToPublish.getVerificationStatus().equalsIgnoreCase(PROVISIONAL)) {
-                        User userToPublish = setUserToPublish(accountToPublish);
-                        Patient patientToPublish = setPatientToPublish(accountToPublish);
-                        phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
-                        patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
-                    }
-                    return Mono.just(accountToPublish.getHidPhrAddress());
-                })
-                .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+                .map(hidPhrAdd ->{
+                    kafkaService.publishPhrUserPatientEvent(hidPhrAddress).subscribe();
+                    return modelMapper.map(hidPhrAdd, HidPhrAddressDto.class);
+                });
     }
 
     @Override
