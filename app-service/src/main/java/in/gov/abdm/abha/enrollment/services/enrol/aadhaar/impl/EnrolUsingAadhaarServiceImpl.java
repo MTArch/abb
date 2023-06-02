@@ -162,6 +162,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .flatMap(transactionDtoResponse ->
                 {
                     transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
+                    if (!generateToken)
+                        transactionDtoResponse.setStatus(AccountStatus.DEACTIVATED.getValue());
                     return transactionService.updateTransactionEntity(transactionDtoResponse, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(res -> {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
