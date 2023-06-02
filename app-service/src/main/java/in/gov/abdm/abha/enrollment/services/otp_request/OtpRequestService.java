@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.otp_request;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
@@ -46,9 +47,7 @@ import java.util.Base64;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT;
 
 /**
@@ -102,41 +101,35 @@ public class OtpRequestService {
         if (!redisService.isResendOtpAllowed(phoneNumber)) {
             throw new UnauthorizedUserToSendOrVerifyOtpException();
         }
+        return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId()).flatMap(transactionDto -> {
+            if (transactionDto.getStatus().equalsIgnoreCase(AccountStatus.DEACTIVATED.getValue())) {
+                throw new AbhaUnProcessableException(ABDMError.UN_PROCESSABLE_ENTITY.getCode(), THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+            }
+            return accountService.getMobileLinkedAccountCount(phoneNumber).flatMap(mobileLinkedAccountCount -> {
+                if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                    throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
+                } else {
+                    Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendRegistrationOtp(phoneNumber, newOtp);
 
-        return accountService.getMobileLinkedAccountCount(phoneNumber)
-                .flatMap(mobileLinkedAccountCount -> {
-                    if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
-                    } else {
-                        Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
-                        return transactionDtoMono.flatMap(transactionDto -> {
-
-                            Mono<NotificationResponseDto> notificationResponseDtoMono
-                                    = notificationService.sendRegistrationOtp(phoneNumber, newOtp);
-
-                            return notificationResponseDtoMono.flatMap(response -> {
-                                if (response.getStatus().equals(SENT)) {
-                                    transactionDto.setMobile(phoneNumber);
-                                    transactionDto.setOtp(Argon2Util.encode(newOtp));
-                                    transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                                    transactionDto.setCreatedDate(LocalDateTime.now());
-                                    transactionDto.setScope(Scopes.MOBILE_VERIFY.getValue());
-                                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                                            .flatMap(res -> {
-                                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), phoneNumber, StringUtils.EMPTY, Argon2Util.encode(newOtp));
-                                                return Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                                        .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                                        .message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber))
-                                                        .build());
-                                            });
-                                } else {
-                                    throw new NotificationGatewayUnavailableException();
-                                }
+                    return notificationResponseDtoMono.flatMap(response -> {
+                        if (response.getStatus().equals(SENT)) {
+                            transactionDto.setMobile(phoneNumber);
+                            transactionDto.setOtp(Argon2Util.encode(newOtp));
+                            transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                            transactionDto.setCreatedDate(LocalDateTime.now());
+                            transactionDto.setScope(Scopes.MOBILE_VERIFY.getValue());
+                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId())).flatMap(res -> {
+                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), phoneNumber, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                                return Mono.just(MobileOrEmailOtpResponseDto.builder().txnId(mobileOrEmailOtpRequestDto.getTxnId()).message(OTP_IS_SENT_TO_MOBILE_ENDING + Common.hidePhoneNumber(phoneNumber)).build());
                             });
-                        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+                        } else {
+                            throw new NotificationGatewayUnavailableException();
+                        }
+                    });
+                }
+            });
 
-                    }
-                });
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
 
@@ -271,44 +264,36 @@ public class OtpRequestService {
     public Mono<MobileOrEmailOtpResponseDto> sendEmailOtpViaNotificationService(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String email = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
         String newOtp = GeneralUtils.generateRandomOTP();
+        return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId()).flatMap(transactionDto -> {
+            if (transactionDto.getStatus().equalsIgnoreCase(AccountStatus.DEACTIVATED.getValue())) {
+                throw new AbhaUnProcessableException(ABDMError.UN_PROCESSABLE_ENTITY.getCode(), THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+            }
+            return accountService.getEmailLinkedAccountCount(email).flatMap(emailLinkedAccountCount -> {
+                if (emailLinkedAccountCount >= maxMobileLinkingCount) {
+                    throw new AbhaUnProcessableException(ABDMError.EMAIL_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
+                } else {
+                    Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(email, EMAIL_OTP_SUBJECT, templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, newOtp));
 
-        return accountService.getEmailLinkedAccountCount(email)
-                .flatMap(emailLinkedAccountCount -> {
-                    if (emailLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.EMAIL_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
-                    } else {
-                        if (!redisService.isResendOtpAllowed(email)) {
-                            throw new UnauthorizedUserToSendOrVerifyOtpException();
-                        }
-                        Mono<TransactionDto> transactionDtoMono = transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId());
-                        return transactionDtoMono.flatMap(transactionDto -> {
-                            Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(
-                                    email,
-                                    EMAIL_OTP_SUBJECT,
-                                    templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, newOtp));
-
-                            return notificationResponseDtoMono.flatMap(response -> {
-                                if (response.getStatus().equals(SENT)) {
-                                    transactionDto.setEmail(email);
-                                    transactionDto.setOtp(Argon2Util.encode(newOtp));
-                                    transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                                    transactionDto.setCreatedDate(LocalDateTime.now());
-                                    transactionDto.setScope(Scopes.EMAIL_VERIFY.getValue());
-                                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                                            .flatMap(res -> {
-                                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
-                                                return Mono.just(MobileOrEmailOtpResponseDto.builder()
-                                                        .txnId(mobileOrEmailOtpRequestDto.getTxnId())
-                                                        .message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hideEmail(email))
-                                                        .build());
-                                            });
-                                } else {
-                                    throw new NotificationGatewayUnavailableException();
-                                }
+                    return notificationResponseDtoMono.flatMap(response -> {
+                        if (response.getStatus().equals(SENT)) {
+                            transactionDto.setEmail(email);
+                            transactionDto.setOtp(Argon2Util.encode(newOtp));
+                            transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                            transactionDto.setCreatedDate(LocalDateTime.now());
+                            transactionDto.setScope(Scopes.EMAIL_VERIFY.getValue());
+                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId())).flatMap(res -> {
+                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                                return Mono.just(MobileOrEmailOtpResponseDto.builder().txnId(mobileOrEmailOtpRequestDto.getTxnId()).message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hideEmail(email)).build());
                             });
-                        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-                    }
-                });
+                        } else {
+                            throw new NotificationGatewayUnavailableException();
+                        }
+                    });
+                }
+            });
+
+        }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
+
     }
 
     public Mono<MobileOrEmailOtpResponseDto> sendOtpViaNotificationServiceDLFlow(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
