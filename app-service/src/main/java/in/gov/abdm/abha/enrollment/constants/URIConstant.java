@@ -128,4 +128,5 @@ public class URIConstant {
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
 
     public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
+    public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";
 }

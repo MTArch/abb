@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import org.springframework.web.bind.annotation.*;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Flux;
@@ -41,5 +42,8 @@ public interface AbhaDBAccountFClient {
 
     @GetMapping(URIConstant.FDB_GET_DUPLICATE_ACCOUNT)
     Mono<AccountDto> checkDeDuplication(@RequestBody DeDuplicationRequest request);
+
+    @PostMapping(URIConstant.ACCOUNT_SAVE_ALL)
+    Mono<String> saveAllData(@RequestBody SaveAllDataRequest saveAllDataRequest);
 
 }

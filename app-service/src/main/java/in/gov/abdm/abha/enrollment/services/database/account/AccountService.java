@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,4 +32,8 @@ public interface AccountService {
     Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
 
     Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
+
+    Mono<AccountDto> settingOriginAndClientId(AccountDto accountDto);
+
+    Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest);
 }

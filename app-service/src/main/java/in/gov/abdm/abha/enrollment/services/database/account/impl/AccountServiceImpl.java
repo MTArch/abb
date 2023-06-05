@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
@@ -219,6 +220,26 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<Integer> getEmailLinkedAccountCount(String email) {
         return abhaDBAccountFClient.getEmailLinkedAccountCount(email)
+                .onErrorResume((throwable-> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
+    @Override
+    public Mono<AccountDto> settingOriginAndClientId(AccountDto accountDto) {
+        if (FacilityContextHolder.getSubject() == null) {
+            accountDto.setOrigin(ContextHolder.getClientId());
+            accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        } else {
+            accountDto.setOrigin(ContextHolder.getClientId());
+            accountDto.setFacilityId(FacilityContextHolder.getSubject());
+            accountDto.setLstUpdatedBy(FacilityContextHolder.getSubject());
+        }
+        accountDto.setNewAccount(true);
+        accountDto.setCreatedDate(LocalDateTime.now());
+        return Mono.just(accountDto);
+    }
+
+    @Override
+    public Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest) {
+       return abhaDBAccountFClient.saveAllData(saveAllDataRequest)
                 .onErrorResume((throwable-> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 }
