@@ -15,7 +15,7 @@ import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT
 @ReactiveFeignClient(name = AbhaConstants.PHR_APP_CLIENT, url = ENROLLMENT_GATEWAY_PHR_BASEURI, configuration = BeanConfiguration.class)
 public interface PhrDbFClient {
 
-    public static final String REQUEST_ID = "REQUEST_ID";
+    public static final String REQUEST_ID = "REQUEST-ID";
     public static final String TIMESTAMP = "TIMESTAMP";
     @GetMapping(URIConstant.GET_USERS_BY_ABHA_ADDRESS_LIST_URI)
     Flux<User> getUsersByAbhaAddressList(

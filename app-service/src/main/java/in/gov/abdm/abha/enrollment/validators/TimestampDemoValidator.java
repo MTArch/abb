@@ -22,7 +22,7 @@ public class TimestampDemoValidator implements ConstraintValidator<TimestampDemo
             try {
                 return LocalDateTime.parse(demoDto.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
             } catch (Exception ex) {
-                log.error(ex.getMessage());
+                log.error(ex.getMessage(),ex);
                 return false;
             }
         }

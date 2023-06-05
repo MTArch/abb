@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.facility;
 
 import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
+import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
@@ -79,7 +80,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     private static final String STATUS = "status";
     private static final String ENROL_VERIFICATION_ACCEPT_MESSAGE = "Congratulations! Your ABHA has been created successfully";
     private static final String ENROL_VERIFICATION_REJECT_MESSAGE = "We're sorry, but we were unable to process your registration at this time. Please re-register with the correct and accurate details to successfully complete your registration process.";
-    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP is sent to Mobile number ending with ";
+    private static final String OTP_IS_SENT_TO_MOBILE_ENDING = "OTP sent to mobile number ending with ";
     private static final String SENT = "sent";
     private static final String FOUND = " found.";
     private static final String TRANSACTION = " Transaction.";
@@ -170,9 +171,7 @@ public class FacilityEnrolByEnrollmentNumberService {
     public Mono<GetByDocumentResponseDto> fetchDetailsByEnrollmentNumber(String enrollmentNumber) {
         Mono<AccountDto> accountDtoMono = accountService.getAccountByHealthIdNumber(enrollmentNumber);
         return accountDtoMono.flatMap(accountDto -> {
-            if (!accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && (accountDto.getVerificationStatus() == null || !accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL))
-                    || !accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus() == null
-                    || accountDto.getStatus().equalsIgnoreCase(ACTIVE.getValue()) && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
+            if (!PROVISIONAL.equals(accountDto.getVerificationStatus()) || !ACTIVE.toString().equals(accountDto.getStatus())) {
                 return Mono.error(new EnrolmentIdNotFoundException(AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE));
             }
             EnrolProfileDetailsDto enrolProfileDto = EnrolProfileDetailsDto.builder().enrolmentNumber(accountDto.getHealthIdNumber()).enrolmentState(accountDto.getVerificationStatus()).firstName(accountDto.getFirstName()).middleName(accountDto.getMiddleName()).lastName(accountDto.getLastName()).dob(accountDto.getYearOfBirth() + StringConstants.DASH + accountDto.getMonthOfBirth() + StringConstants.DASH + accountDto.getDayOfBirth()).gender(accountDto.getGender()).photo(accountDto.getProfilePhoto()).mobile(accountDto.getMobile()).email(accountDto.getEmail()).address(accountDto.getAddress()).districtCode(accountDto.getDistrictCode()).stateCode(accountDto.getStateCode()).abhaType(accountDto.getType() == null ? null : StringUtils.upperCase(accountDto.getType().getValue())).pinCode(accountDto.getPincode()).state(accountDto.getStateName()).district(accountDto.getDistrictName()).phrAddress(Collections.singletonList(accountDto.getHealthId())).abhaStatus(StringUtils.upperCase(accountDto.getStatus())).build();
@@ -232,6 +231,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
+            log.error("Error while validating otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -288,6 +288,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         accountDto.setVerificationStatus(VERIFIED);
                         accountDto.setStatus(ACTIVE.getValue());
                         accountDto.setUpdateDate(now());
+                        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
                         accountDto.setKycVerified(true);
                         accountService.updateAccountByHealthIdNumber(accountDto, txnDto.getHealthIdNumber()).subscribe();
                         AccountActionDto newAccountActionDto = new AccountActionDto();
@@ -328,7 +329,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
                         enrollmentResponse = EnrollmentResponse.builder()
                                 .status(ENROL_VERIFICATION_STATUS)
-                                .message(ENROL_VERIFICATION_ACCEPT_MESSAGE).build();
+                                .message(ENROL_VERIFICATION_REJECT_MESSAGE).build();
                     }
                     return Mono.just(enrollmentResponse);
                 });
@@ -343,6 +344,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setStatus(REJECTED);
         accountDto.setStatus(DELETED);
         accountDto.setUpdateDate(LocalDateTime.now());
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
         accountDto.setAddress(null);
         accountDto.setDayOfBirth(null);
         accountDto.setDistrictCode(null);

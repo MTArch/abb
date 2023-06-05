@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,4 +35,8 @@ public class BioDto {
      */
     @JsonProperty("fingerPrintAuthPid")
     private String fingerPrintAuthPid;
+
+    @JsonProperty("mobile")
+    @Mobile
+    private String mobile;
 }

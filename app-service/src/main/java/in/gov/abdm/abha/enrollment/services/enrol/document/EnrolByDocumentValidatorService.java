@@ -44,6 +44,7 @@ public class EnrolByDocumentValidatorService {
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
+    private String base64Regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
 
 
     @Value(ENROLLMENT_PHOTO_MIN_SIZE_IN_KB)
@@ -106,9 +107,19 @@ public class EnrolByDocumentValidatorService {
         if (enrolByDocumentRequestDto.getConsent() == null) {
             errors.put(CONSENT, AbhaConstants.VALIDATION_ERROR_CONSENT_FIELD);
         }
+        if (!isValidBase64(enrolByDocumentRequestDto.getFrontSidePhoto())) {
+            errors.put(FRONT_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_FORMAT);
+        }
+        if (!isValidBase64(enrolByDocumentRequestDto.getBackSidePhoto())) {
+            errors.put(BACK_SIDE_PHOTO, AbhaConstants.INVALID_PHOTO_FORMAT);
+        }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidBase64(String value) {
+        return Pattern.matches(base64Regex,value);
     }
 
     private void isValidTxnId(EnrolByDocumentRequestDto enrolByDocumentRequestDto,  LinkedHashMap<String, String> errors){
@@ -123,9 +134,12 @@ public class EnrolByDocumentValidatorService {
         }
     }
     private boolean isSameFrontSideBackSidePhoto(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        byte[] imageBytes1 = Common.base64Decode(enrolByDocumentRequestDto.getFrontSidePhoto());
-        byte[] imageBytes2 = Common.base64Decode(enrolByDocumentRequestDto.getBackSidePhoto());
-        return Arrays.equals(imageBytes1, imageBytes2);
+        if(isValidBase64(enrolByDocumentRequestDto.getBackSidePhoto()) && isValidBase64(enrolByDocumentRequestDto.getFrontSidePhoto())) {
+            byte[] imageBytes1 = Common.base64Decode(enrolByDocumentRequestDto.getFrontSidePhoto());
+            byte[] imageBytes2 = Common.base64Decode(enrolByDocumentRequestDto.getBackSidePhoto());
+            return Arrays.equals(imageBytes1, imageBytes2);
+        }
+        return false;
     }
 
     private boolean isValidFrontSidePhotoSize(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
@@ -200,7 +214,7 @@ public class EnrolByDocumentValidatorService {
                 return false;
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             return false;
         }
     }

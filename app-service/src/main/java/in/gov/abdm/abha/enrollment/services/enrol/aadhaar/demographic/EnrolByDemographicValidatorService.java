@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 @Service
+@Slf4j
 public class EnrolByDemographicValidatorService {
 
     private static final String M = "M";
@@ -40,9 +42,11 @@ public class EnrolByDemographicValidatorService {
     private static final String MOBILE = "mobile";
     private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
+    private static final String ADDRESS = "address";
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
+    private String alphabeticCharOnlyRegexWithSpaceAddress = "^[A-Za-z ,]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
@@ -93,21 +97,33 @@ public class EnrolByDemographicValidatorService {
         if (!isValidHealthWorkerMobile(demographic)) {
             errors.put(HEALTH_WORKER_MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
+        if (!isValidAddress(demographic)) {
+            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
+        }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
     }
 
     private void validateNameAndDob(Demographic demographic, LinkedHashMap<String, String> errors) {
-        if (!isValidDayOfBirth(demographic)) {
+        boolean isValidMonthAndYear=true;
+        if (!isValidDateOfBirth(demographic)) {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            isValidMonthAndYear=false;
         }
         if (!isValidMonthOfBirth(demographic)) {
             errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
+            isValidMonthAndYear=false;
         }
+
         if (!isValidYearOfBirth(demographic)) {
             errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
+            isValidMonthAndYear=false;
         }
+        if (isValidMonthAndYear && !isValidDayOfBirth(demographic)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+        }
+
         if (!isValidFirstName(demographic)) {
             errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
         }
@@ -132,26 +148,33 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidYearOfBirth(Demographic demographic) {
-        return demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear();
+        return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth())>=1900);
     }
 
     private boolean isValidMonthOfBirth(Demographic demographic) {
-        return (StringUtils.isEmpty(demographic.getMonthOfBirth()) || demographic.getMonthOfBirth().matches(only2Digit)) && Integer.parseInt(demographic.getMonthOfBirth()) <= 12;
+        return (StringUtils.isNotBlank(demographic.getMonthOfBirth()) && demographic.getMonthOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getMonthOfBirth()) <= 12);
+    }
+
+    private boolean isValidDateOfBirth(Demographic demographic) {
+        return (StringUtils.isNotBlank(demographic.getDayOfBirth()) && demographic.getDayOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getDayOfBirth()) <= 31);
     }
 
     private boolean isValidDayOfBirth(Demographic demographic) {
         if (StringUtils.isEmpty(demographic.getDayOfBirth())) {
             return true;
-        } else if (isValidMonthOfBirth(demographic) && isValidYearOfBirth(demographic)) {
+        } else {
             YearMonth yearMonth = YearMonth.of(Integer.parseInt(demographic.getYearOfBirth()), Integer.parseInt(demographic.getMonthOfBirth()));
             return yearMonth.isValidDay(Integer.parseInt(demographic.getDayOfBirth()));
-        } else {
-            return false;
         }
     }
 
     private boolean isValidAadhaar(Demographic demographic) {
-        return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        try {
+           return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        }catch(Exception ex){
+            log.error("Invalid encryption value {}",ex.getMessage());
+            return false;
+        }
     }
 
     private boolean isValidConsentFormImage(Demographic demographic) {
@@ -165,11 +188,11 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidDistrict(Demographic demographic) {
-        return demographic.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
+        return !demographic.getDistrict().isBlank() && demographic.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
     }
 
     private boolean isValidState(Demographic demographic) {
-        return demographic.getState().matches(alphabeticCharOnlyRegexWithSpace);
+        return !demographic.getState().isBlank() && demographic.getState().matches(alphabeticCharOnlyRegexWithSpace);
     }
 
     private boolean isValidPinCode(Demographic demographic) {
@@ -178,7 +201,7 @@ public class EnrolByDemographicValidatorService {
 
     private boolean isValidLastName(Demographic demographic) {
         return StringUtils.isEmpty(demographic.getLastName())
-                || (Common.validStringSize(demographic.getLastName(), MAX_NAME_SIZE)
+                || !demographic.getLastName().isBlank() && (Common.validStringSize(demographic.getLastName(), MAX_NAME_SIZE)
                 && demographic.getLastName().matches(alphabeticCharOnlyRegex));
     }
 
@@ -189,12 +212,16 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidFirstName(Demographic demographic) {
-        return Common.validStringSize(demographic.getFirstName(), MAX_NAME_SIZE) && demographic.getFirstName().matches(alphabeticCharOnlyRegex);
+        return !demographic.getFirstName().isBlank() && Common.validStringSize(demographic.getFirstName(), MAX_NAME_SIZE) && demographic.getFirstName().matches(alphabeticCharOnlyRegex);
     }
 
     private boolean isValidGender(Demographic demographic) {
         return demographic.getGender().equals(M) ||
                 demographic.getGender().equals(F) ||
                 demographic.getGender().equals(O);
+    }
+
+    private boolean isValidAddress(Demographic demographic) {
+        return !demographic.getAddress().isBlank() && demographic.getAddress().matches(alphabeticCharOnlyRegexWithSpaceAddress);
     }
 }

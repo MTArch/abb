@@ -10,6 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import in.gov.abdm.abha.profile.constants.StringConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +57,10 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId()) && mobileOrEmailOtpRequestDto.getLoginId()!=null
+        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim()) && mobileOrEmailOtpRequestDto.getLoginId()!=null
                 && mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getScope() != null) {
+            if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).equals(StringConstants.EMPTY))
+                return false;
 
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
                     && isValidInput(mobileOrEmailOtpRequestDto.getLoginId())) {
@@ -66,7 +69,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
             }
             else return true;
-        }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId())) {
+        }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim())) {
             return false;
         }
         else
@@ -129,7 +132,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             new String(Base64.getDecoder().decode(loginId));
             return true;
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }

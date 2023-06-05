@@ -34,7 +34,7 @@ public class PHREventPublisher implements EventPublisher {
             log.info(MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR);
         }
         catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error(exception.getMessage(),exception);
         }
     }
 

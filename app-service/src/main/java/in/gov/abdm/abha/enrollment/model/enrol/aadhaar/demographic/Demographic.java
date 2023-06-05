@@ -26,7 +26,6 @@ public class Demographic {
     private String lastName;
     private String dayOfBirth;
     private String monthOfBirth;
-    @NotEmpty(message = AbhaConstants.INVALID_YEAR_OF_BIRTH)
     private String yearOfBirth;
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_GENDER_FIELD)
     private String gender;

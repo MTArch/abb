@@ -54,7 +54,7 @@ public class AadhaarNumberFaceValidator implements ConstraintValidator<AadhaarNu
             new String(Base64.getDecoder().decode(aadhaar));
             return true;
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(),ex);
             return false;
         }
     }
