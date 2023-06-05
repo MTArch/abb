@@ -1,7 +1,9 @@
 package in.gov.abdm.abha.enrollmentdb.domain.procedure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
 import in.gov.abdm.abha.enrollmentdb.model.procedure.SaveAllDataRequest;
+import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.abha.enrollmentdb.repository.procedure.ProcedureRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -11,21 +13,40 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
-public class ProcedureServiceImpl implements ProcedureService{
+public class ProcedureServiceImpl implements ProcedureService {
     @Autowired
     ProcedureRepository procedureRepository;
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    KafkaService kafkaService;
+
+    @Autowired
+    HidPhrAddressRepository hidPhrAddressRepository;
+
     @Override
-    public Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest){
+    public Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest) {
         ObjectMapper om = new ObjectMapper();
         try {
             saveAllDataRequest.getAccounts().get(0).setCreatedDate(null);
-           return procedureRepository.saveAllDataProcedure(om.writeValueAsString(saveAllDataRequest.getAccounts()),
-                    om.writeValueAsString(saveAllDataRequest.getHidPhrAddress()), om.writeValueAsString(saveAllDataRequest.getAccountAuthMethods()));
+            saveAllDataRequest.getAccounts().get(0).setConsentDate(null);
+            saveAllDataRequest.getAccounts().get(0).setUpdateDate(null);
+            saveAllDataRequest.getHidPhrAddress().get(0).setLastModifiedDate(null);
+            saveAllDataRequest.getHidPhrAddress().get(0).setCreatedDate(null);
+            return procedureRepository.saveAllDataProcedure(om.writeValueAsString(saveAllDataRequest.getAccounts()),
+                            om.writeValueAsString(saveAllDataRequest.getHidPhrAddress()), om.writeValueAsString(saveAllDataRequest.getAccountAuthMethods()))
+                    .flatMap(response -> {
+                        log.info("response of sp {}", response);
+                        return hidPhrAddressRepository.getPhrAddressByPhrAddress(saveAllDataRequest.getAccounts().get(0).getHealthId().toLowerCase())
+                                .flatMap(hidPhrAddress -> {
+                                    kafkaService.publishPhrUserPatientEvent(hidPhrAddress).subscribe();
+                                    return Mono.just(response);
+                                });
+                    });
         } catch (Exception e) {
-           log.info(e.getMessage());
+            log.error(e.getMessage());
         }
         return Mono.empty();
     }

@@ -33,8 +33,7 @@ public interface AccountService {
     Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
 
     Mono<Integer> getEmailLinkedAccountCount(@PathVariable("email") String email);
-
-    Mono<AccountDto> settingOriginAndClientId(AccountDto accountDto);
-
     Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest);
+
+    Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders);
 }

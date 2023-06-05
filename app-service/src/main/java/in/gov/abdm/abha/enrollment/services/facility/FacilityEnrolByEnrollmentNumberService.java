@@ -373,7 +373,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         accountDto.setWardCode(null);
         accountDto.setWardName(null);
         accountDto.setHipId(null);
-        accountDto.setXmlUID(null);
+        accountDto.setXmluid(null);
         accountDto.setConsentDate(null);
         accountDto.setEmailVerificationDate(null);
         accountDto.setEmailVerified(null);

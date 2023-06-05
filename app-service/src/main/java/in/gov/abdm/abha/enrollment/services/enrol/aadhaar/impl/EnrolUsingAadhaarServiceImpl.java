@@ -26,10 +26,8 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
@@ -111,8 +109,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
-
-    private boolean isTransactionManagementEnable=true;
+    @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
+    private boolean isTransactionManagementEnable;
 
     @Override
     public Mono<EnrolByAadhaarResponseDto> verifyOtp(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
@@ -249,7 +247,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
                                         }else{
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                                    .flatMap(transactionDtoResponse -> accountService.settingOriginAndClientId(accountDto))
+                                                    .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                                     .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto));
                                         }
 
