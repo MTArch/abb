@@ -37,6 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.DASH;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.SYSTEM;
+
 @Slf4j
 @Service
 public class AbhaAddressServiceImpl implements AbhaAddressService {
@@ -213,12 +216,15 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 if(hidPhrAddressDto!=null)
                 {
                     hidPhrAddressDto.setPreferred(0);
+                    if(hidPhrAddressDto.getPhrAddress().contains(hidPhrAddressDto.getHealthIdNumber().replaceAll(DASH,StringConstants.EMPTY)))
+                        hidPhrAddressDto.setStatus(SYSTEM);
                     Mono<HidPhrAddressDto> phrAddressDtoMono
                             = hidPhrAddressService.updateHidPhrAddressById(hidPhrAddressDto,hidPhrAddressDto.getHidPhrAddressId());
                     return phrAddressDtoMono.flatMap(hidPhrAddressDto1 -> {
                         if(hidPhrAddressDto1!=null)
                         {
                             Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
+
                                     = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
                             return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto));
                         }
