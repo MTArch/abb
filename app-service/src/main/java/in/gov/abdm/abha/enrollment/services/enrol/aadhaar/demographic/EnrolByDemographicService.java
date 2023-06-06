@@ -134,7 +134,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
         accountDto.setConsentDate(LocalDateTime.now());
         accountDto.setHealthId(defaultAbhaAddress);
-        accountDto.setXmlUID(xmlUid);
+        accountDto.setXmluid(xmlUid);
         accountDto.setPincode(demographic.getPinCode());
         accountDto.setHealthIdNumber(newAbhaNumber);
         accountDto.setMobile(demographic.getMobile());
@@ -182,7 +182,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, String consentFromImage) {
 
         IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
-        identityDocumentsDto.setDocumentNumber(accountDto.getXmlUID());
+        identityDocumentsDto.setDocumentNumber(accountDto.getXmluid());
         identityDocumentsDto.setDocumentType(AbhaConstants.OFFLINE_AADHAAR);
         identityDocumentsDto.setDob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
         identityDocumentsDto.setGender(accountDto.getGender());

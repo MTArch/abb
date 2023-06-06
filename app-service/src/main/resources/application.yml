@@ -47,6 +47,7 @@ enrollment:
     maxSendOtpCount: ${MAX_SEND_OTP_COUNT}
     maxVerifyOtpCount: ${MAX_VERIFY_OTP_COUNT}
   maxMobileLinkingCount: ${MAX_MOBILE_LINKING_COUNT}
+  transaction: ${IS_TRANSACTION_TRUE}
   gateway:
     aadhaar:
       baseuri: ${AADHAAR_SERVICE_BASE_URI}
