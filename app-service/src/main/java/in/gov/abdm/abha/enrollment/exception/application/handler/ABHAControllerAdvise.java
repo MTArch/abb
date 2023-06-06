@@ -34,7 +34,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+import static in.gov.abdm.abha.profile.constants.AbhaConstants.*;
+
 
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -247,7 +249,13 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-
+        if (ex.getMessage().contains(SCOPES)) {
+            errorMap.put(StringConstants.MESSAGE, INVALID_SCOPE);
+        }else if (ex.getMessage().contains(AUTH_METHOD)) {
+            errorMap.put(StringConstants.MESSAGE, INVALID_AUTH_METHODS);
+        }else if (ex.getMessage().contains(REASONS)) {
+            errorMap.put(StringConstants.MESSAGE, INVALID_REASON);
+        }
         Optional.ofNullable(ex)
                 .map(Throwable::getMessage)
                 .filter(msg -> msg.contains("F-token"))
@@ -267,6 +275,7 @@ public class ABHAControllerAdvise {
                                     });
                         }
                 );
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 }
