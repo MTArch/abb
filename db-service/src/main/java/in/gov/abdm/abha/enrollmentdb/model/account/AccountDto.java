@@ -196,7 +196,7 @@ public class AccountDto {
     /**
      * xmluid of abha user
      */
-    private String xmlUID;
+    private String xmluid;
 
     /**
      * year of birth of abha user

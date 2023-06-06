@@ -33,4 +33,6 @@ public class PropertyConstants {
     public static final String ENROLLMENT_GATEWAY_NOTIFICATION_BASEURI = "${enrollment.gateway.notification.baseuri}";
     public static final String ENROLLMENT_GATEWAY_NOTIFICATIONDB_BASEURI = "${enrollment.gateway.notificationdb.baseuri}";
     public static final String ENROLLMENT_GATEWAY_PHR_BASEURI = "${enrollment.gateway.phr.baseuri}";
+    public static final String ENROLLMENT_IS_TRANSACTION = "${enrollment.transaction}";
+
 }
