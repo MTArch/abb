@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -19,28 +21,30 @@ import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.CIPHER_SEC
 @Slf4j
 public class EnrolmentCipher {
 
-	private static final String ALGO = "AES/CBC/PKCS5Padding";
+	private static final String ALGO = "AES/GCM/NoPadding";
 
 	@Value(CIPHER_SECRET_KEY)
 	private String secretKey;
 
-	private IvParameterSpec ivParameterSpec;
+	private GCMParameterSpec gcmParameterSpec;
+
 	private SecretKeySpec secretKeySpec;
 
 	public String decrypt(String strToDecrypt) {
 		return decrypt(strToDecrypt, secretKey);
 	}
 
+	
 	public String decrypt(String strToDecrypt, String secret) {
 		try {
 			initialize(secret);
 			Cipher cipher = Cipher.getInstance(ALGO);
-			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, gcmParameterSpec);
 			byte[] original = cipher.doFinal(Base64.getDecoder().decode(strToDecrypt));
 
 			return new String(original);
 		} catch (Exception exp) {
-			log.error(exp.getMessage());
+			log.error(exp.getMessage(), exp);
 		}
 		return null;
 	}
@@ -53,10 +57,10 @@ public class EnrolmentCipher {
 		try {
 			initialize(secret);
 			Cipher cipher = Cipher.getInstance(ALGO);
-			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, gcmParameterSpec);
 			return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
 		} catch (Exception exp) {
-			log.error(exp.getMessage());
+			log.error(exp.getMessage(),exp);
 		}
 		return null;
 	}
@@ -69,7 +73,7 @@ public class EnrolmentCipher {
 			key = sha.digest(key);
 			key = Arrays.copyOf(key, 16);
 			secretKeySpec = new SecretKeySpec(key, "AES");
-			ivParameterSpec = new IvParameterSpec(key);
+			gcmParameterSpec = new GCMParameterSpec(128, key);
 		} catch (NoSuchAlgorithmException exp) {
 			log.error("No such algo found exception.", exp);
 		}

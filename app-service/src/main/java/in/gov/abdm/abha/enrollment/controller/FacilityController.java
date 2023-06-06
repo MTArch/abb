@@ -10,7 +10,6 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthR
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.facility.EnrollmentStatusUpdate;
 import in.gov.abdm.abha.enrollment.model.facility.document.GetByDocumentResponseDto;
-import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpResponseDto;
 import in.gov.abdm.abha.enrollment.services.auth.abdm.AuthByAbdmService;
@@ -19,7 +18,6 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -54,7 +52,8 @@ public class FacilityController {
      * @return txnId and success or failed message as part of responseDto
      */
     @PostMapping(URIConstant.FACILITY_OTP_ENDPOINT)
-    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto
+                                                                    ,@RequestHeader(value = AbhaConstants.F_TOKEN) String fToken) {
         //filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
         // If scope -abha-enrol and verify-enrolment and otpSystem -abdm
@@ -69,12 +68,12 @@ public class FacilityController {
     }
 
     @GetMapping(URIConstant.FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT)
-    public Mono<GetByDocumentResponseDto> getDetailsByEnrolmentNumber(@Valid @PathVariable String enrollmentNumber) {
+    public Mono<GetByDocumentResponseDto> getDetailsByEnrolmentNumber(@Valid @PathVariable String enrollmentNumber,@RequestHeader(value = AbhaConstants.F_TOKEN) String fToken) {
         return facilityRequestService.fetchDetailsByEnrollmentNumber(enrollmentNumber);
     }
 
     @PostMapping(VERIFY_FACILITY_OTP_ENDPOINT)
-    public Mono<AuthResponseDto> authByAbdm(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
+    public Mono<AuthResponseDto> authByAbdm(@Valid @RequestBody AuthRequestDto authByAbdmRequest,@RequestHeader(value = AbhaConstants.F_TOKEN) String fToken) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
         if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))) {
             return facilityRequestService.verifyOtpViaNotificationFlow(authByAbdmRequest);
@@ -85,7 +84,7 @@ public class FacilityController {
     }
 
     @PostMapping(VERIFY_ENROLLMENT_ENDPOINT)
-    public Mono<EnrollmentResponse> verifyEnrollment(@Valid @RequestBody EnrollmentStatusUpdate enrollmentStatusUpdate) {
+    public Mono<EnrollmentResponse> verifyEnrollment(@Valid @RequestBody EnrollmentStatusUpdate enrollmentStatusUpdate,@RequestHeader(value = AbhaConstants.F_TOKEN) String fToken) {
         return facilityRequestService.verifyFacilityByEnroll(enrollmentStatusUpdate);
     }
 

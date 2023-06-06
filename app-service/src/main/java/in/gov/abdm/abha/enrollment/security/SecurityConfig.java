@@ -17,17 +17,16 @@ public class SecurityConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, RequestConverter converter, RequestManager manager) {
         AuthenticationWebFilter webFilter = new AuthenticationWebFilter(manager);
         webFilter.setServerAuthenticationConverter(converter);
+        http.csrf().disable().cors();
         http.headers().contentSecurityPolicy("form-action 'self'").and()
-                .permissionsPolicy().policy("geolocation=(self)").and()
-                .hsts().includeSubdomains(true).preload(true).maxAge(Duration.ofDays(365));
+                .permissionsPolicy().policy("geolocation=(self)");
 		
         return http.authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec.anyExchange().authenticated()
                         .and()
                         .addFilterAfter(webFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                         .addFilterAfter(new ClientFilter(), SecurityWebFiltersOrder.HTTP_HEADERS_WRITER)
                         .httpBasic().disable()
-                        .formLogin().disable()
-                        .csrf().disable())
+                        .formLogin().disable())
                 .build();
     }
 }

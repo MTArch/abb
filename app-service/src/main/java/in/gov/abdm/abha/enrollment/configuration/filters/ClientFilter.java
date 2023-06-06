@@ -17,14 +17,18 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.net.InetSocketAddress;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static in.gov.abdm.abha.constant.ABHAConstants.FTOKEN;
 import static in.gov.abdm.constant.ABDMConstant.*;
 
 @Slf4j
 @Component
 public class ClientFilter implements WebFilter {
+    public static final String APPLICATION = "application";
+    public static final String NAME = "name";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -38,14 +42,36 @@ public class ClientFilter implements WebFilter {
                 authorization = authorizationHeaders.get(0);
             }
 
+            String fToken = requestHeaders.get(FTOKEN) != null && requestHeaders.get(FTOKEN).size() > 0
+                    ? requestHeaders.get(FTOKEN).get(0)
+                    : null;
+
+            if (fToken!=null && !Common.isValidateFToken(fToken)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_F_TOKEN);
+            }
+            if (fToken!=null && !Common.isFTokenExpired(fToken)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.F_TOKEN_EXPIRED);
+            }
+
             String requestId = requestHeaders.getFirst(REQUEST_ID);
             String timestamp = requestHeaders.getFirst(TIMESTAMP);
 
-            validateRequestHeaders(requestId, timestamp, exchange);
+            if (!Common.isValidateISOTimeStamp(timestamp)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_TIMESTAMP);
+            }
+            if (!Common.isValidRequestId(requestId)) {
+                return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_REQUEST_ID);
+            }
 
             if (!StringUtils.isEmpty(authorization)) {
+                authorization =authorization.substring("Bearer ".length());
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
-                ContextHolder.setClientId(claims.get(CLIENT_ID) == null ? StringConstants.EMPTY : claims.get(CLIENT_ID).toString());
+                if(claims.get(CLIENT_ID) != null){
+                    ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
+                }else if(claims.get(APPLICATION)!=null){
+                    LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
+                    ContextHolder.setClientId((application.get(NAME)!=null? application.get(NAME) :null));
+                }
             }
             ContextHolder.setRequestId(requestId);
             ContextHolder.setTimestamp(timestamp);
@@ -58,15 +84,5 @@ public class ClientFilter implements WebFilter {
             ContextHolder.setClientIp(clientIp);
         }
         return chain.filter(exchange);
-    }
-
-    private Mono<Void> validateRequestHeaders(String requestId, String timestamp, ServerWebExchange exchange) {
-        if (!Common.isValidateISOTimeStamp(timestamp)) {
-            return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_TIMESTAMP);
-        }
-        if (!Common.isValidRequestId(requestId)) {
-            return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_REQUEST_ID);
-        }
-        return Mono.empty();
     }
 }

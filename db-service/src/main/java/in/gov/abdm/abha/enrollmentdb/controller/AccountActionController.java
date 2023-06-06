@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.accountaction.AccountActionService;
-import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActionDto;
 import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

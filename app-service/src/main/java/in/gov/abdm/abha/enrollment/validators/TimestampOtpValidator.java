@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TimestampOtpValidator implements ConstraintValidator<TimestampOtp, String> {
 
-	private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+	private static final  String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
 	DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 
 	private int minusMinutes = 10;
@@ -31,7 +31,7 @@ public class TimestampOtpValidator implements ConstraintValidator<TimestampOtp, 
 						&& LocalDateTime.parse(timestamp, dateTimeFormatter)
 								.isAfter(currentTime.minusMinutes(minusMinutes));
 			} catch (Exception ex) {
-				log.error(ex.getMessage());
+				log.error(ex.getMessage(), ex);
 				return false;
 			}
 		}

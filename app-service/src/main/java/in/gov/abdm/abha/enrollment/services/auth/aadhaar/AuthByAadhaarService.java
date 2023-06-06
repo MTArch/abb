@@ -12,7 +12,6 @@ import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import in.gov.abdm.abha.enrollment.client.AadhaarClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
@@ -43,8 +42,6 @@ public class AuthByAadhaarService {
     AccountService accountService;
     @Autowired
     TransactionService transactionService;
-    @Autowired
-    AadhaarClient aadhaarClient;
     @Autowired
     RSAUtil rsaUtil;
     @Autowired
@@ -119,11 +116,11 @@ public class AuthByAadhaarService {
                 .flatMap(transactionResDto -> {
                     transactionDto.setTxnResponse(healthIdNumbers.stream().collect(Collectors.joining(",")));
                     return transactionService.updateTransactionEntity(transactionDto, authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
-                            .flatMap(response -> AccountResponse(authByAadhaarRequestDto, accountDtoList));
+                            .flatMap(response -> accountResponse(authByAadhaarRequestDto, accountDtoList));
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
+    private Mono<AuthResponseDto> accountResponse(AuthRequestDto authByAadhaarRequestDto, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty()) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAadhaarRequestDto.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)

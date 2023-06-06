@@ -6,13 +6,15 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.BioDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
+@Slf4j
 public class EnrolByBioValidatorService {
     private static final String AADHAAR = "Aadhaar";
     private static final String TIMESTAMP = "Timestamp";
@@ -40,11 +42,12 @@ public class EnrolByBioValidatorService {
     }
     private boolean isValidTimeStamp(BioDto bioData) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
-        if(!StringUtils.isEmpty(bioData)
+        if(!ObjectUtils.isEmpty(bioData)
                  && timestampNotNullOrEmpty(bioData.getTimestamp())) {
             try {
                 return LocalDateTime.parse(bioData.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
             } catch (Exception ex) {
+                log.error("Error while parsing timestamp",ex);
                 return false;
             }
         }

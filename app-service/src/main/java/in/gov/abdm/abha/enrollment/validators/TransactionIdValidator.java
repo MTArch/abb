@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.otp_request.MobileOrEmailOtpRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
-import in.gov.abdm.abha.enrollment.validators.annotations.ValidTransactionId;
+import in.gov.abdm.abha.enrollment.validators.annotations.ValidTxnId;
 import in.gov.abdm.abha.enrollment.validators.request.HelperUtil;
 
 /**
@@ -23,7 +23,7 @@ import in.gov.abdm.abha.enrollment.validators.request.HelperUtil;
  * <p>
  * it should match transaction id regex pattern
  */
-public class TransactionIdValidator implements ConstraintValidator<ValidTransactionId, MobileOrEmailOtpRequestDto> {
+public class TransactionIdValidator implements ConstraintValidator<ValidTxnId, MobileOrEmailOtpRequestDto> {
 
     /**
      * Constant for transaction id pattern matching
@@ -42,7 +42,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
 
-        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null && mobileOrEmailOtpRequestDto.getTxnId()!=null) {
+        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null ) {
 
             List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
             List<Scopes> enumNames = Stream.of(Scopes.values()).filter(name -> !name.equals(Scopes.WRONG)).collect(Collectors.toList());
@@ -70,7 +70,7 @@ public class TransactionIdValidator implements ConstraintValidator<ValidTransact
             if ((mobileOrEmailOtpRequestDto.getLoginHint().getValue().equalsIgnoreCase(LoginHint.MOBILE.getValue())
                     || mobileOrEmailOtpRequestDto.getLoginHint().getValue().
                     equalsIgnoreCase(LoginHint.EMAIL.getValue()))
-                    && StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {
+                    && (mobileOrEmailOtpRequestDto.getTxnId()==null || StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId()))) {
                 return false;
             }
             if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getTxnId())) {

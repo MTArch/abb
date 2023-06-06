@@ -85,6 +85,7 @@ public class GeneralUtils {
         try {
             return ImageIO.read(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64))) != null;
         } catch (IOException e) {
+            log.error("Error while parsing the image file format",e);
             return false;
         }
     }
@@ -93,8 +94,9 @@ public class GeneralUtils {
         return VerhoeffAlgorithm.validateVerhoeff(aadhaarNumber);
     }
     public Mono<DataBuffer> prepareFilterExceptionResponse(ServerWebExchange exchange, ABDMError error) {
+
         return Mono.just(exchange.getResponse().bufferFactory()
-                .wrap(new JSONObject(new ErrorResponse(error.getCode(), error.getMessage())).toString().getBytes()));
+                .wrap(new JSONObject(new ErrorResponse(error.getCode().split(":")[0], error.getMessage())).toString().getBytes()));
     }
 
 }

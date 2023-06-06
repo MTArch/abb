@@ -57,11 +57,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                         Mono<DependentAccountRelationshipDto> dependentAccountRelationshipDtoMono = dependentAccountRelationshipService
                                 .createDependentAccountEntity(dependentAccountList);
 
-                        return dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto -> {
-                            return updateDependentAccount(linkParentRequestDto);
-                        }).switchIfEmpty(Mono.defer(() -> {
-                            return updateDependentAccount(linkParentRequestDto);
-                        }));
+                        return dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto -> updateDependentAccount(linkParentRequestDto)).switchIfEmpty(Mono.defer(() -> updateDependentAccount(linkParentRequestDto)));
                     }
                     else {
                         throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST);
@@ -119,11 +115,7 @@ public class LinkParentServiceImpl implements LinkParentService {
 				new ArrayList<>(Collections.singleton(accountDto.getHealthIdNumber())),
 				new ArrayList<>(Collections.singleton(1))).map(h -> h.getPhrAddress());
 
-		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(result -> {
-			return mapAccountToProfile(result, accountDto, linkParentRequestDto);
-		}).switchIfEmpty(Mono.defer(() -> {
-			return mapAccountToProfile(null, accountDto, linkParentRequestDto);
-		}));
+		return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(result -> mapAccountToProfile(result, accountDto, linkParentRequestDto)).switchIfEmpty(Mono.defer(() -> mapAccountToProfile(null, accountDto, linkParentRequestDto)));
 	}
 	
 	private Mono<LinkParentResponseDto> mapAccountToProfile(List<String> phrAddress, AccountDto accountDto,

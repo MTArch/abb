@@ -17,7 +17,7 @@ import in.gov.abdm.abha.enrollment.validators.TransactionIdValidator;
 @Retention(RUNTIME)
 @Constraint(validatedBy = TransactionIdValidator.class)
 @Target({TYPE})
-public @interface ValidTransactionId {
+public @interface ValidTxnId {
 
     public String message() default AbhaConstants.VALIDATION_ERROR_TRANSACTION_FIELD;
     public Class<?>[] groups() default {};

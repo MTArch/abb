@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -16,11 +17,9 @@ public class PhrDbService {
     @Autowired
     PhrDbFClient phrDbFClient;
 
-    public static final String REQUEST_ID = "phr-app-backend";
-
     public Flux<User> getUsersByAbhaAddressList(List<String> abhaAddressList)
     {
-        String requestId = REQUEST_ID;
+        String requestId = UUID.randomUUID().toString();
         Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
         return phrDbFClient.getUsersByAbhaAddressList(requestId,timestamp,abhaAddressList.stream().collect(Collectors.joining(",")));
     }

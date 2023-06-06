@@ -13,4 +13,5 @@ public interface AbhaAddressService {
 
     Mono<AbhaAddressResponseDto> createAbhaAddress(@RequestBody AbhaAddressRequestDto abhaAddressRequestDto);
 
+    void validateAbhaAddress(AbhaAddressRequestDto abhaAddressRequestDto);
 }

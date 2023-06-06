@@ -37,6 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.DASH;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.SYSTEM;
+
 @Slf4j
 @Service
 public class AbhaAddressServiceImpl implements AbhaAddressService {
@@ -60,6 +63,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     @Autowired
     IdpAppService idpAppService;
     public static final String TXN_ID = "txnId";
+    public static final String ABHA_ADDRESS = "abhaAddress";
     private static final String TXN_ID_PATTERN = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
     @Override
@@ -212,12 +216,15 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 if(hidPhrAddressDto!=null)
                 {
                     hidPhrAddressDto.setPreferred(0);
+                    if(hidPhrAddressDto.getPhrAddress().contains(hidPhrAddressDto.getHealthIdNumber().replaceAll(DASH,StringConstants.EMPTY)))
+                        hidPhrAddressDto.setStatus(SYSTEM);
                     Mono<HidPhrAddressDto> phrAddressDtoMono
                             = hidPhrAddressService.updateHidPhrAddressById(hidPhrAddressDto,hidPhrAddressDto.getHidPhrAddressId());
                     return phrAddressDtoMono.flatMap(hidPhrAddressDto1 -> {
                         if(hidPhrAddressDto1!=null)
                         {
                             Mono<HidPhrAddressDto> hidPhrAddressDtoMono1
+
                                     = hidPhrAddressService.createHidPhrAddressEntity(prepareHidPhrAddress(accountDto,abhaAddressRequestDto));
                             return hidPhrAddressDtoMono1.flatMap(hidPhrAddressDto2 -> handleCreateAbhaResponse(hidPhrAddressDto2,transactionDto));
                         }
@@ -274,5 +281,20 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
 
     private boolean isValidTxnId(String txnId) {
         return Pattern.compile(TXN_ID_PATTERN).matcher(txnId).matches();
+    }
+
+    @Override
+    public void validateAbhaAddress(AbhaAddressRequestDto abhaAddressRequestDto) {
+        LinkedHashMap<String, String> errors = new LinkedHashMap<>();
+        if (isValidAbhaAddress(abhaAddressRequestDto.getPreferredAbhaAddress())) {
+            errors.put(ABHA_ADDRESS, AbhaConstants.VALIDATION_ERROR_ABHA_ADDRESS_CANNOT_14_DIGIT_NO);
+        }
+        if (errors.size() != 0) {
+            throw new BadRequestException(errors);
+        }
+    }
+
+    private boolean isValidAbhaAddress(String abhaAddress) {
+        return (Pattern.compile("[0-9]+").matcher(abhaAddress).matches() && abhaAddress.length()==14);
     }
 }

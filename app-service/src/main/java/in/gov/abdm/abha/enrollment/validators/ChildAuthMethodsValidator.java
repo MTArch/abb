@@ -21,9 +21,7 @@ public class ChildAuthMethodsValidator implements ConstraintValidator<AuthMethod
     public boolean isValid(AuthData authData, ConstraintValidatorContext context) {
     	 List<AuthMethods> requestScopes = authData.getAuthMethods();
     	 List<AuthMethods> enumNames =Stream.of(AuthMethods.values())
-                 .filter(name -> {
-                     return !name.equals(AuthMethods.WRONG);
-                 })
+                 .filter(name -> !name.equals(AuthMethods.WRONG))
                  .collect(Collectors.toList());
          return requestScopes != null &&  !requestScopes.isEmpty() && new HashSet<>(enumNames).containsAll(requestScopes);
     }

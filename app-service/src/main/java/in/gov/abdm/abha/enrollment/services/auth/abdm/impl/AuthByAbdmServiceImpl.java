@@ -4,7 +4,9 @@ import com.password4j.BadParametersException;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
+import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
@@ -28,6 +30,9 @@ import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.argon2.Argon2Util;
+import lombok.extern.slf4j.Slf4j;
+
+import in.gov.abdm.error.ABDMError;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +45,7 @@ import java.util.stream.Collectors;
 import static java.time.LocalDateTime.now;
 
 @Service
+@Slf4j
 public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     private static final String OTP_EXPIRED_RESEND_OTP_AND_RETRY = "Please enter a valid OTP. Entered OTP is either expired or incorrect.";
@@ -84,7 +90,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
 
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
-                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto, isMobile))
+                .flatMap(transactionDto -> verifyOtpViaNotification(authByAbdmRequest, transactionDto, isMobile))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -96,9 +102,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
         return transactionService.findTransactionDetailsFromDB(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                 .flatMap(transactionDto ->
-                {
-                    return verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto);
-                })
+                        verifyOtpViaNotificationDLFlow(authByAbdmRequest.getAuthData().getOtp().getOtpValue(), transactionDto))
                 .switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
@@ -122,24 +126,29 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return null;
     }
 
-    private Mono<AuthResponseDto> verifyOtpViaNotification(String otp, TransactionDto transactionDto,
+    private Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, TransactionDto transactionDto,
                                                            boolean isMobile) {
         try {
-            if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
-            } else if (Argon2Util.verify(transactionDto.getOtp(), otp)) {
-                return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
-                        .flatMap(accountDto -> {
-                            if (isMobile) {
-                                return updatePhoneNumberInAccountEntity(accountDto, transactionDto);
-                            } else {
-                                return updateEmailInAccountEntity(accountDto, transactionDto);
-                            }
-                        });
-            } else {
-                return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+            if (authByAbdmRequest.getScope().contains(Scopes.fromText(transactionDto.getScope()))) {
+                if (GeneralUtils.isOtpExpired(transactionDto.getCreatedDate(), OTP_EXPIRE_TIME)) {
+                    return prepareAuthByAdbmResponse(transactionDto, false, OTP_EXPIRED_RESEND_OTP_AND_RETRY);
+                } else if (Argon2Util.verify(transactionDto.getOtp(), authByAbdmRequest.getAuthData().getOtp().getOtpValue())) {
+                    return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
+                            .flatMap(accountDto -> {
+                                if (isMobile) {
+                                    return updatePhoneNumberInAccountEntity(accountDto, transactionDto);
+                                } else {
+                                    return updateEmailInAccountEntity(accountDto, transactionDto);
+                                }
+                            });
+                } else {
+                    return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
+                }
+            }else{
+                throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
             }
         } catch (BadParametersException ex) {
+            log.error("Error while verifying otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -175,6 +184,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
+            log.error("Error while validating otp",ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -232,10 +242,10 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
         return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
-                .flatMap(res -> HandleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
+                .flatMap(res -> handleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 
-    private Mono<AuthResponseDto> HandleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
+    private Mono<AuthResponseDto> handleIdpMobileOtpResponse(AuthRequestDto authByAbdmRequest,
                                                              IdpVerifyOtpResponse idpVerifyOtpResponse, TransactionDto transactionDto) {
 
         if (idpVerifyOtpResponse.getError() != null) {
@@ -244,9 +254,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         } else {
             List<String> healthIdNumbers = idpVerifyOtpResponse.getKyc().stream()
                     .filter(kyc -> !kyc.getAbhaNumber().equals(transactionDto.getHealthIdNumber().replace("-", "")))
-                    .map(kyc -> {
-                        return getHyphenAbhaNumber(kyc.getAbhaNumber());
-                    }).collect(Collectors.toList());
+                    .map(kyc -> getHyphenAbhaNumber(kyc.getAbhaNumber())).collect(Collectors.toList());
 
 
             if (healthIdNumbers.size() == 0)
@@ -261,20 +269,12 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                         .getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers,
                                 new ArrayList<>(Collections.singleton(1)));
 
-                return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
+                        transactionDto)).switchIfEmpty(Mono.defer(() -> handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
+                                healthIdNumbers, transactionDto)));
 
-                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
-                            transactionDto);
-                }).switchIfEmpty(Mono.defer(() -> {
-
-                    return handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
-                            healthIdNumbers, transactionDto);
-                }));
-
-            }).switchIfEmpty(Mono.defer(() -> {
-                return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
-                        AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
-            }));
+            }).switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
+                    AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()))));
         }
     }
 
@@ -288,7 +288,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                     phrAddressList);
 
             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
-                    .flatMap(response -> AccountResponse(authByAbdmRequest, accountResponseDtoList))
+                    .flatMap(response -> accountResponse(authByAbdmRequest, accountResponseDtoList))
                     .switchIfEmpty(Mono.error(new AbhaDBGatewayUnavailableException()));
         }
         return Mono.empty();
@@ -309,7 +309,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         return accountResponseDtos;
     }
 
-    private Mono<AuthResponseDto> AccountResponse(AuthRequestDto
+    private Mono<AuthResponseDto> accountResponse(AuthRequestDto
                                                           authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
         if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())

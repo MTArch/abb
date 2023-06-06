@@ -1,11 +1,13 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Aadhaar Number Validation by the Verhoeff Algorithm.
  */
 @Component
+@Slf4j
 public class VerhoeffAlgorithm {
 
     static int[][] d = new int[][] {
@@ -50,7 +52,7 @@ public class VerhoeffAlgorithm {
             }
             myArray = Reverse(myArray);
         }catch(NumberFormatException ex){
-           // myArray=new int[0];
+            log.error("Error while parsing array",ex);
         }
         return myArray;
     }
