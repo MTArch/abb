@@ -26,10 +26,12 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 	@Autowired
 	AbhaDBHidPhrAddressFClient abhaDBHidPhrAddressFClient;
 
+	public static final String DEFAULT_CLIENT_ID = "healthid-api";
+
 	@Override
 	public Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto) {
-		hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : ContextHolder.getClientId());
-		hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : ContextHolder.getClientId());
+		hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
+		hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
 		return abhaDBHidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
 				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
@@ -99,7 +101,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
 	@Override
 	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
-		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId());
+		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId()!=null?ContextHolder.getClientId():DEFAULT_CLIENT_ID);
 		return abhaDBHidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
 				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
