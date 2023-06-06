@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.*;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLResponse;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
@@ -105,6 +106,7 @@ public class EnrolServiceTests {
     private IdentityDocumentsDto identityDocumentsDto;
     private EnrolByDocumentRequestDto enrolByDocumentRequestDto;
     private FaceDto faceDto;
+    private RequestHeaders requestHeaders;
 
     @BeforeEach
     void setup()
@@ -127,6 +129,7 @@ public class EnrolServiceTests {
         identityDocumentsDto = new IdentityDocumentsDto();
         enrolByDocumentRequestDto = new EnrolByDocumentRequestDto() ;
         faceDto = new FaceDto();
+        requestHeaders = new RequestHeaders();
     }
 
     @AfterEach
@@ -148,6 +151,7 @@ public class EnrolServiceTests {
         identityDocumentsDto = null;
         enrolByDocumentRequestDto = null;
         faceDto = null;
+        requestHeaders = null;
     }
 
     @Test
@@ -186,7 +190,7 @@ public class EnrolServiceTests {
                   .thenReturn("76524587621574@abdm");
         when(transactionService.updateTransactionEntity(any(),any()))
                 .thenReturn(Mono.just(transactionDto));
-        when(accountService.createAccountEntity(any()))
+        when(accountService.createAccountEntity(any(),any(),any()))
                 .thenReturn(Mono.just(accountDto));
         hidPhrAddressDto.setHealthIdNumber("76-5245-8762-1574");
         hidPhrAddressDto.setPhrAddress("76524587621574@abdm");
@@ -221,7 +225,7 @@ public class EnrolServiceTests {
         enrolByAadhaarRequestDto.setAuthData(authData);
         enrolByAadhaarRequestDto.setConsent(consentDto);
         Mono<EnrolByAadhaarResponseDto> responseDtoMono
-               = enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto);
+               = enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders);
         StepVerifier.create(responseDtoMono)
                 .assertNext(response->{
                     assert response!=null;
@@ -254,7 +258,7 @@ public class EnrolServiceTests {
         lgdDistrictResponse.setStateName("UTTAR PRADESH");
         when(lgdUtility.getLgdData(any(),any()))
                 .thenReturn(Mono.just(Arrays.asList(lgdDistrictResponse)));
-        when(accountService.createAccountEntity(any()))
+        when(accountService.createAccountEntity(any(),any(),any()))
                 .thenReturn(Mono.just(accountDto));
         when(hidPhrAddressService.createHidPhrAddressEntity(any()))
                 .thenReturn(Mono.just(hidPhrAddressDto));
@@ -285,7 +289,7 @@ public class EnrolServiceTests {
         enrolByDocumentRequestDto.setGender("M");
         enrolByDocumentRequestDto.setPinCode("247232");
         enrolByDocumentRequestDto.setState("Uttar Pradesh");
-        StepVerifier.create(enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto,null))
+        StepVerifier.create(enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto,requestHeaders))
                 .expectNextCount(1L)
                 .verifyComplete();
     }
@@ -293,6 +297,8 @@ public class EnrolServiceTests {
     @Test
     void faceAuthSuccess()
     {
+        when(accountService.getMobileLinkedAccountCount(any()))
+                .thenReturn(Mono.just(-1));
         aadhaarResponseDto.setStatus("success");
         aadhaarUserKycDto.setStatus("success");
         aadhaarResponseDto.setAadhaarUserKycDto(aadhaarUserKycDto);
@@ -303,7 +309,7 @@ public class EnrolServiceTests {
 
         transactionDto.setStatus("ACTIVE");
         transactionDto.setTxnId(UUID.fromString("cda04910-37ca-4f2e-84d9-4e5a970d3dc7"));
-        transactionDto.setAadharNo("");
+        transactionDto.setAadharNo("omJXDzhTJYvtCVhy+hlXSdZ3GW9ZIHMHz1FxQZnwl/oQlV9TSHFxU0CXW7ncj2JXYWGLEJjlrqJXqEXcWUQiktcNYrQ6xEviLepYv50KsvTcHJ2UJjaWQiZrTks0XrPPCeKuOLqdVz/+1Z2r5xupNOxNCkSuYTi9RIO2ZR394zCo9pT2kqoWB9E13g33EO+FubWRr5JEHK5Whcn/pY1kKkLClwsQMuBjV8RRAoVPOxtOPSgjq6j5U2C9Xca55b4xoseMRgYMu8yOWBBYeVnmbFtW8F5nfj42gXkx/QIK/DBogVZTm+zpk7amZnC990RcBmm9Qa1IIYH6VvFPjW8NgE+zLz53cI3fHmjQtcHLKe8nvm3lxFtqTP/vJavcF5EmcBaZuQ9/d4Tb3QrXvdvR4X6NIlzIIvclVZY3PS4Rn0gDhUxbkKwXEMm1qq4Bt0yjNike+Ox8766ELnFw5/+E+7Q0AAVTYgkRYB9J7iZ7QDKGxpvvQ6qKQtJ/5AViV4wQe/Hi/joxCM2zatJ6A3F97FG9ebffMqYPzw2mQrzXkerE1VFhm3kGg6qX3Vrf4zYm8b5KzJjQi8MzNX7u5yxO3FpPxdk2vjKV7w70Xr+fRTLhRKZug7F7gHV0aOE7+JzIVHPHy5McYG9ZvvM8PDdmXuR8g/5hD+c9M/D3KxwkXZI=");
         when(transactionService.createTransactionEntity(any()))
                 .thenReturn(Mono.just(transactionDto));
         when(accountService.findByXmlUid(any()))
@@ -320,9 +326,10 @@ public class EnrolServiceTests {
                 .thenReturn(Mono.empty());
         when(abhaAddressGenerator.generateDefaultAbhaAddress(any()))
                 .thenReturn("76524587621574@abdm");
+        transactionDto.setMobile("7676546783");
         when(transactionService.updateTransactionEntity(any(),any()))
                 .thenReturn(Mono.just(transactionDto));
-        when(accountService.createAccountEntity(any()))
+        when(accountService.createAccountEntity(any(),any(),any()))
                 .thenReturn(Mono.just(accountDto));
 
         hidPhrAddressDto.setHealthIdNumber("76-5245-8762-1574");
@@ -346,13 +353,14 @@ public class EnrolServiceTests {
         faceDto.setTimestamp("2023-04-24 13:24:13");
         faceDto.setAadhaar(AADHAAR_NUMBER);
         faceDto.setRdPidData(PID);
+        faceDto.setMobile("9887654739");
         consentDto.setCode("abha-enrollment");
         consentDto.setVersion("1.4");
         authData.setAuthMethods(authMethods);
         authData.setFace(faceDto);
         enrolByAadhaarRequestDto.setAuthData(authData);
         enrolByAadhaarRequestDto.setConsent(consentDto);
-        StepVerifier.create(enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto))
+        StepVerifier.create(enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto,requestHeaders))
                 .expectNextCount(1L)
                 .verifyComplete();
     }

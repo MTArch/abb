@@ -8,6 +8,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.*;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLResponse;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
@@ -88,6 +89,7 @@ public class EnrolByDemographicServiceTests {
     private VerifyDLResponse verifyDLResponse;
     private IdentityDocumentsDto identityDocumentsDto;
     private EnrolByDocumentRequestDto enrolByDocumentRequestDto;
+    private RequestHeaders requestHeaders;
 
     @BeforeEach
     void setup()
@@ -109,6 +111,7 @@ public class EnrolByDemographicServiceTests {
         verifyDLResponse = new VerifyDLResponse();
         identityDocumentsDto = new IdentityDocumentsDto();
         enrolByDocumentRequestDto = new EnrolByDocumentRequestDto() ;
+        requestHeaders = new RequestHeaders();
     }
 
     @AfterEach
@@ -129,12 +132,15 @@ public class EnrolByDemographicServiceTests {
         verifyDLResponse = null;
         identityDocumentsDto = null;
         enrolByDocumentRequestDto = null;
+        requestHeaders = null;
     }
 
 
     @Test
     void validateAndEnrolByDemoAuthSuccess()
     {
+        when(accountService.getMobileLinkedAccountCount(any()))
+                .thenReturn(Mono.just(-1));
         when(rsaUtils.decrypt(any()))
                 .thenReturn("806863997309");
         VerifyDemographicResponse verifyDemographicResponse = new VerifyDemographicResponse();
@@ -153,7 +159,7 @@ public class EnrolByDemographicServiceTests {
         lgdDistrictResponse.setStateName("UTTAR PRADESH");
         when(lgdUtility.getLgdData(any(),any()))
                 .thenReturn(Mono.just(Arrays.asList(lgdDistrictResponse)));
-        when(accountService.createAccountEntity(any()))
+        when(accountService.createAccountEntity(any(),any(),any()))
                 .thenReturn(Mono.just(accountDto));
         hidPhrAddressDto.setHealthIdNumber("76-5245-8762-1574");
         hidPhrAddressDto.setPhrAddress("76524587621574@abdm");
@@ -195,7 +201,7 @@ public class EnrolByDemographicServiceTests {
         authData.setDemographic(demographic);
         enrolByAadhaarRequestDto.setAuthData(authData);
         enrolByAadhaarRequestDto.setConsent(consentDto);
-        StepVerifier.create(enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto))
+        StepVerifier.create(enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders))
                 .expectNextCount(1L)
                 .verifyComplete();
 

@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.*;
 import in.gov.abdm.abha.enrollment.model.entities.*;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.services.aadhaar.impl.AadhaarAppServiceImpl;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
@@ -74,6 +75,7 @@ public class EnrolByBioServiceTests {
     private LgdDistrictResponse lgdDistrictResponse;
     private BioDto bioDto;
 
+    private RequestHeaders requestHeaders;
     @BeforeEach
     void setup()
     {
@@ -89,6 +91,7 @@ public class EnrolByBioServiceTests {
         consentDto = new ConsentDto();
         aadhaarUserKycDto = new AadhaarUserKycDto();
         lgdDistrictResponse = new LgdDistrictResponse();
+        requestHeaders = new RequestHeaders();
     }
 
     @AfterEach
@@ -104,11 +107,14 @@ public class EnrolByBioServiceTests {
         aadhaarUserKycDto = null;
         lgdDistrictResponse = null;
         transactionDto = null;
+        requestHeaders = null;
     }
 
     @Test
     void verifyBioSuccess()
     {
+        when(accountService.getMobileLinkedAccountCount(any()))
+                .thenReturn(Mono.just(-1));
         aadhaarResponseDto.setStatus("success");
         aadhaarUserKycDto.setStatus("success");
         aadhaarResponseDto.setAadhaarUserKycDto(aadhaarUserKycDto);
@@ -136,9 +142,10 @@ public class EnrolByBioServiceTests {
                 .thenReturn(Mono.empty());
         when(abhaAddressGenerator.generateDefaultAbhaAddress(any()))
                 .thenReturn("76524587621574@abdm");
+        transactionDto.setMobile("86475976573");
         when(transactionService.updateTransactionEntity(any(),any()))
                 .thenReturn(Mono.just(transactionDto));
-        when(accountService.createAccountEntity(any()))
+        when(accountService.createAccountEntity(any(),any(),any()))
                 .thenReturn(Mono.just(accountDto));
 
         hidPhrAddressDto.setHealthIdNumber("76-5245-8762-1574");
@@ -162,13 +169,14 @@ public class EnrolByBioServiceTests {
         bioDto.setTimestamp("2023-04-24 13:24:13");
         bioDto.setAadhaar(AADHAAR_NUMBER);
         bioDto.setFingerPrintAuthPid(PID);
+        bioDto.setMobile("9876543872");
         consentDto.setCode("abha-enrollment");
         consentDto.setVersion("1.4");
         authData.setAuthMethods(authMethods);
         authData.setBio(bioDto);
         enrolByAadhaarRequestDto.setAuthData(authData);
         enrolByAadhaarRequestDto.setConsent(consentDto);
-        StepVerifier.create(enrolByBioService.verifyBio(enrolByAadhaarRequestDto))
+        StepVerifier.create(enrolByBioService.verifyBio(enrolByAadhaarRequestDto,requestHeaders))
                 .expectNextCount(1L)
                 .verifyComplete();
     }
