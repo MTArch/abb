@@ -187,4 +187,7 @@ public class AbhaConstants {
     public static final String ROLES = "roles";
 
     public static final String OFFLINE_HID = "OFFLINE_HID";
+    public static final String SCOPES="Scopes";
+    public static final String AUTH_METHOD="AuthMethod";
+    public static final String REASONS="reasons";
 }
