@@ -114,11 +114,6 @@
             <artifactId>abdm-process</artifactId>
             <version>1.0.10</version>
         </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
