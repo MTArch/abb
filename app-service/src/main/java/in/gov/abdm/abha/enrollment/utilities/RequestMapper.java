@@ -8,6 +8,7 @@ import in.gov.abdm.abha.profile.utilities.Common;
 import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.jwt.util.JWTToken;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedHashMap;
@@ -33,7 +34,7 @@ public class RequestMapper {
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
 
-        if (authorization != null) {
+        if (!StringUtils.isEmpty(authorization)) {
             authorization =authorization.substring("Bearer ".length());
             claims = JWTUtil.readJWTToken(authorization);
             if (claims.get(CLIENT_ID) != null) {
