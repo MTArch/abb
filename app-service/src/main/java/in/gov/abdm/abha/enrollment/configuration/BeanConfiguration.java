@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.protocol.ProtocolVersion;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 
 @Configuration
+@Slf4j
 public class BeanConfiguration {
 
 
@@ -37,6 +39,7 @@ public class BeanConfiguration {
     private final int redisPort;
     private final String redisPassword;
     private final int redisDatabase;
+    private static final String NOTIFICATION_ERROR_MESSAGE = "Notification service error {}";
 
     @Autowired
     public BeanConfiguration(
@@ -65,6 +68,7 @@ public class BeanConfiguration {
         List<Templates> templates = new ArrayList<>();
         return notificationDBClient.getAll(UUID.randomUUID().toString(), Common.timeStampWithT()).collectList().onErrorResume(throwable -> {
             templates.addAll(Common.loadDummyTemplates());
+            log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
             return Mono.error(new NotificationDBGatewayUnavailableException());
         }).block();
     }

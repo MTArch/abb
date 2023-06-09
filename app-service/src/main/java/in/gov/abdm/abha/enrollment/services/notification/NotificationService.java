@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.client.NotificationAppFClient;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.notification.*;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class NotificationService {
 
     public static final String ORIGIN = "abha";
@@ -30,6 +32,8 @@ public class NotificationService {
 
     private static final String ABHA_URL= "https://healthid.abdm.gov.in";
 
+    private static final String NOTIFICATION_ERROR_MESSAGE = "Notification service error {}";
+
 
     @Autowired
     NotificationAppFClient notificationAppFClient;
@@ -43,16 +47,23 @@ public class NotificationService {
                 phoneNumber,
                 OTP_SUBJECT,
                 1007164181681962323L,
-                templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp));
+                templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp))
+                .onErrorResume((throwable -> {
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
     }
-
     public Mono<NotificationResponseDto> sendRegistrationSMS(String phoneNumber,String name,String abhaNumber){
         return sendSMS(NotificationType.SMS,
                 NotificationContentType.INFO,
                 phoneNumber,
                 SMS_SUBJECT,
                 1007164181688870515L,
-                templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name,abhaNumber,ABHA_URL));
+                templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name, abhaNumber, ABHA_URL))
+                .onErrorResume((throwable -> {
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
     }
 
     public Mono<NotificationResponseDto> sendSMS(NotificationType notificationType, NotificationContentType notificationContentType , String phoneNumber, String subject,Long templateId,String message) {
@@ -63,7 +74,10 @@ public class NotificationService {
                         subject,
                         templateId,
                         message), UUID.randomUUID().toString(), Common.timeStampWithT())
-                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
+                .onErrorResume((throwable->{
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
     }
 
     private NotificationRequestDto prepareNotificationRequest(NotificationType notificationType, String contentType, String phoneNumber, String subject, Long templateId ,String message) {
@@ -88,7 +102,10 @@ public class NotificationService {
                         email,
                         subject,
                         message),UUID.randomUUID().toString(), Common.timeStampWithT())
-                .onErrorResume((throwable->Mono.error(new NotificationGatewayUnavailableException())));
+                .onErrorResume((throwable->{
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
     }
 
     private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {
