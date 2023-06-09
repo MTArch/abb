@@ -17,6 +17,7 @@ public class LgdUtility {
     LgdAppFClient lgdAppFClient;
 
     public static final String DISTRICT = "district";
+    private static final String LGD_ERROR_MESSAGE = "LGD service error {}";
 
     public Mono<List<LgdDistrictResponse>> getLgdData(String pinCode, String state) {
         if (pinCode == null || pinCode.isBlank()) {
@@ -37,7 +38,13 @@ public class LgdUtility {
 
     public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(String pinCode, String district, String stateName) {
         if (stateName != null)
-            return lgdAppFClient.getDetailsByAttributeState(stateName).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
-        return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
+            return lgdAppFClient.getDetailsByAttributeState(stateName).onErrorResume(throwable -> {
+                log.error(LGD_ERROR_MESSAGE, throwable.getMessage());
+               return Mono.error(new LgdGatewayUnavailableException());
+            });
+        return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> {
+            log.error(LGD_ERROR_MESSAGE, throwable.getMessage());
+            return Mono.error(new LgdGatewayUnavailableException());
+        });
     }
 }
