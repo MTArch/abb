@@ -21,6 +21,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressServic
 import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
 import in.gov.abdm.abha.enrollment.services.phr.PhrDbService;
 import in.gov.abdm.error.ABDMError;
+import in.gov.abdm.identity.domain.Identity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +81,11 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                                         Set<String> listAbhaSuggestion = populatePHRAddress(accountDto);
                                         List<String> stringList = listAbhaSuggestion.stream().collect(Collectors.toList());
 
-                                        return phrDbService.getUsersByAbhaAddressList(listAbhaSuggestion.stream().collect(Collectors.toList()))
+                                        return idpAppService.getUsersByAbhaAddressList(listAbhaSuggestion.stream().collect(Collectors.toList()))
                                                 .collectList().flatMap(Mono::just)
                                                 .flatMap(userList -> {
                                                     List<String> listAbhaAddressPhrDb = userList.stream()
-                                                            .map(User::getPhrAddress)
+                                                            .map(Identity::getAbhaAddress)
                                                             .collect(Collectors.toList());
 
                                                     stringList.removeAll(listAbhaAddressPhrDb);

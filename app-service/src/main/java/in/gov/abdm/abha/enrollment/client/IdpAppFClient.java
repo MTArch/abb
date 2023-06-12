@@ -7,8 +7,10 @@ import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRe
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
+import in.gov.abdm.identity.domain.Identity;
 import org.springframework.web.bind.annotation.*;
 import reactivefeign.spring.config.ReactiveFeignClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.UUID;
 
@@ -28,4 +30,7 @@ public interface IdpAppFClient {
 
     @GetMapping(URIConstant.IDENTITY_VERIFY_ABHA_EXISTS)
     public Mono<Boolean> verifyAbhaAddressExists(@PathVariable("abhaAddress") String abhaAddress,@RequestHeader(REQUEST_ID) UUID requestId,@RequestHeader(TIMESTAMP) String timestamp);
+
+    @GetMapping(URIConstant.GET_IDENTITY_BY_ABHA_ADDRESS_LIST_URI)
+    public Flux<Identity> getUsersByAbhaAddressList(@PathVariable("abhaAddressList") String abhaAddress, @RequestHeader(REQUEST_ID) UUID requestId, @RequestHeader(TIMESTAMP) String timestamp);
 }
