@@ -114,6 +114,11 @@
             <artifactId>abdm-process</artifactId>
             <version>1.0.10</version>
         </dependency>
+        <dependency>
+            <groupId>in.gov.abdm</groupId>
+            <artifactId>abdm-identity</artifactId>
+            <version>1.1.6</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
