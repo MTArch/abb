@@ -121,7 +121,7 @@ public class EnrolByDemographicValidatorService {
             isValidMonthAndYear=false;
         }
         if (isValidMonthAndYear && !isValidDayOfBirth(demographic)) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
 
         if (!isValidFirstName(demographic)) {
