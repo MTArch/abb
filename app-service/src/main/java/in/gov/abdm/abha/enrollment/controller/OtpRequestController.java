@@ -28,6 +28,7 @@ public class OtpRequestController {
     @Autowired
     OtpRequestService otpRequestService;
 
+
     /**
      * endpoint to generate mobile or email otp for abha creation using aadhaar
      *

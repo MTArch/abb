@@ -190,4 +190,8 @@ public class AbhaConstants {
     public static final String SCOPES="Scopes";
     public static final String AUTH_METHOD="AuthMethod";
     public static final String REASONS="reasons";
+
+    public static final long REGISTRATION_OTP_TEMPLATE_ID = 1007164181681962323L;
+    public static final long ABHA_CREATED_TEMPLATE_ID = 1007168421931217527L;
+    public static final long ENROLL_CREATED_TEMPLATE_ID = 1007168421921410710L;
 }

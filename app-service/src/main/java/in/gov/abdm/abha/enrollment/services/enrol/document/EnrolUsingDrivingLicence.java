@@ -44,8 +44,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.PROVISIONAL;
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
@@ -236,7 +234,7 @@ public class EnrolUsingDrivingLicence {
                                                                 } else {
                                                                     log.info(TRANSACTION_DELETED);
                                                                 }
-                                                                return sendSucessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString(), requestHeaders);
+                                                                return sendSuccessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString(), requestHeaders);
                                                             });
                                                         } else {
                                                             throw new AbhaDBGatewayUnavailableException();
@@ -342,8 +340,8 @@ public class EnrolUsingDrivingLicence {
         return Mono.just(enrolByDocumentResponseDto);
     }
 
-    private Mono<EnrolByDocumentResponseDto> sendSucessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId, RequestHeaders requestHeaders) {
-        return notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
+    private Mono<EnrolByDocumentResponseDto> sendSuccessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId, RequestHeaders requestHeaders) {
+        return notificationService.sendEnrollCreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
                 .flatMap(notificationResponseDto -> {
                     if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
                         log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
