@@ -222,6 +222,6 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidAddress(Demographic demographic) {
-        return !demographic.getAddress().isBlank() && demographic.getAddress().matches(alphabeticCharOnlyRegexWithSpaceAddress);
+        return !demographic.getAddress().isBlank();
     }
 }
