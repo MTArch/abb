@@ -146,12 +146,10 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
             if (age >= 18) {
                 accountDto.setType(AbhaType.STANDARD);
-                accountDto.setStatus(AccountStatus.ACTIVE.toString());
             } else {
                 accountDto.setType(AbhaType.CHILD);
-                accountDto.setStatus(AccountStatus.PARENT_LINKING_PENDING.toString());
             }
-
+            accountDto.setStatus(AccountStatus.ACTIVE.toString());
             String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
             transactionDto.setHealthIdNumber(newAbhaNumber);
             accountDto.setHealthIdNumber(newAbhaNumber);
