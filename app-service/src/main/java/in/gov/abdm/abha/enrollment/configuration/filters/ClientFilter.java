@@ -2,7 +2,6 @@ package in.gov.abdm.abha.enrollment.configuration.filters;
 
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.error.ABDMError;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.FTOKEN;
+import static in.gov.abdm.abha.enrollment.constants.URIConstant.excludedList;
 import static in.gov.abdm.constant.ABDMConstant.*;
 
 @Slf4j
@@ -33,7 +33,7 @@ public class ClientFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String authorization = StringUtils.EMPTY;
-        if (!HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+        if (!HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod()) && !excludedList.contains(exchange.getRequest().getPath().toString()))  {
             ContextHolder.removeAll();
             HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
 

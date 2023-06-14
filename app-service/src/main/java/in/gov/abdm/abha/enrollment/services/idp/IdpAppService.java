@@ -6,13 +6,18 @@ import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpRe
 import in.gov.abdm.abha.enrollment.model.idp.idpverifyotpresponse.IdpVerifyOtpResponse;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpRequest;
 import in.gov.abdm.abha.enrollment.model.idp.sendotp.IdpSendOtpResponse;
+import in.gov.abdm.identity.domain.Identity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.UTC_TIMEZONE_ID;
 
 @Service
@@ -37,6 +42,15 @@ public class IdpAppService {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
         String timestamp = dateFormat.format(new Date());
         return idpAppFClient.verifyAbhaAddressExists(abhaAddress,requestId,timestamp)
+                .onErrorResume(throwable -> Mono.error(new IdpGatewayUnavailableException()));
+    }
+    public Flux<Identity> getUsersByAbhaAddressList(List<String> abhaAddressList)
+    {
+        UUID requestId = UUID.randomUUID();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
+        String timestamp = dateFormat.format(new Date());
+        return idpAppFClient.getUsersByAbhaAddressList(abhaAddressList.stream().collect(Collectors.joining(",")),requestId,timestamp)
                 .onErrorResume(throwable -> Mono.error(new IdpGatewayUnavailableException()));
     }
 }

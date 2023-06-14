@@ -1,5 +1,8 @@
 package in.gov.abdm.abha.enrollment.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class URIConstant {
 
     private URIConstant() {
@@ -95,6 +98,8 @@ public class URIConstant {
 
     public static final String IDENTITY_VERIFY_ABHA_EXISTS = IDP_BASE_URI + "/verify/abhaExists/{abhaAddress}";
 
+    public static final String GET_IDENTITY_BY_ABHA_ADDRESS_LIST_URI = IDP_BASE_URI + "/address/identity/getUsersByAbhaAddressList";
+
     //    Notification Service
     public static final String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
@@ -136,4 +141,10 @@ public class URIConstant {
 
     public static final String BENEFIT_NAME = "benefitName";
     public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";
+
+    public static final List<String> excludedList = Arrays.asList(
+            "/actuator/health",
+            "/actuator/metrics",
+            "/metrics"
+    );
 }

@@ -121,7 +121,7 @@ public class EnrolByDemographicValidatorService {
             isValidMonthAndYear=false;
         }
         if (isValidMonthAndYear && !isValidDayOfBirth(demographic)) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
 
         if (!isValidFirstName(demographic)) {
@@ -222,6 +222,6 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidAddress(Demographic demographic) {
-        return !demographic.getAddress().isBlank() && demographic.getAddress().matches(alphabeticCharOnlyRegexWithSpaceAddress);
+        return !demographic.getAddress().isBlank();
     }
 }

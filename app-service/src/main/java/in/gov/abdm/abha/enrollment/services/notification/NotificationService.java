@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+
 @Service
 @Slf4j
 public class NotificationService {
@@ -34,7 +36,6 @@ public class NotificationService {
 
     private static final String NOTIFICATION_ERROR_MESSAGE = "Notification service error {}";
 
-
     @Autowired
     NotificationAppFClient notificationAppFClient;
 
@@ -46,20 +47,33 @@ public class NotificationService {
                 NotificationContentType.OTP,
                 phoneNumber,
                 OTP_SUBJECT,
-                1007164181681962323L,
-                templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, otp))
+                REGISTRATION_OTP_TEMPLATE_ID,
+                templatesHelper.prepareRegistrationOtpMessage(REGISTRATION_OTP_TEMPLATE_ID, otp))
                 .onErrorResume((throwable -> {
                     log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
                     return Mono.error(new NotificationGatewayUnavailableException());
                 }));
     }
-    public Mono<NotificationResponseDto> sendRegistrationSMS(String phoneNumber,String name,String abhaNumber){
+    public Mono<NotificationResponseDto> sendABHACreationSMS(String phoneNumber, String name, String abhaNumber){
         return sendSMS(NotificationType.SMS,
-                NotificationContentType.INFO,
+                NotificationContentType.OTP,
                 phoneNumber,
                 SMS_SUBJECT,
-                1007164181688870515L,
-                templatesHelper.prepareRegistrationSMSMessage(1007164181688870515L, name, abhaNumber, ABHA_URL))
+                ABHA_CREATED_TEMPLATE_ID,
+                templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, name, abhaNumber))
+                .onErrorResume((throwable -> {
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
+    }
+
+    public Mono<NotificationResponseDto> sendEnrollCreationSMS(String phoneNumber,String name,String abhaNumber){
+        return sendSMS(NotificationType.SMS,
+                NotificationContentType.OTP,
+                phoneNumber,
+                SMS_SUBJECT,
+                ENROLL_CREATED_TEMPLATE_ID,
+                templatesHelper.prepareSMSMessage(ENROLL_CREATED_TEMPLATE_ID, name, abhaNumber))
                 .onErrorResume((throwable -> {
                     log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
                     return Mono.error(new NotificationGatewayUnavailableException());

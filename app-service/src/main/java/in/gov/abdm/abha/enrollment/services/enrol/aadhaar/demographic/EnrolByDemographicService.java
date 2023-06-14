@@ -209,7 +209,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
     private Mono<EnrolByAadhaarResponseDto> sendAccountCreatedSMS(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto) {
-        return notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
+        return notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
             if (notificationResponseDto.getStatus().equals(SENT)) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))

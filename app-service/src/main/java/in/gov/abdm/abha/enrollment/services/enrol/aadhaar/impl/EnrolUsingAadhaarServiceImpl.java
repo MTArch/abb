@@ -14,7 +14,6 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableExc
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
-import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
@@ -49,7 +48,6 @@ import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -300,7 +298,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto, AccountDto accountDtoResponse, ABHAProfileDto abhaProfileDto) {
         if (accountDtoResponse.getMobile() != null && !accountDtoResponse.getMobile().isBlank()) {
-            return notificationService.sendRegistrationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
+            return notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
                     .flatMap(notificationResponseDto -> {
                         if (notificationResponseDto.getStatus().equals(SENT)) {
                             log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDtoResponse.getMobile() + FOR_HEALTH_ID_NUMBER + accountDtoResponse.getHealthIdNumber());

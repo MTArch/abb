@@ -19,7 +19,7 @@ public class TemplatesHelper {
         return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), otp);
     }
 
-    public String prepareRegistrationSMSMessage(Long templateId,String name,String abhaNumber,String url) {
-        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), name,abhaNumber,url);
+    public String prepareSMSMessage(Long templateId,String... params) {
+        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), params);
     }
 }

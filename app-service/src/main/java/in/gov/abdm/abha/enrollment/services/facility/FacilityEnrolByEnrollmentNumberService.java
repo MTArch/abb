@@ -300,7 +300,7 @@ public class FacilityEnrolByEnrollmentNumberService {
                         newAccountActionDto.setPreviousValue(null);
                         newAccountActionDto.setReasons(enrollmentStatusUpdate.getMessage());
                         accountActionService.createAccountActionEntity(newAccountActionDto).subscribe();
-                        notificationService.sendRegistrationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
+                        notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).subscribe();
                         enrollmentResponse = EnrollmentResponse.builder()
                                 .status(ENROL_VERIFICATION_STATUS)
                                 .message(ENROL_VERIFICATION_ACCEPT_MESSAGE)
