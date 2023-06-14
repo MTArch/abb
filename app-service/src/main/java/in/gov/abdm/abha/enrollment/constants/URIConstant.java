@@ -143,6 +143,8 @@ public class URIConstant {
     public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";
 
     public static final List<String> excludedList = Arrays.asList(
-            "/actuator/health"
+            "/actuator/health",
+            "/actuator/metrics",
+            "/metrics"
     );
 }
