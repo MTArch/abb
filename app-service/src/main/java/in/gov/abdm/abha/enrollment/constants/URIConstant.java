@@ -145,6 +145,7 @@ public class URIConstant {
     public static final List<String> excludedList = Arrays.asList(
             "/actuator/health",
             "/actuator/metrics",
+            "/actuator/prometheus",
             "/metrics"
     );
 }
