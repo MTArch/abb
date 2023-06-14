@@ -66,6 +66,7 @@ public class ABHAEnrollmentDBConstant {
 
     public static final String VERIFIED ="VERIFIED";
     public static final String PENDING = "PENDING";
+    public static final String SYSTEM = "SYSTEM";
     public static final String KAFKA_ERROR_LOG_MSG = "Error while publishing kafka event: {}";
 
 }

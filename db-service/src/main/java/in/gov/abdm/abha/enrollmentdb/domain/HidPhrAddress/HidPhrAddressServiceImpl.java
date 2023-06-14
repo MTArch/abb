@@ -62,7 +62,10 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
         HidPhrAddress hidPhrAddress = modelMapper.map(hidPhrAddressDto, HidPhrAddress.class);
         return hidPhrAddressRepository.save(hidPhrAddress)
-                .map(hidPhrAdd -> modelMapper.map(hidPhrAdd, HidPhrAddressDto.class));
+                .map(hidPhrAdd -> {
+                    kafkaService.publishPhrUserPatientEvent(hidPhrAddress).subscribe();
+                    return modelMapper.map(hidPhrAdd, HidPhrAddressDto.class);
+                });
     }
 
     @Override
