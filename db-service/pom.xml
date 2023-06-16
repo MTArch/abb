@@ -30,6 +30,11 @@
             <version>1.0.5</version>
             <type>pom</type>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.25</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
