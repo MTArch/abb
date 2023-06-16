@@ -52,7 +52,7 @@ public class KafkaServiceImpl implements KafkaService{
                     saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(),hidPhrAddress.getPhrAddress());
                     User userToPublish = setUserToPublish(accountDto);
                     Patient patientToPublish = setPatientToPublish(accountDto);
-                    if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL) && !accountDto.getStatus().equalsIgnoreCase(SYSTEM)) {
+                    if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL) && !accountDto.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)) {
                         phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
                         patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
                     }else{
