@@ -70,7 +70,7 @@ public class EnrollmentController {
         if (authMethods.contains(AuthMethods.OTP)) {
             return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders).subscribeOn(Schedulers.parallel());
         } else if (authMethods.contains(AuthMethods.DEMO)) {
-            enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
+            enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto, requestHeaders);
             return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
         } else if (authMethods.contains(AuthMethods.FACE)) {
             return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto,requestHeaders);
