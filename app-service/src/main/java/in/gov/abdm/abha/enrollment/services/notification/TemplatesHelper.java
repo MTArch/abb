@@ -22,4 +22,7 @@ public class TemplatesHelper {
     public String prepareSMSMessage(Long templateId,String... params) {
         return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), params);
     }
+    public String getMessage(Long templateId) {
+        return templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage();
+    }
 }

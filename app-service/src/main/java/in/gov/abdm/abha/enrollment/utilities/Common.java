@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationType;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.error.ABDMError;
@@ -36,9 +37,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_HIDE_REGEX;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_MASK_CHAR;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
 import static in.gov.abdm.abha.profile.constants.AbhaConstants.LOG_PREFIX;
 import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
@@ -328,5 +329,12 @@ public class Common {
             log.error(LOG_PREFIX + ex.getMessage());
             return false;
         }
+    }
+
+    public boolean isValidAbha(String abha) {
+        return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();
+    }
+    public boolean isAllNotificationTypeAvailable(List<NotificationType> notificationTypes, List<NotificationType> typeToMatch) {
+        return new HashSet<>(notificationTypes).containsAll(typeToMatch);
     }
 }

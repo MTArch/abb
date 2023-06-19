@@ -194,4 +194,21 @@ public class AbhaConstants {
     public static final long REGISTRATION_OTP_TEMPLATE_ID = 1007164181681962323L;
     public static final long ABHA_CREATED_TEMPLATE_ID = 1007168421931217527L;
     public static final long ENROLL_CREATED_TEMPLATE_ID = 1007168421921410710L;
+
+    public static final String DEFAULT_CLIENT_ID = "healthid-api";
+    public static final String CREATION = "CREATION";
+    public static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
+
+    public static final String ABHA_NUMBER ="abhaNumber";
+    public static final String VALIDATION_ERROR_ABHA_NUMBER_FIELD = "Invalid Abha Number";
+
+    public static final String _TYPE ="type";
+    public static final String VALIDATION_ERROR_TYPE_FIELD = "Invalid Type";
+
+    public static final String NOTIFICATION_TYPE="notificationType";
+    public static final String VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD = "Invalid Notification Type";
+    public static final String EMAIL_ACCOUNT_CREATION_SUBJECT = "account creation";
+
+
+
 }
