@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
@@ -63,7 +64,7 @@ public class EnrolByDemographicValidatorService {
     @Autowired
     RSAUtil rsaUtil;
 
-    public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
@@ -88,7 +89,7 @@ public class EnrolByDemographicValidatorService {
         } else if (!isValidConsentFormImageFormat(demographic)) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         }
-        if (!isValidMobileNumber(demographic)) {
+        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && !isValidMobileNumber(demographic)) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidMobileType(demographic)) {

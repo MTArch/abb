@@ -303,6 +303,8 @@ public class Accounts implements Persistable<String>{
 	 */
 	private String mobileType;
 
+    private byte[] compPhoto;
+
     /**
      * type of account
      */
