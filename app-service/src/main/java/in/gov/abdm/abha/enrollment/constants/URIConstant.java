@@ -107,6 +107,7 @@ public class URIConstant {
     //    Notification DB Service
     public static final String NOTIFICATION_DB_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/template/name/ABHA";
+    public static final String NOTIFICATION_DB_GET_TEMPLATE_BY_ID_URI = NOTIFICATION_DB_BASE_URI + "/template/id/{templateId}";
 
     //LGD service
     public static final String LGD_BASE_URI = "/internal/v3/abdm/lgd";

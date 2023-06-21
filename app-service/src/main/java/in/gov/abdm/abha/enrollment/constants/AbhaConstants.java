@@ -60,9 +60,6 @@ public class AbhaConstants {
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
-
-    public static final String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
-    public static final String INTEGRATED_PROGRAMS = "INTEGRATED_PROGRAMS";
     public static final String INVALID_OTP = "Invalid OTP, Please try again.";
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
