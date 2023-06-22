@@ -202,7 +202,7 @@ public class AbhaConstants {
     public static final String ABHA_NUMBER ="abhaNumber";
     public static final String VALIDATION_ERROR_ABHA_NUMBER_FIELD = "Invalid Abha Number";
 
-    public static final String _TYPE ="type";
+    public static final String TYPE ="type";
     public static final String VALIDATION_ERROR_TYPE_FIELD = "Invalid Type";
 
     public static final String NOTIFICATION_TYPE="notificationType";

@@ -663,7 +663,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             errors.put( AbhaConstants.NOTIFICATION_TYPE,VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD);
         }
         if (!isValidType(sendNotificationRequestDto.getType())) {
-            errors.put(_TYPE, AbhaConstants.VALIDATION_ERROR_TYPE_FIELD);
+            errors.put(TYPE, AbhaConstants.VALIDATION_ERROR_TYPE_FIELD);
         }
 
         if (errors.size() != 0) {
