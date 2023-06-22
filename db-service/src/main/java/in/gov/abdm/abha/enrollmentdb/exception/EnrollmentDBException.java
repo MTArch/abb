@@ -33,6 +33,7 @@ public class EnrollmentDBException {
      */
     @ExceptionHandler(Exception.class)
     Mono<String> genericException(Exception e) {
+        log.error(EXCEPTION, e.getMessage());
         return Mono.just(e.getMessage());
     }
 
@@ -40,7 +41,7 @@ public class EnrollmentDBException {
     public Map<String, Object> runtimeGenericExceptionHandler(GenericExceptionMessage ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(MESSAGE, ex.getMessage());
-        log.info(EXCEPTION, ex.getMessage());
+        log.error(EXCEPTION, ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, LocalDateTime.now().format(dateTimeFormatter));
         return errorMap;
     }
