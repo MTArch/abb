@@ -1,26 +1,20 @@
 package in.gov.abdm.abha.enrollment.services.notification;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
-import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 @Service
 public class TemplatesHelper {
+
     @Autowired
-    @Qualifier(AbhaConstants.MESSAGE_TEMPLATES)
-    List<Templates> templates;
+    RedisService redisService;
 
-    public String prepareRegistrationOtpMessage(Long templateId, String otp) {
-        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), otp);
-    }
-
-    public String prepareSMSMessage(Long templateId,String... params) {
-        return MessageFormat.format(templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage(), params);
+    public Mono<String> prepareSMSMessage(Long templateId, String... params) {
+        return redisService.getNotificationTemplate(templateId.toString()).flatMap(template -> Mono.just(MessageFormat.format(template.getMessage(), params)));
     }
     public String getMessage(Long templateId) {
         return templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage();

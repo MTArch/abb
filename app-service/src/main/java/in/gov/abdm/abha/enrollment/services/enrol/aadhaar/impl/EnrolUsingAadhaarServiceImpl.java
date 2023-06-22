@@ -113,10 +113,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Autowired
     TemplatesHelper templatesHelper;
 
-    @Autowired
-    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
-    private List<IntegratedProgramDto> integratedProgramDtos;
-
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
     @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
@@ -273,11 +269,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         }
                                         //update transaction table and create account in account table
                                         //account status is active
-                                        if(!isTransactionManagementEnable){
+                                        if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                                     .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto,requestHeaders));
-                                        }else{
+                                        } else {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                                     .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
@@ -619,11 +615,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private void isValidBenefitProgram(RequestHeaders requestHeaders) {
-        if (requestHeaders.getBenefitName() != null && integratedProgramDtos != null
-                && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
-                && res.getClientId().equals(requestHeaders.getClientId()))
-                || requestHeaders.getRoleList() != null && requestHeaders.getBenefitName() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
-            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+        if (!Common.isValidBenefitProgram(requestHeaders, redisService.getIntegratedPrograms())){
+            redisService.reloadAndGetIntegratedPrograms().flatMap(newIntegratedProgramDtos -> {
+                if(!Common.isValidBenefitProgram(requestHeaders, newIntegratedProgramDtos)){
+                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                }
+                return Mono.empty();
+            }).subscribe();
         }
     }
 
@@ -643,7 +641,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             }
 
             log.info("going to call procedure to create account");
-           return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v->{
+            return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
                 return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto,requestHeaders);
