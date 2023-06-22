@@ -125,6 +125,37 @@ public class NotificationService {
                     return Mono.error(new NotificationGatewayUnavailableException());
                 }));
     }
+    public Mono<NotificationResponseDto> sendSmsAndEmailOtp(String email,String phoneNumber, String subject, String message) {
+        return notificationAppFClient.sendOtp(
+                        prepareSmsAndEmailNotificationRequest(List.of(NotificationType.EMAIL.getValue(),NotificationType.SMS.getValue()),
+                                NotificationContentType.OTP.getValue(),
+                                email,
+                                phoneNumber,
+                                ABHA_CREATED_TEMPLATE_ID,
+                                subject,
+                                message), UUID.randomUUID().toString(), Common.timeStampWithT())
+                .onErrorResume((throwable -> {
+                    log.error(NOTIFICATION_ERROR_MESSAGE, throwable.getMessage());
+                    return Mono.error(new NotificationGatewayUnavailableException());
+                }));
+    }
+
+    private NotificationRequestDto prepareSmsAndEmailNotificationRequest(List<String> notificationType, String contentType, String email,String phoneNumber, Long templateId, String subject, String message) {
+        NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
+        notificationRequestDto.setOrigin(ORIGIN);
+        notificationRequestDto.setType(notificationType);
+        notificationRequestDto.setContentType(contentType);
+        notificationRequestDto.setSender(SENDER);
+        notificationRequestDto.setReceiver(List.of(new KeyValue(MOBILE_KEY, phoneNumber),new KeyValue(EMAIL_KEY, email)));
+        List<KeyValue> notification = new LinkedList<>();
+        notification.add(new KeyValue(TEMPLATE_ID, String.valueOf(templateId)));
+        notification.add(new KeyValue(SUBJECT, subject));
+        notification.add(new KeyValue(CONTENT, message));
+        notificationRequestDto.setNotification(notification);
+        return notificationRequestDto;
+
+
+    }
 
     private NotificationRequestDto prepareEmailNotificationRequest(NotificationType notificationType, String contentType, String email, String subject, String message) {
         NotificationRequestDto notificationRequestDto = new NotificationRequestDto();

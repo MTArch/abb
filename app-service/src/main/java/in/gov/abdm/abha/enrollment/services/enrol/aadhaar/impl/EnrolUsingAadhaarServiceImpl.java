@@ -156,11 +156,26 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     {
                         if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(SMS)) && null!=accountDtoResponse.getMobile()) {
                             notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber()).subscribe();
+                            return Mono.empty();
                         }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(EMAIL))&& null!=accountDtoResponse.getEmail()) {
-                        notificationService.sendEmailOtp(accountDtoResponse.getEmail(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber)).subscribe();
-                    }
+                           return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
+                                   message->
+                                   {
+                                           notificationService.sendEmailOtp(accountDtoResponse.getEmail(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                       return Mono.empty();
+                                   }
+                           );
 
-                        return Mono.empty();
+                    }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS,EMAIL)) && null!=accountDtoResponse.getEmail() && null!=accountDtoResponse.getMobile()) {
+                            return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
+                                    message->
+                                    {
+                                        notificationService.sendSmsAndEmailOtp(accountDtoResponse.getEmail(),accountDtoResponse.getMobile(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                        return Mono.empty();
+                                    }
+                            );
+
+                        }
                     }
                     return Mono.empty();
                 });
