@@ -18,6 +18,7 @@ public class URIConstant {
     public static final String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion";
 
     public static final String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
+    public static final String ENROL_REQUEST_NOTIFICATION_ENDPOINT = "/request/notification";
 
     //request endpoints
     public static final String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";

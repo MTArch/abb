@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException
 import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationType;
 import in.gov.abdm.abha.enrollment.model.notification.template.Templates;
 import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.error.ABDMError;
@@ -40,6 +41,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
@@ -335,6 +337,14 @@ public class Common {
         }
     }
 
+    public boolean isValidAbha(String abha) {
+        return Pattern.compile(ABHA_NO_REGEX_PATTERN).matcher(abha).matches();
+    }
+
+    public boolean isAllNotificationTypeAvailable(List<NotificationType> notificationTypes, List<NotificationType> typeToMatch) {
+        return new HashSet<>(notificationTypes).containsAll(typeToMatch);
+    }
+    
     public boolean isValidBenefitProgram(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
         return !(requestHeaders.getBenefitName() != null && integratedProgramDtos != null
                 && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())

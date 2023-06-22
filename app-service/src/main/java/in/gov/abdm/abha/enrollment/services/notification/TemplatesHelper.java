@@ -16,4 +16,7 @@ public class TemplatesHelper {
     public Mono<String> prepareSMSMessage(Long templateId, String... params) {
         return redisService.getNotificationTemplate(templateId.toString()).flatMap(template -> Mono.just(MessageFormat.format(template.getMessage(), params)));
     }
+    public String getMessage(Long templateId) {
+        return templates.stream().filter(res-> res.getId().equals(templateId)).findAny().get().getMessage();
+    }
 }
