@@ -317,6 +317,7 @@ public class AccountServiceImpl implements AccountService {
                 .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .linkedDate(LocalDateTime.now())
                 .healthIdNumber(accountDto.getHealthIdNumber())
+                .mobileNumber(accountDto.getMobile()!=null ? accountDto.getMobile() : null)
                 .build();
     }
 
