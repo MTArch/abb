@@ -21,6 +21,7 @@ import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.error.ABDMError;
@@ -57,8 +58,7 @@ public class AccountServiceImpl implements AccountService {
     IntegratedProgramDBFClient integratedProgramDBFClient;
 
     @Autowired
-    @Qualifier(AbhaConstants.INTEGRATED_PROGRAMS)
-    private List<IntegratedProgramDto> integratedProgramDtos;
+    RedisService redisService;
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
@@ -225,29 +225,27 @@ public class AccountServiceImpl implements AccountService {
         return new AccountDto();
     }
 
-    public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, RequestHeaders requestHeaders) {
-        String subject = requestHeaders.getFTokenClaims() == null ? null:requestHeaders.getFTokenClaims().get(SUB).toString();
+    public Mono<AccountDto> createAccountEntity(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders) {
+        String subject = requestHeaders.getFTokenClaims() == null ? null : requestHeaders.getFTokenClaims().get(SUB).toString();
         if (requestHeaders.getFTokenClaims() == null && subject == null) {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
             accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
-            accountDto.setFacilityId(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
-            accountDto.setLstUpdatedBy(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setFacilityId(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setLstUpdatedBy(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
         accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());
 
-        if (requestHeaders.getBenefitName()!=null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
+        if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)))
-        {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
             //HID benefit Flow
-            return handleAccountByBenefitProgram(accountDto,requestHeaders);
-        }
-        else {
+            return handleAccountByBenefitProgram(accountDto, requestHeaders);
+        } else {
             //normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
                     .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
@@ -255,36 +253,36 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders) {
+        List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
+        if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders));
+        } else {
+            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders);
+        }
+    }
 
-        if(!integratedProgramDtos.isEmpty()
-                && integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName())))
-        {
-            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos,accountDto,requestHeaders);
-        }
-        else {
-            return findBenefitIfNotPresentAndCreateAccount(integratedProgramDtos,accountDto,requestHeaders);
-        }
+    private boolean validBenefitProgram(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+        return !integratedProgramDtos.isEmpty() && integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()));
     }
 
     private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
         String requestId = UUID.randomUUID().toString();
         String timestamp = String.valueOf(LocalDateTime.now());
-        return integratedProgramDBFClient.getAll(requestId,timestamp)
+        return integratedProgramDBFClient.getAll(requestId, timestamp)
                 .collectList().flatMap(Mono::just).flatMap(integratedProgramDtoList -> {
                     integratedProgramDtos.clear();
                     integratedProgramDtos.addAll(integratedProgramDtoList);
 
-                    if(integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
-                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)){
-                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders, integratedProgramDtos))
+                    if (integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
+                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                                 .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                                         .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
-                    }
-                    else {
-                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    } else {
+                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
                     }
                 }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
                 }));
     }
 
@@ -293,20 +291,20 @@ public class AccountServiceImpl implements AccountService {
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders,integratedProgramDtos))
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
-            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
         }
     }
 
     private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
-        String benefitId  = String.valueOf(Common.systemGeneratedBenefitId());
+        String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
         List<IntegratedProgramDto> integratedProgramDtoList
-                = integratedProgramDtos.stream().filter(v->v.getBenefitName().equals(requestHeaders.getBenefitName())
+                = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
                 && v.getClientId().equals(requestHeaders.getClientId())).collect(Collectors.toList());
-        List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto :: getProgramName).collect(Collectors.toList());
+        List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto::getProgramName).collect(Collectors.toList());
 
         return HidBenefitDto.builder()
                 .benefitName(requestHeaders.getBenefitName())
@@ -325,67 +323,60 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<Integer> getEmailLinkedAccountCount(String email) {
         return abhaDBAccountFClient.getEmailLinkedAccountCount(email)
-                .onErrorResume((throwable-> Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
     @Override
     public Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest) {
         return abhaDBAccountFClient.saveAllData(saveAllDataRequest)
-                .onErrorResume((throwable-> Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
     }
 
-    public Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto , AccountDto accountDto, RequestHeaders requestHeaders) {
-        String subject = requestHeaders.getFTokenClaims() == null ? null:requestHeaders.getFTokenClaims().get(SUB).toString();
+    public Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders) {
+        String subject = requestHeaders.getFTokenClaims() == null ? null : requestHeaders.getFTokenClaims().get(SUB).toString();
         if (requestHeaders.getFTokenClaims() == null && subject == null) {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
             accountDto.setLstUpdatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
         } else {
             accountDto.setOrigin(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null);
-            accountDto.setFacilityId(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
-            accountDto.setLstUpdatedBy(subject !=null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setFacilityId(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
+            accountDto.setLstUpdatedBy(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
         accountDto.setNewAccount(true);
         accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());
 
-        if (requestHeaders.getBenefitName()!=null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
+        if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)))
-        {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
             //HID benefit Flow
-            return handleAccountByBenefitProgramForSpCall(accountDto,requestHeaders);
-        }
-        else {
+            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
+        } else {
             //normal flow
             return Mono.just(accountDto);
         }
     }
 
-
     private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders) {
-
-        if(!integratedProgramDtos.isEmpty()
-                && integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName())))
-        {
-            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos,accountDto,requestHeaders);
-        }
-        else {
-            return findBenefitIfNotPresentAndCreateAccountForSpCall(integratedProgramDtos,accountDto,requestHeaders);
+        List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
+        if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders));
+        } else {
+            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders);
         }
     }
-
 
     private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders,integratedProgramDtos))
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                     .flatMap(response -> Mono.just(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
-            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
         }
     }
 
@@ -393,22 +384,21 @@ public class AccountServiceImpl implements AccountService {
     private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
         String requestId = UUID.randomUUID().toString();
         String timestamp = String.valueOf(LocalDateTime.now());
-        return integratedProgramDBFClient.getAll(requestId,timestamp)
+        return integratedProgramDBFClient.getAll(requestId, timestamp)
                 .collectList().flatMap(Mono::just).flatMap(integratedProgramDtoList -> {
                     integratedProgramDtos.clear();
                     integratedProgramDtos.addAll(integratedProgramDtoList);
 
-                    if(integratedProgramDtos.stream().anyMatch(res->res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
-                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)){
-                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto,requestHeaders, integratedProgramDtos))
+                    if (integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
+                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                                 .flatMap(response -> Mono.just(accountDto)
                                         .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
-                    }
-                    else {
-                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    } else {
+                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
                     }
                 }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(),ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
                 }));
     }
 }
