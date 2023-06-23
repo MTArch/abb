@@ -18,6 +18,7 @@ public class URIConstant {
     public static final String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion";
 
     public static final String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
+    public static final String ENROL_REQUEST_NOTIFICATION_ENDPOINT = "/request/notification";
 
     //request endpoints
     public static final String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
@@ -107,6 +108,7 @@ public class URIConstant {
     //    Notification DB Service
     public static final String NOTIFICATION_DB_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/template/name/ABHA";
+    public static final String NOTIFICATION_DB_GET_TEMPLATE_BY_ID_URI = NOTIFICATION_DB_BASE_URI + "/template/id/{templateId}";
 
     //LGD service
     public static final String LGD_BASE_URI = "/internal/v3/abdm/lgd";

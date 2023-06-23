@@ -60,9 +60,6 @@ public class AbhaConstants {
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
-
-    public static final String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
-    public static final String INTEGRATED_PROGRAMS = "INTEGRATED_PROGRAMS";
     public static final String INVALID_OTP = "Invalid OTP, Please try again.";
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
@@ -194,4 +191,21 @@ public class AbhaConstants {
     public static final long REGISTRATION_OTP_TEMPLATE_ID = 1007164181681962323L;
     public static final long ABHA_CREATED_TEMPLATE_ID = 1007168421931217527L;
     public static final long ENROLL_CREATED_TEMPLATE_ID = 1007168421921410710L;
+
+    public static final String DEFAULT_CLIENT_ID = "healthid-api";
+    public static final String CREATION = "CREATION";
+    public static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
+
+    public static final String ABHA_NUMBER ="abhaNumber";
+    public static final String VALIDATION_ERROR_ABHA_NUMBER_FIELD = "Invalid Abha Number";
+
+    public static final String TYPE ="type";
+    public static final String VALIDATION_ERROR_TYPE_FIELD = "Invalid Type";
+
+    public static final String NOTIFICATION_TYPE="notificationType";
+    public static final String VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD = "Invalid Notification Type";
+    public static final String EMAIL_ACCOUNT_CREATION_SUBJECT = "account creation";
+
+
+
 }

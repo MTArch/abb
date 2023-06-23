@@ -13,6 +13,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbha
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
+import in.gov.abdm.abha.enrollment.model.notification.SendNotificationRequestDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio.EnrolByBioService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
@@ -110,5 +111,14 @@ public class EnrollmentController {
     public Mono<AbhaAddressResponseDto> createAbhaAddress(@Valid @RequestBody AbhaAddressRequestDto abhaAddressRequestDto) {
         abhaAddressService.validateAbhaAddress(abhaAddressRequestDto);
         return abhaAddressService.createAbhaAddress(abhaAddressRequestDto);
+    }
+
+    @PostMapping(URIConstant.ENROL_REQUEST_NOTIFICATION_ENDPOINT)
+    public Mono<String> requestNotification(@Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
+                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION ,required = false) String authorization) {
+
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,null);
+        enrolUsingAadhaarService.validateNotificationRequest(sendNotificationRequestDto);
+        return enrolUsingAadhaarService.requestNotification(sendNotificationRequestDto,requestHeaders);
     }
 }
