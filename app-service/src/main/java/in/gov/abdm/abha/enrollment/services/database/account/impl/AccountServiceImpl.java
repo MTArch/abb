@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.enums.hidbenefit.HidBenefitStatus;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
@@ -329,7 +330,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest) {
         return abhaDBAccountFClient.saveAllData(saveAllDataRequest)
-                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable ->
+                {
+                    log.info(throwable.getMessage());
+                    return Mono.error(new AbhaDBException(throwable.getMessage()));
+                }));
     }
 
     public Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders) {
