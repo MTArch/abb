@@ -14,6 +14,7 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableExc
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
@@ -27,6 +28,8 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarRe
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
 import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationType;
+import in.gov.abdm.abha.enrollment.model.notification.SendNotificationRequestDto;
 import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
@@ -38,6 +41,7 @@ import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionServ
 import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
+import in.gov.abdm.abha.enrollment.services.notification.TemplatesHelper;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
@@ -49,7 +53,6 @@ import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -58,8 +61,12 @@ import reactor.core.publisher.Mono;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.EMAIL;
+import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.SMS;
 
 @Service
 @Slf4j
@@ -100,6 +107,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Autowired
     LgdUtility lgdUtility;
+    @Autowired
+    TemplatesHelper templatesHelper;
 
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
@@ -131,6 +140,45 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         }
                     });
         }
+    }
+
+    @Override
+    public Mono<String> requestNotification(SendNotificationRequestDto sendNotificationRequestDto, RequestHeaders requestHeaders) {
+        String abhaNumber=sendNotificationRequestDto.getAbhaNumber();
+
+        return accountService.getAccountByHealthIdNumber(abhaNumber)
+                .flatMap(accountDtoResponse ->
+                {
+                    if(accountDtoResponse.getStatus().equalsIgnoreCase(AccountStatus.ACTIVE.getValue()))
+                    {
+                        if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(SMS)) && null!=accountDtoResponse.getMobile()) {
+                            notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber()).subscribe();
+                            return Mono.empty();
+                        }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(EMAIL))&& null!=accountDtoResponse.getEmail()) {
+                           return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
+                                   message->
+                                   {
+                                           notificationService.sendEmailOtp(accountDtoResponse.getEmail(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                       return Mono.empty();
+                                   }
+                           );
+
+                    }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS,EMAIL)) && null!=accountDtoResponse.getEmail() && null!=accountDtoResponse.getMobile()) {
+                            return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
+                                    message->
+                                    {
+                                        notificationService.sendSmsAndEmailOtp(accountDtoResponse.getEmail(),accountDtoResponse.getMobile(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                        return Mono.empty();
+                                    }
+                            );
+
+                        }
+                    }
+                    return Mono.empty();
+                });
+
+
+
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleAadhaarOtpResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
@@ -236,11 +284,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
+                                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto,requestHeaders));
                                         } else {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto));
+                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
                                         }
 
                                     });
@@ -249,7 +297,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             //account status is active
                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto));
+                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto,requestHeaders));
                         }
 
                     }));
@@ -257,7 +305,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
 
-    private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
+    private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
 
         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse, abhaProfileDto);
 
@@ -278,7 +326,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
 
-                                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto);
+                                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto,requestHeaders);
 
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
@@ -290,8 +338,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto, AccountDto accountDtoResponse, ABHAProfileDto abhaProfileDto) {
-        if (accountDtoResponse.getMobile() != null && !accountDtoResponse.getMobile().isBlank()) {
+    private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto, AccountDto accountDtoResponse, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
+        if (accountDtoResponse.getMobile() != null && !accountDtoResponse.getMobile().isBlank() && !DEFAULT_CLIENT_ID.equalsIgnoreCase(requestHeaders.getClientId())) {
+
+
             return notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber())
                     .flatMap(notificationResponseDto -> {
                         if (notificationResponseDto.getStatus().equals(SENT)) {
@@ -552,6 +602,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         }
     }
 
+
+
     private void isAuthorized(RequestHeaders requestHeaders, String fToken) {
         if ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().equals(StringConstants.EMPTY))
                 && (fToken == null || fToken.equals(StringConstants.EMPTY))) {
@@ -585,7 +637,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
         List<AccountDto> accountList = new ArrayList<>();
         List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
         accountList.add(accountDtoResponse);
@@ -604,10 +656,55 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto);
+                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto,requestHeaders);
             });
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
+    }
+    @Override
+    public void validateNotificationRequest(SendNotificationRequestDto sendNotificationRequestDto) {
+        LinkedHashMap<String, String> errors;
+        errors = new LinkedHashMap<>();
+        if (!isValidAbhaNumber(sendNotificationRequestDto.getAbhaNumber())) {
+            errors.put(ABHA_NUMBER, AbhaConstants.VALIDATION_ERROR_ABHA_NUMBER_FIELD);
+        }
+        if (!isValidNotificationType(sendNotificationRequestDto.getNotificationType())) {
+            errors.put( AbhaConstants.NOTIFICATION_TYPE,VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD);
+        }
+        if (!isValidType(sendNotificationRequestDto.getType())) {
+            errors.put(TYPE, AbhaConstants.VALIDATION_ERROR_TYPE_FIELD);
+        }
+
+        if (errors.size() != 0) {
+            throw new BadRequestException(errors);
+        }
+    }
+
+    private boolean isValidType(String type) {
+        if (type != null && !type.isEmpty())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isValidNotificationType(List<NotificationType> type) {
+        if (type != null && !type.isEmpty())
+        {
+            List<NotificationType> notificationTypes = Stream.of(NotificationType.values()).filter(name -> !name.equals(NotificationType.WRONG)).collect(Collectors.toList());
+            return new HashSet<>(type).size() == type.size() && Common.isAllNotificationTypeAvailable(notificationTypes, type);
+
+        }
+        return false;
+
+    }
+
+
+    private boolean isValidAbhaNumber(String abhaNumber) {
+        if (abhaNumber != null && !abhaNumber.isBlank())
+            return Common.isValidAbha(abhaNumber);
+
+        return false;
     }
 }

@@ -19,6 +19,7 @@ import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
+import in.gov.abdm.abha.enrollment.model.notification.NotificationResponseDto;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
@@ -61,7 +62,7 @@ public class EnrolUsingDrivingLicence {
     private static final String FOUND_ACCOUNT = "Found account (";
     private static final String ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS = "Account not found with DL, verifying DL details";
     private static final String MOBILE_NUMBER_NOT_VERIFIED = "mobile number not verified";
-    private static final String DL_VERIFICATION_FAILED = "The details provided by you do not match against your Documents details. Please provide the correct details";
+    private static final String DL_VERIFICATION_FAILED = "The details provided by you do not match against your documents details. Please provide the correct details.";
     private static final String DL_DETAILS_VERIFIED_CREATING_NEW_ENROLLMENT_ACCOUNT = "DL details verified, creating new Enrollment Account";
     private static final String DL_DETAILS_NOT_VERIFIED = "DL details not verified";
     private static final String NEW_ENROLLMENT_ACCOUNT_CREATED_AND_UPDATED_IN_DB = "new enrollment account created and updated in DB";
@@ -341,14 +342,24 @@ public class EnrolUsingDrivingLicence {
     }
 
     private Mono<EnrolByDocumentResponseDto> sendSuccessNotificationAndPrepareDLResponse(AccountDto accountDto, String txnId, RequestHeaders requestHeaders) {
-        return notificationService.sendEnrollCreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
-                .flatMap(notificationResponseDto -> {
-                    if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
-                        log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
-                        return prepareErolByDLResponse(accountDto, txnId, true, true, AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY, requestHeaders);
-                    } else {
-                        throw new NotificationGatewayUnavailableException();
-                    }
-                });
+        boolean isFacilityRequest = requestHeaders.getFTokenClaims() != null;
+        if (isFacilityRequest) {
+            return notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
+                    .flatMap(notificationResponseDto -> getEnrolByDocumentResponseDtoMono(accountDto, txnId, requestHeaders, notificationResponseDto));
+
+        } else
+        {
+            return notificationService.sendEnrollCreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
+                    .flatMap(notificationResponseDto -> getEnrolByDocumentResponseDtoMono(accountDto, txnId, requestHeaders, notificationResponseDto));
+    }
+    }
+
+    private Mono<EnrolByDocumentResponseDto> getEnrolByDocumentResponseDtoMono(AccountDto accountDto, String txnId, RequestHeaders requestHeaders, NotificationResponseDto notificationResponseDto) {
+        if (notificationResponseDto.getStatus().equals(AbhaConstants.SENT)) {
+            log.info(NOTIFICATION_SENT_ON_ACCOUNT_CREATION + ON_MOBILE_NUMBER + accountDto.getMobile() + FOR_HEALTH_ID_NUMBER + accountDto.getHealthIdNumber());
+            return prepareErolByDLResponse(accountDto, txnId, true, true, AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY, requestHeaders);
+        } else {
+            throw new NotificationGatewayUnavailableException();
+        }
     }
 }
