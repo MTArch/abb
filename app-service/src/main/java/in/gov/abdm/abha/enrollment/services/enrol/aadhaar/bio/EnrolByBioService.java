@@ -161,7 +161,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
             String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getBio().getMobile();
-            if (Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+            if (userEnteredPhoneNumber!=null && !userEnteredPhoneNumber.isBlank() && Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
                 return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
