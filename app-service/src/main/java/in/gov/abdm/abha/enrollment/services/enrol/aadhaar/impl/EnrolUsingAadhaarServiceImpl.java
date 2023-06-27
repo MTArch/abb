@@ -295,9 +295,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         } else {
                             //update transaction table and create account in account table
                             //account status is active
-                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto,requestHeaders));
+                            if (!isTransactionManagementEnable) {
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                        .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto, requestHeaders));
+                            }else {
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                        .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
+                            }
                         }
 
                     }));
