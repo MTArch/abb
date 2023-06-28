@@ -1,4 +1,4 @@
-FROM  harbor.pmjaydevmgmt.tatacommunications.com/abdm/openjdk:17.0-jdk
+FROM  harbor.abdm.gov.in/abdm/openjdk:17.0-jdk
 ENV TZ=Asia/Calcutta
 RUN mkdir /APP
 WORKDIR /APP
