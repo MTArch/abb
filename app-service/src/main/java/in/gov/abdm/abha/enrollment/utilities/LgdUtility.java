@@ -28,7 +28,7 @@ public class LgdUtility {
                     if (lgdDistrictResponses.isEmpty())
                         return getLgdByState(state);
                     return Mono.just(lgdDistrictResponses);
-                });
+                }).switchIfEmpty( getLgdByState(state));
     }
 
     public Mono<List<LgdDistrictResponse>> getLgdByState(String state) {
@@ -44,7 +44,7 @@ public class LgdUtility {
             });
         return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> {
             log.error(LGD_ERROR_MESSAGE, throwable.getMessage());
-            return Mono.error(new LgdGatewayUnavailableException());
+            return Mono.empty();
         });
     }
 }
