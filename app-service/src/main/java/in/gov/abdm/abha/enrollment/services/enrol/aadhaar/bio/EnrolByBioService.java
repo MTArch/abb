@@ -23,6 +23,7 @@ import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
+import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.model.redis.otp.ReceiverOtpTracker;
 import in.gov.abdm.abha.enrollment.model.redis.otp.RedisOtp;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
@@ -40,6 +41,7 @@ import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +53,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Slf4j
 public class EnrolByBioService extends EnrolByBioValidatorService {
 
     @Autowired
@@ -81,6 +84,8 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
+    @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
+    private boolean isTransactionManagementEnable;
 
     public Mono<EnrolByAadhaarResponseDto> verifyBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         if (enrolByAadhaarRequestDto.getAuthData().getBio().getMobile() == null || enrolByAadhaarRequestDto.getAuthData().getBio().getMobile().isBlank()) {
@@ -170,16 +175,32 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                             }
                             //update transaction table and create account in account table
                             //account status is active
-                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                    .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+                            if(isTransactionManagementEnable){
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                        .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto));
+
+                            }else{
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                        .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+                            }
+
                         });
             } else {
                 //update transaction table and create account in account table
                 //account status is active
-                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                        .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+                if (isTransactionManagementEnable) {
+                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                            .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                            .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto));
+
+                } else {
+                    return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                            .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                            .flatMap(response -> handleCreateAccountResponseUsingBio(response, transactionDto, abhaProfileDto));
+
+                }
             }
         });
     }
@@ -256,5 +277,43 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                 .name(accountDto.getName())
                 .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
                 .build();
+    }
+
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto) {
+        List<AccountDto> accountList = new ArrayList<>();
+        List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
+        accountList.add(accountDtoResponse);
+        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse, abhaProfileDto);
+        hidPhrAddressDtoList.add(hidPhrAddressDto);
+        if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {
+            List<AccountAuthMethodsDto> accountAuthMethodsDtos = new ArrayList<>();
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_OTP.getValue()));
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
+            if (accountDtoResponse.getMobile() != null) {
+                accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
+            }
+
+            log.info("going to call procedure to create account");
+            return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
+                return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)
+                        .flatMap(res -> {
+                            if (!res.isEmpty()) {
+                                ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                        .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                                        .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                        .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                                        .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                        .build();
+                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).build());
+                            } else {
+                                throw new AbhaDBGatewayUnavailableException();
+                            }
+                        });
+            });
+        } else {
+            throw new AbhaDBGatewayUnavailableException();
+        }
     }
 }
