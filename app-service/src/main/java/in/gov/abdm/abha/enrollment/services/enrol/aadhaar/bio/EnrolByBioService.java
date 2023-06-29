@@ -312,7 +312,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                         .build();
                                 return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
-                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).build());
+                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).isNew(true).build());
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
                             }
