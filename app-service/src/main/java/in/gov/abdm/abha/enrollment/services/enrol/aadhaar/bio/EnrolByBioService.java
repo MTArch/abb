@@ -241,8 +241,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccountBio(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
-
-        return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
+         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
                 {
                     transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
@@ -254,17 +253,24 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
-                                    ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                                            .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
-                                            .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                                            .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
-                                            .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                            .build();
+                                    if (!accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                        ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                                .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
+                                                .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                                .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                                                .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                                .build();
+                                        return Mono.just(EnrolByAadhaarResponseDto.builder()
+                                                .txnId(transactionDto.getTxnId().toString())
+                                                .responseTokensDto(responseTokensDto)
+                                                .abhaProfileDto(abhaProfileDto)
+                                                .build());
+                                    }
                                     //Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
-                                            .responseTokensDto(responseTokensDto)
                                             .abhaProfileDto(abhaProfileDto)
+                                            .message(AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED)
                                             .build());
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
