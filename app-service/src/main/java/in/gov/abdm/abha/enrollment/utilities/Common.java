@@ -195,13 +195,21 @@ public class Common {
             }
             log.error("Error while getting LGD details", noSuchElementException);
         }
+        if (lgdDistrictResponse==null && !lgdDistrictResponses.isEmpty()) {
+            lgdDistrictResponse = lgdDistrictResponses.get(0);
+        }
+
         if (lgdDistrictResponse != null) {
             String districtCode = lgdDistrictResponse.getDistrictCode() != null ? lgdDistrictResponse.getDistrictCode() : StringConstants.UNKNOWN;
             String districtName = lgdDistrictResponse.getDistrictName() != null ? lgdDistrictResponse.getDistrictName() : StringConstants.UNKNOWN;
-
+            String stateCode = lgdDistrictResponse.getStateCode() != null ? lgdDistrictResponse.getStateCode() : StringConstants.UNKNOWN;
+            String stateName = lgdDistrictResponse.getStateName() != null ? lgdDistrictResponse.getStateName() : StringConstants.UNKNOWN;
             lgdDistrictResponse.setDistrictCode(districtCode);
             lgdDistrictResponse.setDistrictName(districtName);
+            lgdDistrictResponse.setStateCode(stateCode);
+            lgdDistrictResponse.setStateName(stateName);
         }
+
         return lgdDistrictResponse;
     }
 
