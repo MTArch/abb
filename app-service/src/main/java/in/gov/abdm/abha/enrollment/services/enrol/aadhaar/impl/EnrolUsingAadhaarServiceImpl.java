@@ -193,12 +193,23 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                        } else if (existingAccount.getStatus().equals(AccountStatus.ACTIVE.getValue())) {
+                            return checkKycAndUpdate(aadhaarResponseDto,existingAccount)
+                                    .flatMap(updatedAccountDto -> existingAccount(transactionDto, aadhaarResponseDto, updatedAccountDto, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST));
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
-                        }
+                           }
                     })
                     .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders)));
         });
+    }
+
+    private Mono<AccountDto> checkKycAndUpdate(AadhaarResponseDto aadhaarResponseDto, AccountDto existingAccount) {
+        return lgdUtility.getLgdData(aadhaarResponseDto.getAadhaarUserKycDto().getPincode(), aadhaarResponseDto.getAadhaarUserKycDto().getState())
+                        .flatMap(lgdDistrictResponses -> {
+                            accountService.mapAccountWithEkyc(aadhaarResponseDto,existingAccount,lgdDistrictResponses);
+                            return accountService.updateAccountByHealthIdNumber(existingAccount,existingAccount.getHealthIdNumber());
+                        });
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, boolean generateToken, String responseMessage) {
