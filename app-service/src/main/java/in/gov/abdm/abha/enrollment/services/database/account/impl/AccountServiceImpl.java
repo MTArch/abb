@@ -149,7 +149,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
-        accountDto.setLstUpdatedBy(ContextHolder.getClientId());
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId()!=null?ContextHolder.getClientId():DEFAULT_CLIENT_ID);
         accountDto.setUpdateDate(LocalDateTime.now());
         return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));

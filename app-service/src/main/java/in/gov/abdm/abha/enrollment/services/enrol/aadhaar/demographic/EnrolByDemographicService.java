@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
@@ -14,12 +15,10 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarReq
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
-import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
+import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
+import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
@@ -46,6 +45,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
 
 @Slf4j
@@ -76,6 +76,8 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     DeDuplicationService deDuplicationService;
     @Value(PropertyConstants.ENROLLMENT_MAX_MOBILE_LINKING_COUNT)
     private int maxMobileLinkingCount;
+    @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
+    private boolean isTransactionManagementEnable;
 
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
@@ -178,11 +180,19 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
-        return accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
-            HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
-            return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
-                    .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto)));
-        });
+        if(isTransactionManagementEnable){
+            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
+                //HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
+                return callProcedureToCreateAccount(accountDtoResponse,requestHeaders);
+            });
+        }else{
+            return accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
+                HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
+                return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
+                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto,requestHeaders)));
+            });
+        }
+
     }
 
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, String consentFromImage) {
@@ -204,37 +214,55 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
     }
 
-    private Mono<EnrolByAadhaarResponseDto> addAuthMethods(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto) {
+    private Mono<EnrolByAadhaarResponseDto> addAuthMethods(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto, RequestHeaders requestHeaders) {
         List<AccountAuthMethodsDto> accountAuthMethodsDtoList = new ArrayList<>();
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.AADHAAR_OTP.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
         accountAuthMethodsDtoList.add(new AccountAuthMethodsDto(accountDto.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
         return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtoList)
-                .flatMap(authMethods -> sendAccountCreatedSMS(accountDto, hidPhrAddressDto));
+                .flatMap(authMethods -> sendAccountCreatedSMS(accountDto, hidPhrAddressDto, requestHeaders));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> sendAccountCreatedSMS(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto) {
-        return notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
-            if (notificationResponseDto.getStatus().equals(SENT)) {
-                ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                        .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))
-                        .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                        .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
-                        .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                        .build();
-                ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
-                abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-                //Final create account response
-                return Mono.just(EnrolByAadhaarResponseDto.builder()
-                        .abhaProfileDto(abhaProfileDto)
-                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
-                        .isNew(true)
-                        .responseTokensDto(responseTokensDto).build());
-            } else {
-                throw new NotificationGatewayUnavailableException();
-            }
-        });
+    private Mono<EnrolByAadhaarResponseDto> sendAccountCreatedSMS(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto, RequestHeaders requestHeaders) {
+        if (accountDto.getMobile() != null && !accountDto.getMobile().isBlank() && !DEFAULT_CLIENT_ID.equalsIgnoreCase(requestHeaders.getClientId())) {
+            return notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
+                if (notificationResponseDto.getStatus().equals(SENT)) {
+                    ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                            .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))
+                            .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                            .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                            .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                            .build();
+                    ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
+                    abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
+                    //Final create account response
+                    return Mono.just(EnrolByAadhaarResponseDto.builder()
+                            .abhaProfileDto(abhaProfileDto)
+                            .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                            .isNew(true)
+                            .responseTokensDto(responseTokensDto).build());
+                } else {
+                    throw new NotificationGatewayUnavailableException();
+                }
+            });
+        }else{
+            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                    .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))
+                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                    .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
+                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                    .build();
+            ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
+            abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
+            //Final create account response
+            return Mono.just(EnrolByAadhaarResponseDto.builder()
+                    .abhaProfileDto(abhaProfileDto)
+                    .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
+                    .isNew(true)
+                    .responseTokensDto(responseTokensDto).build());
+        }
+
     }
 
     private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto, boolean generateToken, String responseMessage) {
@@ -273,6 +301,30 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     private String formatDob(String year, String month, String day) {
         return year + StringConstants.DASH + preFixZero(month) + StringConstants.DASH + preFixZero(day);
+    }
+
+
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, RequestHeaders requestHeaders) {
+        List<AccountDto> accountList = new ArrayList<>();
+        List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
+        accountList.add(accountDtoResponse);
+        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
+        hidPhrAddressDtoList.add(hidPhrAddressDto);
+        if (!accountDtoResponse.getHealthIdNumber().isEmpty()) {
+            List<AccountAuthMethodsDto> accountAuthMethodsDtos = new ArrayList<>();
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_OTP.getValue()));
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.DEMOGRAPHICS.getValue()));
+            accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.AADHAAR_BIO.getValue()));
+            if (accountDtoResponse.getMobile() != null) {
+                accountAuthMethodsDtos.add(new AccountAuthMethodsDto(accountDtoResponse.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
+            }
+
+            log.info("going to call procedure to create account using demographic");
+            return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
+                    .flatMap(v -> sendAccountCreatedSMS(accountDtoResponse,hidPhrAddressDto,requestHeaders));
+        } else {
+            throw new AbhaDBGatewayUnavailableException();
+        }
     }
 
 }
