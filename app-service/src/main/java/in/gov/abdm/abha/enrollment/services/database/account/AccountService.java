@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.database.account;
 
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
@@ -36,4 +37,5 @@ public interface AccountService {
     Mono<String> saveAllData(SaveAllDataRequest saveAllDataRequest);
 
     Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders);
+    void mapAccountWithEkyc(AadhaarResponseDto aadhaarResponseDto,AccountDto accountDto,List<LgdDistrictResponse> lgdDistrictResponse);
 }

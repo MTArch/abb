@@ -13,6 +13,8 @@ import in.gov.abdm.abha.enrollment.enums.hidbenefit.HidBenefitStatus;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidBenefitDto;
@@ -25,6 +27,7 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
+import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -406,5 +409,69 @@ public class AccountServiceImpl implements AccountService {
                 }).switchIfEmpty(Mono.defer(() -> {
                     throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
                 }));
+    }
+
+    @Override
+    public void mapAccountWithEkyc(AadhaarResponseDto aadhaarResponseDto, AccountDto newUser, List<LgdDistrictResponse> lgdDistrictResponses) {
+        AadhaarUserKycDto kycDto = aadhaarResponseDto.getAadhaarUserKycDto();
+        if (kycDto.getPhoto()!= null) {
+            newUser.setKycPhoto(kycDto.getPhoto());
+            newUser.setProfilePhoto(kycDto.getPhoto());
+        }
+        if (!StringUtils.isBlank(kycDto.getPincode())
+                && !kycDto.getPincode().equals(newUser.getPincode())) {
+            newUser.setPincode(kycDto.getPincode());
+        }
+        if (!StringUtils.isBlank(kycDto.getEmail())
+                && !kycDto.getEmail().equals(newUser.getEmail())) {
+            newUser.setEmail(kycDto.getEmail());
+        }
+        if (!StringUtils.isBlank(kycDto.getName())
+                && !kycDto.getName().equals(newUser.getName())) {
+            newUser.setName(kycDto.getName());
+        }
+        breakName(newUser);
+        if (!StringUtils.isBlank(kycDto.getGender())
+                && !kycDto.getGender().equals(newUser.getGender())) {
+            newUser.setGender(kycDto.getGender());
+        }
+        if (!StringUtils.isBlank(kycDto.getBirthdate())) {
+            newUser.setKycdob(kycDto.getBirthdate());
+            if (kycDto.getBirthdate().length() > 4) {
+                try {
+                    LocalDate birthDate = kycDateFormat.parse(kycDto.getBirthdate()).toInstant()
+                            .atZone(ZoneId.systemDefault()).toLocalDate();
+                    newUser.setMonthOfBirth(String.valueOf(birthDate.getMonth().getValue()));
+                    newUser.setDayOfBirth(String.valueOf(birthDate.getDayOfMonth()));
+                    newUser.setYearOfBirth(String.valueOf(birthDate.getYear()));
+                } catch (ParseException e) {
+                    log.error(PARSER_EXCEPTION_OCCURRED_DURING_PARSING, e);
+                } catch (Exception ex) {
+                    log.error(EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB, kycDto.getBirthdate(), ex);
+                }
+            } else if (kycDto.getBirthdate().length() == 4) {
+                newUser.setYearOfBirth(kycDto.getBirthdate());
+            }
+        }
+        newUser.setVillageName(Common.getStringIgnoreNull(kycDto.getVillageTownCity()));
+        newUser.setTownName(Common.getStringIgnoreNull(kycDto.getVillageTownCity()));
+        newUser.setSubDistrictName(Common.getStringIgnoreNull(kycDto.getSubDist()));
+        newUser.setDistrictName(Common.getStringIgnoreNull(kycDto.getDistrict()));
+        newUser.setStateName(Common.getStringIgnoreNull(kycDto.getState()));
+        newUser.setAddress(Common.getByCommaIgnoreNull(kycDto.getHouse())
+                + Common.getByCommaIgnoreNull(kycDto.getStreet())
+                + Common.getByCommaIgnoreNull(kycDto.getLandmark())
+                + Common.getByCommaIgnoreNull(kycDto.getLocality())
+                + Common.getByCommaIgnoreNull(kycDto.getVillageTownCity())
+                + Common.getByCommaIgnoreNull(kycDto.getSubDist())
+                + Common.getByCommaIgnoreNull(kycDto.getDistrict())
+                + kycDto.getState()
+        );
+
+        LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+        newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+        newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
+        newUser.setStateCode(lgdDistrictResponse.getStateCode());
+        newUser.setStateName(lgdDistrictResponse.getStateName());
     }
 }
