@@ -59,4 +59,10 @@ public class AuthData {
     @JsonProperty("bio")
     @Valid
     private BioDto bio;
+
+    @JsonProperty("iris")
+    @Valid
+    private IrisDto iris;
+
+
 }

@@ -139,7 +139,8 @@ public class URIConstant {
     public static final String REQUESTER_ID = "REQUESTER_ID";
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
 
-    public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
+    public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyFingerprint";
+    public static final String AADHAAR_VERIFY_IRIS = AADHAAR_BASE_URI + "/verifyIRIS";
 
     public static final String BENEFIT_NAME = "benefitName";
     public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";

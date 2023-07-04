@@ -17,6 +17,7 @@ import in.gov.abdm.abha.enrollment.model.notification.SendNotificationRequestDto
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio.EnrolByBioService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
+import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
@@ -58,6 +59,8 @@ public class EnrollmentController {
     EnrolByDemographicService enrolByDemographicService;
     @Autowired
     EnrolByBioService enrolByBioService;
+    @Autowired
+    EnrolByIrisService enrolByIrisService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
@@ -78,6 +81,9 @@ public class EnrollmentController {
         }else if(authMethods.contains(AuthMethods.BIO)){
             enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto);
             return enrolByBioService.verifyBio(enrolByAadhaarRequestDto,requestHeaders);
+        }else if(authMethods.contains(AuthMethods.IRIS)){
+            enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
+            return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto,requestHeaders);
         }
         throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
     }
