@@ -254,7 +254,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
     private HidPhrAddressDto prepareHidPhrAddress(AccountDto accountDto,AbhaAddressRequestDto abhaAddressRequestDto) {
         return HidPhrAddressDto.builder()
                 .healthIdNumber(accountDto.getHealthIdNumber())
-                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT+ abhaAddressExtension)
+                .phrAddress(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+StringConstants.AT+ abhaAddressExtension)
                 .status(AccountStatus.ACTIVE.getValue())
                 .preferred(Integer.valueOf(abhaAddressRequestDto.getPreferred()))
                 .lastModifiedBy(ABHA_APP)

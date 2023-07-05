@@ -163,11 +163,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                    }
                            );
 
-                    }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS,EMAIL)) && null!=accountDtoResponse.getEmail() && null!=accountDtoResponse.getMobile()) {
+                    }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS,EMAIL)) ) {
                             return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
                                     message->
                                     {
-                                        notificationService.sendSmsAndEmailOtp(accountDtoResponse.getEmail(),accountDtoResponse.getMobile(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                        if(null!=accountDtoResponse.getEmail()) {
+                                            notificationService.sendSmsAndEmailOtp(accountDtoResponse.getEmail(), accountDtoResponse.getMobile(), EMAIL_ACCOUNT_CREATION_SUBJECT, message).subscribe();
+                                        }else {
+                                            notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber()).subscribe();
+                                        }
                                         return Mono.empty();
                                     }
                             );
@@ -193,12 +197,23 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             return createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders);
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                        } else if (existingAccount.getStatus().equals(AccountStatus.ACTIVE.getValue())) {
+                            return checkKycAndUpdate(aadhaarResponseDto,existingAccount)
+                                    .flatMap(updatedAccountDto -> existingAccount(transactionDto, aadhaarResponseDto, updatedAccountDto, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST));
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
-                        }
+                           }
                     })
                     .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, aadhaarResponseDto, transactionDto, requestHeaders)));
         });
+    }
+
+    private Mono<AccountDto> checkKycAndUpdate(AadhaarResponseDto aadhaarResponseDto, AccountDto existingAccount) {
+        return lgdUtility.getLgdData(aadhaarResponseDto.getAadhaarUserKycDto().getPincode(), aadhaarResponseDto.getAadhaarUserKycDto().getState())
+                        .flatMap(lgdDistrictResponses -> {
+                            accountService.mapAccountWithEkyc(aadhaarResponseDto,existingAccount,lgdDistrictResponses);
+                            return accountService.updateAccountByHealthIdNumber(existingAccount,existingAccount.getHealthIdNumber());
+                        });
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccount(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, boolean generateToken, String responseMessage) {
