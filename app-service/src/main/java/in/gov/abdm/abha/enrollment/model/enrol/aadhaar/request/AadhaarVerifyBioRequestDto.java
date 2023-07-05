@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AadhaarVerifyBioRequestDto {
     private String aadhaarNumber;
-    private String fingerPrintAuthPid;
+    private String pid;
 }
