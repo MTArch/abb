@@ -37,4 +37,7 @@ public interface AadhaarFClient {
     @PostMapping(AADHAAR_VERIFY_BIO)
     public Mono<AadhaarResponseDto> verifyBio(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
 
+    @PostMapping(AADHAAR_VERIFY_IRIS)
+    public Mono<AadhaarResponseDto> verifyIris(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
+
 }

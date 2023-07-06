@@ -55,4 +55,11 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
             return Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable)));
         });
     }
+
+    public Mono<AadhaarResponseDto> verifyIris(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto){
+        return aadhaarFClient.verifyIris(aadhaarVerifyBioRequestDto).onErrorResume(throwable -> {
+            log.error(AADHAAR_ERROR_MESSAGE,throwable.getMessage());
+            return Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable)));
+        });
+    }
 }

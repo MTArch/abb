@@ -20,4 +20,6 @@ public interface AadhaarAppService {
     Mono<AadhaarResponseDto> faceAuth(AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto);
 
     Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
+    Mono<AadhaarResponseDto> verifyIris(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
+
 }

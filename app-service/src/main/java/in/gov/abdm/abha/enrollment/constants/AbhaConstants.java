@@ -206,6 +206,8 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD = "Invalid Notification Type";
     public static final String EMAIL_ACCOUNT_CREATION_SUBJECT = "account creation";
 
+    public static final String INVALID_BENEFIT_ROLE = "Invalid benefit role";
+
 
 
 }

@@ -605,12 +605,12 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             isValidBenefitProgram(requestHeaders);
             isValidFacility(requestHeaders, fToken);
         } else if (authMethods.contains(AuthMethods.DEMO)) {
-            isAuthorized(requestHeaders, fToken);
             isValidBenefitProgram(requestHeaders);
+            isAuthorized(requestHeaders, fToken);
             isValidFacilityForDemoAuth(requestHeaders, fToken);
         } else if (authMethods.contains(AuthMethods.BIO)) {
-            isAuthorized(requestHeaders, fToken);
             isValidBenefitProgram(requestHeaders);
+            isAuthorized(requestHeaders, fToken);
             isValidFacility(requestHeaders, fToken);
         } else if (authMethods.contains(AuthMethods.FACE)) {
             if (fToken == null || fToken.equals(StringConstants.EMPTY)) {
@@ -648,6 +648,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private void isValidBenefitProgram(RequestHeaders requestHeaders) {
+
+        if (null!=requestHeaders.getRoleList() && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
+            throw new AbhaUnAuthorizedException(ABDMError.BENEFIT_NOT_FOUND.getCode(),INVALID_BENEFIT_ROLE);
+        }
         if (!Common.isValidBenefitProgram(requestHeaders, redisService.getIntegratedPrograms())){
             redisService.reloadAndGetIntegratedPrograms().flatMap(newIntegratedProgramDtos -> {
                 if(!Common.isValidBenefitProgram(requestHeaders, newIntegratedProgramDtos)){
