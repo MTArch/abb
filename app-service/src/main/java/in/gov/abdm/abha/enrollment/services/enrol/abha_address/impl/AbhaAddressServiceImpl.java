@@ -195,7 +195,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                         return accountService.getAccountByHealthIdNumber(transactionDto.getHealthIdNumber())
                                 .flatMap(accountDto ->
                                 {
-                                    return idpAppService.verifyAbhaAddressExists(abhaAddressRequestDto.getPreferredAbhaAddress()+StringConstants.AT + abhaAddressExtension)
+                                    return idpAppService.verifyAbhaAddressExists(abhaAddressRequestDto.getPreferredAbhaAddress().toLowerCase()+StringConstants.AT + abhaAddressExtension)
                                     .flatMap(exists ->
                                                 {
                                                     if(exists)
