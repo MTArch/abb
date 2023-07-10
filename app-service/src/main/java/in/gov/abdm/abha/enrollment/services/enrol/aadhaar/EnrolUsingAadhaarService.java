@@ -18,8 +18,7 @@ public interface EnrolUsingAadhaarService {
 
     Mono<EnrolByAadhaarResponseDto> faceAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders);
 
-    void validateHeaders(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken);
-
+    Mono<Boolean> validateHeaders(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken);
     void validateNotificationRequest(SendNotificationRequestDto sendNotificationRequestDto);
 
 }

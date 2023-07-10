@@ -178,7 +178,7 @@ public class AbhaConstants {
 
     public static final String PID_INVALID = "Invalid PID";
     public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
-    public static final String BENEFIT_NAME = "Benefit-Name";
+    public static final String BENEFIT_NAME = "BENEFIT_NAME";
     public static final String F_TOKEN = "F-token";
     public static final String SUB = "sub";
     public static final String ROLES = "roles";
@@ -206,7 +206,11 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD = "Invalid Notification Type";
     public static final String EMAIL_ACCOUNT_CREATION_SUBJECT = "account creation";
 
-    public static final String INVALID_BENEFIT_ROLE = "Invalid benefit role";
+    public static final String INVALID_BENEFIT_ROLE = "Invalid Benefit Role";
+
+    public static final String BENEFIT_NAME_OR_F_TOKEN_REQUIRED = "Please provide either valid F-token or valid beneficiary name.";
+
+    public static final String INVALID_BENEFIT_NAME = "Invalid Benefit Name";
 
 
 
