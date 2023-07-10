@@ -303,4 +303,5 @@ public class AccountDto {
     private String kycPhoto;
 
     private String profilePhoto;
+    private String source;
 }

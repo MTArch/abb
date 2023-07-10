@@ -45,8 +45,9 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.DEMO_AUTH;
 
 @Slf4j
 @Service
@@ -150,7 +151,9 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
         accountDto.setStatus(AccountStatus.ACTIVE.getValue());
         accountDto.setMobileType(demographic.getMobileType().getValue());
+        accountDto.setSource(DEMO_AUTH);
         accountDto.setKycVerified(true);
+        accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount -> {

@@ -264,7 +264,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
             return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                     .flatMap(duplicateAccount -> {
                         return existingAccount(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
@@ -441,7 +441,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> handleAadhaarFaceResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
+    private Mono<EnrolByAadhaarResponseDto>     handleAadhaarFaceResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
 
         handleAadhaarExceptions(aadhaarResponseDto);
         TransactionDto transactionDto = new TransactionDto();
@@ -473,7 +473,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
             return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                     .flatMap(duplicateAccount -> {
                         return existingAccountFaceAuth(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
@@ -613,10 +613,12 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             isAuthorized(requestHeaders, fToken);
             isValidFacility(requestHeaders, fToken);
         } else if (authMethods.contains(AuthMethods.FACE)) {
-            if (fToken == null || fToken.equals(StringConstants.EMPTY)) {
-                throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(), ABDMError.UNAUTHORIZED_ACCESS.getMessage());
-            }
+//            if (fToken == null || fToken.equals(StringConstants.EMPTY)) {
+//                throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(), ABDMError.UNAUTHORIZED_ACCESS.getMessage());
+//            }
             isValidFacility(requestHeaders, fToken);
+            isValidBenefitProgram(requestHeaders);
+            isAuthorized(requestHeaders, fToken);
         } else {
             //DL
             isValidFacility(requestHeaders, fToken);

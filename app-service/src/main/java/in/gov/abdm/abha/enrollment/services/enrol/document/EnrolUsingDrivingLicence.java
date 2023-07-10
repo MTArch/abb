@@ -51,8 +51,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static in.gov.abdm.abha.constant.ABHAConstants.PROVISIONAL;
-import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
+import static in.gov.abdm.abha.constant.ABHAConstants.*;
 
 @Slf4j
 @Service
@@ -204,6 +203,7 @@ public class EnrolUsingDrivingLicence {
                 .consentDate(LocalDateTime.now())
                 .documentCode(GeneralUtils.documentChecksum(enrolByDocumentRequestDto.getDocumentType(), enrolByDocumentRequestDto.getDocumentId()))
                 .healthId(defaultAbhaAddress)
+                .source(DRIVING_LICENCE)
                 .build();
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
