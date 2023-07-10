@@ -283,10 +283,10 @@ public class AccountServiceImpl implements AccountService {
                                 .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                                         .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
                     } else {
-                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                        throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
                     }
                 }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
                 }));
     }
 
@@ -299,7 +299,7 @@ public class AccountServiceImpl implements AccountService {
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
-            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+            throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
         }
     }
 
@@ -314,7 +314,6 @@ public class AccountServiceImpl implements AccountService {
                 .benefitName(requestHeaders.getBenefitName())
                 .programName(programName.get(0) != null ? programName.get(0) : null)
                 .benefitId(benefitId)
-                .validTill(LocalDateTime.now())
                 .status(HidBenefitStatus.LINKED.value())
                 .createdBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .stateCode(accountDto.getStateCode())
@@ -384,7 +383,7 @@ public class AccountServiceImpl implements AccountService {
                     .flatMap(response -> Mono.just(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
-            throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+            throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
         }
     }
 
@@ -403,10 +402,10 @@ public class AccountServiceImpl implements AccountService {
                                 .flatMap(response -> Mono.just(accountDto)
                                         .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
                     } else {
-                        throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                        throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
                     }
                 }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(ABDMError.BENEFIT_NOT_FOUND.getCode(), ABDMError.BENEFIT_NOT_FOUND.getMessage());
+                    throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
                 }));
     }
 
