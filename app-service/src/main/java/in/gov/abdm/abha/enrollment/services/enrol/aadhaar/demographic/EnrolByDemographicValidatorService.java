@@ -87,7 +87,7 @@ public class EnrolByDemographicValidatorService {
         if (!isValidConsentFormImage(demographic)) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (!isValidConsentFormImageFormat(demographic)) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_PHOTO_FORMAT);
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
         if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && !isValidMobileNumber(demographic)) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
@@ -185,7 +185,7 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidConsentFormImageFormat(Demographic demographic) {
-        return GeneralUtils.isImageFileFormat(demographic.getConsentFormImage());
+        return GeneralUtils.isFileFormat(demographic.getConsentFormImage());
     }
 
     private boolean isValidDistrict(Demographic demographic) {
