@@ -39,9 +39,7 @@ public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     private boolean bioNullorEmpty(AuthData authData) {
         return (ObjectUtils.isEmpty(authData.getFace())
                 || authData.getFace() == null)
-                || ((authData.getFace().getTimestamp() ==null
-                || authData.getFace().getTimestamp().isEmpty())
-                || (authData.getFace().getAadhaar()==null
+                || ((authData.getFace().getAadhaar()==null
                 || authData.getFace().getAadhaar().isEmpty())
                 || (authData.getFace().getRdPidData()==null
                 || authData.getFace().getRdPidData().isEmpty()));
@@ -50,8 +48,6 @@ public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     private boolean bioNotNullorEmpty(AuthData authData) {
         return !ObjectUtils.isEmpty(authData.getFace())
                 && authData.getFace()!=null
-                && authData.getFace().getTimestamp()!=null
-                && !authData.getFace().getTimestamp().isEmpty()
                 && authData.getFace().getAadhaar()!=null
                 && !authData.getFace().getAadhaar().isEmpty()
                 && authData.getFace().getRdPidData()!=null

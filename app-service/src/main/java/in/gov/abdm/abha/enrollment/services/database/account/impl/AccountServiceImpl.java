@@ -47,6 +47,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.*;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.FINGER_SCAN;
 
 @Service
 @Slf4j
@@ -91,6 +94,15 @@ public class AccountServiceImpl implements AccountService {
             newUser.setStateName(transactionDto.getStateName());
             newUser.setVerificationType(AbhaConstants.AADHAAR);
             newUser.setVerificationStatus(AbhaConstants.VERIFIED);
+            if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)){
+                newUser.setSource(AADHAAR_OTP);
+            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.FACE)){
+                newUser.setSource(FACE);
+            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.IRIS)){
+                newUser.setSource(IRIS);
+            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)){
+                newUser.setSource(FINGER_SCAN);
+            }
             if (!lgdDistrictResponses.isEmpty()) {
                 LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
                 newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
