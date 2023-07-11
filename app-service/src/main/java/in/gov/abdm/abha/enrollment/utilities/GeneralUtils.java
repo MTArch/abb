@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.Tika;
 import org.json.JSONObject;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.web.server.ServerWebExchange;
@@ -17,8 +18,12 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * It is General Utils class
@@ -30,6 +35,7 @@ public class GeneralUtils {
     public static final String PNG = "PNG";
     public static final String JPG = "JPG";
     public static final String JPEG = "JPEG";
+    private static final String[] ALLOWED_IMAGE_EXTENSION = { "png", "jpeg", "jpg", "pdf" };
 
     /**
      * Method to check if given String is palindrome
@@ -89,6 +95,18 @@ public class GeneralUtils {
             return false;
         }
     }
+
+    public boolean isFileFormat(String base64) {
+            byte[] decodedBytes = Base64.getDecoder().decode(base64);
+            String contentType = new Tika().detect(decodedBytes);
+            String imageExtension = Arrays.stream(contentType.split("/")).collect(Collectors.toList()).get(1);
+            List<String> imageExtensions = Arrays.asList(ALLOWED_IMAGE_EXTENSION);
+            if (!imageExtensions.contains(imageExtension)) {
+                return false;
+            }
+            return true;
+
+       }
 
     public boolean isValidAadhaarNumber(String aadhaarNumber){
         return VerhoeffAlgorithm.validateVerhoeff(aadhaarNumber);

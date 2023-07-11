@@ -319,6 +319,8 @@ public class Accounts implements Persistable<String>{
     @Transient
     private HidPhrAddress hidPhrAddress;
 
+    private String source;
+
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.
      */

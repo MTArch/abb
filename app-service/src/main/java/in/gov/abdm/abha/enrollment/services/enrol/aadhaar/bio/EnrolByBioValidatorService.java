@@ -29,9 +29,7 @@ public class EnrolByBioValidatorService {
         if (!isValidAadhaar(bioData)) {
             errors.put(AADHAAR, AbhaConstants.AADHAAR_NUMBER_INVALID);
         }
-        if (!isValidTimeStamp(bioData)) {
-            errors.put(TIMESTAMP, AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD);
-        }
+
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
@@ -40,22 +38,5 @@ public class EnrolByBioValidatorService {
     private boolean isValidAadhaar(BioDto bioData) {
         return rsaUtil.isRSAEncrypted(bioData.getAadhaar()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(bioData.getAadhaar()));
     }
-    private boolean isValidTimeStamp(BioDto bioData) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
-        if(!ObjectUtils.isEmpty(bioData)
-                 && timestampNotNullOrEmpty(bioData.getTimestamp())) {
-            try {
-                return LocalDateTime.parse(bioData.getTimestamp(), dateTimeFormatter).isBefore(LocalDateTime.now());
-            } catch (Exception ex) {
-                log.error("Error while parsing timestamp",ex);
-                return false;
-            }
-        }
-        return true;
-    }
 
-    private boolean timestampNotNullOrEmpty(String timestamp) {
-        return timestamp!=null
-                && !timestamp.isEmpty();
-    }
 }

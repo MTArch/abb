@@ -105,6 +105,7 @@ public class AbhaConstants {
 
     public static final String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
+    public static final String INVALID_FILE_FORMAT = "Invalid file extension. Please upload a file with extensions as (JPEG/PNG/JPG/PDF)";
     public static final String INVALID_PIN_CODE = "Invalid PinCode";
 
     public static final String AADHAAR = "AADHAAR";
