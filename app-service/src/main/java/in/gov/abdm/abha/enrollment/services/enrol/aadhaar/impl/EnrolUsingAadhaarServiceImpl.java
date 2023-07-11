@@ -77,6 +77,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private static final String ON_MOBILE_NUMBER = "on Mobile Number:";
     private static final String FOR_HEALTH_ID_NUMBER = "for HealthIdNumber:";
 
+    private static final String INTEGRATED_PROGRAMS_LOADED_FROM_REDIS = "Integrated Programs loaded from Redis ::";
+    private static final String FAILED_TO_LOAD_INTEGRATED_PROGRAMS = "Failed to load Integrated Programs";
+
     @Autowired
     AccountService accountService;
     @Autowired
@@ -625,18 +628,120 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         } else {
             //DL
             isValidFacility(requestHeaders, fToken);
+    public Mono<Boolean> validateHeaders(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
+        if (Boolean.FALSE.equals(isAuthorized(requestHeaders, authMethods,fToken))) {
+            throw new BenefitNotFoundException(BENEFIT_NAME_OR_F_TOKEN_REQUIRED);
         }
+        if (Boolean.FALSE.equals(isValidFacilityFaceAuth(authMethods,fToken))) {
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
+        }
+        if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods,fToken))) {
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
+        }
+        if (Boolean.FALSE.equals(isValidBenefitRole(requestHeaders,authMethods))) {
+            throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
+        }
+        return validateBenefitProgram(requestHeaders,authMethods);
     }
 
-
-
-    private void isAuthorized(RequestHeaders requestHeaders, String fToken) {
-        if ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().equals(StringConstants.EMPTY))
-                && (fToken == null || fToken.equals(StringConstants.EMPTY))) {
-            throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(), ABDMError.UNAUTHORIZED_ACCESS.getMessage());
+    private Boolean isValidFacilityFaceAuth(List<AuthMethods> authMethods, String fToken) {
+        if(authMethods!=null && !authMethods.isEmpty() && authMethods.contains(AuthMethods.FACE)
+                && (fToken == null || fToken.isEmpty())) {
+            return false;
         }
+        return true;
     }
 
+    private Boolean isAuthorized(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken) {
+        if(authMethods!=null && !authMethods.isEmpty()
+                && (authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO))) {
+            if ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())
+                    && (fToken == null || fToken.isEmpty())) {
+                return false;
+            }
+        }
+        if(authMethods!=null && !authMethods.isEmpty()
+                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO))) {
+            if ((requestHeaders.getBenefitName() != null && !requestHeaders.getBenefitName().isEmpty())
+                    && (fToken != null && !fToken.isEmpty())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private Mono<Boolean> validateBenefitProgram(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
+        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
+                || authMethods.contains(AuthMethods.DEMO))) {
+            if(!authMethods.contains(AuthMethods.OTP) && requestHeaders.getRoleList()!=null && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)
+                && (requestHeaders.getBenefitName()==null || requestHeaders.getBenefitName().isEmpty()))
+            {
+               throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
+            }
+            if (requestHeaders.getBenefitName() != null && requestHeaders.getRoleList()!=null) {
+                return validateIntegratedPrograms(requestHeaders,redisService.getIntegratedPrograms())
+                        .flatMap(aBoolean -> {
+                            log.info(INTEGRATED_PROGRAMS_LOADED_FROM_REDIS +aBoolean);
+                            if(aBoolean.equals(Boolean.FALSE)) {
+                                return redisService.reloadAndGetIntegratedPrograms()
+                                        .flatMap(integratedProgramDtos -> integratedProgramDtos.stream()
+                                        .filter(integratedProgramDto ->
+                                                integratedProgramDto.getBenefitName().equals(requestHeaders.getBenefitName())
+                                                        && integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
+                                        .findAny()
+                                        .map(integratedProgramDto -> Mono.just(true))
+                                        .orElseThrow(() -> new BenefitNotFoundException(INVALID_BENEFIT_NAME)))
+                                        .switchIfEmpty(Mono.error(new BenefitNotFoundException(FAILED_TO_LOAD_INTEGRATED_PROGRAMS)));
+                            }
+                            return Mono.just(true);
+                        });
+            }
+        }
+        return Mono.just(true);
+    }
+
+    private Mono<Boolean> validateIntegratedPrograms(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+        if(integratedProgramDtos!=null && !integratedProgramDtos.isEmpty()
+                && requestHeaders.getBenefitName()!=null && requestHeaders.getClientId()!=null) {
+            return integratedProgramDtos.stream()
+                    .filter(res->res.getBenefitName().equals(requestHeaders.getBenefitName())
+                            && res.getClientId().equals(requestHeaders.getClientId()))
+                    .findAny()
+                    .map(integratedProgramDto -> Mono.just(true))
+                    .orElseThrow(() -> new BenefitNotFoundException(INVALID_BENEFIT_NAME));
+        }
+        return Mono.just(false);
+    }
+
+    private Boolean isValidFacility(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
+        if(authMethods!=null && authMethods.contains(AuthMethods.DEMO))
+        {
+            if(fToken != null && requestHeaders.getFTokenClaims() != null
+                    && (requestHeaders.getFTokenClaims().get(ROLES) == null
+                    || requestHeaders.getFTokenClaims().get(ROLES) != null
+                    && !requestHeaders.getFTokenClaims().get(ROLES).equals(OFFLINE_HID))){
+                return false;
+            }
+        }
+        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
+                || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.WRONG)))
+        {
+            if (fToken != null && requestHeaders.getFTokenClaims() != null
+                    && requestHeaders.getFTokenClaims().get(SUB) == null){
+                return false;
+            }
+        }
+        return true;
+    }
+    private Boolean isValidBenefitRole(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
+        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
+                || authMethods.contains(AuthMethods.DEMO))) {
+            if(requestHeaders.getBenefitName() != null
+                    && ((requestHeaders.getRoleList()==null || requestHeaders.getRoleList().isEmpty())
+                    || (requestHeaders.getRoleList()!=null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)))) {
+                return false;
+            }
     private void isValidFacilityForDemoAuth(RequestHeaders requestHeaders, String fToken) {
         if (fToken != null && requestHeaders.getFTokenClaims() != null
                 && (requestHeaders.getFTokenClaims().get(ROLES) == null
@@ -665,6 +770,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 return Mono.empty();
             }).subscribe();
         }
+        return true;
     }
 
     private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
