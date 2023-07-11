@@ -15,13 +15,6 @@ import javax.validation.constraints.NotEmpty;
  */
 @Data
 public class OtpDto {
-	/**
-	 * It is date
-	 */
-	@JsonProperty("timeStamp")
-	@NotEmpty(message = AbhaConstants.VALIDATION_ERROR_TIMESTAMP_FIELD)
-	@TimestampOtp
-	private String timeStamp;
 
 	/**
 	 * It is Transection Id for validation

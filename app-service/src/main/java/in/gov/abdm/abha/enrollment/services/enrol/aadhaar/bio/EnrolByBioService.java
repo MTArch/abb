@@ -150,7 +150,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
             if (age >= 18) {
                 accountDto.setType(AbhaType.STANDARD);

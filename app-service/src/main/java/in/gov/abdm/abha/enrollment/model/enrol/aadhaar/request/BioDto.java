@@ -17,11 +17,6 @@ import javax.validation.constraints.NotEmpty;
 @Builder
 @Data
 public class BioDto {
-    /**
-     *  It is for date
-     */
-    @JsonProperty("timeStamp")
-    private String timestamp;
 
     /**
      * It is Aadhaar Number

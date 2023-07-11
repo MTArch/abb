@@ -40,8 +40,6 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
     private boolean otpNotNullorEmpty(AuthData authData) {
         return !ObjectUtils.isEmpty(authData.getOtp())
                 && authData.getOtp()!=null
-                && authData.getOtp().getTimeStamp()!=null
-                && !authData.getOtp().getTimeStamp().isEmpty()
                 && authData.getOtp().getTxnId()!=null
                 && !authData.getOtp().getTxnId().isEmpty()
                 && authData.getOtp().getOtpValue()!=null
@@ -51,8 +49,6 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
     private boolean otpNullorEmpty(AuthData authData) {
         return ObjectUtils.isEmpty(authData.getOtp())
                 || authData.getOtp() == null
-                || authData.getOtp().getTimeStamp() ==null
-                || authData.getOtp().getTimeStamp().isEmpty()
                 || authData.getOtp().getTxnId()==null
                 || authData.getOtp().getTxnId().isEmpty()
                 || authData.getOtp().getOtpValue()==null

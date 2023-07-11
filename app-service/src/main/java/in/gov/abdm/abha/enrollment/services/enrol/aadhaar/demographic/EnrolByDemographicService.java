@@ -153,7 +153,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setMobileType(demographic.getMobileType().getValue());
         accountDto.setSource(DEMO_AUTH);
         accountDto.setKycVerified(true);
-        accountDto.setFacilityId(requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+        accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount -> {
