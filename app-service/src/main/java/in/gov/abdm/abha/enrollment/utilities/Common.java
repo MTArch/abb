@@ -85,6 +85,10 @@ public class Common {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
+    public String isoTimestamp() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+    }
+
     public static String loadFileData(String fileName) {
         String content = null;
         try {
@@ -352,11 +356,5 @@ public class Common {
     public boolean isAllNotificationTypeAvailable(List<NotificationType> notificationTypes, List<NotificationType> typeToMatch) {
         return new HashSet<>(notificationTypes).containsAll(typeToMatch);
     }
-    
-    public boolean isValidBenefitProgram(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
-        return !(requestHeaders.getBenefitName() != null && integratedProgramDtos != null
-                && integratedProgramDtos.stream().noneMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
-                && res.getClientId().equals(requestHeaders.getClientId()))
-                || requestHeaders.getRoleList() != null && requestHeaders.getBenefitName() != null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE));
-    }
+
 }
