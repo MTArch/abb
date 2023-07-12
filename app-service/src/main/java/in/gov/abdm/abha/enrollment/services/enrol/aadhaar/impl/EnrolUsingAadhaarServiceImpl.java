@@ -616,9 +616,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (Boolean.FALSE.equals(isAuthorized(requestHeaders, authMethods,fToken))) {
             throw new BenefitNotFoundException(BENEFIT_NAME_OR_F_TOKEN_REQUIRED);
         }
-        if (Boolean.FALSE.equals(isValidFacilityFaceAuth(authMethods,fToken))) {
-            throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
-        }
         if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods,fToken))) {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
         }
@@ -628,24 +625,16 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         return validateBenefitProgram(requestHeaders,authMethods);
     }
 
-    private Boolean isValidFacilityFaceAuth(List<AuthMethods> authMethods, String fToken) {
-        if(authMethods!=null && !authMethods.isEmpty() && authMethods.contains(AuthMethods.FACE)
-                && (fToken == null || fToken.isEmpty())) {
-            return false;
-        }
-        return true;
-    }
-
     private Boolean isAuthorized(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken) {
         if(authMethods!=null && !authMethods.isEmpty()
-                && (authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO))) {
+                && (authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS))) {
             if ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())
                     && (fToken == null || fToken.isEmpty())) {
                 return false;
             }
         }
         if(authMethods!=null && !authMethods.isEmpty()
-                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO))) {
+                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.FACE))) {
             if ((requestHeaders.getBenefitName() != null && !requestHeaders.getBenefitName().isEmpty())
                     && (fToken != null && !fToken.isEmpty())) {
                 return false;
@@ -708,7 +697,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 return false;
             }
         }
-        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
+        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS)
                 || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.WRONG)))
         {
             if (fToken != null && requestHeaders.getFTokenClaims() != null
@@ -719,8 +708,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         return true;
     }
     private Boolean isValidBenefitRole(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
-        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
-                || authMethods.contains(AuthMethods.DEMO))) {
+        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.BIO)
+                || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.DEMO))) {
             if(requestHeaders.getBenefitName() != null
                     && ((requestHeaders.getRoleList()==null || requestHeaders.getRoleList().isEmpty())
                     || (requestHeaders.getRoleList()!=null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)))) {
