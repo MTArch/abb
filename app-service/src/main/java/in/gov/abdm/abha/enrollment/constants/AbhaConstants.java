@@ -213,6 +213,6 @@ public class AbhaConstants {
 
     public static final String INVALID_BENEFIT_NAME = "Invalid Benefit Name";
 
-
-
+    public static final String FACILITY_ID = "Facility-Id";
+    public static final String CLIENT_ID = "Client-Id";
 }

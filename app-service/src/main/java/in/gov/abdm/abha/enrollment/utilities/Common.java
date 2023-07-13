@@ -357,4 +357,7 @@ public class Common {
         return new HashSet<>(notificationTypes).containsAll(typeToMatch);
     }
 
+    public String getFToken(RequestHeaders requestHeaders){
+        return requestHeaders.getFTokenClaims() == null ? null : requestHeaders.getFTokenClaims().get(SUB).toString();
+    }
 }
