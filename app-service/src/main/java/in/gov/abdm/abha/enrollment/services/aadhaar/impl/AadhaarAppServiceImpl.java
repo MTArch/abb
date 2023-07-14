@@ -9,7 +9,9 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemogr
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyBioRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyFaceAuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
+import in.gov.abdm.abha.enrollment.utilities.Common;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,8 +51,8 @@ public class AadhaarAppServiceImpl implements AadhaarAppService {
             return Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable)));
         });
     }
-    public Mono<AadhaarResponseDto> verifyBio(AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto){
-        return aadhaarFClient.verifyBio(aadhaarVerifyBioRequestDto).onErrorResume(throwable -> {
+    public Mono<AadhaarResponseDto> verifyBio(RequestHeaders requestHeaders, AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto){
+        return aadhaarFClient.verifyBio(aadhaarVerifyBioRequestDto, requestHeaders.getClientId(), Common.getFToken(requestHeaders)).onErrorResume(throwable -> {
             log.error(AADHAAR_ERROR_MESSAGE,throwable.getMessage());
             return Mono.error(new AadhaarGatewayUnavailableException(new Exception(throwable)));
         });
