@@ -112,6 +112,7 @@ public enum AadhaarErrorCodes {
     E_997("Aadhaar suspended (Aadhaar is not in authenticatable status)."),
     E_998("Invalid Aadhaar Number."),
     E_999("Unknown error."),
+    E_300("The provided Biometric details and Aadhaar details does not match"),
 
     OTHER_ERROR("Please try again in some time.");
     private final String value;

@@ -12,6 +12,7 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyFace
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.AadhaarVerifyOtpRequestDto;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import reactivefeign.spring.config.ReactiveFeignClient;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +36,9 @@ public interface AadhaarFClient {
     public Mono<AadhaarResponseDto> faceAuth(@RequestBody AadhaarVerifyFaceAuthRequestDto aadhaarVerifyFaceAuthRequestDto);
 
     @PostMapping(AADHAAR_VERIFY_BIO)
-    public Mono<AadhaarResponseDto> verifyBio(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);
+    public Mono<AadhaarResponseDto> verifyBio(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto,
+                                              @RequestHeader(value = AbhaConstants.CLIENT_ID) String clientId,
+                                              @RequestHeader(value = AbhaConstants.FACILITY_ID) String facilityId);
 
     @PostMapping(AADHAAR_VERIFY_IRIS)
     public Mono<AadhaarResponseDto> verifyIris(@RequestBody AadhaarVerifyBioRequestDto aadhaarVerifyBioRequestDto);

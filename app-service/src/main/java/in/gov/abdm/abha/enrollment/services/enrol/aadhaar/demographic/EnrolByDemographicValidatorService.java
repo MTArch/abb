@@ -145,6 +145,9 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidMobileNumber(Demographic demographic) {
+        if(demographic.getMobile()==null || demographic.getMobile().isBlank()){
+            return false;
+        }
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getMobile()).matches();
     }
 

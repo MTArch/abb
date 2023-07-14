@@ -426,7 +426,6 @@ public class AccountServiceImpl implements AccountService {
         AadhaarUserKycDto kycDto = aadhaarResponseDto.getAadhaarUserKycDto();
         if (kycDto.getPhoto()!= null) {
             newUser.setKycPhoto(kycDto.getPhoto());
-            newUser.setProfilePhoto(kycDto.getPhoto());
         }
         if (!StringUtils.isBlank(kycDto.getPincode())
                 && !kycDto.getPincode().equals(newUser.getPincode())) {

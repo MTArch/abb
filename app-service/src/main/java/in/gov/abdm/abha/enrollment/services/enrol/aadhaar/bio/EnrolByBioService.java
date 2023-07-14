@@ -105,7 +105,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> verifyAadhaarBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders){
-        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(AadhaarVerifyBioRequestDto.builder()
+        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(requestHeaders, AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
                 .pid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
                 .build());
