@@ -22,7 +22,7 @@ public class StringConstants {
      public static final String MESSAGE = "message";
      public static final String UNKNOWN = "Unknown";
      public static final String COMMA_SPACE = ", ";
-     public static final String SYSTEM = "AADHAAR_OTP";
+     public static final String SYSTEM = "SYSTEM";
      public static final String DEMO_AUTH = "DEMO_AUTH";
      public static final String AADHAAR_OTP = "AADHAAR_OTP";
      public static final String FACE = "FACE";

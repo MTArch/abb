@@ -214,6 +214,7 @@ public class KafkaServiceImpl implements KafkaService{
         userToBePublished.setEmailIdVerified(null != accountDto.getEmailVerified());
         userToBePublished.setUpdatedBy(ABHA_SYNC);
         userToBePublished.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        userToBePublished.setStatus(accountDto.getStatus());
         return userToBePublished;
     }
 
@@ -225,6 +226,7 @@ public class KafkaServiceImpl implements KafkaService{
         patientToBePublished.setEmailId(accountDto.getEmail());
         patientToBePublished.setEmailVerified(null != accountDto.getEmailVerified());
         patientToBePublished.setDateModified(Timestamp.valueOf(LocalDateTime.now()));
+        patientToBePublished.setStatus(accountDto.getStatus());
         return patientToBePublished;
     }
 }
