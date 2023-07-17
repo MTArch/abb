@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.enrol.document;
 
+import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
@@ -52,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.*;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
 
 @Slf4j
 @Service
@@ -380,6 +382,8 @@ public class EnrolUsingDrivingLicence {
         List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
         accountList.add(accountDto);
         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
+        hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
+        hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
         hidPhrAddressDtoList.add(hidPhrAddressDto);
         if (!accountDto.getHealthIdNumber().isEmpty()) {
             List<AccountAuthMethodsDto> accountAuthMethodsDtos = new ArrayList<>();
@@ -390,8 +394,8 @@ public class EnrolUsingDrivingLicence {
                     .flatMap(idDocumentResponse -> {
                         if (idDocumentResponse != null) {
                             log.info("going to call procedure to create account via DL");
-                           return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
-                                    .flatMap(v-> sendSuccessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString(), requestHeaders));
+                            return accountService.settingClientIdAndOrigin(null,accountDto,requestHeaders).flatMap(accountDtoResponse -> accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
+                                    .flatMap(v-> sendSuccessNotificationAndPrepareDLResponse(accountDto, transactionDto.getTxnId().toString(), requestHeaders)));
                         }else{
                             throw new DocumentGatewayUnavailableException();
                         }
