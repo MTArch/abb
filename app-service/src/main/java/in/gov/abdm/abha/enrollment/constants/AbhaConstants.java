@@ -14,7 +14,7 @@ public class AbhaConstants {
     public static final String VALIDATION_ERROR_LOGIN_HINT_FIELD = "Invalid Login Hint";
     public static final String VALIDATION_ERROR_LOGIN_ID_FIELD = "Invalid LoginId";
     public static final String VALIDATION_ERROR_OTP_SYSTEM_FIELD = "Invalid Otp System";
-    public static final String MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The mobile number provided by you is already linked to {} ABHA numbers. Please provide a different mobile number.";
+    public static final String MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The mobile number provided by you is already linked to {0} ABHA numbers. Please provide a different mobile number.";
     public static final String EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The email address provided by you is already linked to {0} ABHA numbers. Please provide a different email address.";
 
 
