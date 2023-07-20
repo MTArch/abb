@@ -23,4 +23,10 @@ public class StringConstants {
      public static final String UNKNOWN = "Unknown";
      public static final String COMMA_SPACE = ", ";
      public static final String SYSTEM = "SYSTEM";
+     public static final String DEMO_AUTH = "DEMO_AUTH";
+     public static final String AADHAAR_OTP = "AADHAAR_OTP";
+     public static final String FACE = "FACE";
+     public static final String IRIS = "IRIS";
+     public static final String FINGER_SCAN = "FINGERSCAN";
+
 }

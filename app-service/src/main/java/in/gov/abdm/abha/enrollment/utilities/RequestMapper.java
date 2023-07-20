@@ -8,12 +8,14 @@ import in.gov.abdm.abha.profile.utilities.Common;
 import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.jwt.util.JWTToken;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
 import static in.gov.abdm.constant.ABDMConstant.CLIENT_ID;
 
 @UtilityClass
@@ -24,7 +26,6 @@ public class RequestMapper {
     public static final String ROLES = "roles";
     public static final String APPLICATION = "application";
     public static final String NAME = "name";
-    public static final String DEFAULT_CLIENT_ID = "healthid-api";
 
     public static RequestHeaders prepareRequestHeaders(String benefitName, String authorization,String fToken) {
 
@@ -33,7 +34,7 @@ public class RequestMapper {
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
 
-        if (authorization != null) {
+        if (!StringUtils.isEmpty(authorization)) {
             authorization =authorization.substring("Bearer ".length());
             claims = JWTUtil.readJWTToken(authorization);
             if (claims.get(CLIENT_ID) != null) {

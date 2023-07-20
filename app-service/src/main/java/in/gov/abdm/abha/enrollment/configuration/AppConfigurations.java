@@ -21,9 +21,9 @@ public class AppConfigurations implements WebFluxConfigurer {
     @Bean
     public ReactiveOptions reactiveOptions() {
         return new WebReactiveOptions.Builder()
-                .setReadTimeoutMillis(10000)
-                .setWriteTimeoutMillis(10000)
-                .setResponseTimeoutMillis(10000)
+                .setReadTimeoutMillis(60000)
+                .setWriteTimeoutMillis(60000)
+                .setResponseTimeoutMillis(60000)
                 .build();
     }
 

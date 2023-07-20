@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -17,6 +18,7 @@ public class LgdUtility {
     LgdAppFClient lgdAppFClient;
 
     public static final String DISTRICT = "district";
+    private static final String LGD_ERROR_MESSAGE = "LGD service error {}";
 
     public Mono<List<LgdDistrictResponse>> getLgdData(String pinCode, String state) {
         if (pinCode == null || pinCode.isBlank()) {
@@ -27,7 +29,7 @@ public class LgdUtility {
                     if (lgdDistrictResponses.isEmpty())
                         return getLgdByState(state);
                     return Mono.just(lgdDistrictResponses);
-                });
+                }).switchIfEmpty( getLgdByState(state));
     }
 
     public Mono<List<LgdDistrictResponse>> getLgdByState(String state) {
@@ -37,7 +39,13 @@ public class LgdUtility {
 
     public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(String pinCode, String district, String stateName) {
         if (stateName != null)
-            return lgdAppFClient.getDetailsByAttributeState(stateName).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
-        return lgdAppFClient.getDetailsByAttribute(pinCode, district).onErrorResume(throwable -> Mono.error(new LgdGatewayUnavailableException()));
+            return lgdAppFClient.getDetailsByAttributeState(UUID.randomUUID(), Common.isoTimestamp(), stateName).onErrorResume(throwable -> {
+                log.error(LGD_ERROR_MESSAGE, throwable.getMessage());
+               return Mono.error(new LgdGatewayUnavailableException());
+            });
+        return lgdAppFClient.getDetailsByAttribute(UUID.randomUUID(), Common.isoTimestamp(), pinCode, district).onErrorResume(throwable -> {
+            log.error(LGD_ERROR_MESSAGE, throwable.getMessage());
+            return Mono.empty();
+        });
     }
 }

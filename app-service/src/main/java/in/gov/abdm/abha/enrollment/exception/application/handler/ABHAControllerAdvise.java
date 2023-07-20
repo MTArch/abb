@@ -1,10 +1,10 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarGatewayUnavailableException;
+import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.EnrolmentIdNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.*;
@@ -36,6 +36,7 @@ import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.profile.constants.AbhaConstants.*;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 
 
 @RestControllerAdvice
@@ -52,6 +53,9 @@ public class ABHAControllerAdvise {
     private static final String TRACKING_ID = "Tracking Id : ";
     private static final String CODE = "code";
     private static final String MESSAGE_KEY = "message";
+    private static final String PROCEDURE_ERROR_CODE = "\\[P0001]";
+    private static final String REPLACE_REGEX = "[\\],\"]";
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
@@ -59,9 +63,7 @@ public class ABHAControllerAdvise {
         log.error(trackingId + StringConstants.COLON + "Message : ", exception);
          if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE);
-        } else if (exception.getClass() == BenefitNotFoundException.class) {
-             return handleAbhaExceptions(HttpStatus.UNAUTHORIZED, exception.getMessage());
-         } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
+        } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.DOCUMENT_DB_GATEWAY_UNAVAILABLE);
@@ -77,7 +79,9 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
         } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
-        } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
+        }  else if (exception.getClass() == AbhaDBException.class) {
+             return handleAbhaDBExceptions(exception.getMessage());
+         } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
@@ -276,6 +280,21 @@ public class ABHAControllerAdvise {
                         }
                 );
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
+
+    private ResponseEntity<Mono<ErrorResponse>> handleAbhaDBExceptions(String ex) {
+        log.error(EXCEPTIONS +ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ABDMControllerAdvise.handleException(new Exception(ex.split(PROCEDURE_ERROR_CODE)[1].replaceAll(REPLACE_REGEX,EMPTY))));
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(BenefitNotFoundException.class)
+    public Map<String, Object> benefitNotFoundException(BenefitNotFoundException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(StringConstants.MESSAGE, ex.getMessage());
+        log.error(EXCEPTIONS + ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP,Common.timeStampWithT());
         return errorMap;
     }
 }

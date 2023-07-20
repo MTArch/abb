@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.utilities.phr_address_generator;
+package in.gov.abdm.abha.enrollmentdb.utilities;
 
 import in.gov.abdm.abha.enrollmentdb.constant.StringConstants;
 import lombok.experimental.UtilityClass;

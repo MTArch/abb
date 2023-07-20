@@ -1,5 +1,8 @@
 package in.gov.abdm.abha.enrollment.constants;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class URIConstant {
 
     private URIConstant() {
@@ -15,6 +18,7 @@ public class URIConstant {
     public static final String ENROL_SUGGEST_ABHA_ENDPOINT = "/suggestion";
 
     public static final String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
+    public static final String ENROL_REQUEST_NOTIFICATION_ENDPOINT = "/request/notification";
 
     //request endpoints
     public static final String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
@@ -95,6 +99,8 @@ public class URIConstant {
 
     public static final String IDENTITY_VERIFY_ABHA_EXISTS = IDP_BASE_URI + "/verify/abhaExists/{abhaAddress}";
 
+    public static final String GET_IDENTITY_BY_ABHA_ADDRESS_LIST_URI = IDP_BASE_URI + "/address/identity/getUsersByAbhaAddressList";
+
     //    Notification Service
     public static final String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
@@ -102,6 +108,7 @@ public class URIConstant {
     //    Notification DB Service
     public static final String NOTIFICATION_DB_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/template/name/ABHA";
+    public static final String NOTIFICATION_DB_GET_TEMPLATE_BY_ID_URI = NOTIFICATION_DB_BASE_URI + "/template/id/{templateId}";
 
     //LGD service
     public static final String LGD_BASE_URI = "/internal/v3/abdm/lgd";
@@ -132,8 +139,16 @@ public class URIConstant {
     public static final String REQUESTER_ID = "REQUESTER_ID";
     public static final String AADHAAR_VERIFY_FACE = AADHAAR_BASE_URI + "/verifyFace";
 
-    public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyBio";
+    public static final String AADHAAR_VERIFY_BIO = AADHAAR_BASE_URI + "/verifyFingerprint";
+    public static final String AADHAAR_VERIFY_IRIS = AADHAAR_BASE_URI + "/verifyIRIS";
 
     public static final String BENEFIT_NAME = "benefitName";
     public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";
+
+    public static final List<String> excludedList = Arrays.asList(
+            "/actuator/health",
+            "/actuator/metrics",
+            "/actuator/prometheus",
+            "/metrics"
+    );
 }

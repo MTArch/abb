@@ -303,6 +303,8 @@ public class Accounts implements Persistable<String>{
 	 */
 	private String mobileType;
 
+    private byte[] compPhoto;
+
     /**
      * type of account
      */
@@ -316,6 +318,8 @@ public class Accounts implements Persistable<String>{
     @JsonIgnore
     @Transient
     private HidPhrAddress hidPhrAddress;
+
+    private String source;
 
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.

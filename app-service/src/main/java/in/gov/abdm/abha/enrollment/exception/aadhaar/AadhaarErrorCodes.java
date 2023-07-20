@@ -20,7 +20,7 @@ public enum AadhaarErrorCodes {
     E_403("Maximum number of attempts for OTP match is exceeded or OTP is not generated. Please generate a fresh OTP and try to authenticate again"),
     E_500("Invalid encryption of session key."),
     E_501("Invalid certificate identifier in “ci” attribute of “Skey”."),
-    E_502("Invalid encryption of PID."),
+    E_502("An error was encountered during the communication process with Aadhaar. Please try again."),
     E_503("Invalid encryption of Hmac."),
     E_504("Session key rE_initiation required due to expiry or key out of sync."),
     E_505("Synchronized Key usage not allowed for the AUA."),
@@ -112,6 +112,7 @@ public enum AadhaarErrorCodes {
     E_997("Aadhaar suspended (Aadhaar is not in authenticatable status)."),
     E_998("Invalid Aadhaar Number."),
     E_999("Unknown error."),
+    E_300("The provided Biometric details and Aadhaar details does not match"),
 
     OTHER_ERROR("Please try again in some time.");
     private final String value;

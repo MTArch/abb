@@ -66,6 +66,17 @@ public class ABHAEnrollmentDBConstant {
 
     public static final String VERIFIED ="VERIFIED";
     public static final String PENDING = "PENDING";
+    public static final String SYSTEM = "SYSTEM";
     public static final String KAFKA_ERROR_LOG_MSG = "Error while publishing kafka event: {}";
 
+    public static final String ENROLLMENT_DB_LOG_MSG = "ABHA_ENROLLMENT_DB: About to Process the request to ";
+
+    public static final String ENROLLMENT_DB_ACCOUNT_ACTION=" for account action .";
+    public static final String ENROLLMENT_DB_AUTH_METHODS=" for auth methods .";
+    public static final String ENROLLMENT_DB_ACCOUNTS=" for accounts .";
+    public static final String ENROLLMENT_DB_DEPENDENT_ACCOUNT_RELATIONSHIP=" for dependent account relationship .";
+    public static final String ENROLLMENT_DB_HID_BENEFIT=" for hid benefit .";
+    public static final String ENROLLMENT_DB_HID_PHR_ADDRESS=" for hid phr address .";
+    public static final String ENROLLMENT_DB_INTEGRATED_PROGRAM=" for integrated program .";
+    public static final String ENROLLMENT_DB_PROCEDURE_CALL=" for procedure call .";
 }

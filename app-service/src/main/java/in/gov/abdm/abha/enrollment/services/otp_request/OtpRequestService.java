@@ -272,22 +272,24 @@ public class OtpRequestService {
                 if (emailLinkedAccountCount >= maxMobileLinkingCount) {
                     throw new AbhaUnProcessableException(ABDMError.EMAIL_ALREADY_LINKED_TO_6_ACCOUNTS.getCode(), MessageFormat.format(EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS, maxMobileLinkingCount));
                 } else {
-                    Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(email, EMAIL_OTP_SUBJECT, templatesHelper.prepareRegistrationOtpMessage(1007164181681962323L, newOtp));
+                    return templatesHelper.prepareSMSMessage(REGISTRATION_OTP_TEMPLATE_ID, newOtp).flatMap(message -> {
+                        Mono<NotificationResponseDto> notificationResponseDtoMono = notificationService.sendEmailOtp(email, EMAIL_OTP_SUBJECT, message);
 
-                    return notificationResponseDtoMono.flatMap(response -> {
-                        if (response.getStatus().equals(SENT)) {
-                            transactionDto.setEmail(email);
-                            transactionDto.setOtp(Argon2Util.encode(newOtp));
-                            transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
-                            transactionDto.setCreatedDate(LocalDateTime.now());
-                            transactionDto.setScope(Scopes.EMAIL_VERIFY.getValue());
-                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId())).flatMap(res -> {
-                                handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
-                                return Mono.just(MobileOrEmailOtpResponseDto.builder().txnId(mobileOrEmailOtpRequestDto.getTxnId()).message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hideEmail(email)).build());
-                            });
-                        } else {
-                            throw new NotificationGatewayUnavailableException();
-                        }
+                        return notificationResponseDtoMono.flatMap(response -> {
+                            if (response.getStatus().equals(SENT)) {
+                                transactionDto.setEmail(email);
+                                transactionDto.setOtp(Argon2Util.encode(newOtp));
+                                transactionDto.setOtpRetryCount(transactionDto.getOtpRetryCount() + 1);
+                                transactionDto.setCreatedDate(LocalDateTime.now());
+                                transactionDto.setScope(Scopes.EMAIL_VERIFY.getValue());
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId())).flatMap(res -> {
+                                    handleNewOtpRedisObjectCreation(transactionDto.getTxnId().toString(), email, StringUtils.EMPTY, Argon2Util.encode(newOtp));
+                                    return Mono.just(MobileOrEmailOtpResponseDto.builder().txnId(mobileOrEmailOtpRequestDto.getTxnId()).message(OTP_IS_SENT_TO_EMAIL_ENDING + Common.hideEmail(email)).build());
+                                });
+                            } else {
+                                throw new NotificationGatewayUnavailableException();
+                            }
+                        });
                     });
                 }
             });

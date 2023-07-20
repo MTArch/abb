@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
@@ -63,7 +64,7 @@ public class EnrolByDemographicValidatorService {
     @Autowired
     RSAUtil rsaUtil;
 
-    public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+    public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
@@ -84,11 +85,11 @@ public class EnrolByDemographicValidatorService {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
         if (!isValidConsentFormImage(demographic)) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_PHOTO_FORMAT);
-        } else if (!isValidConsentFormImageFormat(demographic)) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
+        } else if (!isValidConsentFormImageFormat(demographic)) {
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (!isValidMobileNumber(demographic)) {
+        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && !isValidMobileNumber(demographic)) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidMobileType(demographic)) {
@@ -121,7 +122,7 @@ public class EnrolByDemographicValidatorService {
             isValidMonthAndYear=false;
         }
         if (isValidMonthAndYear && !isValidDayOfBirth(demographic)) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
 
         if (!isValidFirstName(demographic)) {
@@ -144,6 +145,9 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidMobileNumber(Demographic demographic) {
+        if(demographic.getMobile()==null || demographic.getMobile().isBlank()){
+            return false;
+        }
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getMobile()).matches();
     }
 
@@ -184,7 +188,7 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidConsentFormImageFormat(Demographic demographic) {
-        return GeneralUtils.isImageFileFormat(demographic.getConsentFormImage());
+        return GeneralUtils.isFileFormat(demographic.getConsentFormImage());
     }
 
     private boolean isValidDistrict(Demographic demographic) {
@@ -222,6 +226,6 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidAddress(Demographic demographic) {
-        return !demographic.getAddress().isBlank() && demographic.getAddress().matches(alphabeticCharOnlyRegexWithSpaceAddress);
+        return !demographic.getAddress().isBlank();
     }
 }

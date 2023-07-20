@@ -60,9 +60,6 @@ public class AbhaConstants {
     public static final String INVALID_VERIFICATION_STATUS = "Allowed values are 'ACCEPT' or 'REJECT'";
     public static final String VERIFICATION_STATUS_REGEX = "ACCEPT|REJECT";
 
-
-    public static final String MESSAGE_TEMPLATES = "MESSAGE_TEMPLATES";
-    public static final String INTEGRATED_PROGRAMS = "INTEGRATED_PROGRAMS";
     public static final String INVALID_OTP = "Invalid OTP, Please try again.";
     public static final String INVALID_PARENT_ABHA_NUMBER = "Invalid Parent ABHA Number";
     public static final String INVALID_CHILD_ABHA_NUMBER = "Invalid Child ABHA Number";
@@ -108,6 +105,7 @@ public class AbhaConstants {
 
     public static final String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
+    public static final String INVALID_FILE_FORMAT = "Invalid file extension. Please upload a file with extensions as (JPEG/PNG/JPG/PDF)";
     public static final String INVALID_PIN_CODE = "Invalid PinCode";
 
     public static final String AADHAAR = "AADHAAR";
@@ -181,7 +179,7 @@ public class AbhaConstants {
 
     public static final String PID_INVALID = "Invalid PID";
     public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
-    public static final String BENEFIT_NAME = "Benefit-Name";
+    public static final String BENEFIT_NAME = "BENEFIT_NAME";
     public static final String F_TOKEN = "F-token";
     public static final String SUB = "sub";
     public static final String ROLES = "roles";
@@ -190,4 +188,31 @@ public class AbhaConstants {
     public static final String SCOPES="Scopes";
     public static final String AUTH_METHOD="AuthMethod";
     public static final String REASONS="reasons";
+
+    public static final long REGISTRATION_OTP_TEMPLATE_ID = 1007164181681962323L;
+    public static final long ABHA_CREATED_TEMPLATE_ID = 1007168421931217527L;
+    public static final long ENROLL_CREATED_TEMPLATE_ID = 1007168421921410710L;
+
+    public static final String DEFAULT_CLIENT_ID = "healthid-api";
+    public static final String CREATION = "CREATION";
+    public static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
+
+    public static final String ABHA_NUMBER ="abhaNumber";
+    public static final String VALIDATION_ERROR_ABHA_NUMBER_FIELD = "Invalid Abha Number";
+
+    public static final String TYPE ="type";
+    public static final String VALIDATION_ERROR_TYPE_FIELD = "Invalid Type";
+
+    public static final String NOTIFICATION_TYPE="notificationType";
+    public static final String VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD = "Invalid Notification Type";
+    public static final String EMAIL_ACCOUNT_CREATION_SUBJECT = "account creation";
+
+    public static final String INVALID_BENEFIT_ROLE = "Invalid Benefit Role";
+
+    public static final String BENEFIT_NAME_OR_F_TOKEN_REQUIRED = "Please provide either valid F-token or valid beneficiary name.";
+
+    public static final String INVALID_BENEFIT_NAME = "Invalid Benefit Name";
+
+    public static final String FACILITY_ID = "Facility-Id";
+    public static final String CLIENT_ID = "Client-Id";
 }

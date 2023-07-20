@@ -13,9 +13,11 @@ import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbha
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentResponseDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
+import in.gov.abdm.abha.enrollment.model.notification.SendNotificationRequestDto;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.EnrolUsingAadhaarService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio.EnrolByBioService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
+import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
@@ -57,6 +59,8 @@ public class EnrollmentController {
     EnrolByDemographicService enrolByDemographicService;
     @Autowired
     EnrolByBioService enrolByBioService;
+    @Autowired
+    EnrolByIrisService enrolByIrisService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
@@ -65,21 +69,25 @@ public class EnrollmentController {
                                                              @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName,authorization,fToken);
-        enrolUsingAadhaarService.validateHeaders(requestHeaders,authMethods,fToken);
-
-        if (authMethods.contains(AuthMethods.OTP)) {
-            return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders).subscribeOn(Schedulers.parallel());
-        } else if (authMethods.contains(AuthMethods.DEMO)) {
-            enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto);
-            return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
-        } else if (authMethods.contains(AuthMethods.FACE)) {
-            return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto,requestHeaders);
-        }else if(authMethods.contains(AuthMethods.BIO)){
-            enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto);
-            return enrolByBioService.verifyBio(enrolByAadhaarRequestDto,requestHeaders);
-        }
-        throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
-    }
+       return enrolUsingAadhaarService.validateHeaders(requestHeaders,authMethods,fToken)
+                .flatMap(aBoolean -> {
+                    if (authMethods.contains(AuthMethods.OTP)) {
+                        return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders).subscribeOn(Schedulers.parallel());
+                    } else if (authMethods.contains(AuthMethods.DEMO)) {
+                        enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto, requestHeaders);
+                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
+                    } else if (authMethods.contains(AuthMethods.FACE)) {
+                        return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto,requestHeaders);
+                    }else if(authMethods.contains(AuthMethods.BIO)){
+                        enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto);
+                        return enrolByBioService.verifyBio(enrolByAadhaarRequestDto,requestHeaders);
+                    }else if(authMethods.contains(AuthMethods.IRIS)){
+                        enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
+                        return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto,requestHeaders);
+                    }
+                    throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+                });
+         }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
     public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
@@ -89,14 +97,15 @@ public class EnrollmentController {
         List<AuthMethods> authMethods = new ArrayList<>();
         authMethods.add(AuthMethods.WRONG);
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,fToken);
-        enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods,fToken);
-
-        if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
-            enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
-            return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto, requestHeaders);
-        } else {
-            throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
-        }
+        return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods,fToken)
+         .flatMap(aBoolean -> {
+             if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
+                 enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
+                 return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto, requestHeaders);
+             } else {
+                 throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
+             }
+        });
     }
 
     @GetMapping(URIConstant.ENROL_SUGGEST_ABHA_ENDPOINT)
@@ -110,5 +119,14 @@ public class EnrollmentController {
     public Mono<AbhaAddressResponseDto> createAbhaAddress(@Valid @RequestBody AbhaAddressRequestDto abhaAddressRequestDto) {
         abhaAddressService.validateAbhaAddress(abhaAddressRequestDto);
         return abhaAddressService.createAbhaAddress(abhaAddressRequestDto);
+    }
+
+    @PostMapping(URIConstant.ENROL_REQUEST_NOTIFICATION_ENDPOINT)
+    public Mono<String> requestNotification(@Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
+                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION ,required = false) String authorization) {
+
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,null);
+        enrolUsingAadhaarService.validateNotificationRequest(sendNotificationRequestDto);
+        return enrolUsingAadhaarService.requestNotification(sendNotificationRequestDto,requestHeaders);
     }
 }
