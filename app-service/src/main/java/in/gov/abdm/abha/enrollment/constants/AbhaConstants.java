@@ -99,7 +99,7 @@ public class AbhaConstants {
 
     public static final String INVALID_DISTRICT = "Invalid District";
 
-    public static final String INVALID_DOCUMENT_PHOTO_SIZE = "The size of the document uploaded exceeds the permissible limits. Please upload a document of size less than 150KB";
+    public static final String INVALID_DOCUMENT_PHOTO_SIZE = "The size of the document uploaded exceeds the permissible limits. Please upload a document of size less than 150KB.";
 
     public static final String SAME_PHOTO_EXCEPTION = "Front and backside photos cannot be the same. Please upload different photos for both sides.";
 
