@@ -16,7 +16,7 @@ public class RandomUtil {
         try {
             secureRandom = SecureRandom.getInstance(SECURE_RANDOM_ALGO);
         } catch (NoSuchAlgorithmException e) {
-            log.error(NO_ALGO_FOUND_TO_CREATE_SECURE_RANDOM_INSTANCE, SECURE_RANDOM_ALGO,e);
+            log.error(NO_ALGO_FOUND_TO_CREATE_SECURE_RANDOM_INSTANCE, SECURE_RANDOM_ALGO);
             secureRandom = new SecureRandom();
         }
     }
