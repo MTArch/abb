@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollment.aadhaar.send_otp.dto;
+package in.gov.abdm.abha.enrollment.dto;
 
 import in.gov.abdm.abha.enrollment.validators.annotations.*;
 import lombok.AllArgsConstructor;
