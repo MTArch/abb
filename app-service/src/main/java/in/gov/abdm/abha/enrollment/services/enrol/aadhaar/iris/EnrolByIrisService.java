@@ -305,9 +305,6 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
 
             log.info("going to call procedure to create account");
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
-                return accountAuthMethodService.addAccountAuthMethods(accountAuthMethodsDtos)
-                        .flatMap(res -> {
-                            if (!res.isEmpty()) {
                                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                                         .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
                                         .expiresIn(jwtUtil.jwtTokenExpiryTime())
@@ -315,14 +312,13 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                         .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                         .build();
                                 return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                                        .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
                                         .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).isNew(true).build());
-                            } else {
-                                throw new AbhaDBGatewayUnavailableException();
-                            }
-                        });
             });
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
     }
+
+
 }
