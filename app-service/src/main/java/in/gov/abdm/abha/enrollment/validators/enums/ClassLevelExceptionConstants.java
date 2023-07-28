@@ -62,7 +62,8 @@ public enum ClassLevelExceptionConstants {
     verificationStatus(AbhaConstants.INVALID_VERIFICATION_STATUS),
     message(AbhaConstants.INVALID_REASON),
     documentID(AbhaConstants.VALIDATION_ERROR_DL_NUMBER),
-    preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG);
+    preferred(AbhaConstants.VALIDATION_ERROR_PREFERRED_FLAG),
+    fingerPrintAuthPid(AbhaConstants.FINGERPRINT_PID_INVALID);
     private final String value;
 
 
