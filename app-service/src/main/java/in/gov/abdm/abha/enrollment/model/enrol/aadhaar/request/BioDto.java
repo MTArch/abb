@@ -28,6 +28,7 @@ public class BioDto {
     /**
      * It is a rdPidData
      */
+    @NotEmpty(message = AbhaConstants.FINGERPRINT_PID_INVALID)
     @JsonProperty("fingerPrintAuthPid")
     private String fingerPrintAuthPid;
 

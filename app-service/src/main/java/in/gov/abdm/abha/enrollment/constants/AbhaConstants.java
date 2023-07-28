@@ -215,4 +215,5 @@ public class AbhaConstants {
 
     public static final String FACILITY_ID = "Facility-Id";
     public static final String CLIENT_ID = "Client-Id";
+    public static final String FINGERPRINT_PID_INVALID = "Invalid Fingerprint Auth PID";
 }
