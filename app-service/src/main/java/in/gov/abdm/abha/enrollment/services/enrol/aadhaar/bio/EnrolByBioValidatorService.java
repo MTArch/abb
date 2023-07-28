@@ -16,8 +16,6 @@ import java.util.regex.Pattern;
 public class EnrolByBioValidatorService {
     private static final String AADHAAR = "Aadhaar";
     private static final String MOBILE = "Mobile";
-    private static final String TIMESTAMP = "Timestamp";
-    private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     private static final String MOBILE_NUMBER_REGEX_PATTERN = "(\\+91)?[1-9][0-9]{9}";
     @Autowired
     RSAUtil rsaUtil;
@@ -40,15 +38,7 @@ public class EnrolByBioValidatorService {
 
     private boolean isMobileRequired(String fToken, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto){
         String mobile = enrolByAadhaarRequestDto.getAuthData().getBio().getMobile();
-        if(null != fToken){
-            if(mobile==null){
-                return true;
-            }else{
-                return Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(mobile).matches();
-            }
-        }else{
-            return null != mobile && Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(mobile).matches();
-        }
+        return null != fToken && null == mobile || null != mobile && Pattern.compile(MOBILE_NUMBER_REGEX_PATTERN).matcher(mobile).matches();
     }
 
     private boolean isValidAadhaar(BioDto bioData) {
