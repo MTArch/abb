@@ -13,6 +13,11 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 @Slf4j
+@SuppressWarnings("java:S6353")
+/**
+ * suppress reason
+ * expression required
+ */
 public class EnrolByBioValidatorService {
     private static final String AADHAAR = "Aadhaar";
     private static final String MOBILE = "Mobile";
