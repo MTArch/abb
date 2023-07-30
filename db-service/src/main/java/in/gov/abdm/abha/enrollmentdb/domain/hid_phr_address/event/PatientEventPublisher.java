@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress.event;
+package in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event;
 
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.user.User;

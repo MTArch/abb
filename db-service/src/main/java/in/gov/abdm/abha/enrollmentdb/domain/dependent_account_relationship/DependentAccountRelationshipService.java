@@ -1,5 +1,6 @@
-package in.gov.abdm.abha.enrollmentdb.domain.DependentAccountRelationship;
+package in.gov.abdm.abha.enrollmentdb.domain.dependent_account_relationship;
 
+import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationship;
 import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationshipDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,20 +14,12 @@ import java.util.List;
 public interface DependentAccountRelationshipService {
 
 
-    /**
-     * to add new account
-     *
-     * @param dependentAccountRelationshipDto
-     * @return
-     */
-    Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto);
-
-
-    Mono linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);
+    Mono<DependentAccountRelationshipDto> linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountRelationshipDtoList);
 
 
     /**
      * to fetch all dependent account relationship details
+     *
      * @return
      */
     Flux<DependentAccountRelationshipDto> getAllDependentAccountRelationship();
@@ -47,14 +40,15 @@ public interface DependentAccountRelationshipService {
      * @param id
      * @return
      */
-    Mono updateDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
+    Mono<DependentAccountRelationship> updateDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
 
     /**
      * to delete dependent account relationship details by Id
+     *
      * @param dependentAccountRelationshipDto
      * @param id
      * @return
      */
-    Mono deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
+    Mono<Void> deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id);
 
 }

@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress;
+package in.gov.abdm.abha.enrollmentdb.model.hid_phr_address;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,11 +1,12 @@
-package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
+package in.gov.abdm.abha.enrollmentdb.domain.dependent_account_relationship;
+
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
 
 import org.reactivestreams.Subscription;
 import org.springframework.stereotype.Component;
 
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationship;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Component
 @Slf4j
-public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
+public class DependentAccountRelationshipSubscriberImpl implements DependentAccountRelationshipSubscriber{
+
 
     /**
      * number of rows to be inserted.
      */
-    public static final Long ROW_COUNT = 1L;
+    static Long rowCount;
 
     /**
      * Invoked after calling Publisher.subscribe(Subscriber).
@@ -31,18 +33,17 @@ public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
     @Override
     public void onSubscribe(Subscription s) {
 
-        s.request(ROW_COUNT);
+        s.request(1L);
     }
 
     /**
      * Data notification sent by the Publisher in response to requests to
      * Subscription.request(long).
      *
-     * @param hidPhrAddressDto the element signaled
+     * @param dependentAccountRelationship the element signaled
      */
-
     @Override
-    public void onNext(HidPhrAddress hidPhrAddressDto) {
+    public void onNext(DependentAccountRelationship dependentAccountRelationship) {
 
         log.info(ENROLLMENT_LOG_PREFIX + "Saving next");
     }
@@ -64,6 +65,7 @@ public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
     @Override
     public void onComplete() {
 
-        log.info(ENROLLMENT_LOG_PREFIX + "HidPhrAddress completed");
+        log.info(ENROLLMENT_LOG_PREFIX + "DependentAccountRelationship completed");
+
     }
 }

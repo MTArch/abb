@@ -1,10 +1,10 @@
 package in.gov.abdm.abha.enrollmentdb.repository;
 import java.util.List;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddressDto;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -22,7 +22,7 @@ public class HidBenefitServiceImpl implements HidBenefitService{
         HidBenefit hidBenefit = modelMapper.map(hidBenefitDto, HidBenefit.class).setAsNew();
         hidBenefit.setCreatedDate(LocalDateTime.now());
         hidBenefit.setAsNew();
-        hidBenefit.setHidBenefitId(UUID.randomUUID().toString().replaceAll("\\-",""));
+        hidBenefit.setHidBenefitId(UUID.randomUUID().toString().replace("\\-",""));
         return hidBenefitRepository.save(hidBenefit)
                 .map(hidBenefit1 -> modelMapper.map(hidBenefit1, HidBenefitDto.class));
     }

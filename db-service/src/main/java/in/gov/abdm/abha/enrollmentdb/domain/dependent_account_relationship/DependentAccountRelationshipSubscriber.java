@@ -1,4 +1,4 @@
-package in.gov.abdm.abha.enrollmentdb.domain.DependentAccountRelationship;
+package in.gov.abdm.abha.enrollmentdb.domain.dependent_account_relationship;
 
 import org.reactivestreams.Subscriber;
 

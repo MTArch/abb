@@ -1,20 +1,19 @@
-package in.gov.abdm.abha.enrollmentdb.domain.DependentAccountRelationship;
-
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+package in.gov.abdm.abha.enrollmentdb.domain.dependent_account_relationship;
 
 import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationship;
 import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationshipDto;
 import in.gov.abdm.abha.enrollmentdb.repository.DependentAccountRelationshipRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
 
 
 /**
@@ -22,11 +21,11 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DependentAccountRelationshipServiceImpl implements DependentAccountRelationshipService{
+public class DependentAccountRelationshipServiceImpl implements DependentAccountRelationshipService {
 
     @Autowired
     DependentAccountRelationshipRepository dependentAccountRelationshipRepository;
-    
+
     /**
      * Here we are creating a ModelMapper object and putting into IOC
      * for implementing singleton, with the reference all its methods can be utilized.
@@ -37,26 +36,17 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     @Autowired
     private DependentAccountRelationshipSubscriber dependentAccountRelationshipSubscriber;
 
-    /** To remove later **/
     @Override
-    public Mono addDependentAccountRelationship(DependentAccountRelationshipDto dependentAccountRelationshipDto) {
-        return null;
+    public Mono<DependentAccountRelationshipDto> linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountDtos) {
+        dependentAccountRelationshipRepository.saveAll(dependentAccountDtos.parallelStream()
+                .map(result -> modelMapper.map(result, DependentAccountRelationship.class).setAsNew())
+                .collect(Collectors.toList())).subscribe(dependentAccountRelationshipSubscriber);
+        return Mono.empty();
     }
 
     @Override
-	public Mono linkDependentAccountRelationships(List<DependentAccountRelationshipDto> dependentAccountDtos) {
-
-		DependentAccountRelationshipSubscriberImpl.rowCount = (long) dependentAccountDtos.size();
-
-		dependentAccountRelationshipRepository.saveAll(dependentAccountDtos.parallelStream()
-				.map(result -> modelMapper.map(result, DependentAccountRelationship.class).setAsNew())
-				.collect(Collectors.toList())).subscribe(dependentAccountRelationshipSubscriber);
-		return Mono.empty();
-	}
-
-    @Override
     public Flux<DependentAccountRelationshipDto> getAllDependentAccountRelationship() {
-        return dependentAccountRelationshipRepository.findAll().map(DependentAccountRelationship -> modelMapper.map(DependentAccountRelationship,DependentAccountRelationshipDto.class ));
+        return dependentAccountRelationshipRepository.findAll().map(dependentAccountRelationship -> modelMapper.map(dependentAccountRelationship, DependentAccountRelationshipDto.class));
     }
 
     @Override
@@ -75,10 +65,9 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     }
 
     @Override
-    public Mono deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
+    public Mono<Void> deleteDependentAccountRelationshipDetailById(DependentAccountRelationshipDto dependentAccountRelationshipDto, Long id) {
         log.info(ENROLLMENT_LOG_PREFIX + "Executing deleteDependentAccountRelationshipDetailById method.");
-        DependentAccountRelationship dependentAccount =
-                modelMapper.map(dependentAccountRelationshipDto, DependentAccountRelationship.class);
+        modelMapper.map(dependentAccountRelationshipDto, DependentAccountRelationship.class);
         return dependentAccountRelationshipRepository.deleteById(id);
 
     }

@@ -1,6 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.model.procedure;
 
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.model.accountauthmethods.AccountAuthMethods;
 import lombok.AllArgsConstructor;
