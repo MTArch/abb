@@ -13,10 +13,6 @@ import in.gov.abdm.abha.enrollment.validators.annotations.Consent;
 public class ConsentValidator implements ConstraintValidator<Consent, EnrolByAadhaarRequestDto> {
 	@Override
 	public boolean isValid(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, ConstraintValidatorContext context) {
-
-		if (enrolByAadhaarRequestDto.getConsent() != null) {
-			return true;
-		} else
-			return false;
+		return enrolByAadhaarRequestDto.getConsent() != null;
 	}
 }

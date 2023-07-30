@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
  */
 @Slf4j
 public class TimestampDemoValidator implements ConstraintValidator<TimestampDemo, DemoDto> {
-    private String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER);
 
     @Override

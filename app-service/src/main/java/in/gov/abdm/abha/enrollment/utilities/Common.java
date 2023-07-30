@@ -5,8 +5,6 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
-import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationType;
@@ -25,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.BufferedReader;
@@ -78,6 +75,7 @@ public class Common {
 
     /**
      * Do not change date format, it is getting used in multiple places and required same format
+     *
      * @return
      */
     public String timeStampWithT() {
@@ -199,7 +197,7 @@ public class Common {
             }
             log.error("Error while getting LGD details", noSuchElementException);
         }
-        if (lgdDistrictResponse==null && !lgdDistrictResponses.isEmpty()) {
+        if (lgdDistrictResponse == null && !lgdDistrictResponses.isEmpty()) {
             lgdDistrictResponse = lgdDistrictResponses.get(0);
         }
 
@@ -219,6 +217,7 @@ public class Common {
 
     /**
      * expecting list of first name middle name and last name and return joined name by space
+     *
      * @param name
      * @return
      */
@@ -305,18 +304,12 @@ public class Common {
 
     public boolean isValidateFToken(String fToken) {
         fToken = getValidToken(fToken, "Bearer ");
-        if (fToken != null && !fToken.isBlank()) {
-            return tokenValidation(fToken);
-        }
-        return false;
+        return ((fToken != null && !fToken.isBlank()) && tokenValidation(fToken));
     }
 
     public static boolean isFTokenExpired(String fToken) {
         fToken = getValidToken(fToken, "Bearer ");
-        if (fToken != null && !fToken.isBlank()) {
-            return expiryValidation(fToken);
-        }
-        return false;
+        return ((fToken != null && !fToken.isBlank()) && expiryValidation(fToken));
     }
 
     public static String getValidToken(String token, String startsWith) {
@@ -338,11 +331,7 @@ public class Common {
 
     private boolean expiryValidation(String token) {
         try {
-            if (JWTToken.validateToken(token, GetKeys.getPrivateKey())) {
-                return Boolean.TRUE;
-            } else {
-                return Boolean.FALSE;
-            }
+            return JWTToken.validateToken(token, GetKeys.getPrivateKey());
         } catch (Exception ex) {
             log.error(LOG_PREFIX + ex.getMessage());
             return false;
@@ -357,7 +346,7 @@ public class Common {
         return new HashSet<>(notificationTypes).containsAll(typeToMatch);
     }
 
-    public String getFToken(RequestHeaders requestHeaders){
+    public String getFToken(RequestHeaders requestHeaders) {
         return requestHeaders.getFTokenClaims() == null ? null : requestHeaders.getFTokenClaims().get(SUB).toString();
     }
 }

@@ -1,7 +1,5 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
-import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
-import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.profile.utilities.Common;

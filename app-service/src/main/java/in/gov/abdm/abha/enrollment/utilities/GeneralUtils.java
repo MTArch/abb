@@ -81,10 +81,13 @@ public class GeneralUtils {
         return dlNumber.substring(0, 9) + zeroString + dlNumber.substring(9);
     }
 
+    @SuppressWarnings("java:S2185")
+    /**
+     * Math.ceil required
+     */
     public double fileSize(String base64) {
         double sizeInBytes = 4 * Math.ceil((base64.length() / 3)) * 0.5624896334383812;
-        double sizeInKb = sizeInBytes / 1024;
-        return sizeInKb;
+        return sizeInBytes / 1024;
     }
 
     public boolean isImageFileFormat(String base64) {
@@ -101,10 +104,7 @@ public class GeneralUtils {
             String contentType = new Tika().detect(decodedBytes);
             String imageExtension = Arrays.stream(contentType.split("/")).collect(Collectors.toList()).get(1);
             List<String> imageExtensions = Arrays.asList(ALLOWED_IMAGE_EXTENSION);
-            if (!imageExtensions.contains(imageExtension)) {
-                return false;
-            }
-            return true;
+            return imageExtensions.contains(imageExtension);
 
        }
 

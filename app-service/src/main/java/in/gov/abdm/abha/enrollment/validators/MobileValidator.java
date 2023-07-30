@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
  * Validating mobile number should be encrypted and valid
  *
  */
+@SuppressWarnings("java:S6353")
 @Slf4j
 public class MobileValidator implements ConstraintValidator<Mobile, DemoDto> {
 

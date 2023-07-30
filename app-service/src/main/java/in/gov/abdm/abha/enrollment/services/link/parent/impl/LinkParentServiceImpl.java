@@ -49,8 +49,7 @@ public class LinkParentServiceImpl implements LinkParentService {
 
         return validateLinkRequest(linkParentRequestDto)
                 .flatMap(exists->{
-                    if(exists)
-                    {
+                    if(exists.booleanValue()) {
                         List<DependentAccountRelationshipDto> dependentAccountList = dependentAccountRelationshipService
                                 .prepareDependentAccount(linkParentRequestDto);
 
@@ -58,8 +57,7 @@ public class LinkParentServiceImpl implements LinkParentService {
                                 .createDependentAccountEntity(dependentAccountList);
 
                         return dependentAccountRelationshipDtoMono.flatMap(accountRelationshipDto -> updateDependentAccount(linkParentRequestDto)).switchIfEmpty(Mono.defer(() -> updateDependentAccount(linkParentRequestDto)));
-                    }
-                    else {
+                    } else {
                         throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST);
                     }
                 });
@@ -73,11 +71,11 @@ public class LinkParentServiceImpl implements LinkParentService {
                         .collect(Collectors.toList());
 
                 List<String> parentHealthIdNumbers = linkParentRequestDto.getParentAbhaRequestDtoList().stream()
-                        .map(ParentAbhaRequestDto:: getABHANumber)
+                        .map(ParentAbhaRequestDto::getAbhaNumber)
                         .collect(Collectors.toList());
 
                 boolean flag1 = isParentValid(txnResponseHealthIdNumbers, parentHealthIdNumbers);
-                boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
+                boolean flag2 = isChildValid(transactionDto.getHealthIdNumber(),linkParentRequestDto.getChildAbhaRequestDto().getAbhaNumber());
                 if(!flag1 || !flag2) {
 					throw new AbhaUnProcessableException(ABDMError.INVALID_LINK_REQUEST);
                 }
@@ -96,7 +94,7 @@ public class LinkParentServiceImpl implements LinkParentService {
     }
 
 	private Mono<LinkParentResponseDto> updateDependentAccount(LinkParentRequestDto linkParentRequestDto) {
-		return accountService.getAccountByHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber())
+		return accountService.getAccountByHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getAbhaNumber())
 				.flatMap(res -> {
 					res.setStatus(AccountStatus.ACTIVE.getValue());
 					return accountService.updateAccountByHealthIdNumber(res, res.getHealthIdNumber())
@@ -125,7 +123,6 @@ public class LinkParentServiceImpl implements LinkParentService {
 				.abhaProfileDto(ABHAProfileDto.builder()
 						.abhaNumber(accountDto.getHealthIdNumber())
 						.abhaStatus(AccountStatus.ACTIVE)
-						.ABHAType(accountDto.getType())
 						.firstName(accountDto.getFirstName())
 						.middleName(accountDto.getMiddleName())
 						.lastName(accountDto.getLastName())

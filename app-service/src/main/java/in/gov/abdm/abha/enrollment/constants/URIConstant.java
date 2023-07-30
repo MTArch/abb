@@ -3,6 +3,11 @@ package in.gov.abdm.abha.enrollment.constants;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("java:S2386")
+/**
+ * suppress reason
+ * list of constant variable required
+ */
 public class URIConstant {
 
     private URIConstant() {

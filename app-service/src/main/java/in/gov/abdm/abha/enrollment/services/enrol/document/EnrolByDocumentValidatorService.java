@@ -59,6 +59,7 @@ public class EnrolByDocumentValidatorService {
     @Value(ENROLLMENT_DOCUMENT_PHOTO_MAX_SIZE_IN_KB)
     private String documentPhotoMaxSizeLimit;
 
+    @SuppressWarnings("java:S3776")
     public void validateEnrolByDocument(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();

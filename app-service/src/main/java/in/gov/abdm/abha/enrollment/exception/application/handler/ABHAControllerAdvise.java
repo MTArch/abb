@@ -32,6 +32,7 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
@@ -61,13 +62,13 @@ public class ABHAControllerAdvise {
     public ResponseEntity<Mono<ErrorResponse>> exception(Exception exception) {
         String trackingId = UUID.randomUUID().toString();
         log.error(trackingId + StringConstants.COLON + "Message : ", exception);
-         if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
+        if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.DOCUMENT_DB_GATEWAY_UNAVAILABLE);
-        }  else if (exception.getClass() == AbhaUnProcessableException.class) {
+        } else if (exception.getClass() == AbhaUnProcessableException.class) {
             return handleAbhaExceptions(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
         } else if (exception.getClass() == AbhaBadRequestException.class) {
             return handleAbhaExceptions(HttpStatus.BAD_REQUEST, exception.getMessage());
@@ -79,9 +80,9 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
         } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
-        }  else if (exception.getClass() == AbhaDBException.class) {
-             return handleAbhaDBExceptions(exception.getMessage());
-         } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
+        } else if (exception.getClass() == AbhaDBException.class) {
+            return handleAbhaDBExceptions(exception.getMessage());
+        } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(handleAbdmException(ABDMError.BAD_REQUEST));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
@@ -143,6 +144,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(NotificationGatewayUnavailableException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleNotificationGatewayUnavailableException() {
         log.error(ABDMError.NOTIFICATION_SERVICE_UNAVAILABLE.getMessage());
@@ -153,10 +155,10 @@ public class ABHAControllerAdvise {
                 )
         );
     }
-    
+
     @ExceptionHandler(AadhaarGatewayUnavailableException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleAadhaarGatewayUnavailableException(Exception e) {
-        log.error(e.getMessage(),e.fillInStackTrace());
+        log.error(e.getMessage(), e.fillInStackTrace());
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(ABDMError.AADHAAR_GATEWAY_UNAVAILABLE.getCode()
@@ -164,6 +166,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(RedisConnectionFailureException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleRedisConnectionFailureException() {
         log.error(ABDMError.REDIS_SERVER_UNAVAILABLE.getMessage());
@@ -174,6 +177,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(UnauthorizedUserToSendOrVerifyOtpException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleUnauthorizedUserToSendOrVerifyOtpException() {
         log.error(ABDMError.EXCEEDED_MULTIPLE_OTP_REQUEST_OR_OTP_MATCH.getMessage());
@@ -184,6 +188,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(DocumentGatewayUnavailableException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleDocumentGatewayUnavailableException() {
         log.error(ABDMError.DOCUMENT_GATEWAY_UNAVAILABLE.getMessage());
@@ -194,6 +199,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(EnrolmentIdNotFoundException.class)
     public ResponseEntity<Mono<ErrorResponse>> handleEnrolmentIdNotFoundException() {
         log.error(ENROLLMENT_NOT_FOUND_EXCEPTION_MESSAGE);
@@ -204,6 +210,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(LgdGatewayUnavailableException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleLgdGatewayUnavailableException() {
         log.error(ABDMError.LGD_GATEWAY_UNAVAILABLE.getMessage());
@@ -214,6 +221,7 @@ public class ABHAControllerAdvise {
                 )
         );
     }
+
     @ExceptionHandler(IdpGatewayUnavailableException.class)
     private ResponseEntity<Mono<ErrorResponse>> handleIdpGatewayUnavailableException() {
         log.error(ABDMError.IDP_GATEWAY_UNAVAILABLE.getMessage());
@@ -235,7 +243,7 @@ public class ABHAControllerAdvise {
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleAbhaExceptions(HttpStatus httpStatus, String ex) {
-        log.error(EXCEPTIONS +ex);
+        log.error(EXCEPTIONS + ex);
         return ResponseEntity.status(httpStatus).body(ABDMControllerAdvise.handleException(new Exception(ex)));
     }
 
@@ -253,39 +261,36 @@ public class ABHAControllerAdvise {
     @ExceptionHandler(ServerWebInputException.class)
     public Map<String, Object> invalidRequest(ServerWebInputException ex) {
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        if (ex.getMessage().contains(SCOPES)) {
+        String message = ex.getMessage();
+        message = message != null ? message : "";
+        if (message.contains(SCOPES)) {
             errorMap.put(StringConstants.MESSAGE, INVALID_SCOPE);
-        }else if (ex.getMessage().contains(AUTH_METHOD)) {
+        } else if (message.contains(AUTH_METHOD)) {
             errorMap.put(StringConstants.MESSAGE, INVALID_AUTH_METHODS);
-        }else if (ex.getMessage().contains(REASONS)) {
+        } else if (message.contains(REASONS)) {
             errorMap.put(StringConstants.MESSAGE, INVALID_REASON);
         }
         Optional.ofNullable(ex)
                 .map(Throwable::getMessage)
                 .filter(msg -> msg.contains("F-token"))
-                .ifPresentOrElse(
-                        msg -> {
-                            errorMap.put(CODE, ABDMError.INVALID_F_TOKEN.getCode().split(":")[0]);
-                            errorMap.put(MESSAGE_KEY, ABDMError.INVALID_F_TOKEN.getMessage());
+                .ifPresentOrElse(msg -> {
+                    errorMap.put(CODE, ABDMError.INVALID_F_TOKEN.getCode().split(":")[0]);
+                    errorMap.put(MESSAGE_KEY, ABDMError.INVALID_F_TOKEN.getMessage());
+                    log.error(EXCEPTIONS + msg);
+                }, () -> Optional.ofNullable(ex)
+                        .map(Throwable::getMessage)
+                        .ifPresent(msg -> {
+                            errorMap.put(MESSAGE_KEY, ABDMError.BAD_REQUEST.getMessage());
+                            errorMap.put(CODE, ABDMError.BAD_REQUEST.getCode().split(":")[0]);
                             log.error(EXCEPTIONS + msg);
-                        },
-                        () -> {
-                            Optional.ofNullable(ex)
-                                    .map(Throwable::getMessage)
-                                    .ifPresent(msg -> {
-                                        errorMap.put(MESSAGE_KEY, ABDMError.BAD_REQUEST.getMessage());
-                                        errorMap.put(CODE, ABDMError.BAD_REQUEST.getCode().split(":")[0]);
-                                        log.error(EXCEPTIONS + msg);
-                                    });
-                        }
-                );
+                        }));
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleAbhaDBExceptions(String ex) {
-        log.error(EXCEPTIONS +ex);
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ABDMControllerAdvise.handleException(new Exception(ex.split(PROCEDURE_ERROR_CODE)[1].replaceAll(REPLACE_REGEX,EMPTY))));
+        log.error(EXCEPTIONS + ex);
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ABDMControllerAdvise.handleException(new Exception(ex.split(PROCEDURE_ERROR_CODE)[1].replaceAll(REPLACE_REGEX, EMPTY))));
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -294,7 +299,7 @@ public class ABHAControllerAdvise {
         Map<String, Object> errorMap = new LinkedHashMap<>();
         errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.error(EXCEPTIONS + ex.getMessage());
-        errorMap.put(RESPONSE_TIMESTAMP,Common.timeStampWithT());
+        errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
         return errorMap;
     }
 }

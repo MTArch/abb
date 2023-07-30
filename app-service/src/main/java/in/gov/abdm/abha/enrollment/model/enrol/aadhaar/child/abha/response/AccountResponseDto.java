@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@SuppressWarnings("java:S116")
 public class AccountResponseDto {
 
     @JsonProperty("ABHANumber")

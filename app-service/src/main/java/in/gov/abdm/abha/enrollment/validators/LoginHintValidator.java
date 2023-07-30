@@ -31,20 +31,18 @@ public class LoginHintValidator implements ConstraintValidator<ValidLoginHint, M
         List<LoginHint> enumNames = Stream.of(LoginHint.values())
                 .filter(name -> !name.equals(LoginHint.WRONG))
                 .collect(Collectors.toList());
-        if (  mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint()!= null) {
+        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getLoginHint() != null) {
             boolean validLoginHint = enumNames.contains(mobileOrEmailOtpRequestDto.getLoginHint());
             List<Scopes> scopesList = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
 
-        return isValidMobileOrEmailOtpRequestDto(mobileOrEmailOtpRequestDto,scopesList,validLoginHint);
+            return isValidMobileOrEmailOtpRequestDto(mobileOrEmailOtpRequestDto, scopesList, validLoginHint);
 
-        }else if(mobileOrEmailOtpRequestDto.getLoginHint()==null || !enumNames.contains(mobileOrEmailOtpRequestDto.getLoginHint()))
-            return false;
-        else
-            return true;
-
+        } else {
+            return !(mobileOrEmailOtpRequestDto.getLoginHint() == null || !enumNames.contains(mobileOrEmailOtpRequestDto.getLoginHint()));
+        }
     }
 
-    private boolean isValidMobileOrEmailOtpRequestDto(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto,List<Scopes> scopesList,boolean validLoginHint){
+    private boolean isValidMobileOrEmailOtpRequestDto(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, List<Scopes> scopesList, boolean validLoginHint) {
         if (Common.isScopeAvailable(scopesList, Scopes.MOBILE_VERIFY)
                 && (mobileOrEmailOtpRequestDto.getLoginHint() == null || !mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.MOBILE))) {
             validLoginHint = false;

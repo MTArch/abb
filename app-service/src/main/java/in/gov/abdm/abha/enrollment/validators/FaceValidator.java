@@ -16,18 +16,16 @@ import javax.validation.ConstraintValidatorContext;
 public class FaceValidator implements ConstraintValidator<Face, AuthData> {
     @Override
     public boolean isValid(AuthData authData, ConstraintValidatorContext context) {
-        if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
-                && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
-                && authData.getAuthMethods().contains(AuthMethods.FACE))
+        if (authData.getAuthMethods() != null && !authData.getAuthMethods().isEmpty() && authData.getAuthMethods().get(0) != null && authData.getAuthMethods().contains(AuthMethods.FACE))
         {
             if(bioNullorEmpty(authData))
                 return false;
             else if(bioNotNullorEmpty(authData))
                 return true;
         }
-        else if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
-                && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
-                && authData.getAuthMethods().stream().noneMatch(v->v.equals(AuthMethods.FACE)))
+        else if (authData.getAuthMethods() != null && !authData.getAuthMethods().isEmpty()
+                && authData.getAuthMethods().get(0) != null
+                && authData.getAuthMethods().stream().noneMatch(v -> v.equals(AuthMethods.FACE)))
         {
             return (bioNullorEmpty(authData) || bioNotNullorEmpty(authData));
         }

@@ -31,9 +31,10 @@ public class ClientFilter implements WebFilter {
     public static final String NAME = "name";
 
     @Override
+    @SuppressWarnings("java:S3776")
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String authorization = StringUtils.EMPTY;
-        if (!HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod()) && !excludedList.contains(exchange.getRequest().getPath().toString()))  {
+        if (!HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod()) && !excludedList.contains(exchange.getRequest().getPath().toString())) {
             ContextHolder.removeAll();
             HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
 
@@ -41,15 +42,13 @@ public class ClientFilter implements WebFilter {
             if (authorizationHeaders != null && !authorizationHeaders.isEmpty() && authorizationHeaders.get(0) != null) {
                 authorization = authorizationHeaders.get(0);
             }
+            List<String> fTokens = requestHeaders.get(FTOKEN);
+            String fToken = fTokens != null && !fTokens.isEmpty() ? fTokens.get(0) : null;
 
-            String fToken = requestHeaders.get(FTOKEN) != null && requestHeaders.get(FTOKEN).size() > 0
-                    ? requestHeaders.get(FTOKEN).get(0)
-                    : null;
-
-            if (fToken!=null && !Common.isValidateFToken(fToken)) {
+            if (fToken != null && !Common.isValidateFToken(fToken)) {
                 return Common.throwFilterBadRequestException(exchange, ABDMError.INVALID_F_TOKEN);
             }
-            if (fToken!=null && !Common.isFTokenExpired(fToken)) {
+            if (fToken != null && !Common.isFTokenExpired(fToken)) {
                 return Common.throwFilterBadRequestException(exchange, ABDMError.F_TOKEN_EXPIRED);
             }
 
@@ -64,13 +63,13 @@ public class ClientFilter implements WebFilter {
             }
 
             if (!StringUtils.isEmpty(authorization)) {
-                authorization =authorization.substring("Bearer ".length());
+                authorization = authorization.substring("Bearer ".length());
                 Map<String, Object> claims = JWTUtil.readJWTToken(authorization);
-                if(claims.get(CLIENT_ID) != null){
+                if (claims.get(CLIENT_ID) != null) {
                     ContextHolder.setClientId(claims.get(CLIENT_ID).toString());
-                }else if(claims.get(APPLICATION)!=null){
+                } else if (claims.get(APPLICATION) != null) {
                     LinkedHashMap<String, String> application = (LinkedHashMap<String, String>) claims.get(APPLICATION);
-                    ContextHolder.setClientId((application.get(NAME)!=null? application.get(NAME) :null));
+                    ContextHolder.setClientId((application.get(NAME) != null ? application.get(NAME) : null));
                 }
             }
             ContextHolder.setRequestId(requestId);

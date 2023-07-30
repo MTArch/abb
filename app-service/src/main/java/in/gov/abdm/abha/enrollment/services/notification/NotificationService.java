@@ -32,8 +32,6 @@ public class NotificationService {
     private static final String OTP_SUBJECT = "mobile verification";
     private static final String SMS_SUBJECT = "account creation";
 
-    private static final String ABHA_URL = "https://healthid.abdm.gov.in";
-
     private static final String NOTIFICATION_ERROR_MESSAGE = "Notification service error {}";
 
     @Autowired

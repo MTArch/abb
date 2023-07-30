@@ -270,6 +270,7 @@ public class FacilityEnrolByEnrollmentNumberService {
         return Mono.just(AuthResponseDto.builder().txnId(transactionDto.getTxnId().toString()).authResult(status ? StringConstants.SUCCESS : StringConstants.FAILED).message(message).accounts(status && StringUtils.isNoneEmpty(accountResponseDto.getEnrolmentNumber()) ? Collections.singletonList(accountResponseDto) : null).build());
     }
 
+    @SuppressWarnings("java:S3776")
     public Mono<EnrollmentResponse> verifyFacilityByEnroll(EnrollmentStatusUpdate enrollmentStatusUpdate) {
         String status = enrollmentStatusUpdate.getVerificationStatus();
         return transactionService.findTransactionDetailsFromDB(enrollmentStatusUpdate.getTxnId()).flatMap(txnDto -> {

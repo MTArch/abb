@@ -47,7 +47,6 @@ public class EnrolByDemographicValidatorService {
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
-    private String alphabeticCharOnlyRegexWithSpaceAddress = "^[A-Za-z ,]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
