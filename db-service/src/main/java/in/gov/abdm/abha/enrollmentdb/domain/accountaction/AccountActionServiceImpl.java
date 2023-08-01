@@ -36,9 +36,4 @@ public class AccountActionServiceImpl implements AccountActionService {
         accountActions.setAsNew();
         return accountActionRepository.save(accountActions);
     }
-
-
-    private AccountActions map(AccountActionDto accountActionDto) {
-        return modelMapper.map(accountActionDto, AccountActions.class);
-    }
 }

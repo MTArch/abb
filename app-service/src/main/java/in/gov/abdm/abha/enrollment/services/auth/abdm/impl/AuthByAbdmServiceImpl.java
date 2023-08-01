@@ -123,7 +123,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         }
-        return null;
+        return Mono.just(new AuthResponseDto());
     }
 
     private Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, TransactionDto transactionDto,
@@ -144,11 +144,11 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 } else {
                     return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
                 }
-            }else{
+            } else {
                 throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
             }
         } catch (BadParametersException ex) {
-            log.error("Error while verifying otp",ex);
+            log.error("Error while verifying otp", ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -184,7 +184,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         } catch (BadParametersException ex) {
-            log.error("Error while validating otp",ex);
+            log.error("Error while validating otp", ex);
             return prepareAuthByAdbmResponse(transactionDto, false, FAILED_TO_VALIDATE_OTP_PLEASE_TRY_AGAIN);
         }
     }
@@ -257,7 +257,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                     .map(kyc -> getHyphenAbhaNumber(kyc.getAbhaNumber())).collect(Collectors.toList());
 
 
-            if (healthIdNumbers.size() == 0)
+            if (healthIdNumbers.isEmpty())
                 return Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
                         AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()));
 
@@ -271,7 +271,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
                 return fluxPhrAaddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> handleAccountListResponse(authByAbdmRequest, accountDtoList, phrAddressList, healthIdNumbers,
                         transactionDto)).switchIfEmpty(Mono.defer(() -> handleAccountListResponse(authByAbdmRequest, accountDtoList, Collections.emptyList(),
-                                healthIdNumbers, transactionDto)));
+                        healthIdNumbers, transactionDto)));
 
             }).switchIfEmpty(Mono.defer(() -> Mono.just(prepareAuthResponse(transactionDto.getTxnId().toString(), StringConstants.SUCCESS,
                     AbhaConstants.NO_ACCOUNT_FOUND, Collections.emptyList()))));
@@ -293,25 +293,22 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         }
         return Mono.empty();
     }
-
+    @SuppressWarnings("java:S3776")
     private List<AccountResponseDto> prepareAccountResponseDtoList(List<AccountDto> accountDtoList,
                                                                    List<HidPhrAddressDto> phrAddressList) {
 
-        List<AccountResponseDto> accountResponseDtos = accountDtoList.stream().map(accountDto -> {
+        return accountDtoList.stream().map(accountDto -> {
             Optional<String> reducedValue = phrAddressList.stream()
                     .filter(hidPhrAddDto -> hidPhrAddDto.getHealthIdNumber().equals(accountDto.getHealthIdNumber()))
-                    .map(hidPhrAddDto -> hidPhrAddDto.getPhrAddress()).reduce((first, next) -> first);
+                    .map(HidPhrAddressDto::getPhrAddress).reduce((first, next) -> first);
 
             return MapperUtils.mapAccountDtoToAccountResponse(accountDto,
                     reducedValue.isPresent() ? reducedValue.get() : StringConstants.EMPTY);
         }).collect(Collectors.toList());
-
-        return accountResponseDtos;
     }
 
-    private Mono<AuthResponseDto> accountResponse(AuthRequestDto
-                                                          authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
-        if (accountDtoList != null && !accountDtoList.isEmpty() && accountDtoList.size() > 0) {
+    private Mono<AuthResponseDto> accountResponse(AuthRequestDto authByAbdmRequest, List<AccountResponseDto> accountDtoList) {
+        if (accountDtoList != null && !accountDtoList.isEmpty()) {
             return Mono.just(AuthResponseDto.builder().txnId(authByAbdmRequest.getAuthData().getOtp().getTxnId())
                     .authResult(StringConstants.SUCCESS)
                     .accounts(accountDtoList)

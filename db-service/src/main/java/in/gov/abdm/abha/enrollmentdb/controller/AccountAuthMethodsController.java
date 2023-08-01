@@ -4,10 +4,12 @@ package in.gov.abdm.abha.enrollmentdb.controller;
 import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
 import in.gov.abdm.abha.enrollmentdb.domain.accountauthmethods.AccountAuthMethodsService;
 import in.gov.abdm.abha.enrollmentdb.model.accountauthmethods.AccountAuthMethods;
+import in.gov.abdm.abha.enrollmentdb.model.accountauthmethods.AccountAuthMethodsDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class AccountAuthMethodsController {
 
 
     @PostMapping
-    public ResponseEntity<?> createAuthMethods(@RequestBody List<AccountAuthMethods> accountAuthMethods) {
+    public ResponseEntity<Flux<AccountAuthMethodsDto>> createAuthMethods(@RequestBody List<AccountAuthMethods> accountAuthMethods) {
         log.info(ENROLLMENT_DB_LOG_MSG+"save data "+ENROLLMENT_DB_AUTH_METHODS);
         return ResponseEntity.ok(accountAuthMethodsService.addAccountAuthMethods(accountAuthMethods));
     }

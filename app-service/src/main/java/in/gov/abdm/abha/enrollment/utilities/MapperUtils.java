@@ -27,7 +27,7 @@ public class MapperUtils {
         abhaProfileDto.setMobile(accountDto.getMobile());
         abhaProfileDto.setEmail(accountDto.getEmail());
         abhaProfileDto.setAbhaStatus(AccountStatus.valueOf(accountDto.getStatus()));
-        abhaProfileDto.setABHAType(accountDto.getType());
+        abhaProfileDto.setAbhaType(accountDto.getType());
         return abhaProfileDto;
     }
 
@@ -47,7 +47,7 @@ public class MapperUtils {
         abhaProfileDto.setMobile(accountDto.getMobile());
         abhaProfileDto.setEmail(accountDto.getEmail());
         abhaProfileDto.setAbhaStatus(AccountStatus.valueOf(accountDto.getStatus()));
-        abhaProfileDto.setABHAType(accountDto.getType());
+        abhaProfileDto.setAbhaType(accountDto.getType());
         return abhaProfileDto;
     }
 

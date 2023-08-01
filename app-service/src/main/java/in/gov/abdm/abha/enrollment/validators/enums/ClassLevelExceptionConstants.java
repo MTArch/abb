@@ -10,6 +10,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
+@SuppressWarnings("java:S115")
 public enum ClassLevelExceptionConstants {
     scope(AbhaConstants.VALIDATION_ERROR_SCOPE_FIELD),
     loginHint(AbhaConstants.VALIDATION_ERROR_LOGIN_HINT_FIELD),

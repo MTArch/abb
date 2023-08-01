@@ -63,7 +63,7 @@ public class AbhaNumberGenerator {
      * @return
      */
     private String generate(final Long randomNumber) {
-        final StringBuffer num = new StringBuffer(HID_PREFIX + randomNumber.toString());
+        final StringBuilder num = new StringBuilder(HID_PREFIX + randomNumber.toString());
         final int howManyMore = ABHA_NUMBER_LENGTH - num.toString().length() - 1;
         for (int i = 0; i < howManyMore; i++) {
             num.append(Integer.valueOf(RandomUtil.getRandomNumber(9)));
@@ -80,8 +80,7 @@ public class AbhaNumberGenerator {
      */
     private int calculateCheckDigit(final String str) {
         final int sum = calculateLuhnSum(str, false);
-        final int checkDigit = calculateCheckDigit(sum);
-        return checkDigit;
+        return calculateCheckDigit(sum);
     }
 
     /**
@@ -91,8 +90,7 @@ public class AbhaNumberGenerator {
      * @return checksum digit.
      */
     private int calculateCheckDigit(final int luhnSum) {
-        final int checkDigit = (luhnSum * 9) % 10;
-        return checkDigit;
+        return (luhnSum * 9) % 10;
     }
 
     /**
@@ -103,7 +101,7 @@ public class AbhaNumberGenerator {
      * @return calculated checksum.
      */
     private int calculateLuhnSum(final String str, final boolean hasCheckDigit) {
-        final int luhnNums[] = new int[str.length()];
+        final int[] luhnNums = new int[str.length()];
         final int start = str.length() - (hasCheckDigit ? 2 : 1);
         int sum = 0;
 

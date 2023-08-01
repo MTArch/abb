@@ -1,12 +1,11 @@
-package in.gov.abdm.abha.enrollmentdb.domain.DependentAccountRelationship;
-
+package in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_LOG_PREFIX;
 
 import org.reactivestreams.Subscription;
 import org.springframework.stereotype.Component;
 
-import in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship.DependentAccountRelationship;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Component
 @Slf4j
-public class DependentAccountRelationshipSubscriberImpl implements DependentAccountRelationshipSubscriber{
-
+public class HidPhrAddressSubscriberImpl implements HidPhrAddressSubscriber{
 
     /**
      * number of rows to be inserted.
      */
-    static Long rowCount;
+    public static final Long ROW_COUNT = 1L;
 
     /**
      * Invoked after calling Publisher.subscribe(Subscriber).
@@ -33,17 +31,18 @@ public class DependentAccountRelationshipSubscriberImpl implements DependentAcco
     @Override
     public void onSubscribe(Subscription s) {
 
-        s.request(1L);
+        s.request(ROW_COUNT);
     }
 
     /**
      * Data notification sent by the Publisher in response to requests to
      * Subscription.request(long).
      *
-     * @param dependentAccountRelationship the element signaled
+     * @param hidPhrAddressDto the element signaled
      */
+
     @Override
-    public void onNext(DependentAccountRelationship dependentAccountRelationship) {
+    public void onNext(HidPhrAddress hidPhrAddressDto) {
 
         log.info(ENROLLMENT_LOG_PREFIX + "Saving next");
     }
@@ -65,7 +64,6 @@ public class DependentAccountRelationshipSubscriberImpl implements DependentAcco
     @Override
     public void onComplete() {
 
-        log.info(ENROLLMENT_LOG_PREFIX + "DependentAccountRelationship completed");
-
+        log.info(ENROLLMENT_LOG_PREFIX + "HidPhrAddress completed");
     }
 }

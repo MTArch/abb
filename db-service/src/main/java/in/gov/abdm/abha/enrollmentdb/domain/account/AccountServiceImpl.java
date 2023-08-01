@@ -27,8 +27,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     KafkaService kafkaService;
 
-    private static final String ABHA_SYNC = "ABHA_SYNC";
-
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
         Accounts account = map(accountDto);

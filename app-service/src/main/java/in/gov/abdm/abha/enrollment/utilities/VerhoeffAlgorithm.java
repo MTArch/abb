@@ -1,14 +1,15 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Aadhaar Number Validation by the Verhoeff Algorithm.
  */
-@Component
+@UtilityClass
 @Slf4j
-public class VerhoeffAlgorithm {
+class VerhoeffAlgorithm {
 
     static int[][] d = new int[][] {
             { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
@@ -36,7 +37,7 @@ public class VerhoeffAlgorithm {
 
     public static boolean validateVerhoeff(String num) {
         int c = 0;
-        int[] myArray = StringToReversedIntArray(num);
+        int[] myArray = stringToReversedIntArray(num);
         for (int i = 0; i < myArray.length; i++) {
             c = d[c][p[(i % 8)][myArray[i]]];
         }
@@ -44,20 +45,20 @@ public class VerhoeffAlgorithm {
         return (c == 0);
     }
 
-    private static int[] StringToReversedIntArray(String num) {
+    private static int[] stringToReversedIntArray(String num) {
         int[] myArray = new int[num.length()];
         try {
             for (int i = 0; i < num.length(); i++) {
                 myArray[i] = Integer.parseInt(num.substring(i, i + 1));
             }
-            myArray = Reverse(myArray);
+            myArray = reverse(myArray);
         }catch(NumberFormatException ex){
             log.error("Error while parsing array",ex);
         }
         return myArray;
     }
 
-    private static int[] Reverse(int[] myArray) {
+    private static int[] reverse(int[] myArray) {
         int[] reversed = new int[myArray.length];
         for (int i = 0; i < myArray.length; i++) {
             reversed[i] = myArray[myArray.length - (i + 1)];

@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.model.notification;
 
-import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

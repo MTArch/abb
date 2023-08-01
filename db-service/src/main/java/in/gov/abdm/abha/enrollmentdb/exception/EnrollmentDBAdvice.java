@@ -18,7 +18,7 @@ import java.util.Map;
 @RestControllerAdvice
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @Slf4j
-public class EnrollmentDBException {
+public class EnrollmentDBAdvice {
     private static final String MESSAGE = "message";
     private static final String EXCEPTION = "Exception : ";
     private static final String RESPONSE_TIMESTAMP = "RESPONSE_TIMESTAMP";

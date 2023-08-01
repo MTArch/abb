@@ -70,6 +70,7 @@ import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.SM
 
 @Service
 @Slf4j
+@SuppressWarnings("java:S3776")
 public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private static final String NOTIFICATION_SENT_ON_ACCOUNT_CREATION = "Notification sent successfully on Account Creation";
@@ -147,32 +148,31 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Override
     public Mono<String> requestNotification(SendNotificationRequestDto sendNotificationRequestDto, RequestHeaders requestHeaders) {
-        String abhaNumber=sendNotificationRequestDto.getAbhaNumber();
+        String abhaNumber = sendNotificationRequestDto.getAbhaNumber();
 
         return accountService.getAccountByHealthIdNumber(abhaNumber)
                 .flatMap(accountDtoResponse ->
                 {
-                    if(accountDtoResponse.getStatus().equalsIgnoreCase(AccountStatus.ACTIVE.getValue()))
-                    {
-                        if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(SMS)) && null!=accountDtoResponse.getMobile()) {
+                    if (accountDtoResponse.getStatus().equalsIgnoreCase(AccountStatus.ACTIVE.getValue())) {
+                        if (sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(SMS)) && null != accountDtoResponse.getMobile()) {
                             notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber()).subscribe();
                             return Mono.empty();
-                        }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(EMAIL))&& null!=accountDtoResponse.getEmail()) {
+                        } else if (sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && sendNotificationRequestDto.getNotificationType().equals(List.of(EMAIL)) && null != accountDtoResponse.getEmail()) {
                             return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
-                                    message->
+                                    message ->
                                     {
-                                        notificationService.sendEmailOtp(accountDtoResponse.getEmail(),EMAIL_ACCOUNT_CREATION_SUBJECT ,  message).subscribe();
+                                        notificationService.sendEmailOtp(accountDtoResponse.getEmail(), EMAIL_ACCOUNT_CREATION_SUBJECT, message).subscribe();
                                         return Mono.empty();
                                     }
                             );
 
-                        }else if(sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS,EMAIL)) ) {
+                        } else if (sendNotificationRequestDto.getType().equalsIgnoreCase(CREATION) && new HashSet<>(sendNotificationRequestDto.getNotificationType()).containsAll(List.of(SMS, EMAIL))) {
                             return templatesHelper.prepareSMSMessage(ABHA_CREATED_TEMPLATE_ID, accountDtoResponse.getName(), abhaNumber).flatMap(
-                                    message->
+                                    message ->
                                     {
-                                        if(null!=accountDtoResponse.getEmail()) {
+                                        if (null != accountDtoResponse.getEmail()) {
                                             notificationService.sendSmsAndEmailOtp(accountDtoResponse.getEmail(), accountDtoResponse.getMobile(), EMAIL_ACCOUNT_CREATION_SUBJECT, message).subscribe();
-                                        }else {
+                                        } else {
                                             notificationService.sendABHACreationSMS(accountDtoResponse.getMobile(), accountDtoResponse.getName(), accountDtoResponse.getHealthIdNumber()).subscribe();
                                         }
                                         return Mono.empty();
@@ -183,7 +183,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     }
                     return Mono.empty();
                 });
-
 
 
     }
@@ -201,7 +200,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                         } else if (existingAccount.getStatus().equals(AccountStatus.ACTIVE.getValue())) {
-                            return checkKycAndUpdate(aadhaarResponseDto,existingAccount)
+                            return checkKycAndUpdate(aadhaarResponseDto, existingAccount)
                                     .flatMap(updatedAccountDto -> existingAccount(transactionDto, aadhaarResponseDto, updatedAccountDto, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST));
                         } else {
                             return existingAccount(transactionDto, aadhaarResponseDto, existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
@@ -214,8 +213,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     private Mono<AccountDto> checkKycAndUpdate(AadhaarResponseDto aadhaarResponseDto, AccountDto existingAccount) {
         return lgdUtility.getLgdData(aadhaarResponseDto.getAadhaarUserKycDto().getPincode(), aadhaarResponseDto.getAadhaarUserKycDto().getState())
                 .flatMap(lgdDistrictResponses -> {
-                    accountService.mapAccountWithEkyc(aadhaarResponseDto,existingAccount,lgdDistrictResponses);
-                    return accountService.updateAccountByHealthIdNumber(existingAccount,existingAccount.getHealthIdNumber());
+                    accountService.mapAccountWithEkyc(aadhaarResponseDto, existingAccount, lgdDistrictResponses);
+                    return accountService.updateAccountByHealthIdNumber(existingAccount, existingAccount.getHealthIdNumber());
                 });
     }
 
@@ -267,11 +266,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
             return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                    .flatMap(duplicateAccount -> {
-                        return existingAccount(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
-                    }).switchIfEmpty(Mono.defer(() -> {
+                    .flatMap(duplicateAccount -> existingAccount(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)).switchIfEmpty(Mono.defer(() -> {
                         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
                         if (age >= 18) {
                             accountDto.setType(AbhaType.STANDARD);
@@ -302,11 +299,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto,requestHeaders));
+                                                    .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto, requestHeaders));
                                         } else {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
+                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto, requestHeaders));
                                         }
 
                                     });
@@ -317,10 +314,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                         .flatMap(response -> handleCreateAccountResponse(response, transactionDto, abhaProfileDto, requestHeaders));
-                            }else {
+                            } else {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
+                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto, requestHeaders));
                             }
                         }
 
@@ -329,7 +326,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
 
-    private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
+    private Mono<EnrolByAadhaarResponseDto> handleCreateAccountResponse(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto, RequestHeaders requestHeaders) {
 
         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse, abhaProfileDto);
 
@@ -350,7 +347,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
 
-                                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto,requestHeaders);
+                                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto, requestHeaders);
 
                             } else {
                                 throw new AbhaDBGatewayUnavailableException();
@@ -362,7 +359,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto, AccountDto accountDtoResponse, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
+    private Mono<EnrolByAadhaarResponseDto> addAccountAuthMethods(TransactionDto transactionDto, AccountDto accountDtoResponse, ABHAProfileDto abhaProfileDto, RequestHeaders requestHeaders) {
         if (accountDtoResponse.getMobile() != null && !accountDtoResponse.getMobile().isBlank() && !DEFAULT_CLIENT_ID.equalsIgnoreCase(requestHeaders.getClientId())) {
 
 
@@ -431,26 +428,26 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     @Override
     public Mono<EnrolByAadhaarResponseDto> faceAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         if (enrolByAadhaarRequestDto.getAuthData().getFace().getMobile() == null || enrolByAadhaarRequestDto.getAuthData().getFace().getMobile().isBlank()) {
-            return verifyAadhaarFace(enrolByAadhaarRequestDto,requestHeaders);
-        }else{
-        return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getFace().getMobile())
-                .flatMap(mobileLinkedAccountCount -> {
-                    if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                        throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
-                    } else {
-                            return verifyAadhaarFace(enrolByAadhaarRequestDto,requestHeaders);
+            return verifyAadhaarFace(enrolByAadhaarRequestDto, requestHeaders);
+        } else {
+            return accountService.getMobileLinkedAccountCount(enrolByAadhaarRequestDto.getAuthData().getFace().getMobile())
+                    .flatMap(mobileLinkedAccountCount -> {
+                        if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                            throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                        } else {
+                            return verifyAadhaarFace(enrolByAadhaarRequestDto, requestHeaders);
                         }
                     });
         }
 
     }
 
-    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarFace(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders){
-                        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.faceAuth(AadhaarVerifyFaceAuthRequestDto.builder()
-                                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar()))
-                                .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getFace().getRdPidData())
-                                .build());
-                        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarFaceResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
+    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarFace(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
+        Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.faceAuth(AadhaarVerifyFaceAuthRequestDto.builder()
+                .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar()))
+                .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getFace().getRdPidData())
+                .build());
+        return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarFaceResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }
 
     private Mono<EnrolByAadhaarResponseDto> handleAadhaarFaceResponse(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, RequestHeaders requestHeaders) {
@@ -485,11 +482,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
             return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                    .flatMap(duplicateAccount -> {
-                        return existingAccountFaceAuth(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
-                    }).switchIfEmpty(Mono.defer(() -> {
+                    .flatMap(duplicateAccount -> existingAccountFaceAuth(transactionDto, aadhaarResponseDto, duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)).switchIfEmpty(Mono.defer(() -> {
                         int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
                         if (age >= 18) {
                             accountDto.setType(AbhaType.STANDARD);
@@ -510,7 +505,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
 
                         String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getFace().getMobile();
-                        if (userEnteredPhoneNumber!=null && !userEnteredPhoneNumber.isBlank() && Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+                        if (userEnteredPhoneNumber != null && !userEnteredPhoneNumber.isBlank() && Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
                             return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
                                     .flatMap(verifyDemographicResponse -> {
                                         if (verifyDemographicResponse.isVerified()) {
@@ -522,11 +517,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
-                                        }else{
-                                        return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                                .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                                    .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto,requestHeaders));
+                                                    .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto, requestHeaders));
+                                        } else {
+                                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                                    .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto, requestHeaders));
                                         }
                                     });
                         } else {
@@ -535,11 +530,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             if (!isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
-                            }else{
-                            return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
-                                    .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                        .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto,requestHeaders));
+                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto, requestHeaders));
+                            } else {
+                                return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
+                                        .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
+                                        .flatMap(response -> handleCreateAccountResponseUsingFaceAuth(response, transactionDto, abhaProfileDto, requestHeaders));
                             }
                         }
                     }));
@@ -613,50 +608,41 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     @Override
     public Mono<Boolean> validateHeaders(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
-        if (Boolean.FALSE.equals(isAuthorized(requestHeaders, authMethods,fToken))) {
+        if (Boolean.FALSE.equals(isAuthorized(requestHeaders, authMethods, fToken))) {
             throw new BenefitNotFoundException(BENEFIT_NAME_OR_F_TOKEN_REQUIRED);
         }
-        if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods,fToken))) {
+        if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods, fToken))) {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
         }
-        if (Boolean.FALSE.equals(isValidBenefitRole(requestHeaders,authMethods))) {
+        if (Boolean.FALSE.equals(isValidBenefitRole(requestHeaders, authMethods))) {
             throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
         }
-        return validateBenefitProgram(requestHeaders,authMethods);
+        return validateBenefitProgram(requestHeaders, authMethods);
     }
 
-    private Boolean isAuthorized(RequestHeaders requestHeaders, List<AuthMethods> authMethods,String fToken) {
-        if(authMethods!=null && !authMethods.isEmpty()
-                && (authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS))) {
-            if ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())
-                    && (fToken == null || fToken.isEmpty())) {
-                return false;
-            }
-        }
-        if(authMethods!=null && !authMethods.isEmpty()
-                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.FACE))) {
-            if ((requestHeaders.getBenefitName() != null && !requestHeaders.getBenefitName().isEmpty())
-                    && (fToken != null && !fToken.isEmpty())) {
-                return false;
-            }
-        }
-
-        return true;
+    private Boolean isAuthorized(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
+        return !(((authMethods != null && !authMethods.isEmpty()
+                && (authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS)))
+                && ((requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())
+                && (fToken == null || fToken.isEmpty())))
+                || ((authMethods != null && !authMethods.isEmpty()
+                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.DEMO) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.FACE)))
+                && ((requestHeaders.getBenefitName() != null && !requestHeaders.getBenefitName().isEmpty())
+                && (fToken != null && !fToken.isEmpty()))));
     }
 
     private Mono<Boolean> validateBenefitProgram(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
-        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
+        if (authMethods != null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
                 || authMethods.contains(AuthMethods.DEMO))) {
-            if(!authMethods.contains(AuthMethods.OTP) && requestHeaders.getRoleList()!=null && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)
-                    && (requestHeaders.getBenefitName()==null || requestHeaders.getBenefitName().isEmpty()))
-            {
+            if (!authMethods.contains(AuthMethods.OTP) && requestHeaders.getRoleList() != null && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)
+                    && (requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())) {
                 throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
             }
-            if (requestHeaders.getBenefitName() != null && requestHeaders.getRoleList()!=null) {
-                return validateIntegratedPrograms(requestHeaders,redisService.getIntegratedPrograms())
+            if (requestHeaders.getBenefitName() != null && requestHeaders.getRoleList() != null) {
+                return validateIntegratedPrograms(requestHeaders, redisService.getIntegratedPrograms())
                         .flatMap(aBoolean -> {
-                            log.info(INTEGRATED_PROGRAMS_LOADED_FROM_REDIS +aBoolean);
-                            if(aBoolean.equals(Boolean.FALSE)) {
+                            log.info(INTEGRATED_PROGRAMS_LOADED_FROM_REDIS + aBoolean);
+                            if (aBoolean.equals(Boolean.FALSE)) {
                                 return redisService.reloadAndGetIntegratedPrograms()
                                         .flatMap(integratedProgramDtos -> integratedProgramDtos.stream()
                                                 .filter(integratedProgramDto ->
@@ -675,10 +661,10 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Mono<Boolean> validateIntegratedPrograms(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
-        if(integratedProgramDtos!=null && !integratedProgramDtos.isEmpty()
-                && requestHeaders.getBenefitName()!=null && requestHeaders.getClientId()!=null) {
+        if (integratedProgramDtos != null && !integratedProgramDtos.isEmpty()
+                && requestHeaders.getBenefitName() != null && requestHeaders.getClientId() != null) {
             return integratedProgramDtos.stream()
-                    .filter(res->res.getBenefitName().equals(requestHeaders.getBenefitName())
+                    .filter(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
                             && res.getClientId().equals(requestHeaders.getClientId()))
                     .findAny()
                     .map(integratedProgramDto -> Mono.just(true))
@@ -688,38 +674,25 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private Boolean isValidFacility(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
-        if(authMethods!=null && authMethods.contains(AuthMethods.DEMO))
-        {
-            if(fToken != null && requestHeaders.getFTokenClaims() != null
-                    && (requestHeaders.getFTokenClaims().get(ROLES) == null
-                    || requestHeaders.getFTokenClaims().get(ROLES) != null
-                    && !requestHeaders.getFTokenClaims().get(ROLES).equals(OFFLINE_HID))){
-                return false;
-            }
-        }
-        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS)
+        return !(((authMethods != null && authMethods.contains(AuthMethods.DEMO))
+                && (fToken != null && requestHeaders.getFTokenClaims() != null
+                && (requestHeaders.getFTokenClaims().get(ROLES) == null
+                || requestHeaders.getFTokenClaims().get(ROLES) != null
+                && !requestHeaders.getFTokenClaims().get(ROLES).equals(OFFLINE_HID))))
+                || ((authMethods != null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS)
                 || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.WRONG)))
-        {
-            if (fToken != null && requestHeaders.getFTokenClaims() != null
-                    && requestHeaders.getFTokenClaims().get(SUB) == null){
-                return false;
-            }
-        }
-        return true;
-    }
-    private Boolean isValidBenefitRole(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
-        if(authMethods!=null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.BIO)
-                || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.DEMO))) {
-            if(requestHeaders.getBenefitName() != null
-                    && ((requestHeaders.getRoleList()==null || requestHeaders.getRoleList().isEmpty())
-                    || (requestHeaders.getRoleList()!=null && !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)))) {
-                return false;
-            }
-        }
-        return true;
+                && (fToken != null && requestHeaders.getFTokenClaims() != null
+                && requestHeaders.getFTokenClaims().get(SUB) == null)));
     }
 
-    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
+    private Boolean isValidBenefitRole(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
+        return !(authMethods != null
+                && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.DEMO))
+                && requestHeaders.getBenefitName() != null
+                && (requestHeaders.getRoleList() == null || requestHeaders.getRoleList().isEmpty() || !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)));
+    }
+
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto, RequestHeaders requestHeaders) {
         List<AccountDto> accountList = new ArrayList<>();
         List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
         accountList.add(accountDtoResponse);
@@ -738,12 +711,13 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
                 redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
                 redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
-                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto,requestHeaders);
+                return addAccountAuthMethods(transactionDto, accountDtoResponse, abhaProfileDto, requestHeaders);
             });
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
     }
+
     @Override
     public void validateNotificationRequest(SendNotificationRequestDto sendNotificationRequestDto) {
         LinkedHashMap<String, String> errors;
@@ -752,7 +726,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             errors.put(ABHA_NUMBER, AbhaConstants.VALIDATION_ERROR_ABHA_NUMBER_FIELD);
         }
         if (!isValidNotificationType(sendNotificationRequestDto.getNotificationType())) {
-            errors.put( AbhaConstants.NOTIFICATION_TYPE,VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD);
+            errors.put(AbhaConstants.NOTIFICATION_TYPE, VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD);
         }
         if (!isValidType(sendNotificationRequestDto.getType())) {
             errors.put(TYPE, AbhaConstants.VALIDATION_ERROR_TYPE_FIELD);
@@ -764,16 +738,11 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
     }
 
     private boolean isValidType(String type) {
-        if (type != null && !type.isEmpty())
-        {
-            return true;
-        }
-        return false;
+        return type != null && !type.isEmpty();
     }
 
     private boolean isValidNotificationType(List<NotificationType> type) {
-        if (type != null && !type.isEmpty())
-        {
+        if (type != null && !type.isEmpty()) {
             List<NotificationType> notificationTypes = Stream.of(NotificationType.values()).filter(name -> !name.equals(NotificationType.WRONG)).collect(Collectors.toList());
             return new HashSet<>(type).size() == type.size() && Common.isAllNotificationTypeAvailable(notificationTypes, type);
 

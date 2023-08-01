@@ -33,19 +33,19 @@ public class TransactionController {
     TransactionService transactionService;
 
     @GetMapping(value = ABHAEnrollmentDBConstant.GET_TRANSACTION_BY_TXN_ID)
-    public ResponseEntity<?> getTransactionByTxnId(@PathVariable("txnId") String txnId) {
+    public ResponseEntity<Mono<TransactionDto>> getTransactionByTxnId(@PathVariable("txnId") String txnId) {
         log.info(SEARCHING_FOR_TRANSACTION +txnId);
         return ResponseEntity.ok(transactionService.getTransactionByTxnId(txnId).publishOn(Schedulers.boundedElastic()));
     }
 
     @PostMapping
-    public ResponseEntity<?> createTransaction(@RequestBody TransactionDto transactionDto) {
+    public ResponseEntity<Mono<TransactionDto>> createTransaction(@RequestBody TransactionDto transactionDto) {
         log.info(CREATING_NEW_TRANSACTION +transactionDto.getTxnId());
         return ResponseEntity.ok(transactionService.createTransaction(transactionDto));
     }
 
     @PatchMapping(value = ABHAEnrollmentDBConstant.UPDATE_TRANSACTION_BY_ID)
-    public ResponseEntity<?> updateTransactionById(@RequestBody TransactionDto transactionDto, @PathVariable("id") String id) {
+    public ResponseEntity<Mono<TransactionDto>> updateTransactionById(@RequestBody TransactionDto transactionDto, @PathVariable("id") String id) {
     	log.info(UPDATING_TRANSACTION +transactionDto.getTxnId());
     	return ResponseEntity.ok(transactionService.updateTransactionById(transactionDto, id));
     }

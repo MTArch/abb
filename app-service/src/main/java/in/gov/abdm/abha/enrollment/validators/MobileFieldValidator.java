@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
  * Validating mobile number should be encrypted and valid
  *
  */
+@SuppressWarnings("java:S6353")
 public class MobileFieldValidator implements ConstraintValidator<Mobile, String> {
 
 	private static final String MOBILE_NUMBER_REGEX_PATTERN = "(\\+91|0)?[1-9][0-9]{9}";

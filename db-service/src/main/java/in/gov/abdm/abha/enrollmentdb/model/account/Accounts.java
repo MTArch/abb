@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;

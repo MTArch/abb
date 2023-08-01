@@ -1,18 +1,14 @@
 package in.gov.abdm.abha.enrollmentdb.model.dependentaccountrelationship;
 
 
-import java.time.LocalDateTime;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 
 /**
  * It's a Dependent_account_relationship POJO class
@@ -23,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class DependentAccountRelationship implements Persistable<Long> {
 
     /**
-     *  it is Id and Primary key
+     * it is Id and Primary key
      */
     @Id
     private Long id;
@@ -34,17 +30,17 @@ public class DependentAccountRelationship implements Persistable<Long> {
     private String parentHealthIdNumber;
 
     /**
-     *  it is dependent_health_id_number for child ABHA
+     * it is dependent_health_id_number for child ABHA
      */
-    private  String dependentHealthIdNumber;
+    private String dependentHealthIdNumber;
 
     /**
-     *  It is a relation with child
+     * It is a relation with child
      */
     private String relatedAs;
 
     /**
-     *  It is a relationship_proof_document_location
+     * It is a relationship_proof_document_location
      */
     private String relationshipProofDocumentLocation;
     /**

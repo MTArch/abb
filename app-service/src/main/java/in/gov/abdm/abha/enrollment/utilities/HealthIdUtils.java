@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * It is General Utils class
  */
+@SuppressWarnings("java:S6353")
 @UtilityClass
 @Slf4j
 public class HealthIdUtils {

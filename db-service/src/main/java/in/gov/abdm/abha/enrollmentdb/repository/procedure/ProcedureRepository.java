@@ -1,7 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.repository.procedure;
 
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
-import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActions;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;

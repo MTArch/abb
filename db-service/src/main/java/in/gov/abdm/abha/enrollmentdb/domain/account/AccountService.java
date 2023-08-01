@@ -18,7 +18,7 @@ public interface AccountService {
      * @param accountDto
      * @return
      */
-    Mono addAccount(AccountDto accountDto);
+    Mono<AccountDto> addAccount(AccountDto accountDto);
 
 
     /**
@@ -37,7 +37,7 @@ public interface AccountService {
      * @param healthIdNumber
      * @return
      */
-    Mono updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber);
+    Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber);
 
     /**
      * to fetch account details by xmluid
@@ -46,11 +46,10 @@ public interface AccountService {
      * @return
      */
     Mono<AccountDto> getAccountByXmlUid(String xmluid);
-    
+
     /**
-     * to fetch accounts by list of healthId numbers
      *
-     * @param xmluid
+     * @param healthIdNumbers
      * @return
      */
     Flux<AccountDto> getAccountsByHealthIdNumbers(List<String> healthIdNumbers);
