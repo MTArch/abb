@@ -123,7 +123,7 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
                 return prepareAuthByAdbmResponse(transactionDto, false, OTP_VALUE_DID_NOT_MATCH_PLEASE_TRY_AGAIN);
             }
         }
-        return Mono.just(new AuthResponseDto());
+        return null;
     }
 
     private Mono<AuthResponseDto> verifyOtpViaNotification(AuthRequestDto authByAbdmRequest, TransactionDto transactionDto,
