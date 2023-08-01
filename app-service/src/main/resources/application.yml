@@ -16,7 +16,7 @@ spring:
     sampler:
       probability: ${SLEUTH_PERCENTAGE}
   codec:
-    max-in-memory-size: 10MB
+    max-in-memory-size: ${MAX_MEMORY_SIZE}
 logging:
   level:
     root: ${LOG_LEVEL}
