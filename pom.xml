@@ -5,7 +5,6 @@
     <modules>
         <module>app-service</module>
         <module>db-service</module>
-        <module>db-initializer</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -143,5 +142,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
