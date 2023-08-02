@@ -104,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
 
     private Mono<Accounts> deCompressProfilePhoto(Accounts account){
         if(account.isProfilePhotoCompressed()){
-            account.setProfilePhoto(new String(ImageUtils.decompress(account.getCompPhoto())));
+            account.setProfilePhoto(String.valueOf(ImageUtils.decompress(account.getCompPhoto())));
         }
         return Mono.just(account);
     }
