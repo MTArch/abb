@@ -95,12 +95,9 @@ public class Accounts implements Persistable<String>{
 	 */
 	private String kycdob;
 	
-//	/**
-//	 * kyc photo of abha user
-//	 */
-//	@Basic(fetch = LAZY)
-//	@Lob
-//	@Type(type = "org.hibernate.type.BinaryType")
+	/**
+	 * kyc photo of abha user
+	 */
 	private String kycPhoto;
 
 	/**
@@ -148,12 +145,9 @@ public class Accounts implements Persistable<String>{
      */
     private String pincode;
 
-//    /**
-//     * profile photo of abha user
-//     */
-//    @Basic(fetch = LAZY)
-//	@Lob
-//	@Column(name = "profile_photo")
+    /**
+     * profile photo of abha user
+     */
     private String profilePhoto;
 
     /**

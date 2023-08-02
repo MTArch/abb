@@ -34,20 +34,20 @@ public class AuthController {
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
     public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
-        //Enrol By DL otp verify flow
+        // Enrol By DL otp verify flow
         if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.DL_FLOW, Scopes.MOBILE_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotificationDLFlow(authByAbdmRequest);
         }
-        //Enrol mobile update otp verify flow
+        // Enrol mobile update otp verify flow
         else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(),
                 List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest, Boolean.TRUE);
         }
-        //child abha parent link otp verify flow
+        // child abha parent link otp verify flow
         else if (Common.isScopeAvailable(authByAbdmRequest.getScope(), Scopes.CHILD_ABHA_ENROL)) {
             return authByAbdmService.verifyOtp(authByAbdmRequest);
         }
-        //enrol email verify flow
+        // enrol email verify flow
         else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest, Boolean.FALSE);
         } else {

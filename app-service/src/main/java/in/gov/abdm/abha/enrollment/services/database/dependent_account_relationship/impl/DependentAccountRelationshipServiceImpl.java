@@ -21,8 +21,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     AbhaDBDependentAccountRelationshipFClient abhaDBDependentAccountRelationshipFClient;
 
     public static final String ABHA_APP = "ABHA_APP";
-
-    //    @Override
+    
     public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
         return abhaDBDependentAccountRelationshipFClient.createDependentRelationships(dependentAccountRelationshipList)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));

@@ -79,7 +79,7 @@ public class Common {
      * @return
      */
     public String timeStampWithT() {
-        //Don't change date format
+        // Don't change date format
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
@@ -164,7 +164,7 @@ public class Common {
                 ABHA,
                 MESSAGE,
                 SUBJECT));
-        //OTP for updating the mobile number linked with your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, NHA##1007164725434022866
+        // OTP for updating the mobile number linked with your ABHA is {0}. This One Time Password will be valid for 10 mins.\n\nABDM, NHA##1007164725434022866
         return templates;
     }
 

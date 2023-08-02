@@ -269,10 +269,10 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
-            //HID benefit Flow
+            // HID benefit Flow
             return handleAccountByBenefitProgram(accountDto, requestHeaders);
         } else {
-            //normal flow
+            // normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
                     .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
         }
@@ -358,10 +358,10 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
-            //HID benefit Flow
+            // HID benefit Flow
             return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
         } else {
-            //normal flow
+            // normal flow
             return Mono.just(accountDto);
         }
     }

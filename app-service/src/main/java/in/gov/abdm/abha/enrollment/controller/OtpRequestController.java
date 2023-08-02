@@ -38,7 +38,7 @@ public class OtpRequestController {
     @PostMapping(URIConstant.MOBILE_OR_EMAIL_OTP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
-        //filter scope
+        // filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
 
         // If scope -abha-enrol and mobile-verify and dl-flow and otpSystem -abdm - send otp for DL self registration

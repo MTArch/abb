@@ -174,8 +174,8 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                 accountDto.setMobile(userEnteredPhoneNumber);
                                 abhaProfileDto.setMobile(userEnteredPhoneNumber);
                             }
-                            //update transaction table and create account in account table
-                            //account status is active
+                            // update transaction table and create account in account table
+                            // account status is active
                             if (isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -189,8 +189,8 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
 
                         });
             } else {
-                //update transaction table and create account in account table
-                //account status is active
+                // update transaction table and create account in account table
+                // account status is active
                 if (isTransactionManagementEnable) {
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -267,7 +267,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
-                                    //Final response for existing user
+                                    // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .abhaProfileDto(abhaProfileDto)

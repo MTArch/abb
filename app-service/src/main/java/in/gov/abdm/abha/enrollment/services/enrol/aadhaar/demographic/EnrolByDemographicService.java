@@ -100,7 +100,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
-                                //check if account exist
+                                // check if account exist
                                 return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                         .flatMap(existingAccount -> {
                                             if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
@@ -108,7 +108,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                             } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                                 return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                             } else {
-                                                //existing account
+                                                // existing account
                                                 return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                             }
                                         })
@@ -235,7 +235,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                             .build();
                     ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
                     abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-                    //Final create account response
+                    // Final create account response
                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                             .abhaProfileDto(abhaProfileDto)
                             .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
@@ -254,7 +254,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .build();
             ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
             abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-            //Final create account response
+            // Final create account response
             return Mono.just(EnrolByAadhaarResponseDto.builder()
                     .abhaProfileDto(abhaProfileDto)
                     .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
@@ -280,7 +280,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .isNew(false)
                     .build();
 
-            //Final response for existing user
+            // Final response for existing user
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(txnId, accountDto))

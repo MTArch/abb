@@ -144,7 +144,7 @@ public class EnrolUsingDrivingLicence {
                                         }
                                     });
                                 }).switchIfEmpty(Mono.defer(() -> {
-                                    //verify DL and create new account
+                                    // verify DL and create new account
                                     log.info(ACCOUNT_NOT_FOUND_WITH_DL_VERIFYING_DL_DETAILS);
                                     return verifyDrivingLicence(enrolByDocumentRequestDto, txnDto, requestHeaders);
                                 }));
@@ -162,11 +162,11 @@ public class EnrolUsingDrivingLicence {
                 .dob(enrolByDocumentRequestDto.getDob())
                 .build()).flatMap(verifyDLResponse -> {
             if (verifyDLResponse.getAuthResult().equals(StringConstants.SUCCESS)) {
-                //create new account
+                // create new account
                 log.info(DL_DETAILS_VERIFIED_CREATING_NEW_ENROLLMENT_ACCOUNT);
                 return createDLAccount(enrolByDocumentRequestDto, txnDto, requestHeaders);
             } else {
-                //failure response
+                // failure response
                 log.info(DL_DETAILS_NOT_VERIFIED);
                 throw new AbhaUnProcessableException(ABDMError.DRIVING_LICENSE_EXCEPTIONS.getCode(), DL_VERIFICATION_FAILED);
             }

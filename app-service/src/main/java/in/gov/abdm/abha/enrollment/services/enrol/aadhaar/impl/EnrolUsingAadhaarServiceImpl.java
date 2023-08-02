@@ -255,7 +255,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         enrolByAadhaarResponseDto.setResponseTokensDto(responseTokensDto);
                                     }
 
-                                    //Final response for existing user
+                                    // Final response for existing user
                                     return Mono.just(enrolByAadhaarResponseDto);
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
@@ -294,8 +294,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             accountDto.setMobile(userEnteredPhoneNumber);
                                             abhaProfileDto.setMobile(userEnteredPhoneNumber);
                                         }
-                                        //update transaction table and create account in account table
-                                        //account status is active
+                                        // update transaction table and create account in account table
+                                        // account status is active
                                         if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -308,8 +308,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
                                     });
                         } else {
-                            //update transaction table and create account in account table
-                            //account status is active
+                            // update transaction table and create account in account table
+                            // account status is active
                             if (!isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -373,7 +373,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                     .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
                                     .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                                     .build();
-                            //final create new account response
+                            // final create new account response
                             return Mono.just(EnrolByAadhaarResponseDto.builder()
                                     .txnId(transactionDto.getTxnId().toString())
                                     .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
@@ -391,7 +391,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                     .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
                     .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                     .build();
-            //final create new account response
+            // final create new account response
             return Mono.just(EnrolByAadhaarResponseDto.builder()
                     .txnId(transactionDto.getTxnId().toString())
                     .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto)
@@ -512,8 +512,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             accountDto.setMobile(userEnteredPhoneNumber);
                                             abhaProfileDto.setMobile(userEnteredPhoneNumber);
                                         }
-                                        //update transaction table and create account in account table
-                                        //account status is active
+                                        // update transaction table and create account in account table
+                                        // account status is active
                                         if (!isTransactionManagementEnable) {
                                             return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                                     .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -525,8 +525,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                         }
                                     });
                         } else {
-                            //update transaction table and create account in account table
-                            //account status is active
+                            // update transaction table and create account in account table
+                            // account status is active
                             if (!isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -599,7 +599,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                                 .build();
                                         enrolByAadhaarResponseDto.setResponseTokensDto(responseTokensDto);
                                     }
-                                    //Final response for existing user
+                                    // Final response for existing user
                                     return Mono.just(enrolByAadhaarResponseDto);
                                 });
                             }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));

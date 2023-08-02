@@ -152,7 +152,7 @@ public class OtpRequestService {
         transactionDto.setTxnId(UUID.randomUUID());
         transactionDto.setKycPhoto(null);
 
-        //Child abha parent Linking send parent aadhaar otp flow
+        // Child abha parent Linking send parent aadhaar otp flow
         if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.CHILD_ABHA_ENROL)
                 && Common.isOtpSystem(mobileOrEmailOtpRequestDto.getOtpSystem(), OtpSystem.AADHAAR)) {
             return transactionService.findTransactionDetailsFromDB(mobileOrEmailOtpRequestDto.getTxnId())
@@ -166,7 +166,7 @@ public class OtpRequestService {
                                 handleAadhaarOtpResponse(res, transactionDto)
                         );
                     }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
-        } else { //standard abha send aadhaar otp flow
+        } else { // standard abha send aadhaar otp flow
             Mono<AadhaarResponseDto> aadhaarResponseDto = aadhaarAppService.sendOtp(new AadhaarOtpRequestDto(mobileOrEmailOtpRequestDto.getLoginId()));
             return aadhaarResponseDto.flatMap(res ->
                     {

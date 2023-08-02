@@ -178,8 +178,8 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                 accountDto.setMobile(userEnteredPhoneNumber);
                                 abhaProfileDto.setMobile(userEnteredPhoneNumber);
                             }
-                            //update transaction table and create account in account table
-                            //account status is active
+                            // update transaction table and create account in account table
+                            // account status is active
                             if (isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -193,8 +193,8 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
                         });
             } else {
-                //update transaction table and create account in account table
-                //account status is active
+                // update transaction table and create account in account table
+                // account status is active
                 if (isTransactionManagementEnable) {
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -271,7 +271,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
-                                    //Final response for existing user
+                                    // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .abhaProfileDto(abhaProfileDto)
@@ -325,7 +325,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                     .build();
                     ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
                     abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-                    //Final create account response
+                    // Final create account response
                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                             .txnId(transaction.getTxnId().toString())
                             .abhaProfileDto(abhaProfileDto)
@@ -345,7 +345,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                     .build();
             ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
             abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-            //Final create account response
+            // Final create account response
             return Mono.just(EnrolByAadhaarResponseDto.builder()
                     .txnId(transaction.getTxnId().toString())
                     .abhaProfileDto(abhaProfileDto)
