@@ -51,6 +51,7 @@ import static in.gov.abdm.abha.enrollment.constants.StringConstants.DEMO_AUTH;
 
 @Slf4j
 @Service
+@SuppressWarnings("java:S3776")
 public class EnrolByDemographicService extends EnrolByDemographicValidatorService {
 
     @Autowired
@@ -99,7 +100,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
-                                //check if account exist
+                                // check if account exist
                                 return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
                                         .flatMap(existingAccount -> {
                                             if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
@@ -107,7 +108,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                             } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                                 return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
                                             } else {
-                                                //existing account
+                                                // existing account
                                                 return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
                                             }
                                         })
@@ -153,12 +154,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setMobileType(demographic.getMobileType().getValue());
         accountDto.setSource(DEMO_AUTH);
         accountDto.setKycVerified(true);
-        accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+        accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                .flatMap(duplicateAccount -> {
-                    return respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
-                }).switchIfEmpty(Mono.defer(() -> {
+                .flatMap(duplicateAccount -> respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)).switchIfEmpty(Mono.defer(() -> {
                     int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
                     if (age >= 18) {
                         accountDto.setType(AbhaType.STANDARD);
@@ -183,16 +182,13 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
-        if(isTransactionManagementEnable){
-            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
-                //HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
-                return callProcedureToCreateAccount(accountDtoResponse,requestHeaders);
-            });
-        }else{
+        if (isTransactionManagementEnable) {
+            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> callProcedureToCreateAccount(accountDtoResponse, requestHeaders));
+        } else {
             return accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
                 HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
                 return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
-                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto,requestHeaders)));
+                        .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto, requestHeaders)));
             });
         }
 
@@ -239,7 +235,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                             .build();
                     ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
                     abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-                    //Final create account response
+                    // Final create account response
                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                             .abhaProfileDto(abhaProfileDto)
                             .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
@@ -249,7 +245,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     throw new NotificationGatewayUnavailableException();
                 }
             });
-        }else{
+        } else {
             ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                     .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))
                     .expiresIn(jwtUtil.jwtTokenExpiryTime())
@@ -258,7 +254,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .build();
             ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
             abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
-            //Final create account response
+            // Final create account response
             return Mono.just(EnrolByAadhaarResponseDto.builder()
                     .abhaProfileDto(abhaProfileDto)
                     .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
@@ -284,7 +280,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .isNew(false)
                     .build();
 
-            //Final response for existing user
+            // Final response for existing user
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(txnId, accountDto))
@@ -324,7 +320,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
             log.info("going to call procedure to create account using demographic");
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
-                    .flatMap(v -> sendAccountCreatedSMS(accountDtoResponse,hidPhrAddressDto,requestHeaders));
+                    .flatMap(v -> sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders));
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }

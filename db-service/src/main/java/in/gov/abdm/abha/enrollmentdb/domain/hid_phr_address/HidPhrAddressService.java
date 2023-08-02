@@ -1,13 +1,11 @@
-package in.gov.abdm.abha.enrollmentdb.domain.HidPhrAddress;
+package in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address;
 
 
-import java.util.List;
-import java.util.Set;
-
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddressDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 /**
  * Service layer to perform crud operations on HidPhrAddress Entity
@@ -16,7 +14,6 @@ public interface HidPhrAddressService {
 
 	/**
 	 * to add new Hid Phr address
-	 *
 	 * @param hidPhrAddressDto
 	 * @return
 	 */

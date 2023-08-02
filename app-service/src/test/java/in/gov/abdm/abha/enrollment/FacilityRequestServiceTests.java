@@ -5,8 +5,6 @@ import in.gov.abdm.abha.enrollment.enums.LoginHint;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarAuthOtpDto;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthData;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.OtpDto;
@@ -34,14 +32,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,11 +45,10 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.PROVISIONAL;
 import static in.gov.abdm.abha.enrollment.enums.AccountStatus.ACTIVE;
 import static java.time.LocalDateTime.now;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyByte;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class facilityRequestServiceTests {
+class FacilityRequestServiceTests {
 
     @InjectMocks
     FacilityEnrolByEnrollmentNumberService facilityRequestService;

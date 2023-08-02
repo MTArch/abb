@@ -18,49 +18,46 @@ import in.gov.abdm.abha.enrollment.validators.annotations.ValidOtpSystem;
  */
 public class OtpSystemValidator implements ConstraintValidator<ValidOtpSystem, MobileOrEmailOtpRequestDto> {
 
-	/**
-	 * Implements the validation for otp system Possible values can be aadhaar and
-	 * abdm
-	 *
-	 * @param otpSystem object to validate
-	 * @param context   context in which the constraint is evaluated
-	 *
-	 * @return
-	 */
-	@Override
-	public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-		List<OtpSystem> enumNames = Stream.of(OtpSystem.values())
-				.filter(name -> !name.equals(OtpSystem.WRONG))
-				.collect(Collectors.toList());
+    /**
+     * Implements the validation for otp system Possible values can be aadhaar and
+     * abdm
+     *
+     * @param otpSystem object to validate
+     * @param context   context in which the constraint is evaluated
+     * @return
+     */
+    @Override
+    @SuppressWarnings("java:S3776")
+    public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
+        List<OtpSystem> enumNames = Stream.of(OtpSystem.values())
+                .filter(name -> !name.equals(OtpSystem.WRONG))
+                .collect(Collectors.toList());
 
-		if(mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem()!= null &&  mobileOrEmailOtpRequestDto.getLoginHint() != null) {
+        if (mobileOrEmailOtpRequestDto.getScope() != null && mobileOrEmailOtpRequestDto.getOtpSystem() != null && mobileOrEmailOtpRequestDto.getLoginHint() != null) {
 
 
+            boolean validOtpSystem = enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem());
 
-			boolean validOtpSystem = enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem());
+            if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
+                    && !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
+                validOtpSystem = false;
+            }
 
-			if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.AADHAAR)
-					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.AADHAAR)) {
-				validOtpSystem = false;
-			}
-
-			if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
-					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
-				validOtpSystem = false;
-			}
-			if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
-					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
-				validOtpSystem = false;
-			}
-			if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
-					&& !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
-				validOtpSystem = false;
-			}
-			return validOtpSystem;
-		}
-		else if(mobileOrEmailOtpRequestDto.getOtpSystem()==null || !enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem()))
-			return false;
-		else
-			return true;
-	}
+            if (Common.isScopeAvailable(mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList()), Scopes.MOBILE_VERIFY)
+                    && !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+                validOtpSystem = false;
+            }
+            if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))
+                    && !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+                validOtpSystem = false;
+            }
+            if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))
+                    && !mobileOrEmailOtpRequestDto.getOtpSystem().equals(OtpSystem.ABDM)) {
+                validOtpSystem = false;
+            }
+            return validOtpSystem;
+        } else {
+            return !(mobileOrEmailOtpRequestDto.getOtpSystem() == null || !enumNames.contains(mobileOrEmailOtpRequestDto.getOtpSystem()));
+        }
+    }
 }

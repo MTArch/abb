@@ -8,15 +8,13 @@ import javax.validation.ConstraintValidatorContext;
 /**
  * Validating aadhaar number should be valid and encrypted for abha creation using aadhaar
  */
-
+@SuppressWarnings({"java:S1068","java:S1450"})
 public class AadhaarNumberValidator implements ConstraintValidator<AadhaarNumber, String> {
-
-
 
     private String verhoeffCheck = "enable";
 
-    private Boolean isOptional;
-    private Boolean isEncrypted;
+    private boolean isOptional;
+    private boolean isEncrypted;
 
     @Override
     public void initialize(AadhaarNumber aadhaarNumber) {

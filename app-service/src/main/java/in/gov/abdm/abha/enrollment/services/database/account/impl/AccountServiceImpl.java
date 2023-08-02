@@ -53,6 +53,7 @@ import static in.gov.abdm.abha.enrollment.constants.StringConstants.FINGER_SCAN;
 
 @Service
 @Slf4j
+@SuppressWarnings("java:S3776")
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
@@ -94,25 +95,8 @@ public class AccountServiceImpl implements AccountService {
             newUser.setStateName(transactionDto.getStateName());
             newUser.setVerificationType(AbhaConstants.AADHAAR);
             newUser.setVerificationStatus(AbhaConstants.VERIFIED);
-            if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)){
-                newUser.setSource(AADHAAR_OTP);
-            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.FACE)){
-                newUser.setSource(FACE);
-            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.IRIS)){
-                newUser.setSource(IRIS);
-            }else if(enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)){
-                newUser.setSource(FINGER_SCAN);
-            }
-            if (!lgdDistrictResponses.isEmpty()) {
-                LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-                newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-                newUser.setDistrictName(lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? transactionDto.getDistrictName() : lgdDistrictResponse.getDistrictName());
-                newUser.setStateCode(lgdDistrictResponse.getStateCode());
-                newUser.setStateName(lgdDistrictResponse.getStateName());
-            } else {
-                newUser.setDistrictName(transactionDto.getDistrictName());
-                newUser.setStateName(transactionDto.getStateName());
-            }
+            updateSource(newUser, enrolByAadhaarRequestDto);
+            updateLGD(newUser, lgdDistrictResponses, transactionDto);
 
             newUser.setSubDistrictName(transactionDto.getSubDistrictName());
             newUser.setTownName(transactionDto.getTownName());
@@ -141,6 +125,32 @@ public class AccountServiceImpl implements AccountService {
         return Mono.just(newUser);
     }
 
+    private void updateLGD(AccountDto newUser, List<LgdDistrictResponse> lgdDistrictResponses, TransactionDto transactionDto) {
+        if (!lgdDistrictResponses.isEmpty()) {
+            LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+            newUser.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+            newUser.setDistrictName(lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? transactionDto.getDistrictName() : lgdDistrictResponse.getDistrictName());
+            newUser.setStateCode(lgdDistrictResponse.getStateCode());
+            newUser.setStateName(lgdDistrictResponse.getStateName());
+        } else {
+            newUser.setDistrictName(transactionDto.getDistrictName());
+            newUser.setStateName(transactionDto.getStateName());
+        }
+    }
+
+    private void updateSource(AccountDto newUser, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+        if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
+            newUser.setSource(AADHAAR_OTP);
+        } else if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.FACE)) {
+            newUser.setSource(FACE);
+        } else if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.IRIS)) {
+            newUser.setSource(IRIS);
+        } else if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)) {
+            newUser.setSource(FINGER_SCAN);
+        }
+    }
+
+
     private static void validateKycAndProfilePhoto(TransactionDto transactionDto, AccountDto newUser, AccountDto accountDto) {
         if (accountDto.getKycPhoto() == null) {
             newUser.setKycPhoto(transactionDto.getKycPhoto());
@@ -164,7 +174,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> updateAccountByHealthIdNumber(AccountDto accountDto, String healthIdNumber) {
-        accountDto.setLstUpdatedBy(ContextHolder.getClientId()!=null?ContextHolder.getClientId():DEFAULT_CLIENT_ID);
+        accountDto.setLstUpdatedBy(ContextHolder.getClientId() != null ? ContextHolder.getClientId() : DEFAULT_CLIENT_ID);
         accountDto.setUpdateDate(LocalDateTime.now());
         return abhaDBAccountFClient.updateAccount(accountDto, healthIdNumber)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
@@ -259,10 +269,10 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
-            //HID benefit Flow
+            // HID benefit Flow
             return handleAccountByBenefitProgram(accountDto, requestHeaders);
         } else {
-            //normal flow
+            // normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
                     .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage()))));
         }
@@ -279,27 +289,6 @@ public class AccountServiceImpl implements AccountService {
 
     private boolean validBenefitProgram(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
         return !integratedProgramDtos.isEmpty() && integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()));
-    }
-
-    private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
-        String requestId = UUID.randomUUID().toString();
-        String timestamp = String.valueOf(LocalDateTime.now());
-        return integratedProgramDBFClient.getAll(requestId, timestamp)
-                .collectList().flatMap(Mono::just).flatMap(integratedProgramDtoList -> {
-                    integratedProgramDtos.clear();
-                    integratedProgramDtos.addAll(integratedProgramDtoList);
-
-                    if (integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
-                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
-                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
-                                .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
-                                        .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
-                    } else {
-                        throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
-                    }
-                }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
-                }));
     }
 
     private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
@@ -369,10 +358,10 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
-            //HID benefit Flow
+            // HID benefit Flow
             return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
         } else {
-            //normal flow
+            // normal flow
             return Mono.just(accountDto);
         }
     }
@@ -399,51 +388,10 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-
-    private Mono<AccountDto> findBenefitIfNotPresentAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
-        String requestId = UUID.randomUUID().toString();
-        String timestamp = String.valueOf(LocalDateTime.now());
-        return integratedProgramDBFClient.getAll(requestId, timestamp)
-                .collectList().flatMap(Mono::just).flatMap(integratedProgramDtoList -> {
-                    integratedProgramDtos.clear();
-                    integratedProgramDtos.addAll(integratedProgramDtoList);
-
-                    if (integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()) && res.getClientId().equals(requestHeaders.getClientId()))
-                            && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
-                        return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
-                                .flatMap(response -> Mono.just(accountDto)
-                                        .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
-                    } else {
-                        throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
-                    }
-                }).switchIfEmpty(Mono.defer(() -> {
-                    throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
-                }));
-    }
-
     @Override
     public void mapAccountWithEkyc(AadhaarResponseDto aadhaarResponseDto, AccountDto newUser, List<LgdDistrictResponse> lgdDistrictResponses) {
         AadhaarUserKycDto kycDto = aadhaarResponseDto.getAadhaarUserKycDto();
-        if (kycDto.getPhoto()!= null) {
-            newUser.setKycPhoto(kycDto.getPhoto());
-        }
-        if (!StringUtils.isBlank(kycDto.getPincode())
-                && !kycDto.getPincode().equals(newUser.getPincode())) {
-            newUser.setPincode(kycDto.getPincode());
-        }
-        if (!StringUtils.isBlank(kycDto.getEmail())
-                && !kycDto.getEmail().equals(newUser.getEmail())) {
-            newUser.setEmail(kycDto.getEmail());
-        }
-        if (!StringUtils.isBlank(kycDto.getName())
-                && !kycDto.getName().equals(newUser.getName())) {
-            newUser.setName(kycDto.getName());
-        }
-        breakName(newUser);
-        if (!StringUtils.isBlank(kycDto.getGender())
-                && !kycDto.getGender().equals(newUser.getGender())) {
-            newUser.setGender(kycDto.getGender());
-        }
+        mapAccountWithEkycHelper(newUser, kycDto);
         if (!StringUtils.isBlank(kycDto.getBirthdate())) {
             newUser.setKycdob(kycDto.getBirthdate());
             if (kycDto.getBirthdate().length() > 4) {
@@ -482,5 +430,28 @@ public class AccountServiceImpl implements AccountService {
         newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
         newUser.setStateCode(lgdDistrictResponse.getStateCode());
         newUser.setStateName(lgdDistrictResponse.getStateName());
+    }
+
+    private void mapAccountWithEkycHelper(AccountDto newUser, AadhaarUserKycDto kycDto) {
+        if (kycDto.getPhoto() != null) {
+            newUser.setKycPhoto(kycDto.getPhoto());
+        }
+        if (!StringUtils.isBlank(kycDto.getPincode())
+                && !kycDto.getPincode().equals(newUser.getPincode())) {
+            newUser.setPincode(kycDto.getPincode());
+        }
+        if (!StringUtils.isBlank(kycDto.getEmail())
+                && !kycDto.getEmail().equals(newUser.getEmail())) {
+            newUser.setEmail(kycDto.getEmail());
+        }
+        if (!StringUtils.isBlank(kycDto.getName())
+                && !kycDto.getName().equals(newUser.getName())) {
+            newUser.setName(kycDto.getName());
+        }
+        breakName(newUser);
+        if (!StringUtils.isBlank(kycDto.getGender())
+                && !kycDto.getGender().equals(newUser.getGender())) {
+            newUser.setGender(kycDto.getGender());
+        }
     }
 }

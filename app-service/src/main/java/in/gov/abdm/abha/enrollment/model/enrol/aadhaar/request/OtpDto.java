@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.validators.annotations.Mobile;
 import in.gov.abdm.abha.enrollment.validators.annotations.OtpValue;
-import in.gov.abdm.abha.enrollment.validators.annotations.TimestampOtp;
 import in.gov.abdm.abha.enrollment.validators.annotations.Uuid;
 import lombok.Data;
 

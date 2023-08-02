@@ -29,14 +29,14 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_REGEX_PA
 public class LoginIdValidator implements ConstraintValidator<ValidLoginId, MobileOrEmailOtpRequestDto> {
 
     /**
-     * Constant for any 10-digit number pattern matching, 
+     * Constant for any 10-digit number pattern matching,
      * Starting from 1-9
      */
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
 
     /**
      * Constant for any 14-digit number pattern matching,
-     * $1-$2-$3-$4 
+     * $1-$2-$3-$4
      * Starting from 91
      */
     private static final String ABHA_NO_REGEX_PATTERN = "\\d{2}-\\d{4}-\\d{4}-\\d{4}";
@@ -53,13 +53,13 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
      * If otp system is abdm , login id will be mobile number and perform mobile regex validations
      *
      * @param mobileOrEmailOtpRequestDto object to validate
-     * @param context in which the constraint is evaluated
+     * @param context                    in which the constraint is evaluated
      */
     @Override
     public boolean isValid(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim()) && mobileOrEmailOtpRequestDto.getLoginId()!=null
+        if (!StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim()) && mobileOrEmailOtpRequestDto.getLoginId() != null
                 && mobileOrEmailOtpRequestDto.getLoginHint() != null && mobileOrEmailOtpRequestDto.getScope() != null) {
-            if(rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).equals(StringConstants.EMPTY))
+            if (rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId()).equals(StringConstants.EMPTY))
                 return false;
 
             if (isRSAEncrypted(mobileOrEmailOtpRequestDto.getLoginId())
@@ -67,23 +67,20 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
                 return isValidEmailOrMobileOrAadhaarOrAbha(mobileOrEmailOtpRequestDto);
 
-            }
-            else return true;
-        }else if(mobileOrEmailOtpRequestDto.getLoginId()==null ||StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim())) {
-            return false;
+            } else return true;
+        } else {
+            return !(mobileOrEmailOtpRequestDto.getLoginId() == null || StringUtils.isEmpty(mobileOrEmailOtpRequestDto.getLoginId().trim()));
         }
-        else
-            return true;
-
     }
 
     /**
      * Validates a given MobileOrEmailOtpRequestDto object by checking whether the loginId
      * is a valid mobile number, email address, Aadhaar number, or ABHA number based on the loginHint and scope values.
+     *
      * @param mobileOrEmailOtpRequestDto the MobileOrEmailOtpRequestDto object to validate
      * @return true if the loginId is a valid mobile number, email address, Aadhaar number, or ABHA number
      */
-    private boolean isValidEmailOrMobileOrAadhaarOrAbha(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto){
+    private boolean isValidEmailOrMobileOrAadhaarOrAbha(MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
         String loginId = rsaUtil.decrypt(mobileOrEmailOtpRequestDto.getLoginId());
 
         if (Common.isAllScopesAvailable(mobileOrEmailOtpRequestDto.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.MOBILE_VERIFY))) {
@@ -96,14 +93,14 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             return isValidAadhaar(loginId);
         } else if (mobileOrEmailOtpRequestDto.getLoginHint().equals(LoginHint.ABHA_NUMBER)) {
             return isValidAbha(loginId);
-        }
-        else {
+        } else {
             return true;
         }
     }
 
     /**
      * Validates a given string as a valid email address.
+     *
      * @param email the string to validate
      * @return true if the given string is a valid email address, false otherwise
      */
@@ -114,9 +111,11 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
     /**
      * Checks whether a given string is a valid input.
      * A valid input should not consist of only digits or only letters.
+     *
      * @param loginId the string to check
      * @return true if the given string is a valid input, false otherwise
      */
+    @SuppressWarnings("java:S6353")
     private boolean isValidInput(String loginId) {
         return !Pattern.compile("[0-9]+").matcher(loginId).matches()
                 && !Pattern.compile("[a-zA-Z]+").matcher(loginId).matches();
@@ -124,6 +123,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
     /**
      * Checks whether a given string is RSA encrypted.
+     *
      * @param loginId the string to check
      * @return true if the given string is RSA encrypted, false otherwise
      */
@@ -132,13 +132,14 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
             new String(Base64.getDecoder().decode(loginId));
             return true;
         } catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+            log.error(ex.getMessage(), ex);
             return false;
         }
     }
 
     /**
      * Validates a given string as a valid 10-digit mobile number.
+     *
      * @param mobileNo the string to validate
      * @return true if the given string is a valid 10-digit mobile number, false otherwise
      */
@@ -148,6 +149,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
     /**
      * Validates a given string as a valid Aadhaar number.
+     *
      * @param aadhaar the string to validate
      * @return true if the given string is a valid Aadhaar number, false otherwise
      */
@@ -157,6 +159,7 @@ public class LoginIdValidator implements ConstraintValidator<ValidLoginId, Mobil
 
     /**
      * Validates a given string as a valid Abha number.
+     *
      * @param abha the string to validate
      * @return true if the given string is a valid Abha number, false otherwise
      */

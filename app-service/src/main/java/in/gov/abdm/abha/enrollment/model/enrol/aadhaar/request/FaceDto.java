@@ -26,7 +26,6 @@ public class FaceDto {
     private String rdPidData;
 
     @JsonProperty("mobile")
-    //@NotEmpty(message = AbhaConstants.MOBILE_NUMBER_MISSMATCH)
     @Mobile
     private String mobile;
 }

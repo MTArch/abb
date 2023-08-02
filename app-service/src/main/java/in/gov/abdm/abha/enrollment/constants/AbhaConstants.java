@@ -153,7 +153,7 @@ public class AbhaConstants {
     public static final String CLIENT_ID_VALUE = "abha-profile-app-api";
     public static final String SYSTEM_VALUE = "ABHA-N";
 
-    //Demographic validations
+    // Demographic validations
     public static final String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
     public static final String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
     public static final String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";

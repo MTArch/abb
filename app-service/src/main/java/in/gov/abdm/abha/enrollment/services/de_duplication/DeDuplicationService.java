@@ -14,11 +14,11 @@ import reactor.core.publisher.Mono;
 public class DeDuplicationService {
 
     @Value(PropertyConstants.ENROLLMENT_ENABLE_DEDUPLICATION)
-    private boolean ENABLE_DEDUPLICATION;
+    private boolean enableDeduplication;
     @Autowired
     AbhaDBAccountFClient abhaDBAccountFClient;
     public Mono<AccountDto> checkDeDuplication(DeDuplicationRequest request) {
-        if(!ENABLE_DEDUPLICATION)
+        if(!enableDeduplication)
             return Mono.empty();
         else
             return abhaDBAccountFClient.checkDeDuplication(request);

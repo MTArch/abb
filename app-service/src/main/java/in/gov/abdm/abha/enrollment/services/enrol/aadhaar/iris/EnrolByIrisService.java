@@ -65,8 +65,6 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
     @Autowired
     TransactionService transactionService;
     @Autowired
-    RSAUtil rsaUtil;
-    @Autowired
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
     RedisService redisService;
@@ -104,7 +102,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarIris(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders){
+    private Mono<EnrolByAadhaarResponseDto> verifyAadhaarIris(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyIris(AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getIris().getAadhaar()))
                 .pid(enrolByAadhaarRequestDto.getAuthData().getIris().getPid())
@@ -145,12 +143,12 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
             }
         }
     }
-
+    @SuppressWarnings("java:S3776")
     private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingIris(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
         return newAccountDto.flatMap(accountDto -> {
-            accountDto.setFacilityId(requestHeaders.getFTokenClaims()!=null && requestHeaders.getFTokenClaims().get(SUB)!=null?requestHeaders.getFTokenClaims().get(SUB).toString():null);
+            accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
             if (age >= 18) {
                 accountDto.setType(AbhaType.STANDARD);
@@ -169,21 +167,21 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
             abhaProfileDto.setStateCode(accountDto.getStateCode());
             abhaProfileDto.setDistrictCode(accountDto.getDistrictCode());
             String userEnteredPhoneNumber = enrolByAadhaarRequestDto.getAuthData().getIris().getMobile();
-            if (userEnteredPhoneNumber!=null && !userEnteredPhoneNumber.isBlank() && Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
+            if (userEnteredPhoneNumber != null && !userEnteredPhoneNumber.isBlank() && Common.isPhoneNumberMatching(userEnteredPhoneNumber, transactionDto.getMobile())) {
                 return aadhaarAppService.verifyDemographicDetails(prepareVerifyDemographicRequest(accountDto, transactionDto, enrolByAadhaarRequestDto))
                         .flatMap(verifyDemographicResponse -> {
                             if (verifyDemographicResponse.isVerified()) {
                                 accountDto.setMobile(userEnteredPhoneNumber);
                                 abhaProfileDto.setMobile(userEnteredPhoneNumber);
                             }
-                            //update transaction table and create account in account table
-                            //account status is active
-                            if(isTransactionManagementEnable){
+                            // update transaction table and create account in account table
+                            // account status is active
+                            if (isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                         .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto));
 
-                            }else{
+                            } else {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders))
                                         .flatMap(response -> handleCreateAccountResponseUsingIris(response, transactionDto, abhaProfileDto));
@@ -191,8 +189,8 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
 
                         });
             } else {
-                //update transaction table and create account in account table
-                //account status is active
+                // update transaction table and create account in account table
+                // account status is active
                 if (isTransactionManagementEnable) {
                     return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                             .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
@@ -244,7 +242,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> existingAccountIris(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
-         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
+        return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
                 {
                     transactionDtoResponse.setHealthIdNumber(accountDto.getHealthIdNumber());
@@ -269,7 +267,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
-                                    //Final response for existing user
+                                    // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
                                             .abhaProfileDto(abhaProfileDto)
@@ -305,15 +303,15 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
 
             log.info("going to call procedure to create account");
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> {
-                                ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
-                                        .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
-                                        .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                                        .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
-                                        .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                        .build();
-                                return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
+                            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                                    .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDtoResponse))
+                                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                                    .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                                    .build();
+                            return Mono.just(EnrolByAadhaarResponseDto.builder().txnId(transactionDto.getTxnId().toString())
                                         .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
-                                        .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).isNew(true).build());
+                                    .abhaProfileDto(abhaProfileDto).responseTokensDto(responseTokensDto).isNew(true).build());
             });
         } else {
             throw new AbhaDBGatewayUnavailableException();

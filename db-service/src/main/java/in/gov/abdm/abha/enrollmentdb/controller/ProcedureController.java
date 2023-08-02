@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
@@ -21,7 +22,7 @@ public class ProcedureController {
     @Autowired
     ProcedureService procedureService;
     @PostMapping(value = "/saveAll")
-    public ResponseEntity<?> createAccount(@RequestBody SaveAllDataRequest saveAllDataRequest) {
+    public ResponseEntity<Mono<String>> createAccount(@RequestBody SaveAllDataRequest saveAllDataRequest) {
         log.info(ENROLLMENT_DB_LOG_MSG+"save data"+ENROLLMENT_DB_PROCEDURE_CALL);
         return ResponseEntity.ok(procedureService.saveAllData(saveAllDataRequest));
     }

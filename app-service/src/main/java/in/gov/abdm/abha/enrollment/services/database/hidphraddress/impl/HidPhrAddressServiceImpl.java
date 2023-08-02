@@ -78,7 +78,7 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 	@Override
 	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
 																				  List<Integer> preferred) {
-		return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(n -> n.toString()).collect(Collectors.joining(",")))
+		return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(Object::toString).collect(Collectors.joining(",")))
 				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
 	}
 

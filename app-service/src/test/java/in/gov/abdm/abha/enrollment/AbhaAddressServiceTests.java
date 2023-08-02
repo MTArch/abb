@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class AbhaAddressServiceTests {
+class AbhaAddressServiceTests {
 
     @InjectMocks
     AbhaAddressServiceImpl abhaAddressService;

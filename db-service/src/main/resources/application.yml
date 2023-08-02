@@ -12,10 +12,10 @@ spring:
       type: web
     service:
       name: ${brave.localServiceName:${spring.application.name}}
-    check-timeout: 10000
+    check-timeout: ${ZIPKIN_CHECK_TIMEOUT}
   sleuth:
     sampler:
-      percentage: 1.0
+      probability: ${SLEUTH_PERCENTAGE}
 
   kafka:
     bootstrap-servers: ${KAFKA_SERVICE_URL}

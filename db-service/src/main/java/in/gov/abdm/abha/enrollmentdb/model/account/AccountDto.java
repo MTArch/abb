@@ -2,7 +2,7 @@ package in.gov.abdm.abha.enrollmentdb.model.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
-import in.gov.abdm.abha.enrollmentdb.model.HidPhrAddress.HidPhrAddress;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

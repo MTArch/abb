@@ -1,11 +1,11 @@
 package in.gov.abdm.abha.enrollment.validators;
+
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.DemoDto;
-import in.gov.abdm.abha.enrollment.utilities.VerhoeffAlgorithm;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.abha.enrollment.validators.annotations.AadhaarNumberDemo;
+import in.gov.abdm.abha.profile.utilities.VerhoeffAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -38,6 +38,7 @@ public class AadhaarNumberDemoValidator implements ConstraintValidator<AadhaarNu
                 && !aadhaar.isEmpty();
     }
 
+    @SuppressWarnings("java:S6353")
     private boolean isValidInput(String aadhaar) {
         return !Pattern.compile("[0-9]+").matcher(aadhaar).matches()
                 && !Pattern.compile("[a-zA-Z]+").matcher(aadhaar).matches();

@@ -27,8 +27,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     KafkaService kafkaService;
 
-    private static final String ABHA_SYNC = "ABHA_SYNC";
-
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
         Accounts account = map(accountDto);
@@ -106,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
 
     private Mono<Accounts> deCompressProfilePhoto(Accounts account){
         if(account.isProfilePhotoCompressed()){
-            account.setProfilePhoto(new String(ImageUtils.decompress(account.getCompPhoto())));
+            account.setProfilePhoto(String.valueOf(ImageUtils.decompress(account.getCompPhoto())));
         }
         return Mono.just(account);
     }

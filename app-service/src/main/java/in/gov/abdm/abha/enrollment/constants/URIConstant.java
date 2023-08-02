@@ -3,6 +3,11 @@ package in.gov.abdm.abha.enrollment.constants;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("java:S2386")
+/**
+ * suppress reason
+ * list of constant variable required
+ */
 public class URIConstant {
 
     private URIConstant() {
@@ -11,7 +16,7 @@ public class URIConstant {
     public static final String API_VERSION = "/v3";
     public static final String BASE_URI = "/api" + API_VERSION + "/enrollment";
 
-    //enrol endpoints
+    // enrol endpoints
     public static final String ENROL_ENDPOINT = BASE_URI + "/enrol";
     public static final String BY_ENROL_AADHAAR_ENDPOINT = "/byAadhaar";
     public static final String ENROL_BY_DOCUMENT_ENDPOINT = "/byDocument";
@@ -20,20 +25,20 @@ public class URIConstant {
     public static final String ENROL_ABHA_ADDRESS_ENDPOINT = "/abha-address";
     public static final String ENROL_REQUEST_NOTIFICATION_ENDPOINT = "/request/notification";
 
-    //request endpoints
+    // request endpoints
     public static final String OTP_REQUEST_ENDPOINT = BASE_URI + "/request";
     public static final String MOBILE_OR_EMAIL_OTP_ENDPOINT = "/otp";
 
-    //auth endpoints
+    // auth endpoints
     public static final String AUTH_ENDPOINT = BASE_URI + "/auth";
     public static final String AUTH_BY_ABDM_ENDPOINT = "/byAbdm";
     public static final String AUTH_BY_AADHAAR_ENDPOINT = "/byAadhaar";
 
-    //profile endpoints
+    // profile endpoints
     public static final String PROFILE_ENDPOINT = BASE_URI + "/profile";
     public static final String LINK_PARENT_ENDPOINT = "/link/parent";
 
-    //    DB URIS
+    // DB URIS
     public static final String DB_BASE_URI = "/api/v3/enrollmentdb";
 
     public static final String DB_ADD_TRANSACTION_URI = DB_BASE_URI + "/transaction";
@@ -84,8 +89,8 @@ public class URIConstant {
     public static final String DB_UPDATE_HID_PHR_ADDRESS_BY_HID_PHR_ADDRESS_ID = DB_BASE_URI + "/hidphraddress/{hidPhrAddressId}";
     public static final String DB_GET_ALL_INTEGRATED_PROGRAMS_URI = DB_BASE_URI + "/integratedProgram";
     public static final String DB_GET_INTEGRATED_PROGRAMS_BY_BENEFIT_NAME_URI = DB_BASE_URI + "/integratedProgram/{benefitName}";
-//    Aadhaar Service URI
 
+    // Aadhaar Service URI
     public static final String AADHAAR_BASE_URI = "/api/v3/aadhaar";
     public static final String AADHAAR_SEND_OTP_URI = AADHAAR_BASE_URI + "/sendOtp";
     public static final String AADHAAR_VERIFY_OTP_URI = AADHAAR_BASE_URI + "/verifyOtp";
@@ -101,16 +106,16 @@ public class URIConstant {
 
     public static final String GET_IDENTITY_BY_ABHA_ADDRESS_LIST_URI = IDP_BASE_URI + "/address/identity/getUsersByAbhaAddressList";
 
-    //    Notification Service
+    // Notification Service
     public static final String NOTIFICATION_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_SEND_OTP_URI = NOTIFICATION_BASE_URI + "/message";
 
-    //    Notification DB Service
+    // Notification DB Service
     public static final String NOTIFICATION_DB_BASE_URI = "/internal/v3/notification";
     public static final String NOTIFICATION_DB_GET_ALL_TEMPLATES_URI = NOTIFICATION_DB_BASE_URI + "/template/name/ABHA";
     public static final String NOTIFICATION_DB_GET_TEMPLATE_BY_ID_URI = NOTIFICATION_DB_BASE_URI + "/template/id/{templateId}";
 
-    //LGD service
+    // LGD service
     public static final String LGD_BASE_URI = "/internal/v3/abdm/lgd";
     public static final String FLGD_BASE_URI = "/internal/v3/abdm/lgd/search";
     public static final String FLGD_STATE_SEARCH_URI = "/internal/v3/abdm/lgd/state/search";
@@ -129,11 +134,11 @@ public class URIConstant {
 
     public static final String FACILITY_PROFILE_DETAILS_BY_ENROLLMENT_NUMBER_ENDPOINT = "/{enrollmentNumber}";
 
-    //    PHR DB Service
+    // PHR DB Service
     public static final String PHR_DB_BASE_URI = "/internal/api/v3/phr/profiledb";
     public static final String GET_USERS_BY_ABHA_ADDRESS_LIST_URI = PHR_DB_BASE_URI + "/user/getUsersByAbhaAddressList";
 
-    //Feign Client
+    // Feign Client
     public static final String REQUEST_ID = "REQUEST_ID";
     public static final String TIMESTAMP = "TIMESTAMP";
     public static final String REQUESTER_ID = "REQUESTER_ID";

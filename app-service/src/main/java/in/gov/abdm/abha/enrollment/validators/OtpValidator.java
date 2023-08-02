@@ -16,7 +16,7 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
     public boolean isValid(AuthData authData, ConstraintValidatorContext context) {
 
         if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
-                && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
+                && authData.getAuthMethods().get(0) != null
                 && authData.getAuthMethods().contains(AuthMethods.OTP))
         {
             if(otpNullorEmpty(authData))
@@ -25,7 +25,7 @@ public class OtpValidator implements ConstraintValidator<Otp, AuthData> {
                 return true;
         }
         else if (authData.getAuthMethods()!=null && !authData.getAuthMethods().isEmpty()
-                && authData.getAuthMethods().get(0) != null && !authData.getAuthMethods().get(0).equals("")
+                && authData.getAuthMethods().get(0) != null
                 && authData.getAuthMethods().stream().noneMatch(v->v.equals(AuthMethods.OTP)))
         {
             if(otpNullorEmpty(authData)|| otpNotNullorEmpty(authData)) {

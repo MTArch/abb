@@ -21,8 +21,7 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     AbhaDBDependentAccountRelationshipFClient abhaDBDependentAccountRelationshipFClient;
 
     public static final String ABHA_APP = "ABHA_APP";
-
-    //    @Override
+    
     public Mono<DependentAccountRelationshipDto> createDependentAccountEntity(List<DependentAccountRelationshipDto> dependentAccountRelationshipList) {
         return abhaDBDependentAccountRelationshipFClient.createDependentRelationships(dependentAccountRelationshipList)
                 .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
@@ -32,10 +31,10 @@ public class DependentAccountRelationshipServiceImpl implements DependentAccount
     public List<DependentAccountRelationshipDto> prepareDependentAccount(LinkParentRequestDto linkParentRequestDto) {
         List<DependentAccountRelationshipDto> list = new ArrayList<>();
         DependentAccountRelationshipDto dependentAccountDto = new DependentAccountRelationshipDto();
-        if (linkParentRequestDto.getParentAbhaRequestDtoList() != null && linkParentRequestDto.getParentAbhaRequestDtoList().size() > 0) {
+        if (linkParentRequestDto.getParentAbhaRequestDtoList() != null && !linkParentRequestDto.getParentAbhaRequestDtoList().isEmpty()) {
             for (int i = 0; i < linkParentRequestDto.getParentAbhaRequestDtoList().size(); i++) {
-                dependentAccountDto.setParentHealthIdNumber(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getABHANumber());
-                dependentAccountDto.setDependentHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getABHANumber());
+                dependentAccountDto.setParentHealthIdNumber(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getAbhaNumber());
+                dependentAccountDto.setDependentHealthIdNumber(linkParentRequestDto.getChildAbhaRequestDto().getAbhaNumber());
                 dependentAccountDto.setRelatedAs(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getRelationship().getValue());
                 dependentAccountDto.setRelationshipProofDocumentLocation(linkParentRequestDto.getParentAbhaRequestDtoList().get(i).getDocument());
                 dependentAccountDto.setCreatedBy(ABHA_APP);

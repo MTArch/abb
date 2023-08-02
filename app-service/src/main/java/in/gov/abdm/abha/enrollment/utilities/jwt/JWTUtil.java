@@ -30,10 +30,10 @@ public class JWTUtil {
     private static final String ABHA_NUMBER = "abhaNumber";
     private static final String TYPE = "typ";
 
-    @Value(JWT_TOKEN_VALIDITY_IN_SEC) // Defaults to 30 min
+    @Value(JWT_TOKEN_VALIDITY_IN_SEC)
     private long jwtUserTokenValidityInSec;
 
-    @Value(JWT_TOKEN_REFRESH_VALIDITY_IN_SEC) // Defaults to 15 days
+    @Value(JWT_TOKEN_REFRESH_VALIDITY_IN_SEC)
     private long jwtUserRefreshTokenValidityInSec;
 
     @Autowired

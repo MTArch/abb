@@ -54,7 +54,7 @@ public class FacilityController {
     @PostMapping(URIConstant.FACILITY_OTP_ENDPOINT)
     public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto
                                                                     ,@RequestHeader(value = AbhaConstants.F_TOKEN) String fToken) {
-        //filter scope
+        // filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());
         // If scope -abha-enrol and verify-enrolment and otpSystem -abdm
         if (Common.isAllScopesAvailable(requestScopes, List.of(Scopes.ABHA_ENROL, Scopes.VERIFY_ENROLLMENT))

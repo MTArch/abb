@@ -11,6 +11,7 @@ import in.gov.abdm.abha.enrollment.validators.annotations.Name;
  * Validating name should be a valid name
  *
  */
+@SuppressWarnings("java:S6353")
 public class NameValidator implements ConstraintValidator<Name, String> {
 	
 	private static final String NAME_REGEX_PATTERN = "^[A-Za-z\\s\\.\\']{1,}";
