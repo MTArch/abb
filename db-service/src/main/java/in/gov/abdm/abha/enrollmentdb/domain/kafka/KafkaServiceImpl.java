@@ -70,7 +70,7 @@ public class KafkaServiceImpl implements KafkaService{
     @Override
     public Mono<Void> publishPhrUserPatientEventByAccounts(AccountDto accountDto){
         String requestId = String.valueOf(UUID.randomUUID());
-        return hidPhrAddressRepository.getPhrAddressByPhrAddress(accountDto.getHealthId().toLowerCase())
+        return hidPhrAddressRepository.getPhrAddressByPhrAddress(accountDto.getHealthId())
                 .flatMap(hidPhrAddress -> {
                     accountDto.setHidPhrAddress(hidPhrAddress);
                     User userToBePublished =null;

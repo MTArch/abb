@@ -39,7 +39,7 @@ public class ProcedureServiceImpl implements ProcedureService {
                             om.writeValueAsString(saveAllDataRequest.getHidPhrAddress()), om.writeValueAsString(saveAllDataRequest.getAccountAuthMethods()))
                     .flatMap(response -> {
                         log.info("response of sp {}", response);
-                        return hidPhrAddressRepository.getPhrAddressByPhrAddress(saveAllDataRequest.getAccounts().get(0).getHealthId().toLowerCase())
+                        return hidPhrAddressRepository.getPhrAddressByPhrAddress(saveAllDataRequest.getAccounts().get(0).getHealthId())
                                 .flatMap(hidPhrAddress -> {
                                     kafkaService.publishPhrUserPatientEvent(hidPhrAddress).subscribe();
                                     return Mono.just(response);
