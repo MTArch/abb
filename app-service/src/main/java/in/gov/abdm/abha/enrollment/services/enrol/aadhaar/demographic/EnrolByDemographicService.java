@@ -183,7 +183,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
         if (isTransactionManagementEnable) {
-            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> callProcedureToCreateAccount(accountDtoResponse, requestHeaders));
+            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> callProcedureToCreateAccount(accountDtoResponse, requestHeaders, enrolByAadhaarRequestDto));
         } else {
             return accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
                 HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
@@ -303,7 +303,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
 
-    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, RequestHeaders requestHeaders) {
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, RequestHeaders requestHeaders, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         List<AccountDto> accountList = new ArrayList<>();
         List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
         accountList.add(accountDtoResponse);
@@ -320,7 +320,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
             log.info("going to call procedure to create account using demographic");
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
-                    .flatMap(v -> sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders));
+                    .flatMap(v -> addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByAadhaarRequestDto.getAuthData().getDemographic().getConsentFormImage()).flatMap(v1->sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders)));
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
