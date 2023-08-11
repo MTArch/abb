@@ -173,8 +173,6 @@ public class AbhaConstants {
     public static final String AADHAAR_TECHNICAL_ERROR_MSG = "Technical error that are internal to authentication server.";
     public static final String EMAIL_HIDE_REGEX = ".(?=.{4})";
 
-    public static final String EMAIL_MASK_CHAR = "$1*";
-
     public static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9_-]+(?:\\.[a-zA-Z0-9_-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
     public static final String PID_INVALID = "Invalid PID";

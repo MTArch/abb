@@ -43,6 +43,7 @@ public class EnrolByDemographicValidatorService {
     private static final String MOBILE = "mobile";
     private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
+    private static final String HEALTH_WORKER_NAME = "healthWorkerName";
     private static final String ADDRESS = "address";
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
@@ -51,8 +52,7 @@ public class EnrolByDemographicValidatorService {
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
-
-
+    private static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
 
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
     private String documentPhotoMinSizeLimit;
@@ -88,7 +88,7 @@ public class EnrolByDemographicValidatorService {
         } else if (!isValidConsentFormImageFormat(demographic)) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && !isValidMobileNumber(demographic)) {
+        if (!isValidMobileNumber(requestHeaders, demographic)) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidMobileType(demographic)) {
@@ -96,6 +96,9 @@ public class EnrolByDemographicValidatorService {
         }
         if (!isValidHealthWorkerMobile(demographic)) {
             errors.put(HEALTH_WORKER_MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
+        }
+        if (!isValidHealthWorkerName(demographic)) {
+            errors.put(HEALTH_WORKER_NAME, AbhaConstants.INVALID_HEALTH_WORKER_NAME);
         }
         if (!isValidAddress(demographic)) {
             errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
@@ -105,20 +108,26 @@ public class EnrolByDemographicValidatorService {
         }
     }
 
+    private boolean isValidHealthWorkerName(Demographic demographic) {
+        return StringUtils.isEmpty(demographic.getHealthWorkerName())
+                || (Common.validStringSize(demographic.getHealthWorkerName(), MAX_NAME_SIZE)
+                && demographic.getHealthWorkerName().matches(alphabeticCharOnlyRegex));
+    }
+
     private void validateNameAndDob(Demographic demographic, LinkedHashMap<String, String> errors) {
-        boolean isValidMonthAndYear=true;
+        boolean isValidMonthAndYear = true;
         if (!isValidDateOfBirth(demographic)) {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
-            isValidMonthAndYear=false;
+            isValidMonthAndYear = false;
         }
         if (!isValidMonthOfBirth(demographic)) {
             errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
-            isValidMonthAndYear=false;
+            isValidMonthAndYear = false;
         }
 
         if (!isValidYearOfBirth(demographic)) {
             errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
-            isValidMonthAndYear=false;
+            isValidMonthAndYear = false;
         }
         if (isValidMonthAndYear && !isValidDayOfBirth(demographic)) {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
@@ -143,15 +152,17 @@ public class EnrolByDemographicValidatorService {
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getHealthWorkerMobile()).matches();
     }
 
-    private boolean isValidMobileNumber(Demographic demographic) {
-        if(demographic.getMobile()==null || demographic.getMobile().isBlank()){
+    private boolean isValidMobileNumber(RequestHeaders requestHeaders, Demographic demographic) {
+        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(demographic.getMobile())) {
+            return true;
+        } else if (!StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(demographic.getMobile())) {
             return false;
         }
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getMobile()).matches();
     }
 
     private boolean isValidYearOfBirth(Demographic demographic) {
-        return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth())>=1900);
+        return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth()) >= 1900);
     }
 
     private boolean isValidMonthOfBirth(Demographic demographic) {
@@ -173,9 +184,9 @@ public class EnrolByDemographicValidatorService {
 
     private boolean isValidAadhaar(Demographic demographic) {
         try {
-           return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
-        }catch(Exception ex){
-            log.error("Invalid encryption value {}",ex.getMessage());
+            return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+        } catch (Exception ex) {
+            log.error("Invalid encryption value {}", ex.getMessage());
             return false;
         }
     }
@@ -225,6 +236,7 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidAddress(Demographic demographic) {
-        return !demographic.getAddress().isBlank();
+        return !demographic.getAddress().isBlank() &&
+                demographic.getAddress().matches(ADDRESS_VALIDATOR_REGEX);
     }
 }

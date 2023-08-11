@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.constants;
 public class PropertyConstants {
 
     private PropertyConstants() {
+
     }
 
     public static final String KAFKA_ABHA_PATIENT_SYNC_TOPIC = "${kafka.abha.patient.sync.topic}";
