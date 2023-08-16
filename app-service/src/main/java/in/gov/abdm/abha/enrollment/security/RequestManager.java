@@ -27,7 +27,7 @@ public class RequestManager implements ReactiveAuthenticationManager {
         Request request = (Request) authentication;
         String requestId = request.getRequestId();
         String timestamp = request.getTimestamp();
-        if(requestId != null && request.getTimestamp() != null) {
+        if(requestId != null && timestamp != null) {
             authentication.setAuthenticated(true);
             String key = "ABHA_ENROL_" + requestId;
             ReplayAttack.checkForReplayAttack(redisTemplate, key,
