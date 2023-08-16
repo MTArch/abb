@@ -25,15 +25,18 @@ public class RequestManager implements ReactiveAuthenticationManager {
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         Request request = (Request) authentication;
-        if(request.getRequestId() !=null && request.getTimestamp()!=null) {
+        String requestId = request.getRequestId();
+        String timestamp = request.getTimestamp();
+        if(requestId != null && request.getTimestamp() != null) {
             authentication.setAuthenticated(true);
-//            ReplayAttack.checkForReplayAttack(redisTemplate, request.getRequestId(),
-//                            Timestamp.from(Instant.now()))
-//                    .onErrorResume(throwable -> {
-//                        log.warn(ABHA_ENROL_LOG_PREFIX + REPLAY_ATTACK_FOUND, request.getRequestId(), request.getTimestamp());
-//                        authentication.setAuthenticated(false);
-//                        return Mono.empty();
-//                    }).subscribe();
+            String key = "ABHA_ENROL_" + requestId;
+            ReplayAttack.checkForReplayAttack(redisTemplate, key,
+                            Timestamp.from(Instant.now()))
+                    .onErrorResume(throwable -> {
+                        log.warn(ABHA_ENROL_LOG_PREFIX + REPLAY_ATTACK_FOUND, requestId, timestamp);
+                        authentication.setAuthenticated(false);
+                        return Mono.empty();
+                    }).subscribe();
         }
         return Mono.just(authentication);
     }
