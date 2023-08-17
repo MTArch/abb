@@ -153,7 +153,9 @@ public class AbhaConstants {
     public static final String CLIENT_ID_VALUE = "abha-profile-app-api";
     public static final String SYSTEM_VALUE = "ABHA-N";
 
-    // Demographic validations
+    /**
+     * Demographic validations
+     */
     public static final String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
     public static final String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
     public static final String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";
@@ -214,4 +216,6 @@ public class AbhaConstants {
     public static final String FACILITY_ID = "Facility-Id";
     public static final String CLIENT_ID = "Client-Id";
     public static final String FINGERPRINT_PID_INVALID = "Invalid Fingerprint Auth PID";
+    public static final String HEALTH_WORKER_NAME = "healthWorkerName";
+    public static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
 }

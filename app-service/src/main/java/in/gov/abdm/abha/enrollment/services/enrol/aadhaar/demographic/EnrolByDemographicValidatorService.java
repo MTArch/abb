@@ -43,7 +43,6 @@ public class EnrolByDemographicValidatorService {
     private static final String MOBILE = "mobile";
     private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
-    private static final String HEALTH_WORKER_NAME = "healthWorkerName";
     private static final String ADDRESS = "address";
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
@@ -52,7 +51,8 @@ public class EnrolByDemographicValidatorService {
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
-    private static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
+
+
 
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
     private String documentPhotoMinSizeLimit;
@@ -98,7 +98,7 @@ public class EnrolByDemographicValidatorService {
             errors.put(HEALTH_WORKER_MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidHealthWorkerName(demographic)) {
-            errors.put(HEALTH_WORKER_NAME, AbhaConstants.INVALID_HEALTH_WORKER_NAME);
+            errors.put(AbhaConstants.HEALTH_WORKER_NAME, AbhaConstants.INVALID_HEALTH_WORKER_NAME);
         }
         if (!isValidAddress(demographic)) {
             errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
@@ -237,6 +237,6 @@ public class EnrolByDemographicValidatorService {
 
     private boolean isValidAddress(Demographic demographic) {
         return !demographic.getAddress().isBlank() &&
-                demographic.getAddress().matches(ADDRESS_VALIDATOR_REGEX);
+                demographic.getAddress().matches(AbhaConstants.ADDRESS_VALIDATOR_REGEX);
     }
 }
