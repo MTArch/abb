@@ -29,7 +29,7 @@ public class RequestManager implements ReactiveAuthenticationManager {
         String timestamp = request.getTimestamp();
         if(requestId != null && timestamp != null) {
             authentication.setAuthenticated(true);
-            String key = "ABHA_ENROL_" + requestId;
+            String key = "ABHA_ENROL_DEV_TEST_" + requestId;
             ReplayAttack.checkForReplayAttack(redisTemplate, key,
                             Timestamp.from(Instant.now()))
                     .onErrorResume(throwable -> {
