@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.domain.kafka;
 
+import in.gov.abdm.abha.enrollmentdb.constant.StringConstants;
 import in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event.PatientEventPublisher;
 import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
@@ -41,7 +42,8 @@ public class KafkaServiceImpl implements KafkaService{
     ModelMapper modelMapper;
 
     private static final String PROVISIONAL = "PROVISIONAL";
-
+    private static final String AADHAAR = "AADHAAR";
+    private static final String DL = "DL";
     @Override
     public Mono<Void> publishPhrUserPatientEvent(HidPhrAddress hidPhrAddress){
         String requestId = String.valueOf(UUID.randomUUID());
@@ -53,6 +55,7 @@ public class KafkaServiceImpl implements KafkaService{
                     User userToPublish = setUserToPublish(accountDto);
                     Patient patientToPublish = setPatientToPublish(accountDto);
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL) && !accountDto.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)) {
+                        userToPublish.setCreatedBy(userToPublish.getCreatedBy() + StringConstants.HASH + AADHAAR);
                         phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
                         patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
                     }else{
@@ -78,6 +81,7 @@ public class KafkaServiceImpl implements KafkaService{
                     saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(),hidPhrAddress.getPhrAddress());
                     if (accountDto.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE) && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
                         userToBePublished = setUserToPublish(accountDto);
+                        userToBePublished.setCreatedBy(userToBePublished.getCreatedBy() + StringConstants.HASH + DL);
                         patientToBePublished = setPatientToPublish(accountDto);
                         phrEventPublisher.publish(userToBePublished.setAsNew(true), requestId);
                         patientEventPublisher.publish(patientToBePublished.setNew(true), requestId);
