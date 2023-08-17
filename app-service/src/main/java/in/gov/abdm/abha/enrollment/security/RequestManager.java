@@ -29,14 +29,14 @@ public class RequestManager implements ReactiveAuthenticationManager {
         String timestamp = request.getTimestamp();
         if(requestId != null && timestamp != null) {
             authentication.setAuthenticated(true);
-            String key = "ABHA_ENROL_DEV_TEST_" + requestId;
-            ReplayAttack.checkForReplayAttack(redisTemplate, key,
-                            Timestamp.from(Instant.now()))
-                    .onErrorResume(throwable -> {
-                        log.warn(ABHA_ENROL_LOG_PREFIX + REPLAY_ATTACK_FOUND, requestId, timestamp);
-                        authentication.setAuthenticated(false);
-                        return Mono.empty();
-                    }).subscribe();
+//            String key = "ABHA_ENROL_DEV_TEST_" + requestId;
+//            ReplayAttack.checkForReplayAttack(redisTemplate, key,
+//                            Timestamp.from(Instant.now()))
+//                    .onErrorResume(throwable -> {
+//                        log.warn(ABHA_ENROL_LOG_PREFIX + REPLAY_ATTACK_FOUND, requestId, timestamp);
+//                        authentication.setAuthenticated(false);
+//                        return Mono.empty();
+//                    }).subscribe();
         }
         return Mono.just(authentication);
     }
