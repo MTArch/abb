@@ -79,4 +79,7 @@ public class ABHAEnrollmentDBConstant {
     public static final String ENROLLMENT_DB_HID_PHR_ADDRESS=" for hid phr address .";
     public static final String ENROLLMENT_DB_INTEGRATED_PROGRAM=" for integrated program .";
     public static final String ENROLLMENT_DB_PROCEDURE_CALL=" for procedure call .";
+    public static final String PROVISIONAL = "PROVISIONAL";
+    public static final String AADHAAR = "AADHAAR";
+    public static final String DL = "DL";
 }

@@ -41,9 +41,6 @@ public class KafkaServiceImpl implements KafkaService{
     @Autowired
     ModelMapper modelMapper;
 
-    private static final String PROVISIONAL = "PROVISIONAL";
-    private static final String AADHAAR = "AADHAAR";
-    private static final String DL = "DL";
     @Override
     public Mono<Void> publishPhrUserPatientEvent(HidPhrAddress hidPhrAddress){
         String requestId = String.valueOf(UUID.randomUUID());
