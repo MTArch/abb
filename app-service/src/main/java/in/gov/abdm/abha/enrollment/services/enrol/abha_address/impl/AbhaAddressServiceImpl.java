@@ -200,6 +200,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 ).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
+    @SuppressWarnings("java:S2159") //Suppressed the sonarlint code smell as it is false positive
     private Mono<AbhaAddressResponseDto> updateHidAbhaAddress(AccountDto accountDto, AbhaAddressRequestDto abhaAddressRequestDto, TransactionDto transactionDto) {
         if (abhaAddressRequestDto.getPreferred() != null && abhaAddressRequestDto.getPreferred().equals("1")) {
             Mono<HidPhrAddressDto> hidPhrAddressDtoMono
@@ -240,6 +241,7 @@ public class AbhaAddressServiceImpl implements AbhaAddressService {
                 .build());
     }
 
+    @SuppressWarnings("java:S2153") //Suppressed the sonarlint code smell as it is false positive
     private HidPhrAddressDto prepareHidPhrAddress(AccountDto accountDto, AbhaAddressRequestDto abhaAddressRequestDto) {
         return HidPhrAddressDto.builder()
                 .healthIdNumber(accountDto.getHealthIdNumber())

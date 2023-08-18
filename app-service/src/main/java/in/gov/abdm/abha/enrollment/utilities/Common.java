@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
-import static in.gov.abdm.abha.profile.constants.AbhaConstants.LOG_PREFIX;
 import static in.gov.abdm.constant.ABDMConstant.INVALID_TIMESTAMP_LOG;
 import static in.gov.abdm.constant.ABDMConstant.VALIDATE_TIMESTAMP_LOG;
 
@@ -321,10 +320,10 @@ public class Common {
             JWTToken.validateToken(token, GetKeys.getPrivateKey());
             return true;
         } catch (ExpiredJwtException e) {
-            log.error(LOG_PREFIX + e.getMessage());
+            log.error(ABHA_ENROL_LOG_PREFIX + e.getMessage());
             return true;
         } catch (Exception ex) {
-            log.error(LOG_PREFIX + ex.getMessage());
+            log.error(ABHA_ENROL_LOG_PREFIX + ex.getMessage());
             return false;
         }
     }
@@ -333,7 +332,7 @@ public class Common {
         try {
             return JWTToken.validateToken(token, GetKeys.getPrivateKey());
         } catch (Exception ex) {
-            log.error(LOG_PREFIX + ex.getMessage());
+            log.error(ABHA_ENROL_LOG_PREFIX + ex.getMessage());
             return false;
         }
     }

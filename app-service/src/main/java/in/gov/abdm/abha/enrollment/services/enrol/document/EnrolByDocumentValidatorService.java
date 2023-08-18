@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.enrol.document;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.document.EnrolByDocumentRequestDto;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
@@ -32,6 +33,7 @@ public class EnrolByDocumentValidatorService {
     private static final String FIRST_NAME = "FirstName";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
+    private static final String ADDRESS = "address";
     private static final String PIN_CODE = "PinCode";
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
@@ -45,6 +47,7 @@ public class EnrolByDocumentValidatorService {
     private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
     private String base64Regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
+    private static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
 
 
     @Value(ENROLLMENT_PHOTO_MIN_SIZE_IN_KB)
@@ -83,6 +86,9 @@ public class EnrolByDocumentValidatorService {
         if (!isValidLastName(enrolByDocumentRequestDto)) {
             errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
         }
+        if (!isValidAddress(enrolByDocumentRequestDto)) {
+            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
+        }
         if (!isValidPinCode(enrolByDocumentRequestDto)) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
@@ -117,6 +123,11 @@ public class EnrolByDocumentValidatorService {
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidAddress(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
+        return !enrolByDocumentRequestDto.getAddress().isBlank() &&
+                enrolByDocumentRequestDto.getAddress().matches(ADDRESS_VALIDATOR_REGEX);
     }
 
     private boolean isValidBase64(String value) {

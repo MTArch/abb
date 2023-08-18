@@ -65,6 +65,7 @@ import static java.time.LocalDateTime.now;
  */
 @Service
 @Slf4j
+@SuppressWarnings("java:S1450") //Suppressed the sonarlint code smell as it is false positive.
 public class FacilityEnrolByEnrollmentNumberService {
 
 
