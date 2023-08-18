@@ -668,7 +668,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             && res.getClientId().equals(requestHeaders.getClientId()))
                     .findAny()
                     .map(integratedProgramDto -> Mono.just(true))
-                    .orElseThrow(() -> new BenefitNotFoundException(INVALID_BENEFIT_NAME));
+                    .orElse(Mono.just(false));
         }
         return Mono.just(false);
     }
