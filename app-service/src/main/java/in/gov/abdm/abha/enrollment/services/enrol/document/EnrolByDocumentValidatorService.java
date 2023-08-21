@@ -44,7 +44,7 @@ public class EnrolByDocumentValidatorService {
     private String txnIdRegex = "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
     private String dobRegex = "^\\d{4}\\-(0[1-9]|1[012])\\-(0[1-9]|[12][0-9]|3[01])$";
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
-    private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
+    private String alphabeticCharAndNumberRegexWithSpace = "^[A-Za-z0-9 ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
     private String base64Regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
     private static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
@@ -175,11 +175,11 @@ public class EnrolByDocumentValidatorService {
     }
 
     private boolean isValidDistrict(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return enrolByDocumentRequestDto.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
+        return enrolByDocumentRequestDto.getDistrict().matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
     private boolean isValidState(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
-        return enrolByDocumentRequestDto.getState().matches(alphabeticCharOnlyRegexWithSpace);
+        return enrolByDocumentRequestDto.getState().matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
     private boolean isValidPinCode(EnrolByDocumentRequestDto enrolByDocumentRequestDto) {
