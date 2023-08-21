@@ -39,9 +39,12 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.UTC_TIMEZONE_ID;
+import static in.gov.abdm.abha.enrollment.services.idp.IdpAppService.TIMESTAMP_FORMAT;
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -241,7 +244,10 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         IdpVerifyOtpRequest idpVerifyOtpRequest = new IdpVerifyOtpRequest();
         idpVerifyOtpRequest.setTxnId(xTransactionId);
         idpVerifyOtpRequest.setOtp(authByAbdmRequest.getAuthData().getOtp().getOtpValue());
-        return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, authByAbdmRequest.getAuthData().getOtp().getTimeStamp(), HIP_REQUEST_ID, requestId)
+        SimpleDateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_FORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE_ID));
+        String timestamp = dateFormat.format(new Date());
+        return idpAppService.verifyOtp(idpVerifyOtpRequest, AUTHORIZATION, timestamp, HIP_REQUEST_ID, requestId)
                 .flatMap(res -> handleIdpMobileOtpResponse(authByAbdmRequest, res, transactionDto));
     }
 
