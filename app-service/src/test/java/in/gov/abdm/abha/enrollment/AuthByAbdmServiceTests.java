@@ -84,7 +84,6 @@ class AuthByAbdmServiceTests {
         authMethods.add(AuthMethods.OTP);
         otpDto.setTxnId("1758856d-480d-4479-86f2-0fa4a3300fc6");
         otpDto.setOtpValue("959740");
-        otpDto.setTimeStamp("2023-04-05 16:59:03");
         authData.setOtp(otpDto);
         authData.setAuthMethods(authMethods);
         authRequestDto.setAuthData(authData);

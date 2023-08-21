@@ -46,7 +46,7 @@ public class EnrolByDemographicValidatorService {
     private static final String ADDRESS = "address";
     public static final int MAX_NAME_SIZE = 255;
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
-    private String alphabeticCharOnlyRegexWithSpace = "^[A-Za-z ]+$";
+    private String alphabeticCharAndNumberRegexWithSpace = "^[A-Za-z0-9 ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
@@ -202,11 +202,11 @@ public class EnrolByDemographicValidatorService {
     }
 
     private boolean isValidDistrict(Demographic demographic) {
-        return !demographic.getDistrict().isBlank() && demographic.getDistrict().matches(alphabeticCharOnlyRegexWithSpace);
+        return !demographic.getDistrict().isBlank() && demographic.getDistrict().matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
     private boolean isValidState(Demographic demographic) {
-        return !demographic.getState().isBlank() && demographic.getState().matches(alphabeticCharOnlyRegexWithSpace);
+        return !demographic.getState().isBlank() && demographic.getState().matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
     private boolean isValidPinCode(Demographic demographic) {

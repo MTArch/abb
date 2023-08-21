@@ -54,7 +54,7 @@
         <dependency>
             <groupId>in.gov.abdm</groupId>
             <artifactId>abdm-abha</artifactId>
-            <version>1.1.42</version>
+            <version>1.1.45</version>
         </dependency>
         <dependency>
             <groupId>in.gov.abdm</groupId>
