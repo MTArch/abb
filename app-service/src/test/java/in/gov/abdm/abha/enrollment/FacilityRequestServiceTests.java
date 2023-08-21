@@ -189,7 +189,6 @@ class FacilityRequestServiceTests {
         authMethods.add(AuthMethods.OTP);
         otp.setTxnId("558737e6-677c-4fde-b945-c8e7ce1b3519");
         otp.setOtpValue("959740");
-        otp.setTimeStamp("2023-03-29 14:20:13");
         authData.setAuthMethods(authMethods);
         authData.setOtp(otp);
         authRequestDto.setAuthData(authData);
