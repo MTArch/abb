@@ -1,5 +1,20 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_RE_ATTEMPTED;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -7,6 +22,7 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -31,7 +47,6 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
-
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
@@ -39,20 +54,10 @@ import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
-import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
 
 @Service
 @Slf4j
@@ -125,7 +130,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountIris(transaction, aadhaarResponseDto, existingAccount)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingIris(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountIris(transaction, aadhaarResponseDto, existingAccount,requestHeaders)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingIris(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
         });
     }
 
@@ -241,7 +246,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> existingAccountIris(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> existingAccountIris(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, RequestHeaders rHeaders) {
         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
                 {
@@ -267,6 +272,12 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
+                                    
+                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_IIR.code()	, rHeaders)
+                        			.onErrorResume(thr -> {
+                        		log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+                        				return Mono.empty();
+                        			}).subscribe();  
                                     // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())

@@ -1,10 +1,37 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.AADHAAR_OTP;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.FACE;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.FINGER_SCAN;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.IRIS;
+
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
 import in.gov.abdm.abha.enrollment.client.IntegratedProgramDBFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
-import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -18,6 +45,7 @@ import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidBenefitDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidReattemptDto;
 import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
@@ -27,29 +55,9 @@ import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
-import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
-import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.*;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.FINGER_SCAN;
 
 @Service
 @Slf4j
@@ -70,6 +78,8 @@ public class AccountServiceImpl implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
+    
+    public static final String EXCEPTION_IN_ABHA_RE_ATTEMPT = "Exception occured while callig abhaDBAccountFClient for reAttempt {}";  
     private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
@@ -431,6 +441,16 @@ public class AccountServiceImpl implements AccountService {
         newUser.setStateCode(lgdDistrictResponse.getStateCode());
         newUser.setStateName(lgdDistrictResponse.getStateName());
     }
+    
+	@Override
+	public Mono<Void> reAttemptedAbha(String aNumber, String rType, RequestHeaders rHeaders) {
+		HidReattemptDto hidReattemptDto = HidReattemptDto.builder().healthIdNumber(aNumber)
+				.createdBy(rHeaders.getClientId()).requestType(rType).build();
+		return abhaDBAccountFClient.reAttemptedAbha(hidReattemptDto).doOnError(throwable -> {
+			log.info(EXCEPTION_IN_ABHA_RE_ATTEMPT, aNumber);
+		}).then();
+
+	}
 
     private void mapAccountWithEkycHelper(AccountDto newUser, AadhaarUserKycDto kycDto) {
         if (kycDto.getPhoto() != null) {

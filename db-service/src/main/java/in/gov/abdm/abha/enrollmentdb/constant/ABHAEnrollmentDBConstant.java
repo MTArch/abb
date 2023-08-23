@@ -12,6 +12,7 @@ public class ABHAEnrollmentDBConstant {
     public static final String HID_BENEFIT_ENDPOINT = API_VERSION + "/hidBenefit";
     public static final String TRANSACTION_ENDPOINT = API_VERSION + "/transaction";
     public static final String GET_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
+    public static final String ACCOUNT_REATTEMPT_ENDPOINT = "/reAttempt";
     public static final String UPDATE_ACCOUNT_BY_HEALTH_ID_NUMBER = "/{healthIdNumber}";
     public static final String GET_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     public static final String DELETE_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
@@ -57,6 +58,9 @@ public class ABHAEnrollmentDBConstant {
     public static final String PHR_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_phr = :isSyncedWithPhr, updated_date = :updatedDate WHERE request_id = :requestId and health_id_number = :healthIdNumber";
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM = "Received sync acknowledgement from HIECM with the request ID: ";
     public static final String MSG_ABHA_PUBLISH_PATIENT_TO_HIECM = "Published event to be consumed by HIECM system to add a new patient.";
+    
+    public static final String MSG_ABHA_PUBLISH_TO_DASHBOARD = "Published event to be consumed by bashboard db.";
+    
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_PHR = "Received sync acknowledgement from PHR with the request ID: ";
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_PHR = "Updated the status of synchronization at ABHA end for the user with PHR/ABHA address: ";
     public static final String MSG_ABHA_PUBLISH_USER_TO_PHR = "User about to be published from ABHA";

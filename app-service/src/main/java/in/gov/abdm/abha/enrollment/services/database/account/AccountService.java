@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.database.account;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidReattemptDto;
 import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
@@ -38,4 +39,8 @@ public interface AccountService {
 
     Mono<AccountDto> settingClientIdAndOrigin(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders);
     void mapAccountWithEkyc(AadhaarResponseDto aadhaarResponseDto,AccountDto accountDto,List<LgdDistrictResponse> lgdDistrictResponse);
+    
+    Mono<Void> reAttemptedAbha(String aNumber, String rType , RequestHeaders rHeaders);
+    
+    
 }

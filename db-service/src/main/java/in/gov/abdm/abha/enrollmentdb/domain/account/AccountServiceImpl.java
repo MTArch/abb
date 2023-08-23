@@ -1,19 +1,21 @@
 package in.gov.abdm.abha.enrollmentdb.domain.account;
 
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import in.gov.abdm.abha.enrollmentdb.utilities.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Service
 @Slf4j
@@ -101,6 +103,13 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.checkDeDuplication(request.getFirstName(),request.getLastName(),request.getDob(),request.getMob(),request.getYob(),request.getGender())
                 .map(account -> modelMapper.map(account, AccountDto.class));
     }
+    
+    @Override
+	public Mono<Void> sendAbhaToKafka(AccountReattemptDto aReattemptDto) {
+	return	kafkaService.publishDashBoardAbhaEventByAccounts(aReattemptDto).then();
+		
+	}
+
 
     private Mono<Accounts> deCompressProfilePhoto(Accounts account){
         if(account.isProfilePhotoCompressed()){

@@ -5,6 +5,7 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.model.de_duplication.DeDuplicationRequest;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
+import in.gov.abdm.abha.enrollment.model.entities.HidReattemptDto;
 import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
 import org.springframework.web.bind.annotation.*;
 import reactivefeign.spring.config.ReactiveFeignClient;
@@ -45,5 +46,8 @@ public interface AbhaDBAccountFClient {
 
     @PostMapping(URIConstant.ACCOUNT_SAVE_ALL)
     Mono<String> saveAllData(@RequestBody SaveAllDataRequest saveAllDataRequest);
+    
+    @PostMapping(URIConstant.ABHA_REATTEMPTED)
+    Mono<Void> reAttemptedAbha(@RequestBody HidReattemptDto hidReattemptDto);
 
 }

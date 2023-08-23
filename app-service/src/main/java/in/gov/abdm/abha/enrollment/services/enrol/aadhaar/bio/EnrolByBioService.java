@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -129,7 +130,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount,requestHeaders)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
         });
     }
 
@@ -245,7 +246,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> existingAccountBio(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto) {
+    private Mono<EnrolByAadhaarResponseDto> existingAccountBio(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, RequestHeaders rHeaders ) {
         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
                 {
@@ -259,6 +260,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     if (!accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                    	
                                         ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                                                 .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
                                                 .expiresIn(jwtUtil.jwtTokenExpiryTime())
@@ -271,6 +273,11 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
+                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_FMR.code(), rHeaders).onErrorResume(thr -> {
+										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+										return Mono.empty();
+									}).subscribe();
+							;       
                                     // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())

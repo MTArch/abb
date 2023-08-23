@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event;
 
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
 import in.gov.abdm.phr.enrollment.user.User;
 import lombok.extern.slf4j.Slf4j;
@@ -42,4 +43,10 @@ public class PHREventPublisher implements EventPublisher {
     public void publish(Patient patient, String requestId) {
         // Unused implementation of the method as ABHA does not publish a patient object to PHR system.
     }
+
+	@Override
+	public void publish(AccountReattemptDto patient, String requestId) {
+		// TODO Auto-generated method stub
+		
+	}
 }

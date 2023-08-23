@@ -218,4 +218,6 @@ public class AbhaConstants {
     public static final String FINGERPRINT_PID_INVALID = "Invalid Fingerprint Auth PID";
     public static final String HEALTH_WORKER_NAME = "healthWorkerName";
     public static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
+    
+    public static final String ABHA_RE_ATTEMPTED = "Error while doing reAttempted Abha {}"; 
 }

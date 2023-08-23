@@ -6,6 +6,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
@@ -106,10 +107,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                             if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                                                 return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders);
                                             } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                                                return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED);
+                                                return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED, requestHeaders);
                                             } else {
                                                 // existing account
-                                                return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST);
+                                                return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders);
                                             }
                                         })
                                         .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders)));
@@ -157,7 +158,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                .flatMap(duplicateAccount -> respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST)).switchIfEmpty(Mono.defer(() -> {
+                .flatMap(duplicateAccount -> respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders)).switchIfEmpty(Mono.defer(() -> {
                     int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
                     if (age >= 18) {
                         accountDto.setType(AbhaType.STANDARD);
@@ -264,7 +265,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     }
 
-    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto, boolean generateToken, String responseMessage) {
+    private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto, boolean generateToken, String responseMessage, RequestHeaders rHeaders) {
         ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
         String txnId = UUID.randomUUID().toString();
         Flux<String> fluxPhrAddress = hidPhrAddressService
@@ -279,7 +280,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .message(responseMessage)
                     .isNew(false)
                     .build();
-
+            accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_DEMO.code()	, rHeaders)
+			.onErrorResume(thr -> {
+		log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+				return Mono.empty();
+			}).subscribe();
             // Final response for existing user
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()

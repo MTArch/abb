@@ -47,4 +47,11 @@ kafka:
         topic: ${KAFKA_ABHA_PHR_SYNC_TOPIC}
         ack:
           topic: ${KAFKA_ABHA_PHR_SYNC_ACK_TOPIC}
+    dashBoard:
+       sync:
+         topic: ${KAFKA_ABHA_DASHBOARD_SYNC_TOPIC}
+         ack:
+           topic: ${KAFKA_ABHA_DASHBOARD_SYNC_ACK_TOPIC}
+          
+          
 
