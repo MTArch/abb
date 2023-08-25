@@ -52,7 +52,7 @@ public class KafkaServiceImpl implements KafkaService{
                     User userToPublish = setUserToPublish(accountDto);
                     Patient patientToPublish = setPatientToPublish(accountDto);
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL) && !accountDto.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)) {
-                        userToPublish.setCreatedBy(userToPublish.getCreatedBy() + StringConstants.HASH + AADHAAR);
+                        userToPublish.setCreatedBy(userToPublish.getCreatedBy() + (accountDto.getDocumentCode()==null ? StringConstants.HASH + AADHAAR : StringConstants.HASH + DL));
                         phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
                         patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
                     }else{
