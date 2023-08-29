@@ -48,6 +48,7 @@ public class KafkaServiceImpl implements KafkaService{
     PatientEventPublisher patientEventPublisher;
     @Autowired
     ModelMapper modelMapper;
+    @Autowired
     DashboardEventPublisher dashboardEventPublisher;
 
     @Override
