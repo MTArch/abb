@@ -1,22 +1,31 @@
 package in.gov.abdm.abha.enrollmentdb.controller;
 
-import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
-import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
-import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
-import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_ACCOUNTS;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_LOG_MSG;
 
 import java.util.Base64;
 import java.util.List;
 
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_ACCOUNTS;
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_LOG_MSG;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant;
+import in.gov.abdm.abha.enrollmentdb.domain.account.AccountService;
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
+import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  *
@@ -84,4 +93,10 @@ public class AccountController {
         log.info(ENROLLMENT_DB_LOG_MSG+"check de-duplication= "+ENROLLMENT_DB_ACCOUNTS);
         return ResponseEntity.ok(accountService.checkDeDuplication(request));
     }
+    
+	@PostMapping(value = ABHAEnrollmentDBConstant.ACCOUNT_REATTEMPT_ENDPOINT)
+	public ResponseEntity<Mono<Void>> sendReattemptAbha(@RequestBody AccountReattemptDto aReattemptDto) {
+		log.info(ENROLLMENT_DB_LOG_MSG + "send data to kafka= " + ENROLLMENT_DB_ACCOUNTS);
+		return ResponseEntity.ok(accountService.sendAbhaToKafka(aReattemptDto));
+	}
 }

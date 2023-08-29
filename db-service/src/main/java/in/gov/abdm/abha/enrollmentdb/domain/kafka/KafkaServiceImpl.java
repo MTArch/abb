@@ -1,10 +1,30 @@
 package in.gov.abdm.abha.enrollmentdb.domain.kafka;
 
+import static in.gov.abdm.abha.constant.ABHAConstants.DRIVING_LICENCE;
+import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.AADHAAR;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ABHA_SYNC;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.DL;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.KAFKA_ERROR_LOG_MSG;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.PROVISIONAL;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.SYSTEM;
+
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollmentdb.constant.StringConstants;
+import in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event.DashboardEventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event.PHREventPublisher;
 import in.gov.abdm.abha.enrollmentdb.domain.hid_phr_address.event.PatientEventPublisher;
-import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
+import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.hiecm.userinitiatedlinking.Patient;
@@ -12,19 +32,7 @@ import in.gov.abdm.phr.enrollment.address.Address;
 import in.gov.abdm.phr.enrollment.user.User;
 import in.gov.abdm.syncacknowledgement.SyncAcknowledgement;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.math.BigInteger;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static in.gov.abdm.abha.constant.ABHAConstants.DRIVING_LICENCE;
-import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
 @Service
 @Slf4j
@@ -40,6 +48,8 @@ public class KafkaServiceImpl implements KafkaService{
     PatientEventPublisher patientEventPublisher;
     @Autowired
     ModelMapper modelMapper;
+    @Autowired
+    DashboardEventPublisher dashboardEventPublisher;
 
     @Override
     public Mono<Void> publishPhrUserPatientEvent(HidPhrAddress hidPhrAddress){
@@ -230,4 +240,12 @@ public class KafkaServiceImpl implements KafkaService{
         patientToBePublished.setStatus(accountDto.getStatus());
         return patientToBePublished;
     }
+    
+	@Override
+	public Mono<Void> publishDashBoardAbhaEventByAccounts(AccountReattemptDto rAccountDto) {
+		String requestId = String.valueOf(UUID.randomUUID());
+		dashboardEventPublisher.publish(rAccountDto, requestId);
+		return Mono.empty();
+
+	}
 }

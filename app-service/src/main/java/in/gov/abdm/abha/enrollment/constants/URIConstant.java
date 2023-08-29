@@ -149,6 +149,7 @@ public class URIConstant {
 
     public static final String BENEFIT_NAME = "benefitName";
     public static final String ACCOUNT_SAVE_ALL = DB_BASE_URI + "/account/saveAll";
+    public static final String ABHA_REATTEMPTED = DB_BASE_URI + "/account/reAttempt";
 
     public static final List<String> excludedList = Arrays.asList(
             "/actuator/health",
