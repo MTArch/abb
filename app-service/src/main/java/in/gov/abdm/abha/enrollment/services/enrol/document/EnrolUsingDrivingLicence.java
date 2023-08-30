@@ -328,6 +328,7 @@ public class EnrolUsingDrivingLicence {
                     .message(responseMessage)
                     .isNew(isNewAccount)
                     .build();
+          
             return Mono.just(enrolByDocumentResponseDto);
         } else if (!isNewAccount && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
             EnrolByDocumentResponseDto enrolByDocumentResponseDto = EnrolByDocumentResponseDto.builder()
@@ -335,11 +336,7 @@ public class EnrolUsingDrivingLicence {
                     .message(responseMessage)
                     .isNew(isNewAccount)
                     .build();
-            accountService.reAttemptedAbha(enrolProfileDto.getAbhaNumber(), AadhaarMethod.DL.code(), requestHeaders)
-			.onErrorResume(thr -> {
-		log.info(ABHA_RE_ATTEMPTED, enrolProfileDto.getAbhaNumber());		
-				return Mono.empty();
-			}).subscribe();
+ 
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(txnId, accountDto))
@@ -350,6 +347,14 @@ public class EnrolUsingDrivingLicence {
                 enrolByDocumentResponseDto.setResponseTokensDto(responseTokensDto);
             }
             return Mono.just(enrolByDocumentResponseDto);
+        }
+        
+        if(!isNewAccount) {
+        	   accountService.reAttemptedAbha(enrolProfileDto.getAbhaNumber(), AadhaarMethod.DL.code(), requestHeaders)
+   			.onErrorResume(thr -> {
+   		log.info(ABHA_RE_ATTEMPTED, enrolProfileDto.getAbhaNumber());		
+   				return Mono.empty();
+   			}).subscribe();
         }
         EnrolByDocumentResponseDto enrolByDocumentResponseDto = EnrolByDocumentResponseDto.builder()
                 .message(responseMessage)
