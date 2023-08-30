@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
@@ -54,6 +55,7 @@ import java.util.List;
 
 import static in.gov.abdm.abha.constant.ABHAConstants.PROVISIONAL;
 import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_RE_ATTEMPTED;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
 
 @Slf4j
@@ -312,7 +314,6 @@ public class EnrolUsingDrivingLicence {
                 .phrAddress(Collections.singletonList(accountDto.getHealthId()))
                 .abhaStatus(StringUtils.upperCase(accountDto.getStatus()))
                 .build();
-
         if (isFacilityRequest) {
             EnrollmentResponse enrolmentResponse = EnrollmentResponse.builder()
                     .status(ENROL_VERIFICATION_STATUS)
@@ -334,6 +335,11 @@ public class EnrolUsingDrivingLicence {
                     .message(responseMessage)
                     .isNew(isNewAccount)
                     .build();
+            accountService.reAttemptedAbha(enrolProfileDto.getAbhaNumber(), AadhaarMethod.DL.code(), requestHeaders)
+			.onErrorResume(thr -> {
+		log.info(ABHA_RE_ATTEMPTED, enrolProfileDto.getAbhaNumber());		
+				return Mono.empty();
+			}).subscribe();
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                         .token(jwtUtil.generateToken(txnId, accountDto))
