@@ -6,6 +6,7 @@ public enum AadhaarMethod {
 	 AADHAAR_FID("FID"),
 	 AADHAAR_IIR("IIR"), 
 	 AADHAAR_FMR("FMR"),
+	 DL("DL"),
 	 AADHAAR_DEMO("DEMO");
 
 	private String code;
