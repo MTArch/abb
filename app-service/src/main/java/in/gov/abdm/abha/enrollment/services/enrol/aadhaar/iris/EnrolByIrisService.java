@@ -256,8 +256,15 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                 ABHAProfileDto abhaProfileDto = MapperUtils.mapKycDetails(aadhaarResponseDto.getAadhaarUserKycDto(), accountDto);
                                 Flux<String> fluxPhrAddress = hidPhrAddressService
                                         .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
+                                
+                                
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_IIR.code()	, rHeaders)
+                        			.onErrorResume(thr -> {
+                        		log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+                        				return Mono.empty();
+                        			}).subscribe();  
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     if (!accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                         ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
@@ -273,11 +280,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
                                                 .build());
                                     }
                                     
-                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_IIR.code()	, rHeaders)
-                        			.onErrorResume(thr -> {
-                        		log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
-                        				return Mono.empty();
-                        			}).subscribe();  
+            
                                     // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
