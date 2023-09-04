@@ -258,6 +258,10 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                         .getHidPhrAddressByHealthIdNumbersAndPreferredIn(Arrays.asList(accountDto.getHealthIdNumber()), Arrays.asList(1, 0)).map(h -> h.getPhrAddress());
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
+                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_FMR.code(), rHeaders).onErrorResume(thr -> {
+                          										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+                          										return Mono.empty();
+                          									}).subscribe();
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     if (!accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
                                     	
@@ -273,11 +277,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
-                                    accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_FMR.code(), rHeaders).onErrorResume(thr -> {
-										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
-										return Mono.empty();
-									}).subscribe();
-							;       
+							       
                                     // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
