@@ -440,6 +440,9 @@ public class AccountServiceImpl implements AccountService {
         newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
         newUser.setStateCode(lgdDistrictResponse.getStateCode());
         newUser.setStateName(lgdDistrictResponse.getStateName());
+        if(newUser.getProfilePhoto() != null){
+            newUser.setProfilePhotoCompressed(false);
+        }
     }
     
 	@Override
