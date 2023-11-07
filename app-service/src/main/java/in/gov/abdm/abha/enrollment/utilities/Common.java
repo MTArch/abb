@@ -39,6 +39,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.StringConstants.AT;
@@ -348,4 +349,11 @@ public class Common {
     public String getFToken(RequestHeaders requestHeaders) {
         return requestHeaders.getFTokenClaims() == null ? null : requestHeaders.getFTokenClaims().get(SUB).toString();
     }
+
+    public String removeNulls(String s) {
+        return Arrays.stream(s.split("\\s+|\\s*-\\s*"))
+                .filter(word -> !"null".equals(word))
+                .collect(Collectors.joining(" "));
+    }
+
 }

@@ -24,6 +24,8 @@ public interface LgdAppFClient {
     public static final String VIEW = "view";
     public static final String NAME = "name";
 
+    public static final String DISTRICT_CODE = "districtCode";
+
     @GetMapping(URIConstant.FLGD_BASE_URI)
     public Mono<List<LgdDistrictResponse>> getDetailsByAttribute(@RequestHeader(REQUEST_ID) UUID requestId,
                                                                  @RequestHeader(TIMESTAMP) String timestamp,
@@ -34,5 +36,12 @@ public interface LgdAppFClient {
     public Mono<List<LgdDistrictResponse>> getDetailsByAttributeState(@RequestHeader(REQUEST_ID) UUID requestId,
                                                                       @RequestHeader(TIMESTAMP) String timestamp,
                                                                       @RequestParam(value = NAME, required = false) String name);
+
+
+
+    @GetMapping(URIConstant.FLGD_BASE_URI)
+    public Mono<List<LgdDistrictResponse>> getByDistrictCode(@RequestHeader(REQUEST_ID) UUID requestId,
+                                                                 @RequestHeader(TIMESTAMP) String timestamp,
+                                                                 @RequestParam(value = DISTRICT_CODE, required = false) String districtCode);
 
 }

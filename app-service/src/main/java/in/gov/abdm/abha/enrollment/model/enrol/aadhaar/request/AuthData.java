@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
 import in.gov.abdm.abha.enrollment.validators.annotations.AuthMethod;
 import in.gov.abdm.abha.enrollment.validators.annotations.Face;
 import in.gov.abdm.abha.enrollment.validators.annotations.Otp;
@@ -48,6 +49,13 @@ public class AuthData {
     @JsonProperty("demo")
     @Valid
     private Demographic demographic;
+
+    /**
+     * It is Demo
+     */
+    @JsonProperty("demo_auth")
+    @Valid
+    private DemographicAuth demographicAuth;
 
     /**
      * It is Bio

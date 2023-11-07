@@ -1,10 +1,12 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
+import com.rabbitmq.client.Return;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.Common;
@@ -15,6 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -34,6 +42,8 @@ public class EnrolByDemographicValidatorService {
     private static final String MONTH_OF_BIRTH = "monthOfBirth";
     private static final String YEAR_OF_BIRTH = "yearOfBirth";
     private static final String FIRST_NAME = "FirstName";
+
+    private static final String NAME = "Name";
     private static final String MIDDLE_NAME = "MiddleName";
     private static final String LAST_NAME = "LastName";
     private static final String PIN_CODE = "PinCode";
@@ -52,8 +62,7 @@ public class EnrolByDemographicValidatorService {
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
 
-
-
+    private static final String DATE_FORMATTER = "dd-MM-yyyy";
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
     private String documentPhotoMinSizeLimit;
 
@@ -67,28 +76,28 @@ public class EnrolByDemographicValidatorService {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
-        if (!isValidAadhaar(demographic)) {
+        if (!isValidAadhaar(demographic.getAadhaarNumber())) {
             errors.put(AADHAAR, AbhaConstants.AADHAAR_NUMBER_INVALID);
         }
-        if (!isValidGender(demographic)) {
+        if (!isValidGender(demographic.getGender())) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
         validateNameAndDob(demographic, errors);
-        if (!isValidPinCode(demographic)) {
+        if (!isValidPinCode(demographic.getPinCode())) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
-        if (!isValidState(demographic)) {
+        if (!isValidState(demographic.getState())) {
             errors.put(STATE, AbhaConstants.INVALID_STATE);
         }
-        if (!isValidDistrict(demographic)) {
+        if (!isValidDistrict(demographic.getDistrict())) {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
-        if (!isValidConsentFormImage(demographic)) {
+        if (!demographic.getConsentFormImage().isBlank() && !isValidConsentFormImage(demographic.getConsentFormImage())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
-        } else if (!isValidConsentFormImageFormat(demographic)) {
+        } else if (!demographic.getConsentFormImage().isBlank() && !isValidConsentFormImageFormat(demographic.getConsentFormImage())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (!isValidMobileNumber(requestHeaders, demographic)) {
+        if (!isValidMobileNumber(requestHeaders, demographic.getMobile())) {
             errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidMobileType(demographic)) {
@@ -100,13 +109,56 @@ public class EnrolByDemographicValidatorService {
         if (!isValidHealthWorkerName(demographic)) {
             errors.put(AbhaConstants.HEALTH_WORKER_NAME, AbhaConstants.INVALID_HEALTH_WORKER_NAME);
         }
-        if (!isValidAddress(demographic)) {
+        if (!isValidAddress(demographic.getAddress())) {
             errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
         }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
     }
+
+
+    public void validateEnrolByDemographic(DemographicAuth demographic, RequestHeaders requestHeaders) {
+
+        LinkedHashMap<String, String> errors;
+        errors = new LinkedHashMap<>();
+        if (!isValidAadhaar(demographic.getAadhaarNumber())) {
+            errors.put(AADHAAR, AbhaConstants.AADHAAR_NUMBER_INVALID);
+        }
+        if (!isValidGender(demographic.getGender())) {
+            errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
+        }
+
+        if (!isValidFirstName(demographic.getName())) {
+            errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
+        }
+
+        if (!demographic.getPinCode().isBlank() && !isValidPinCode(demographic.getPinCode())) {
+            errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
+        }
+        if (!isValidState(demographic.getStateCode())) {
+            errors.put(STATE, AbhaConstants.INVALID_STATE);
+        }
+        if (!isValidDistrict(demographic.getDistrictCode())) {
+            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+        }
+        if (StringUtils.isNotBlank(demographic.getConsentFormImage()) && !isValidConsentFormImage(demographic.getConsentFormImage())) {
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
+        } else if (StringUtils.isNotBlank(demographic.getConsentFormImage()) && !isValidConsentFormImageFormat(demographic.getConsentFormImage())) {
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
+        }
+        if (!isValidAddress(demographic.getAddress())) {
+            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
+        }
+        if (!isValidDateFormat(demographic.getBirthOfDay())) {
+            errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
+        }
+
+        if (errors.size() != 0) {
+            throw new BadRequestException(errors);
+        }
+    }
+
 
     private boolean isValidHealthWorkerName(Demographic demographic) {
         return StringUtils.isEmpty(demographic.getHealthWorkerName())
@@ -133,16 +185,17 @@ public class EnrolByDemographicValidatorService {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
 
-        if (!isValidFirstName(demographic)) {
+        if (!isValidFirstName(demographic.getFirstName())) {
             errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
         }
-        if (!isValidMiddleName(demographic)) {
+        if (!isValidMiddleName(demographic.getMiddleName())) {
             errors.put(MIDDLE_NAME, AbhaConstants.INVALID_MIDDLE_NAME);
         }
-        if (!isValidLastName(demographic)) {
+        if (!isValidLastName(demographic.getLastName())) {
             errors.put(LAST_NAME, AbhaConstants.INVALID_LAST_NAME);
         }
     }
+
 
     private boolean isValidMobileType(Demographic demographic) {
         return !demographic.getMobileType().equals(MobileType.WRONG);
@@ -152,14 +205,15 @@ public class EnrolByDemographicValidatorService {
         return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getHealthWorkerMobile()).matches();
     }
 
-    private boolean isValidMobileNumber(RequestHeaders requestHeaders, Demographic demographic) {
-        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(demographic.getMobile())) {
+    private boolean isValidMobileNumber(RequestHeaders requestHeaders, String mobile) {
+        if (StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(mobile)) {
             return true;
-        } else if (!StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(demographic.getMobile())) {
+        } else if (!StringUtils.isEmpty(requestHeaders.getBenefitName()) && StringUtils.isEmpty(mobile)) {
             return false;
         }
-        return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getMobile()).matches();
+        return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(mobile).matches();
     }
+
 
     private boolean isValidYearOfBirth(Demographic demographic) {
         return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth()) >= 1900);
@@ -182,61 +236,111 @@ public class EnrolByDemographicValidatorService {
         }
     }
 
-    private boolean isValidAadhaar(Demographic demographic) {
+    private boolean isValidAadhaar(String aadhaar) {
         try {
-            return rsaUtil.isRSAEncrypted(demographic.getAadhaarNumber()) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(demographic.getAadhaarNumber()));
+            return rsaUtil.isRSAEncrypted(aadhaar) && GeneralUtils.isValidAadhaarNumber(rsaUtil.decrypt(aadhaar));
         } catch (Exception ex) {
             log.error("Invalid encryption value {}", ex.getMessage());
             return false;
         }
     }
 
-    private boolean isValidConsentFormImage(Demographic demographic) {
-        double size = GeneralUtils.fileSize(demographic.getConsentFormImage());
+    private boolean isValidConsentFormImage(String image) {
+        double size = GeneralUtils.fileSize(image);
         return !(size < Integer.parseInt(documentPhotoMinSizeLimit)
                 || size > Integer.parseInt(documentPhotoMaxSizeLimit));
     }
 
-    private boolean isValidConsentFormImageFormat(Demographic demographic) {
-        return GeneralUtils.isFileFormat(demographic.getConsentFormImage());
+    private boolean isValidConsentFormImageFormat(String image) {
+        return GeneralUtils.isFileFormat(image);
     }
 
-    private boolean isValidDistrict(Demographic demographic) {
-        return !demographic.getDistrict().isBlank() && demographic.getDistrict().matches(alphabeticCharAndNumberRegexWithSpace);
+    private boolean isValidDistrict(String district) {
+        return !district.isBlank() && district.matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
-    private boolean isValidState(Demographic demographic) {
-        return !demographic.getState().isBlank() && demographic.getState().matches(alphabeticCharAndNumberRegexWithSpace);
+    private boolean isValidState(String state) {
+        return !state.isBlank() && state.matches(alphabeticCharAndNumberRegexWithSpace);
     }
 
-    private boolean isValidPinCode(Demographic demographic) {
-        return demographic.getPinCode().matches(onlyDigitRegex);
+    private boolean isValidPinCode(String pinCode) {
+        return !pinCode.isBlank() && pinCode.matches(onlyDigitRegex);
     }
 
-    private boolean isValidLastName(Demographic demographic) {
-        return StringUtils.isEmpty(demographic.getLastName())
-                || !demographic.getLastName().isBlank() && (Common.validStringSize(demographic.getLastName(), MAX_NAME_SIZE)
-                && demographic.getLastName().matches(alphabeticCharOnlyRegex));
+    private boolean isValidLastName(String lastName) {
+        return StringUtils.isEmpty(lastName)
+                || !lastName.isBlank() && (Common.validStringSize(lastName, MAX_NAME_SIZE)
+                && lastName.matches(alphabeticCharOnlyRegex));
     }
 
-    private boolean isValidMiddleName(Demographic demographic) {
-        return StringUtils.isEmpty(demographic.getMiddleName())
-                || (Common.validStringSize(demographic.getMiddleName(), MAX_NAME_SIZE)
-                && demographic.getMiddleName().matches(alphabeticCharOnlyRegex));
+    private boolean isValidMiddleName(String middleName) {
+        return StringUtils.isEmpty(middleName)
+                || (Common.validStringSize(middleName, MAX_NAME_SIZE)
+                && middleName.matches(alphabeticCharOnlyRegex));
     }
 
-    private boolean isValidFirstName(Demographic demographic) {
-        return !demographic.getFirstName().isBlank() && Common.validStringSize(demographic.getFirstName(), MAX_NAME_SIZE) && demographic.getFirstName().matches(alphabeticCharOnlyRegex);
+    private boolean isValidFirstName(String firstName) {
+        return !firstName.isBlank() && Common.validStringSize(firstName, MAX_NAME_SIZE) && firstName.matches(alphabeticCharOnlyRegex);
     }
 
-    private boolean isValidGender(Demographic demographic) {
-        return demographic.getGender().equals(M) ||
-                demographic.getGender().equals(F) ||
-                demographic.getGender().equals(O);
+    private boolean isValidGender(String gender) {
+        return !gender.isBlank() && (gender.equals(M) ||
+                gender.equals(F) ||
+                gender.equals(O));
     }
 
-    private boolean isValidAddress(Demographic demographic) {
-        return !demographic.getAddress().isBlank() &&
-                demographic.getAddress().matches(AbhaConstants.ADDRESS_VALIDATOR_REGEX);
+    private boolean isValidAddress(String address) {
+        return !address.isBlank() &&
+                address.matches(AbhaConstants.ADDRESS_VALIDATOR_REGEX);
+    }
+
+
+
+
+    private  boolean isValidDateFormat_(String value) {
+        if (StringUtils.isEmpty(value)) {
+            return false;
+        }
+        Mono<Boolean> isValidFormatMono = Mono.defer(() -> {
+            boolean yearOfBrith = !StringUtils.isEmpty(value) && value.matches("[0-9]+") && value.length() == 4;
+            if (yearOfBrith) {
+                return Mono.just(true); // If it's a 4-digit number, consider it valid
+            } else {
+                return validateDateFormat(value, DATE_FORMATTER)
+                        .onErrorResume(ex -> Mono.just(false));
+            }
+        }).subscribeOn(Schedulers.parallel());
+        return  isValidFormatMono.block();
+    }
+
+    private  Mono<Boolean> validateDateFormat(String value, String format) {
+        return Mono.fromCallable(() -> {
+                    SimpleDateFormat sdf = new SimpleDateFormat(format);
+                    sdf.setLenient(false);
+                    Date date = sdf.parse(value);
+                    return value.equals(sdf.format(date));
+                })
+                .onErrorReturn(false);
+    }
+
+    private static boolean isValidDateFormat(String value) {
+        boolean isNumeric = !StringUtils.isEmpty(value) && value.matches("[0-9]+") && value.length() == 4;
+        if (isNumeric) {
+            return true;
+        } else {
+            // Otherwise, try to validate against the specified date format
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMATTER);
+                sdf.setLenient(false);
+                Date date = sdf.parse(value);
+                return value.equals(sdf.format(date));
+            } catch (ParseException ex) {
+                return false;
+            }
+        }
     }
 }
+
+
+
+
