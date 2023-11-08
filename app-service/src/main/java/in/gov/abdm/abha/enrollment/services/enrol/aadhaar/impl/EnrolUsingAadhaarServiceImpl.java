@@ -21,14 +21,7 @@ import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.EM
 import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.SMS;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,6 +85,7 @@ import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -651,9 +645,15 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods, fToken))) {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
         }
+
         if (Boolean.FALSE.equals(isValidBenefitRole(requestHeaders, authMethods))) {
             throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
         }
+
+      if (authMethods.contains(AuthMethods.DEMO_AUTH) && !isValidHidIntegrated(requestHeaders)){
+            throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
+          }
+
         return validateBenefitProgram(requestHeaders, authMethods);
     }
 
@@ -670,7 +670,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private Mono<Boolean> validateBenefitProgram(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
         if (authMethods != null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
-                || authMethods.contains(AuthMethods.DEMO))) {
+                || authMethods.contains(AuthMethods.DEMO))|| authMethods.contains(AuthMethods.DEMO_AUTH)) {
             if (!authMethods.contains(AuthMethods.OTP) && requestHeaders.getRoleList() != null && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)
                     && (requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())) {
                 throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
@@ -727,6 +727,14 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.FACE) || authMethods.contains(AuthMethods.BIO) || authMethods.contains(AuthMethods.IRIS) || authMethods.contains(AuthMethods.DEMO))
                 && requestHeaders.getBenefitName() != null
                 && (requestHeaders.getRoleList() == null || requestHeaders.getRoleList().isEmpty() || !requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)));
+    }
+
+    private boolean isValidHidIntegrated(RequestHeaders requestHeaders) {
+       boolean isRole=false;
+        if (Objects.nonNull(requestHeaders.getRoleList())){
+            isRole= requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE);
+           }
+       return  isRole;
     }
 
     private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto, RequestHeaders requestHeaders) {

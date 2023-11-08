@@ -7,10 +7,12 @@ import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
+import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
+import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -28,6 +30,7 @@ import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
+import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
@@ -42,6 +45,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -86,9 +90,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
         verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
-        verifyDemographicRequest.setName(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName()));
-        verifyDemographicRequest.setDob(formatDob(demographic.getYearOfBirth(), demographic.getMonthOfBirth(), demographic.getDayOfBirth()));
+        verifyDemographicRequest.setName(Common.removeNulls(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName())));
+        String dob = Objects.nonNull(demographic.getMonthOfBirth()) ? formatDob(demographic.getYearOfBirth(), demographic.getMonthOfBirth(), demographic.getDayOfBirth()) : Common.removeNulls(demographic.getYearOfBirth());
+        verifyDemographicRequest.setDob(dob);
         verifyDemographicRequest.setGender(demographic.getGender());
+        verifyDemographicRequest.setPhone(enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
         Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
         if (!StringUtils.isEmpty(mobileNumber)) {
@@ -123,63 +129,83 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     }
 
+
+    private VerifyDemographicRequest setDemoAuth(String name, String gender, String aadhaar, String yearofBrith) {
+        return VerifyDemographicRequest.builder().name(name).gender(gender).aadhaarNumber(aadhaar).dob(yearofBrith).build();
+    }
+
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid, RequestHeaders requestHeaders) {
-        Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
-        String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
-        String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
-
-        AccountDto accountDto = new AccountDto();
-        accountDto.setFirstName(demographic.getFirstName() != null ? demographic.getFirstName().trim() : null);
-        accountDto.setMiddleName(demographic.getMiddleName() != null ? demographic.getMiddleName().trim() : null);
-        accountDto.setLastName(demographic.getLastName() != null ? demographic.getLastName().trim() : null);
-        accountDto.setName(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName()));
-        accountDto.setConsentDate(LocalDateTime.now());
-        accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
-        accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
-        accountDto.setYearOfBirth(demographic.getYearOfBirth());
-        accountDto.setMonthOfBirth(preFixZero(demographic.getMonthOfBirth()));
-        accountDto.setDayOfBirth(preFixZero(demographic.getDayOfBirth()));
-        accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
-        accountDto.setAddress(demographic.getAddress() != null ? demographic.getAddress().trim() : null);
-        accountDto.setGender(demographic.getGender());
-        accountDto.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
-        accountDto.setConsentDate(LocalDateTime.now());
-        accountDto.setHealthId(defaultAbhaAddress);
-        accountDto.setXmluid(xmlUid);
-        accountDto.setPincode(demographic.getPinCode());
-        accountDto.setHealthIdNumber(newAbhaNumber);
-        accountDto.setMobile(demographic.getMobile());
-        accountDto.setHealthWorkerName(demographic.getHealthWorkerName());
-        accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
-        accountDto.setStatus(AccountStatus.ACTIVE.getValue());
-        accountDto.setMobileType(demographic.getMobileType().getValue());
-        accountDto.setSource(DEMO_AUTH);
-        accountDto.setKycVerified(true);
-        accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
-
-        return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
-                .flatMap(duplicateAccount -> respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders)).switchIfEmpty(Mono.defer(() -> {
-                    int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
-                    if (age >= 18) {
-                        accountDto.setType(AbhaType.STANDARD);
-                    } else {
-                        accountDto.setType(AbhaType.CHILD);
-                    }
-                    return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
-                            .flatMap(lgdDistrictResponses -> {
-                                if (!lgdDistrictResponses.isEmpty()) {
-                                    LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-                                    accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-                                    accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
-                                    accountDto.setStateCode(lgdDistrictResponse.getStateCode());
-                                    accountDto.setStateName(lgdDistrictResponse.getStateName());
+        Demographic demographicdto = enrolByAadhaarRequestDto.getAuthData().getDemographic();
+        List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
+        // Use the breakName method to process demographic data asynchronously
+        return breakName(demographicdto, authMethods)
+                .flatMap(demographic -> {
+                    String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+                    String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
+                    AccountDto accountDto = new AccountDto();
+                    accountDto.setFirstName(demographic.getFirstName() != null ? demographic.getFirstName().trim() : null);
+                    accountDto.setMiddleName(demographic.getMiddleName() != null ? demographic.getMiddleName().trim() : null);
+                    accountDto.setLastName(demographic.getLastName() != null ? demographic.getLastName().trim() : null);
+                    accountDto.setName(Common.removeNulls(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName())));
+                    accountDto.setConsentDate(LocalDateTime.now());
+                    accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
+                    accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
+                    accountDto.setYearOfBirth(demographic.getYearOfBirth());
+                    accountDto.setMonthOfBirth(preFixZero(demographic.getMonthOfBirth()));
+                    accountDto.setDayOfBirth(preFixZero(demographic.getDayOfBirth()));
+                    accountDto.setKycdob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+                    accountDto.setAddress(demographic.getAddress() != null ? demographic.getAddress().trim() : null);
+                    accountDto.setGender(demographic.getGender());
+                    accountDto.setConsentVersion(enrolByAadhaarRequestDto.getConsent().getVersion());
+                    accountDto.setConsentDate(LocalDateTime.now());
+                    accountDto.setHealthId(defaultAbhaAddress);
+                    accountDto.setXmluid(xmlUid);
+                    accountDto.setPincode(demographic.getPinCode());
+                    accountDto.setHealthIdNumber(newAbhaNumber);
+                    accountDto.setMobile(demographic.getMobile());
+                    accountDto.setHealthWorkerName(demographic.getHealthWorkerName());
+                    accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
+                    accountDto.setStatus(AccountStatus.ACTIVE.getValue());
+                    String mobileType = Objects.nonNull(demographic.getMobileType()) ? demographic.getMobileType().getValue() : null;
+                    accountDto.setMobileType(mobileType);
+                    accountDto.setSource(DEMO_AUTH);
+                    accountDto.setKycVerified(true);
+                    accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
+                    return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
+                            .flatMap(duplicateAccount -> respondExistingAccount(duplicateAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders))
+                            .switchIfEmpty(Mono.defer(() -> {
+                                int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
+                                if (age >= 18) {
+                                    accountDto.setType(AbhaType.STANDARD);
                                 } else {
-                                    accountDto.setDistrictName(demographic.getDistrict());
-                                    accountDto.setStateName(demographic.getState());
+                                    accountDto.setType(AbhaType.CHILD);
                                 }
-                                return saveAccountDetails(enrolByAadhaarRequestDto, accountDto, demographic.getConsentFormImage(), requestHeaders);
-                            });
-                }));
+                                return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
+                                        .flatMap(lgdDistrictResponses -> {
+                                            if (!lgdDistrictResponses.isEmpty()) {
+                                                // Process LGD data
+                                                LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                                                accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                                                accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
+                                                accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+                                                accountDto.setStateName(lgdDistrictResponse.getStateName());
+                                            } else {
+                                                accountDto.setDistrictName(demographic.getDistrict());
+                                                accountDto.setStateName(demographic.getState());
+                                            }
+                                            return saveAccountDetails(enrolByAadhaarRequestDto, accountDto, demographic.getConsentFormImage(), requestHeaders);
+                                        }).switchIfEmpty(lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(res-> setLdgData(enrolByAadhaarRequestDto, requestHeaders, demographic, res, accountDto)));
+                            }));
+                });
+    }
+
+    private Mono<EnrolByAadhaarResponseDto> setLdgData(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders, Demographic demographic, List<LgdDistrictResponse> res, AccountDto accountDto) {
+        LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(res);
+        accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+        accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
+        accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+        accountDto.setStateName(lgdDistrictResponse.getStateName());
+        return saveAccountDetails(enrolByAadhaarRequestDto, accountDto, demographic.getConsentFormImage(), requestHeaders);
     }
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
@@ -280,11 +306,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     .message(responseMessage)
                     .isNew(false)
                     .build();
-            accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_DEMO.code()	, rHeaders)
-			.onErrorResume(thr -> {
-		log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
-				return Mono.empty();
-			}).subscribe();
+            accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_DEMO.code(), rHeaders)
+                    .onErrorResume(thr -> {
+                        log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());
+                        return Mono.empty();
+                    }).subscribe();
             // Final response for existing user
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
@@ -325,10 +351,41 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
             log.info("going to call procedure to create account using demographic");
             return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build())
-                    .flatMap(v -> addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByAadhaarRequestDto.getAuthData().getDemographic().getConsentFormImage()).flatMap(v1->sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders)));
+                    .flatMap(v -> addDocumentsInIdentityDocumentEntity(accountDtoResponse, enrolByAadhaarRequestDto.getAuthData().getDemographic().getConsentFormImage()).flatMap(v1 -> sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders)));
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
     }
 
+    private  Mono<Demographic> breakName(Demographic demographic, List<AuthMethods> authMethods ) {
+        if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
+            log.info("Executed in case of demo Auth");
+            String firstName = "";
+            String lastName = "";
+            String middleName = "";
+            if (!StringUtils.isEmpty(demographic.getFirstName())) {
+                String[] nameParts = demographic.getFirstName().split(" ");
+                if (nameParts.length == 1) {
+                    firstName = nameParts[0];
+                } else if (nameParts.length == 2) {
+                    firstName = nameParts[0];
+                    lastName = nameParts[1];
+                } else {
+                    firstName = nameParts[0];
+                    lastName = nameParts[nameParts.length - 1];
+                    middleName = String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length - 1));
+                }
+            }
+            demographic.setFirstName(GeneralUtils.stringTrimmer(firstName));
+            demographic.setLastName(GeneralUtils.stringTrimmer(lastName));
+            demographic.setMiddleName(GeneralUtils.stringTrimmer(middleName));
+        }
+         return Mono.just(demographic);
+    }
+
 }
+
+
+
+
+

@@ -19,7 +19,8 @@ public enum AuthMethods {
     FACE("face"),
     BIO("bio"),
     IRIS("iris"),
-    WRONG("wrong");
+    WRONG("wrong"),
+    DEMO_AUTH("demo_auth");
     private final String value;
 
     @JsonCreator

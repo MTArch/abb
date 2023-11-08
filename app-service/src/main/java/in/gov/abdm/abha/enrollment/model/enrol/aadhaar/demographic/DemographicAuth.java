@@ -16,25 +16,15 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 @Data
-public class Demographic extends  LdgRequest{
-    @NotEmpty(message = AbhaConstants.AADHAAR_NUMBER_INVALID)
+public class DemographicAuth extends LdgRequest {
     @JsonProperty("aadhaar")
     private String aadhaarNumber;
-    //@NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
-    private String firstName;
-    private String middleName;
-    private String lastName;
-    private String dayOfBirth;
-    private String monthOfBirth;
-    private String yearOfBirth;
+    private String name;
+    private String birthOfDay;
     private String gender;
-    private String mobile;
-    private MobileType mobileType;
-    private String state;
-    private String district;
     private String pinCode;
     private String address;
     private String consentFormImage;
-    private String healthWorkerName;
-    private String healthWorkerMobile;
+    private String mobile;
+
 }

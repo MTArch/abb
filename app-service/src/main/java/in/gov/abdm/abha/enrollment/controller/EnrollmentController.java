@@ -5,6 +5,8 @@ import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
@@ -21,6 +23,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisServic
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
+import in.gov.abdm.abha.enrollment.utilities.DataMapper;
 import in.gov.abdm.abha.enrollment.utilities.RequestMapper;
 import in.gov.abdm.error.ABDMError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +87,21 @@ public class EnrollmentController {
                     }else if(authMethods.contains(AuthMethods.IRIS)){
                         enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
                         return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto,requestHeaders);
+                    } else if(authMethods.contains(AuthMethods.DEMO_AUTH)){
+                        DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();
+                        enrolByDemographicService.validateEnrolByDemographic(demoAuth,requestHeaders);
+                        Demographic  demographic = new DataMapper<Demographic>().mapper(demoAuth, Demographic.class);
+                        if (demoAuth.getBirthOfDay().length()==4){
+                            demographic.setYearOfBirth(demoAuth.getBirthOfDay());
+                        }else{
+                            String[] parts = demoAuth.getBirthOfDay().split("-");
+                            demographic.setDayOfBirth(parts[0]);
+                            demographic.setMonthOfBirth(parts[1]);
+                            demographic.setYearOfBirth(parts[2]);
+                        }
+                        demographic.setFirstName(demoAuth.getName());
+                        enrolByAadhaarRequestDto.getAuthData().setDemographic(demographic);
+                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
                     }
                     throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
                 });

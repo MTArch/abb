@@ -24,7 +24,7 @@ public class AbhaConstants {
 
 
     public static final String AADHAAR_NUMBER_INVALID = "Invalid Aadhaar Number";
-    public static final String YEAR_OF_BIRTH_INVALID = "Invalid Year of birth";
+    public static final String  YEAR_OF_BIRTH_INVALID = "Invalid Year of birth";
     public static final String MOBILE_NUMBER_MISSMATCH = "Invalid Mobile Number";
 
     public static final String INVALID_NAME_FORMAT = "Invalid Name format";
@@ -75,6 +75,8 @@ public class AbhaConstants {
     public static final String INVALID_DOCUMENT_TYPE = "Invalid Document Type";
     public static final String INVALID_DOCUMENT_ID = "Invalid Document Id";
     public static final String INVALID_FIRST_NAME = "Invalid First Name";
+
+    public static final String INVALID_NAME = "Invalid Name";
     public static final String FIRST_NAME_EXCEED = "First name should not exceed limit of 255 characters";
 
     public static final String INVALID_MIDDLE_NAME = "Invalid Middle Name";
