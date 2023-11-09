@@ -27,6 +27,7 @@ import reactor.core.scheduler.Schedulers;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Service
@@ -109,7 +110,7 @@ public class EnrolByDemographicValidatorService {
         if (!isValidHealthWorkerName(demographic)) {
             errors.put(AbhaConstants.HEALTH_WORKER_NAME, AbhaConstants.INVALID_HEALTH_WORKER_NAME);
         }
-        if (!isValidAddress(demographic.getAddress())) {
+        if (Objects.nonNull(demographic.getAddress()) && !isValidAddress(demographic.getAddress())) {
             errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
         }
         if (errors.size() != 0) {
@@ -133,7 +134,7 @@ public class EnrolByDemographicValidatorService {
             errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
         }
 
-        if (!demographic.getPinCode().isBlank() && !isValidPinCode(demographic.getPinCode())) {
+        if (Objects.nonNull(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
         if (!isValidState(demographic.getStateCode())) {
@@ -147,7 +148,7 @@ public class EnrolByDemographicValidatorService {
         } else if (StringUtils.isNotBlank(demographic.getConsentFormImage()) && !isValidConsentFormImageFormat(demographic.getConsentFormImage())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (!isValidAddress(demographic.getAddress())) {
+        if (Objects.nonNull(demographic.getAddress()) && !isValidAddress(demographic.getAddress())) {
             errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
         }
         if (!isValidDateFormat(demographic.getBirthOfDay())) {
