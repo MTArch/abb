@@ -22,7 +22,7 @@ public class LgdUtility {
     private static final String LGD_ERROR_MESSAGE = "LGD service error {}";
 
     public Mono<List<LgdDistrictResponse>> getLgdData(String pinCode, String state) {
-        if(pinCode.isEmpty() && Objects.isNull(state)){
+        if(Objects.isNull(pinCode) && Objects.isNull(state)){
             return Mono.empty();
         }
         if (pinCode == null || pinCode.isBlank()) {

@@ -91,15 +91,16 @@ public class EnrollmentController {
                         DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();
                         enrolByDemographicService.validateEnrolByDemographic(demoAuth,requestHeaders);
                         Demographic  demographic = new DataMapper<Demographic>().mapper(demoAuth, Demographic.class);
-                        if (demoAuth.getBirthOfDay().length()==4){
-                            demographic.setYearOfBirth(demoAuth.getBirthOfDay());
-                        }else{
-                            String[] parts = demoAuth.getBirthOfDay().split("-");
+                        if (demoAuth.getDateOfBirth().length()==4){
+                            demographic.setYearOfBirth(demoAuth.getDateOfBirth());
+                     } else {
+                            String[] parts = demoAuth.getDateOfBirth().split("-");
                             demographic.setDayOfBirth(parts[0]);
                             demographic.setMonthOfBirth(parts[1]);
                             demographic.setYearOfBirth(parts[2]);
                         }
                         demographic.setFirstName(demoAuth.getName());
+                        demographic.setConsentFormImage(demoAuth.getProfilePhoto());
                         enrolByAadhaarRequestDto.getAuthData().setDemographic(demographic);
                         return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
                     }

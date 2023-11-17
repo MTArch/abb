@@ -30,6 +30,7 @@ public class AbhaConstants {
     public static final String INVALID_NAME_FORMAT = "Invalid Name format";
     public static final String VALIDATION_ERROR_GENDER_FIELD = "Invalid Gender";
 
+    public static final String VALIDATION_ERROR_DOB = "Invalid dateOfBirth";
     public static final String VALIDATION_EMPTY_AUTH_METHOD = "Invalid Auth Method";
 
     public static final String VALIDATION_ERROR_AUTH_DATA_FIELD = "Auth data cannot be null or empty";

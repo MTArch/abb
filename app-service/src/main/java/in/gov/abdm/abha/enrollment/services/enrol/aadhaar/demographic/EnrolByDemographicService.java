@@ -149,6 +149,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     accountDto.setName(Common.removeNulls(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName())));
                     accountDto.setConsentDate(LocalDateTime.now());
                     accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
+                    if (authMethods.contains(AuthMethods.DEMO_AUTH)){
+                        accountDto.setProfilePhoto(demographic.getConsentFormImage());
+                    } else {
+                        accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
+                    }
                     accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
                     accountDto.setYearOfBirth(demographic.getYearOfBirth());
                     accountDto.setMonthOfBirth(preFixZero(demographic.getMonthOfBirth()));
