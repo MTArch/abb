@@ -104,7 +104,7 @@ public class EnrolByDemographicValidatorService {
         if (!isValidMobileType(demographic)) {
             errors.put(MOBILE_TYPE, AbhaConstants.INVALID_MOBILE_TYPE);
         }
-        if (!isValidHealthWorkerMobile(demographic)) {
+        if (!isValidHealthWorkerMobile(demographic.getHealthWorkerMobile())) {
             errors.put(HEALTH_WORKER_MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
         if (!isValidHealthWorkerName(demographic)) {
@@ -131,10 +131,10 @@ public class EnrolByDemographicValidatorService {
         }
 
         if (!isValidFirstName(demographic.getName())) {
-            errors.put(FIRST_NAME, AbhaConstants.INVALID_FIRST_NAME);
+            errors.put(NAME, AbhaConstants.INVALID_NAME);
         }
 
-        if (Objects.nonNull(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
+        if (!isNullOrEmpty(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
         if (!isValidState(demographic.getStateCode())) {
@@ -143,18 +143,23 @@ public class EnrolByDemographicValidatorService {
         if (!isValidDistrict(demographic.getDistrictCode())) {
             errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
         }
-        if (StringUtils.isNotBlank(demographic.getConsentFormImage()) && !isValidConsentFormImage(demographic.getConsentFormImage())) {
+        if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImage(demographic.getProfilePhoto())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
-        } else if (StringUtils.isNotBlank(demographic.getConsentFormImage()) && !isValidConsentFormImageFormat(demographic.getConsentFormImage())) {
+        } else if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImageFormat(demographic.getProfilePhoto())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (Objects.nonNull(demographic.getAddress()) && !isValidAddress(demographic.getAddress())) {
-            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
-        }
-        if (!isValidDateFormat(demographic.getBirthOfDay())) {
+
+        if (!isValidDateFormat(demographic.getDateOfBirth())) {
             errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
         }
 
+        if (!isNullOrEmpty(demographic.getMobile()) && !isValidHealthWorkerMobile(demographic.getMobile())) {
+            errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
+        }
+
+        if (!isNullOrEmpty(demographic.getAddress()) && !isValidAddress(demographic.getAddress())) {
+            errors.put(ADDRESS, AbhaConstants.INVALID_ADDRESS);
+        }
         if (errors.size() != 0) {
             throw new BadRequestException(errors);
         }
@@ -202,8 +207,8 @@ public class EnrolByDemographicValidatorService {
         return !demographic.getMobileType().equals(MobileType.WRONG);
     }
 
-    private boolean isValidHealthWorkerMobile(Demographic demographic) {
-        return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(demographic.getHealthWorkerMobile()).matches();
+    private boolean isValidHealthWorkerMobile(String mobileNumber) {
+        return Pattern.compile(MOBILE_NO_10_DIGIT_REGEX_PATTERN).matcher(mobileNumber).matches();
     }
 
     private boolean isValidMobileNumber(RequestHeaders requestHeaders, String mobile) {
@@ -266,6 +271,10 @@ public class EnrolByDemographicValidatorService {
 
     private boolean isValidPinCode(String pinCode) {
         return !pinCode.isBlank() && pinCode.matches(onlyDigitRegex);
+    }
+
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
     }
 
     private boolean isValidLastName(String lastName) {
