@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -27,8 +28,8 @@ public class DeDuplicationService {
         return DeDuplicationRequest.builder()
                 .firstName(accountDto.getFirstName().toLowerCase())
                 .lastName(accountDto.getLastName().toLowerCase())
-                .dob(Integer.valueOf(accountDto.getDayOfBirth()))
-                .mob(Integer.valueOf(accountDto.getMonthOfBirth()))
+                .dob(StringUtils.hasLength(accountDto.getDayOfBirth())?Integer.valueOf(accountDto.getDayOfBirth()):0)
+                .mob(StringUtils.hasLength(accountDto.getMonthOfBirth())?Integer.valueOf(accountDto.getMonthOfBirth()):0)
                 .yob(Integer.valueOf(accountDto.getYearOfBirth()))
                 .gender(accountDto.getGender())
                 .build();
