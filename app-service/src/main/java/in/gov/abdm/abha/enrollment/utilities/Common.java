@@ -125,7 +125,7 @@ public class Common {
     }
 
     public int calculateYearDifference(String startYear, String startMonth, String startDay) {
-        LocalDate startDate = LocalDate.of(Integer.parseInt(startYear), Integer.parseInt(startMonth), Integer.parseInt(startDay));
+        LocalDate startDate = LocalDate.of(Integer.parseInt(startYear), org.springframework.util.StringUtils.hasLength(startMonth)?Integer.parseInt(startMonth):1, org.springframework.util.StringUtils.hasLength(startDay) ?Integer.parseInt(startDay):1);
         return Period.between(startDate, LocalDate.now()).getYears();
     }
 
@@ -260,7 +260,7 @@ public class Common {
     }
 
     public String getDob(String day, String month, String year) {
-        return day + StringConstants.DASH + month + StringConstants.DASH + year;
+        return org.springframework.util.StringUtils.hasLength(day) ?day + StringConstants.DASH + month + StringConstants.DASH + year: year;
     }
 
     public boolean isValidateISOTimeStamp(String timestamp) {
