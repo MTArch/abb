@@ -315,6 +315,9 @@ public class Accounts implements Persistable<String>{
 
     private String source;
 
+    private String apiVersion="v3";
+
+
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.
      */
