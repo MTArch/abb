@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.configuration.FacilityContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -207,6 +208,8 @@ public class EnrolUsingDrivingLicence {
                 .healthId(defaultAbhaAddress)
                 .source(StringConstants.DRIVING_LICENCE)
                 .build();
+              accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.ENROL_BY_DOCUMENT_ENDPOINT);
+
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount ->

@@ -304,4 +304,6 @@ public class AccountDto {
 
     private String profilePhoto;
     private String source;
+
+    private String apiEndPoint;
 }

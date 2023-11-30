@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -174,6 +175,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     String mobileType = Objects.nonNull(demographic.getMobileType()) ? demographic.getMobileType().getValue() : null;
                     accountDto.setMobileType(mobileType);
                     accountDto.setSource(DEMO_AUTH);
+                    accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
                     accountDto.setKycVerified(true);
                     accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
                     return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
