@@ -17,6 +17,7 @@ public class AbhaConstants {
     public static final String MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The mobile number provided by you is already linked to {0} ABHA numbers. Please provide a different mobile number.";
     public static final String EMAIL_ALREADY_LINKED_TO_MAX_ACCOUNTS = "The email address provided by you is already linked to {0} ABHA numbers. Please provide a different email address.";
 
+    public static final String INVALID_STATE_DISTRICT = "Invalid state and district code";
 
     public static final String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " +
             "Valid Format Reference: 1. The specified field is mandatory (not null), 2. The specified field shouldn't be Blank, 3. The specified field shouldn't be Empty.";

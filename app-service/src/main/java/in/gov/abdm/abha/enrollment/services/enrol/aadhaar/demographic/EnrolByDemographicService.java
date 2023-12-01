@@ -10,6 +10,7 @@ import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
@@ -86,48 +87,66 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
     private boolean isTransactionManagementEnable;
 
+    private static final String  STATE_DISTRICT= "districtCode";
+
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
         verifyDemographicRequest.setAadhaarNumber(rsaUtils.decrypt(demographic.getAadhaarNumber()));
+        List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
         verifyDemographicRequest.setName(Common.removeNulls(Common.getName(demographic.getFirstName(), demographic.getMiddleName(), demographic.getLastName())));
         String dob = Objects.nonNull(demographic.getMonthOfBirth()) ? formatDob(demographic.getYearOfBirth(), demographic.getMonthOfBirth(), demographic.getDayOfBirth()) : Common.removeNulls(demographic.getYearOfBirth());
         verifyDemographicRequest.setDob(dob);
         verifyDemographicRequest.setGender(demographic.getGender());
         verifyDemographicRequest.setPhone(enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
-        Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
-        if (!StringUtils.isEmpty(mobileNumber)) {
-            mobileLinkedAccountCountMono = accountService.getMobileLinkedAccountCount(mobileNumber);
+        Mono validateStateCode=Mono.just("");
+        if(authMethods.contains(AuthMethods.DEMO_AUTH)){
+            validateStateCode =lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(lgdDistrictResponse -> {
+                if (lgdDistrictResponse.stream()
+                        .anyMatch(vale -> !vale.getStateCode().equals(demographic.getStateCode()))){
+                    LinkedHashMap<String, String> error= new LinkedHashMap<>();
+                    error.put(STATE_DISTRICT, AbhaConstants.INVALID_STATE_DISTRICT);
+                    throw new BadRequestException(error);
+                } else {
+                    return  Mono.just(lgdDistrictResponse);
+                }
+            });
         }
-        return mobileLinkedAccountCountMono.flatMap(mobileLinkedAccountCount -> {
-            if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
-                throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
-            } else {
-                return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
-                        .flatMap(verifyDemographicResponse -> {
-                            if (verifyDemographicResponse.isVerified()) {
-                                // check if account exist
-                                return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
-                                        .flatMap(existingAccount -> {
-                                            if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
-                                                return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders);
-                                            } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                                                return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED, requestHeaders);
-                                            } else {
-                                                // existing account
-                                                return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders);
-                                            }
-                                        })
-                                        .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders)));
-                            } else {
-                                throw new AbhaUnProcessableException(ABDMError.INVALID_DEMOGRAPHIC_DETAILS);
-                            }
-                        });
+        return validateStateCode.flatMap(data-> {
+            Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
+            if (!StringUtils.isEmpty(mobileNumber)) {
+                mobileLinkedAccountCountMono = accountService.getMobileLinkedAccountCount(mobileNumber);
             }
+            return   mobileLinkedAccountCountMono.flatMap(mobileLinkedAccountCount -> {
+                if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
+                    throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
+                } else {
+                    return aadhaarAppService.verifyDemographicDetails(verifyDemographicRequest)
+                            .flatMap(verifyDemographicResponse -> {
+                                if (verifyDemographicResponse.isVerified()) {
+                                    // check if account exist
+                                    return accountService.findByXmlUid(verifyDemographicResponse.getXmlUid())
+                                            .flatMap(existingAccount -> {
+                                                if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
+                                                    return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders);
+                                                } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                                    return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED, requestHeaders);
+                                                } else {
+                                                    // existing account
+                                                    return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders);
+                                                }
+                                            })
+                                            .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders)));
+                                } else {
+                                    throw new AbhaUnProcessableException(ABDMError.INVALID_DEMOGRAPHIC_DETAILS);
+                                }
+                            });
+                }
+            });
         });
-
     }
+
 
 
     private VerifyDemographicRequest setDemoAuth(String name, String gender, String aadhaar, String yearofBrith) {
