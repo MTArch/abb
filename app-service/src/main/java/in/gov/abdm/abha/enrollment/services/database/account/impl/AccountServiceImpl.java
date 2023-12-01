@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -149,6 +150,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void updateSource(AccountDto newUser, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
+        newUser.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
         if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
             newUser.setSource(AADHAAR_OTP);
         } else if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.FACE)) {
