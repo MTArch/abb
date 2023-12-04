@@ -295,4 +295,10 @@ public class AccountDto {
 
     @JsonIgnore
     private HidPhrAddress hidPhrAddress;
+
+    private String source;
+
+    private String apiVersion="v3";
+
+    private String apiEndPoint;
 }
