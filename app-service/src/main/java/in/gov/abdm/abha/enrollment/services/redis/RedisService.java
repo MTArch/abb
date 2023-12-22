@@ -82,8 +82,8 @@ public class RedisService {
     }
 
     public void saveReceiverOtpTracker(String hashKey, ReceiverOtpTracker receiverOtpTracker) {
-        save(RECEIVER_OTP_TRACKER, hashKey, receiverOtpTracker);
-        redisTemplate.expire(RECEIVER_OTP_TRACKER, userBlockTime, TimeUnit.MINUTES);
+        save(RECEIVER_OTP_TRACKER.concat(hashKey), hashKey, receiverOtpTracker);
+        redisTemplate.expire(RECEIVER_OTP_TRACKER.concat(hashKey), userBlockTime, TimeUnit.MINUTES);
     }
 
     public void saveNotificationTemplate(Templates templates) {
@@ -107,7 +107,7 @@ public class RedisService {
     }
 
     public void deleteReceiverOtpTracker(String hashKey) {
-        delete(RECEIVER_OTP_TRACKER, hashKey);
+        delete(RECEIVER_OTP_TRACKER.concat(hashKey), hashKey);
     }
 
     public RedisOtp getRedisOtp(String hashKey) {
@@ -115,7 +115,7 @@ public class RedisService {
     }
 
     public ReceiverOtpTracker getReceiverOtpTracker(String hashKey) {
-        return (ReceiverOtpTracker) redisTemplate.opsForHash().get(RECEIVER_OTP_TRACKER, hashKey);
+       return (ReceiverOtpTracker)redisTemplate.opsForHash().get(RECEIVER_OTP_TRACKER.concat(hashKey), hashKey);
     }
 
     public Mono<Templates> getNotificationTemplate(String templateId) {
@@ -159,7 +159,7 @@ public class RedisService {
     }
 
     public boolean isReceiverOtpTrackerAvailable(String hashKey) {
-        return isAvailable(RECEIVER_OTP_TRACKER, hashKey);
+        return isAvailable(RECEIVER_OTP_TRACKER.concat(hashKey), hashKey);
     }
 
     public boolean isUserBlocked(String receiver) {
