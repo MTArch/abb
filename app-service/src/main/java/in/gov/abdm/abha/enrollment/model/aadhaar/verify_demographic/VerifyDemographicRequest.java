@@ -16,4 +16,5 @@ public class VerifyDemographicRequest {
     private String gender;
     private String dob;
     private String email;
+    private String aadhaarLogType;
 }

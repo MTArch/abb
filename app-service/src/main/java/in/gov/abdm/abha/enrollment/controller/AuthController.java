@@ -22,7 +22,8 @@ import java.util.List;
 @CrossOrigin
 @RequestMapping(URIConstant.AUTH_ENDPOINT)
 @ResponseStatus(HttpStatus.OK)
-public class AuthController {
+public class
+AuthController {
 
     @Autowired
     AuthByAbdmService authByAbdmService;

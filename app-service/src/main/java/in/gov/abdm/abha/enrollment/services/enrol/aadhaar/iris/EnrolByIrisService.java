@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -111,6 +112,7 @@ public class EnrolByIrisService extends EnrolByIrisValidatorService {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyIris(AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getIris().getAadhaar()))
                 .pid(enrolByAadhaarRequestDto.getAuthData().getIris().getPid())
+                .aadhaarLogType(AadhaarLogType.KYC_I.name())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarIrisResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }

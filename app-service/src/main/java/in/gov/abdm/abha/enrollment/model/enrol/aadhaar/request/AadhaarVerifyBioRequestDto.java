@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class AadhaarVerifyBioRequestDto {
     private String aadhaarNumber;
     private String pid;
+    private String aadhaarLogType;
 }

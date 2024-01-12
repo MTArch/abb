@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
+import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.services.aadhaar.AadhaarAppService;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
-import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
@@ -60,6 +61,7 @@ public class AuthByAadhaarService {
                 AadhaarVerifyOtpRequestDto.builder().aadhaarNumber(transactionDto.getAadharNo())
                         .aadhaarTransactionId(transactionDto.getAadharTxn())
                         .otp(authByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
+                        .aadhaarLogType(AadhaarLogType.KYC_OTP.name())
                         .build());
 
         return aadhaarResponseDtoMono

@@ -8,6 +8,7 @@ import in.gov.abdm.abha.enrollment.enums.KycAuthType;
 import in.gov.abdm.abha.enrollment.enums.TransactionStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
+import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
@@ -111,6 +112,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(requestHeaders, AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
                 .pid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
+                        .aadhaarLogType(AadhaarLogType.KYC_F.name())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }
@@ -294,6 +296,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                 .aadhaarNumber(rsaUtil.decrypt(transactionDto.getAadharNo()))
                 .name(accountDto.getName())
                 .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
+                .aadhaarLogType(AadhaarLogType.KYC_D_AUTH.name())
                 .build();
     }
 
