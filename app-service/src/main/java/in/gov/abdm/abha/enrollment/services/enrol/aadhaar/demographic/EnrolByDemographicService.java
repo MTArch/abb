@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
@@ -100,6 +101,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         verifyDemographicRequest.setDob(dob);
         verifyDemographicRequest.setGender(demographic.getGender());
         verifyDemographicRequest.setPhone(enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile());
+        verifyDemographicRequest.setAadhaarLogType(AadhaarLogType.KYC_D_AUTH.name());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
         Mono validateStateCode=Mono.just("");
         if(authMethods.contains(AuthMethods.DEMO_AUTH)){

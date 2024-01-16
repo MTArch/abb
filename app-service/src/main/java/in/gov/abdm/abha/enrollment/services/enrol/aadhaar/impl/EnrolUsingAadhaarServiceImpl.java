@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -159,6 +160,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .aadhaarNumber(rsaUtil.encrypt(redisOtp.getReceiver()))
                                             .aadhaarTransactionId(redisOtp.getAadhaarTxnId())
                                             .otp(enrolByAadhaarRequestDto.getAuthData().getOtp().getOtpValue())
+                                            .aadhaarLogType(AadhaarLogType.KYC_OTP.name())
                                             .build());
 
                             return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarOtpResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
@@ -471,6 +473,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.faceAuth(AadhaarVerifyFaceAuthRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar()))
                 .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getFace().getRdPidData())
+                .aadhaarLogType(AadhaarLogType.KYC_F.name())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarFaceResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }

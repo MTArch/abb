@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class AadhaarVerifyFaceAuthRequestDto {
     private String aadhaarNumber;
     private String faceAuthPid;
+    private String aadhaarLogType;
 }

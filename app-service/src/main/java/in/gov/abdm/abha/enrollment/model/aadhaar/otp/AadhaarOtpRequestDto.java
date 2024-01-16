@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AadhaarOtpRequestDto {
     private String aadhaarNumber;
+    private String aadhaarLogType;
 }

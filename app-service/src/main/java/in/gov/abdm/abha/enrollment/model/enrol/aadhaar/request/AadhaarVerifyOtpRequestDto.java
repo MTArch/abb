@@ -16,4 +16,5 @@ public class AadhaarVerifyOtpRequestDto {
     private String aadhaarTransactionId;
     private String otp;
     private String faceAuthPid;
+    private String aadhaarLogType;
 }
