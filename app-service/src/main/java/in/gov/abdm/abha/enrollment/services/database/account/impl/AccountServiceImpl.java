@@ -75,8 +75,8 @@ public class AccountServiceImpl implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
-    
-    public static final String EXCEPTION_IN_ABHA_RE_ATTEMPT = "Exception occured while callig abhaDBAccountFClient for reAttempt {}";  
+
+    public static final String EXCEPTION_IN_ABHA_RE_ATTEMPT = "Exception occured while callig abhaDBAccountFClient for reAttempt {}";
     private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
@@ -279,7 +279,11 @@ public class AccountServiceImpl implements AccountService {
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
             ||enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            String mobile=enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getAadhaarNumber();
+            String mobile=null;
+            if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)){
+                 mobile= Objects.nonNull(enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile())
+                        ?enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile(): null;
+            }
             return handleAccountByBenefitProgram(accountDto, requestHeaders,mobile );
         } else {
             // normal flow
@@ -374,7 +378,11 @@ public class AccountServiceImpl implements AccountService {
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
           || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            String mobile=enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile();
+            String mobile = null;
+            if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)){
+                mobile= Objects.nonNull(enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile())
+                        ?enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile(): null;
+            }
             return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders, mobile);
         } else {
             // normal flow
