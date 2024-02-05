@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.enrollment.constants.PropertyConstants.ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI;
 
-@ReactiveFeignClient(name = AbhaConstants.ABHA_DB_HID_BENEFIT_CLIENT, url = "localhost:8081", configuration = AppConfigurations.class)
+@ReactiveFeignClient(name = AbhaConstants.ABHA_DB_HID_BENEFIT_CLIENT, url = ENROLLMENT_GATEWAY_ENROLLMENTDB_BASEURI, configuration = AppConfigurations.class)
 public interface HidBenefitDBFClient {
 
     @PostMapping(URIConstant.DB_ADD_HID_BENEFIT_URI)
