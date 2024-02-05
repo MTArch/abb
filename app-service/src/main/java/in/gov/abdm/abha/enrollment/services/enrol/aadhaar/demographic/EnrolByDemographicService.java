@@ -241,8 +241,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 });
     }
 
-
-
     private Mono<EnrolByAadhaarResponseDto> setLdgData(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders, Demographic demographic, List<LgdDistrictResponse> res, AccountDto accountDto) {
         LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(res);
         accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
