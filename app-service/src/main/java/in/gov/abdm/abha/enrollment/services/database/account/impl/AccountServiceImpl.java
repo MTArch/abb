@@ -14,11 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
@@ -76,8 +72,8 @@ public class AccountServiceImpl implements AccountService {
 
     public static final String PARSER_EXCEPTION_OCCURRED_DURING_PARSING = "Parser Exception occurred during parsing :";
     public static final String EXCEPTION_IN_PARSING_INVALID_VALUE_OF_DOB = "Exception in parsing Invalid value of DOB: {}";
-    
-    public static final String EXCEPTION_IN_ABHA_RE_ATTEMPT = "Exception occured while callig abhaDBAccountFClient for reAttempt {}";  
+
+    public static final String EXCEPTION_IN_ABHA_RE_ATTEMPT = "Exception occured while callig abhaDBAccountFClient for reAttempt {}";
     private DateFormat kycDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @Override
@@ -278,7 +274,8 @@ public class AccountServiceImpl implements AccountService {
         if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
             return handleAccountByBenefitProgram(accountDto, requestHeaders);
         } else {
@@ -331,6 +328,9 @@ public class AccountServiceImpl implements AccountService {
                 .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .linkedDate(LocalDateTime.now())
                 .healthIdNumber(accountDto.getHealthIdNumber())
+                .updatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .updatedDate(LocalDateTime.now())
+                .mobileNumber(accountDto.getMobile())
                 .build();
     }
 
@@ -368,7 +368,8 @@ public class AccountServiceImpl implements AccountService {
         if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
             return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
         } else {
@@ -391,9 +392,17 @@ public class AccountServiceImpl implements AccountService {
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
-                    .flatMap(response -> Mono.just(accountDto)
-                            .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
+            return hidBenefitDBFClient.existByHealthIdAndBenefit(accountDto.getHealthIdNumber(), requestHeaders.getBenefitName())
+                    .flatMap(exists -> {
+                        if (!exists) {
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
+                                    .flatMap(response -> Mono.just(accountDto))
+                                    .onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
+                        } else {
+                            return Mono.just(accountDto);
+                        }
+                    }).onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
+
         } else {
             throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
         }
@@ -441,20 +450,20 @@ public class AccountServiceImpl implements AccountService {
         newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
         newUser.setStateCode(lgdDistrictResponse.getStateCode());
         newUser.setStateName(lgdDistrictResponse.getStateName());
-        if(newUser.getProfilePhoto() != null){
+        if (newUser.getProfilePhoto() != null) {
             newUser.setProfilePhotoCompressed(false);
         }
     }
-    
-	@Override
-	public Mono<Void> reAttemptedAbha(String aNumber, String rType, RequestHeaders rHeaders) {
-		HidReattemptDto hidReattemptDto = HidReattemptDto.builder().healthIdNumber(aNumber)
-				.createdBy(rHeaders.getClientId()).requestType(rType).build();
-		return abhaDBAccountFClient.reAttemptedAbha(hidReattemptDto).doOnError(throwable -> {
-			log.info(EXCEPTION_IN_ABHA_RE_ATTEMPT, aNumber);
-		}).then();
 
-	}
+    @Override
+    public Mono<Void> reAttemptedAbha(String aNumber, String rType, RequestHeaders rHeaders) {
+        HidReattemptDto hidReattemptDto = HidReattemptDto.builder().healthIdNumber(aNumber)
+                .createdBy(rHeaders.getClientId()).requestType(rType).build();
+        return abhaDBAccountFClient.reAttemptedAbha(hidReattemptDto).doOnError(throwable -> {
+            log.info(EXCEPTION_IN_ABHA_RE_ATTEMPT, aNumber);
+        }).then();
+
+    }
 
     private void mapAccountWithEkycHelper(AccountDto newUser, AadhaarUserKycDto kycDto) {
         if (kycDto.getPhoto() != null) {

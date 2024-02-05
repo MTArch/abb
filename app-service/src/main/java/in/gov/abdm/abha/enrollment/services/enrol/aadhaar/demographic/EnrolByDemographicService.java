@@ -104,7 +104,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         verifyDemographicRequest.setAadhaarLogType(AadhaarLogType.KYC_D_AUTH.name());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
         Mono validateStateCode=Mono.just("");
-        if(authMethods.contains(AuthMethods.DEMO_AUTH)){
+        /*if(authMethods.contains(AuthMethods.DEMO_AUTH)){
             validateStateCode =lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(lgdDistrictResponse -> {
                 if (lgdDistrictResponse.stream()
                         .anyMatch(vale -> !vale.getStateCode().equals(demographic.getStateCode()))){
@@ -115,7 +115,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     return  Mono.just(lgdDistrictResponse);
                 }
             });
-        }
+        }*/
         return validateStateCode.flatMap(data-> {
             Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
             if (!StringUtils.isEmpty(mobileNumber)) {
@@ -156,6 +156,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         return VerifyDemographicRequest.builder().name(name).gender(gender).aadhaarNumber(aadhaar).dob(yearofBrith).build();
     }
 
+
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, String xmlUid, RequestHeaders requestHeaders) {
         Demographic demographicdto = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
@@ -171,7 +172,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     accountDto.setName(Common.removeNulls(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName())));
                     accountDto.setConsentDate(LocalDateTime.now());
                     accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
-                    if (authMethods.contains(AuthMethods.DEMO_AUTH)){
+                    if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
                         accountDto.setProfilePhoto(demographic.getConsentFormImage());
                     } else {
                         accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
@@ -196,7 +197,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     String mobileType = Objects.nonNull(demographic.getMobileType()) ? demographic.getMobileType().getValue() : null;
                     accountDto.setMobileType(mobileType);
                     accountDto.setSource(DEMO_AUTH);
-                    accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
+                    accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT + URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
                     accountDto.setKycVerified(true);
                     accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
                     return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
@@ -208,21 +209,34 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                 } else {
                                     accountDto.setType(AbhaType.CHILD);
                                 }
-                                return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
-                                        .flatMap(lgdDistrictResponses -> {
-                                            if (!lgdDistrictResponses.isEmpty()) {
-                                                // Process LGD data
-                                                LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
-                                                accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
-                                                accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
-                                                accountDto.setStateCode(lgdDistrictResponse.getStateCode());
-                                                accountDto.setStateName(lgdDistrictResponse.getStateName());
-                                            } else {
-                                                accountDto.setDistrictName(demographic.getDistrict());
-                                                accountDto.setStateName(demographic.getState());
-                                            }
-                                            return saveAccountDetails(enrolByAadhaarRequestDto, accountDto, demographic.getConsentFormImage(), requestHeaders);
-                                        }).switchIfEmpty(lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(res-> setLdgData(enrolByAadhaarRequestDto, requestHeaders, demographic, res, accountDto)));
+                                if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
+                                    return lgdUtility.getDistrictCode(demographic.getDistrictCode()).
+                                            flatMap(res -> {
+                                                if (Objects.isNull(res) || res.stream()
+                                                        .anyMatch(vale -> !vale.getStateCode().equals(demographic.getStateCode()))) {
+                                                    LinkedHashMap<String, String> error = new LinkedHashMap<>();
+                                                    error.put(STATE_DISTRICT, AbhaConstants.INVALID_STATE_DISTRICT);
+                                                    throw new BadRequestException(error);
+                                                }
+                                                return setLdgData(enrolByAadhaarRequestDto, requestHeaders, demographic, res, accountDto);
+                                            });
+                                } else {
+                                    return lgdUtility.getLgdData(demographic.getPinCode(), demographic.getState())
+                                            .flatMap(lgdDistrictResponses -> {
+                                                if (!lgdDistrictResponses.isEmpty()) {
+                                                    // Process LGD data
+                                                    LgdDistrictResponse lgdDistrictResponse = Common.getLGDDetails(lgdDistrictResponses);
+                                                    accountDto.setDistrictCode(lgdDistrictResponse.getDistrictCode());
+                                                    accountDto.setDistrictName(lgdDistrictResponse.getDistrictName() == null || lgdDistrictResponse.getDistrictName().equalsIgnoreCase("Unknown") ? demographic.getDistrict() : lgdDistrictResponse.getDistrictName());
+                                                    accountDto.setStateCode(lgdDistrictResponse.getStateCode());
+                                                    accountDto.setStateName(lgdDistrictResponse.getStateName());
+                                                } else {
+                                                    accountDto.setDistrictName(demographic.getDistrict());
+                                                    accountDto.setStateName(demographic.getState());
+                                                }
+                                                return saveAccountDetails(enrolByAadhaarRequestDto, accountDto, demographic.getConsentFormImage(), requestHeaders);
+                                            }).switchIfEmpty(lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(res -> setLdgData(enrolByAadhaarRequestDto, requestHeaders, demographic, res, accountDto)));
+                                }
                             }));
                 });
     }
