@@ -5,10 +5,7 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENC
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.AADHAAR_OTP;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.FACE;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.FINGER_SCAN;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.IRIS;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.*;
 
 
 import java.text.DateFormat;
@@ -273,6 +270,7 @@ public class AccountServiceImpl implements AccountService {
             accountDto.setFacilityId(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
             accountDto.setLstUpdatedBy(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
+        accountDto.setApiVersion(API_VERSION);
         accountDto.setNewAccount(true);
         accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());
@@ -362,6 +360,7 @@ public class AccountServiceImpl implements AccountService {
             accountDto.setFacilityId(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
             accountDto.setLstUpdatedBy(subject != null ? String.valueOf(requestHeaders.getFTokenClaims().get(SUB)) : null);
         }
+        accountDto.setApiVersion(API_VERSION);
         accountDto.setNewAccount(true);
         accountDto.setUpdateDate(LocalDateTime.now());
         accountDto.setCreatedDate(LocalDateTime.now());

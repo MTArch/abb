@@ -54,8 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static in.gov.abdm.abha.constant.ABHAConstants.PROVISIONAL;
-import static in.gov.abdm.abha.constant.ABHAConstants.VERIFIED;
+import static in.gov.abdm.abha.constant.ABHAConstants.*;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_RE_ATTEMPTED;
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
 
@@ -209,7 +208,7 @@ public class EnrolUsingDrivingLicence {
                 .source(StringConstants.DRIVING_LICENCE)
                 .build();
               accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.ENROL_BY_DOCUMENT_ENDPOINT);
-
+              accountDto.setApiVersion(API_VERSION);
 
         return deDuplicationService.checkDeDuplication(deDuplicationService.prepareRequest(accountDto))
                 .flatMap(duplicateAccount ->
