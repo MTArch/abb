@@ -275,14 +275,9 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
-            ||enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            String mobile=null;
-            if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)){
-                 mobile= Objects.nonNull(enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile())
-                        ?enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile(): null;
-            }
-            return handleAccountByBenefitProgram(accountDto, requestHeaders,mobile );
+            return handleAccountByBenefitProgram(accountDto, requestHeaders);
         } else {
             // normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
@@ -290,12 +285,12 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
+    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders, mobile));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders));
         } else {
-            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders, mobile);
+            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders);
         }
     }
 
@@ -303,12 +298,12 @@ public class AccountServiceImpl implements AccountService {
         return !integratedProgramDtos.isEmpty() && integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()));
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos, mobile))
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
@@ -316,8 +311,7 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-
-    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos, String mobile) {
+    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
         String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
         List<IntegratedProgramDto> integratedProgramDtoList
                 = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
@@ -336,7 +330,7 @@ public class AccountServiceImpl implements AccountService {
                 .healthIdNumber(accountDto.getHealthIdNumber())
                 .updatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .updatedDate(LocalDateTime.now())
-                .mobileNumber(mobile)
+                .mobileNumber(accountDto.getMobile())
                 .build();
     }
 
@@ -375,30 +369,25 @@ public class AccountServiceImpl implements AccountService {
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
-          || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            String mobile = null;
-            if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)){
-                mobile= Objects.nonNull(enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile())
-                        ?enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile(): null;
-            }
-            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders, mobile);
+            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
         } else {
             // normal flow
             return Mono.just(accountDto);
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
+    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders, mobile));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders));
         } else {
-            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders, mobile);
+            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders);
         }
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
@@ -406,7 +395,7 @@ public class AccountServiceImpl implements AccountService {
             return hidBenefitDBFClient.existByHealthIdAndBenefit(accountDto.getHealthIdNumber(), requestHeaders.getBenefitName())
                     .flatMap(exists -> {
                         if (!exists) {
-                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos,mobile))
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
                                     .flatMap(response -> Mono.just(accountDto))
                                     .onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
                         } else {
@@ -461,20 +450,20 @@ public class AccountServiceImpl implements AccountService {
         newUser.setDistrictName(lgdDistrictResponse.getDistrictName());
         newUser.setStateCode(lgdDistrictResponse.getStateCode());
         newUser.setStateName(lgdDistrictResponse.getStateName());
-        if(newUser.getProfilePhoto() != null){
+        if (newUser.getProfilePhoto() != null) {
             newUser.setProfilePhotoCompressed(false);
         }
     }
-    
-	@Override
-	public Mono<Void> reAttemptedAbha(String aNumber, String rType, RequestHeaders rHeaders) {
-		HidReattemptDto hidReattemptDto = HidReattemptDto.builder().healthIdNumber(aNumber)
-				.createdBy(rHeaders.getClientId()).requestType(rType).build();
-		return abhaDBAccountFClient.reAttemptedAbha(hidReattemptDto).doOnError(throwable -> {
-			log.info(EXCEPTION_IN_ABHA_RE_ATTEMPT, aNumber);
-		}).then();
 
-	}
+    @Override
+    public Mono<Void> reAttemptedAbha(String aNumber, String rType, RequestHeaders rHeaders) {
+        HidReattemptDto hidReattemptDto = HidReattemptDto.builder().healthIdNumber(aNumber)
+                .createdBy(rHeaders.getClientId()).requestType(rType).build();
+        return abhaDBAccountFClient.reAttemptedAbha(hidReattemptDto).doOnError(throwable -> {
+            log.info(EXCEPTION_IN_ABHA_RE_ATTEMPT, aNumber);
+        }).then();
+
+    }
 
     private void mapAccountWithEkycHelper(AccountDto newUser, AadhaarUserKycDto kycDto) {
         if (kycDto.getPhoto() != null) {
