@@ -29,5 +29,6 @@ public class StringConstants {
      public static final String IRIS = "IIR";
      public static final String FINGER_SCAN = "FMR";
      public static final String DRIVING_LICENCE = "DL";
+     public static final String API_VERSION = "v3";
 
 }

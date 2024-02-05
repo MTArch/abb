@@ -298,7 +298,7 @@ public class AccountDto {
 
     private String source;
 
-    private String apiVersion="v3";
+    private String apiVersion;
 
     private String apiEndPoint;
 }

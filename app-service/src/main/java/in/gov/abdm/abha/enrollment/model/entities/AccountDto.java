@@ -306,4 +306,6 @@ public class AccountDto {
     private String source;
 
     private String apiEndPoint;
+    private String apiVersion;
+
 }
