@@ -4,10 +4,7 @@ import in.gov.abdm.abha.enrollmentdb.domain.hidbenefit.HidBenefitService;
 import in.gov.abdm.abha.enrollmentdb.model.hidbenefit.HidBenefitDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_HID_BENEFIT;
@@ -26,4 +23,13 @@ public class HidBenefitController {
         return hidBenefitService.addHidBenefit(hidBenefit);
     }
 
-}
+
+    @GetMapping("/check")
+    public  Mono<Boolean> existByHealthIdAndBenefit(@RequestParam("healthIdNumber") String healthIdNumber,
+                                                    @RequestParam("benefitName") String benefitName) {
+        log.info(ENROLLMENT_DB_LOG_MSG+"get data"+ENROLLMENT_DB_HID_BENEFIT);
+        return hidBenefitService.existByHealthIdAndBenefit(healthIdNumber,benefitName);
+    }
+
+
+ }

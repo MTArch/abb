@@ -14,11 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import in.gov.abdm.abha.enrollment.constants.URIConstant;
@@ -278,9 +274,11 @@ public class AccountServiceImpl implements AccountService {
         if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
+            ||enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            return handleAccountByBenefitProgram(accountDto, requestHeaders);
+            String mobile=enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getAadhaarNumber();
+            return handleAccountByBenefitProgram(accountDto, requestHeaders,mobile );
         } else {
             // normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
@@ -288,12 +286,12 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders, mobile));
         } else {
-            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders);
+            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders, mobile);
         }
     }
 
@@ -301,12 +299,12 @@ public class AccountServiceImpl implements AccountService {
         return !integratedProgramDtos.isEmpty() && integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()));
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos, mobile))
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
@@ -314,7 +312,8 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+
+    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos, String mobile) {
         String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
         List<IntegratedProgramDto> integratedProgramDtoList
                 = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
@@ -331,6 +330,9 @@ public class AccountServiceImpl implements AccountService {
                 .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
                 .linkedDate(LocalDateTime.now())
                 .healthIdNumber(accountDto.getHealthIdNumber())
+                .updatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .updatedDate(LocalDateTime.now())
+                .mobileNumber(mobile)
                 .build();
     }
 
@@ -368,32 +370,42 @@ public class AccountServiceImpl implements AccountService {
         if (requestHeaders.getBenefitName() != null && !accountDto.getVerificationType().equals(DRIVING_LICENCE)
                 && (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO)
-                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO))) {
+                || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
+          || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
+            String mobile=enrolByAadhaarRequestDto.getAuthData().getDemographicAuth().getMobile();
+            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders, mobile);
         } else {
             // normal flow
             return Mono.just(accountDto);
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders, mobile));
         } else {
-            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders);
+            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders, mobile);
         }
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders, String mobile) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
-                    .flatMap(response -> Mono.just(accountDto)
-                            .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
+            return hidBenefitDBFClient.existByHealthIdAndBenefit(accountDto.getHealthIdNumber(), requestHeaders.getBenefitName())
+                    .flatMap(exists -> {
+                        if (!exists) {
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos,mobile))
+                                    .flatMap(response -> Mono.just(accountDto))
+                                    .onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
+                        } else {
+                            return Mono.just(accountDto);
+                        }
+                    }).onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
+
         } else {
             throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
         }
