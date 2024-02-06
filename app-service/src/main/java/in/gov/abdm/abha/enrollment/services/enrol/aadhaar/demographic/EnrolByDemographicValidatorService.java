@@ -4,6 +4,7 @@ import com.rabbitmq.client.Return;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
@@ -12,6 +13,7 @@ import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,9 @@ public class EnrolByDemographicValidatorService {
 
     public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
+        if(demographic == null){
+            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+        }
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
         if (!isValidAadhaar(demographic.getAadhaarNumber())) {
@@ -139,12 +144,12 @@ public class EnrolByDemographicValidatorService {
         if (!isNullOrEmpty(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
-        if (isNullOrEmpty(demographic.getStateCode()) || !isValidState(demographic.getStateCode())) {
-            errors.put(STATE, AbhaConstants.INVALID_STATE);
-        }
-        if (isNullOrEmpty(demographic.getDistrictCode()) ||  !isValidDistrict(demographic.getDistrictCode())) {
-            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
-        }
+//        if (isNullOrEmpty(demographic.getStateCode()) || !isValidState(demographic.getStateCode())) {
+//            errors.put(STATE, AbhaConstants.INVALID_STATE);
+//        }
+//        if (isNullOrEmpty(demographic.getDistrictCode()) ||  !isValidDistrict(demographic.getDistrictCode())) {
+//            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+//        }
         if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImage(demographic.getProfilePhoto())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImageFormat(demographic.getProfilePhoto())) {
