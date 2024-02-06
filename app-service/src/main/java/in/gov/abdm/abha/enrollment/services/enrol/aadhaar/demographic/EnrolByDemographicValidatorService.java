@@ -52,6 +52,8 @@ public class EnrolByDemographicValidatorService {
     private static final String DISTRICT = "District";
     private static final String CONSENT_FORM_IMAGE = "ConsentFormImage";
     private static final String MOBILE = "mobile";
+
+    private static final String DATE_OF_BIRTH = "dateOfBirth";
     private static final String MOBILE_TYPE = "mobileType";
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
     private static final String ADDRESS = "address";
@@ -149,8 +151,9 @@ public class EnrolByDemographicValidatorService {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
 
-        if (!isValidDateFormat(demographic.getDateOfBirth())) {
-            errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
+        if (isNullOrEmpty(demographic.getDateOfBirth())
+                || !isValidDateFormat(demographic.getDateOfBirth())) {
+            errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_DATE_OF_BIRTH);
         }
 
         if (!isNullOrEmpty(demographic.getMobile()) && !isValidHealthWorkerMobile(demographic.getMobile())) {

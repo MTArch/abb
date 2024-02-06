@@ -22,7 +22,6 @@ public class DemographicAuth extends LdgRequest {
     private String aadhaarNumber;
     @NotEmpty(message = AbhaConstants.INVALID_NAME)
     private String name;
-    @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_DOB)
     private String dateOfBirth;
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_GENDER_FIELD)
     private String gender;
