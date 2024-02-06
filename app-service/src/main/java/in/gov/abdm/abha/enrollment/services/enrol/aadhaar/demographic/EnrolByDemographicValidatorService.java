@@ -138,7 +138,7 @@ public class EnrolByDemographicValidatorService {
         }
 
         if (!isValidFirstName(demographic.getName())) {
-            errors.put(NAME, AbhaConstants.INVALID_NAME);
+            errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
         }
 
         if (!isNullOrEmpty(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
