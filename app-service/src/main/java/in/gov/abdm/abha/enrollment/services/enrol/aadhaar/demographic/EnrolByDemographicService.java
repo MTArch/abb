@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
+import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
@@ -9,13 +10,13 @@ import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AadhaarMethod;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
+import in.gov.abdm.abha.enrollment.enums.hidbenefit.HidBenefitStatus;
 import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicRequest;
-import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -32,6 +33,7 @@ import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddress
 import in.gov.abdm.abha.enrollment.services.de_duplication.DeDuplicationService;
 import in.gov.abdm.abha.enrollment.services.document.IdentityDocumentDBService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.LgdUtility;
@@ -48,13 +50,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
 import static in.gov.abdm.abha.enrollment.constants.StringConstants.DEMO_AUTH;
 
 @Slf4j
@@ -68,6 +69,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private RSAUtil rsaUtils;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    HidBenefitDBFClient hidBenefitDBFClient;
+    @Autowired
+    RedisService redisService;
     @Autowired
     private HidPhrAddressService hidPhrAddressService;
     @Autowired
@@ -89,7 +94,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     @Value(PropertyConstants.ENROLLMENT_IS_TRANSACTION)
     private boolean isTransactionManagementEnable;
 
-    private static final String  STATE_DISTRICT= "districtCode";
+    private static final String STATE_DISTRICT = "districtCode";
+    private String onlyDigitRegex = "^[0-9]*$";
+    private static final String STATE = "State";
+    private static final String DISTRICT = "District";
 
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
@@ -103,7 +111,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         verifyDemographicRequest.setPhone(enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile());
         verifyDemographicRequest.setAadhaarLogType(AadhaarLogType.KYC_D_AUTH.name());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
-        Mono validateStateCode=Mono.just("");
+        Mono validateStateCode = Mono.just("");
         /*if(authMethods.contains(AuthMethods.DEMO_AUTH)){
             validateStateCode =lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(lgdDistrictResponse -> {
                 if (lgdDistrictResponse.stream()
@@ -116,12 +124,12 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 }
             });
         }*/
-        return validateStateCode.flatMap(data-> {
+        return validateStateCode.flatMap(data -> {
             Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
             if (!StringUtils.isEmpty(mobileNumber)) {
                 mobileLinkedAccountCountMono = accountService.getMobileLinkedAccountCount(mobileNumber);
             }
-            return   mobileLinkedAccountCountMono.flatMap(mobileLinkedAccountCount -> {
+            return mobileLinkedAccountCountMono.flatMap(mobileLinkedAccountCount -> {
                 if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
                     throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
                 } else {
@@ -151,7 +159,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
 
-
     private VerifyDemographicRequest setDemoAuth(String name, String gender, String aadhaar, String yearofBrith) {
         return VerifyDemographicRequest.builder().name(name).gender(gender).aadhaarNumber(aadhaar).dob(yearofBrith).build();
     }
@@ -163,6 +170,16 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         // Use the breakName method to process demographic data asynchronously
         return breakName(demographicdto, authMethods)
                 .flatMap(demographic -> {
+                    LinkedHashMap<String, String> errors = new LinkedHashMap<>();
+                    if (StringUtils.isEmpty(demographic.getStateCode()) || !isValidState(demographic.getStateCode())) {
+                        errors.put(STATE, AbhaConstants.INVALID_STATE);
+                    }
+                    if (StringUtils.isEmpty(demographic.getDistrictCode()) || !isValidDistrict(demographic.getDistrictCode())) {
+                        errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
+                    }
+                    if (!errors.isEmpty()) {
+                        throw new BadRequestException(errors);
+                    }
                     String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
                     String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(newAbhaNumber);
                     AccountDto accountDto = new AccountDto();
@@ -239,6 +256,14 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                 }
                             }));
                 });
+    }
+
+    private boolean isValidState(String state) {
+        return !state.isBlank() && state.matches(onlyDigitRegex);
+    }
+
+    private boolean isValidDistrict(String district) {
+        return !district.isBlank() && district.matches(onlyDigitRegex);
     }
 
     private Mono<EnrolByAadhaarResponseDto> setLdgData(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders, Demographic demographic, List<LgdDistrictResponse> res, AccountDto accountDto) {
@@ -353,6 +378,15 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                         log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());
                         return Mono.empty();
                     }).subscribe();
+
+            hidBenefitDBFClient.existByHealthIdAndBenefit(accountDto.getHealthIdNumber(), rHeaders.getBenefitName())
+                    .flatMap(exists -> {
+                        if (!exists) {
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, rHeaders, redisService.getIntegratedPrograms()));
+                        }
+                        return null;
+                    }).subscribe();
+
             // Final response for existing user
             if (generateToken) {
                 ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
@@ -365,6 +399,29 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             }
             return Mono.just(enrolByAadhaarResponseDto);
         });
+    }
+
+    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+        String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
+        List<IntegratedProgramDto> integratedProgramDtoList
+                = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
+                && v.getClientId().equals(requestHeaders.getClientId())).collect(Collectors.toList());
+        List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto::getProgramName).collect(Collectors.toList());
+
+        return HidBenefitDto.builder()
+                .benefitName(requestHeaders.getBenefitName())
+                .programName(programName.get(0) != null ? programName.get(0) : null)
+                .benefitId(benefitId)
+                .status(HidBenefitStatus.LINKED.value())
+                .createdBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .stateCode(accountDto.getStateCode())
+                .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .linkedDate(LocalDateTime.now())
+                .healthIdNumber(accountDto.getHealthIdNumber())
+                .updatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .updatedDate(LocalDateTime.now())
+                .mobileNumber(accountDto.getMobile())
+                .build();
     }
 
     private String preFixZero(String value) {
@@ -399,7 +456,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         }
     }
 
-    private  Mono<Demographic> breakName(Demographic demographic, List<AuthMethods> authMethods ) {
+    private Mono<Demographic> breakName(Demographic demographic, List<AuthMethods> authMethods) {
         if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
             log.info("Executed in case of demo Auth");
             String firstName = "";
@@ -422,7 +479,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             demographic.setLastName(GeneralUtils.stringTrimmer(lastName));
             demographic.setMiddleName(GeneralUtils.stringTrimmer(middleName));
         }
-         return Mono.just(demographic);
+        return Mono.just(demographic);
     }
 
 }

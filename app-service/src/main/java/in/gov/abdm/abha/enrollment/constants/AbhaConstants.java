@@ -161,6 +161,7 @@ public class AbhaConstants {
      * Demographic validations
      */
     public static final String INVALID_YEAR_OF_BIRTH = "Invalid Year of Birth";
+    public static final String INVALID_DATE_OF_BIRTH = "Invalid Date of Birth";
     public static final String INVALID_DAY_OF_BIRTH = "Invalid Day of Birth";
     public static final String INVALID_MONTH_OF_BIRTH = "Invalid Month of Birth";
     public static final String INVALID_MOBILE_NUMBER = "Invalid Mobile Number";
