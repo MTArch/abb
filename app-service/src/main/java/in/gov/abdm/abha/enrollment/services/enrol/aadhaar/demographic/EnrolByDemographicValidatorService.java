@@ -144,12 +144,6 @@ public class EnrolByDemographicValidatorService {
         if (!isNullOrEmpty(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
             errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
         }
-//        if (isNullOrEmpty(demographic.getStateCode()) || !isValidState(demographic.getStateCode())) {
-//            errors.put(STATE, AbhaConstants.INVALID_STATE);
-//        }
-//        if (isNullOrEmpty(demographic.getDistrictCode()) ||  !isValidDistrict(demographic.getDistrictCode())) {
-//            errors.put(DISTRICT, AbhaConstants.INVALID_DISTRICT);
-//        }
         if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImage(demographic.getProfilePhoto())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImageFormat(demographic.getProfilePhoto())) {
