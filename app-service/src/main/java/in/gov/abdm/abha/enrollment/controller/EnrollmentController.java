@@ -23,6 +23,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisServic
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
+import in.gov.abdm.abha.enrollment.utilities.BenefitMapper;
 import in.gov.abdm.abha.enrollment.utilities.DataMapper;
 import in.gov.abdm.abha.enrollment.utilities.RequestMapper;
 import in.gov.abdm.error.ABDMError;
@@ -33,10 +34,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID;
 
@@ -66,34 +64,34 @@ public class EnrollmentController {
     EnrolByIrisService enrolByIrisService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
-    public Mono<EnrolByAadhaarResponseDto> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
-                                                             @RequestHeader(value = AbhaConstants.BENEFIT_NAME, required = false) String benefitName,
-                                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION ,required = false) String authorization,
-                                                             @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
+    public Mono<Object> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
+                                          @RequestHeader(value = AbhaConstants.BENEFIT_NAME, required = false) String benefitName,
+                                          @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization,
+                                          @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName,authorization,fToken);
-       return enrolUsingAadhaarService.validateHeaders(requestHeaders,authMethods,fToken)
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName, authorization, fToken);
+        return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods, fToken)
                 .flatMap(aBoolean -> {
                     if (authMethods.contains(AuthMethods.OTP)) {
-                        return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto,requestHeaders).subscribeOn(Schedulers.parallel());
+                        return enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto, requestHeaders).subscribeOn(Schedulers.parallel());
                     } else if (authMethods.contains(AuthMethods.DEMO)) {
                         enrolByDemographicService.validateEnrolByDemographic(enrolByAadhaarRequestDto, requestHeaders);
-                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
+                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.FACE)) {
-                        return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto,requestHeaders);
-                    }else if(authMethods.contains(AuthMethods.BIO)){
-                        enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto,fToken);
-                        return enrolByBioService.verifyBio(enrolByAadhaarRequestDto,requestHeaders);
-                    }else if(authMethods.contains(AuthMethods.IRIS)){
+                        return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto, requestHeaders);
+                    } else if (authMethods.contains(AuthMethods.BIO)) {
+                        enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto, fToken);
+                        return enrolByBioService.verifyBio(enrolByAadhaarRequestDto, requestHeaders);
+                    } else if (authMethods.contains(AuthMethods.IRIS)) {
                         enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
-                        return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto,requestHeaders);
-                    } else if(authMethods.contains(AuthMethods.DEMO_AUTH)){
+                        return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto, requestHeaders);
+                    } else if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
                         DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();
-                        enrolByDemographicService.validateEnrolByDemographic(demoAuth,requestHeaders);
-                        Demographic  demographic = new DataMapper<Demographic>().mapper(demoAuth, Demographic.class);
-                        if (demoAuth.getDateOfBirth().length()==4){
+                        enrolByDemographicService.validateEnrolByDemographic(demoAuth, requestHeaders);
+                        Demographic demographic = new DataMapper<Demographic>().mapper(demoAuth, Demographic.class);
+                        if (demoAuth.getDateOfBirth().length() == 4) {
                             demographic.setYearOfBirth(demoAuth.getDateOfBirth());
-                     } else {
+                        } else {
                             String[] parts = demoAuth.getDateOfBirth().split("-");
                             demographic.setDayOfBirth(parts[0]);
                             demographic.setMonthOfBirth(parts[1]);
@@ -102,29 +100,30 @@ public class EnrollmentController {
                         demographic.setFirstName(demoAuth.getName());
                         demographic.setConsentFormImage(demoAuth.getProfilePhoto());
                         enrolByAadhaarRequestDto.getAuthData().setDemographic(demographic);
-                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto,requestHeaders);
+                        return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto, requestHeaders)
+                                .map(BenefitMapper::mapHidBenefitRequestPayload);
                     }
                     throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
                 });
-         }
+    }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
     public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
                                                             @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken,
-                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION,required = false) String authorization) {
+                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization) {
 
         List<AuthMethods> authMethods = new ArrayList<>();
         authMethods.add(AuthMethods.WRONG);
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,fToken);
-        return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods,fToken)
-         .flatMap(aBoolean -> {
-             if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
-                 enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
-                 return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto, requestHeaders);
-             } else {
-                 throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
-             }
-        });
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, fToken);
+        return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods, fToken)
+                .flatMap(aBoolean -> {
+                    if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
+                        enrolByDocumentValidatorService.validateEnrolByDocument(enrolByDocumentRequestDto);
+                        return enrolUsingDrivingLicence.verifyAndCreateAccount(enrolByDocumentRequestDto, requestHeaders);
+                    } else {
+                        throw new BadRequestException(new LinkedHashMap<>(Collections.singletonMap(AbhaConstants.DOCUMENT_TYPE, AbhaConstants.INVALID_DOCUMENT_TYPE)));
+                    }
+                });
     }
 
     @GetMapping(URIConstant.ENROL_SUGGEST_ABHA_ENDPOINT)
@@ -142,10 +141,10 @@ public class EnrollmentController {
 
     @PostMapping(URIConstant.ENROL_REQUEST_NOTIFICATION_ENDPOINT)
     public Mono<String> requestNotification(@Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
-                                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION ,required = false) String authorization) {
+                                            @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization) {
 
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null,authorization,null);
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, null);
         enrolUsingAadhaarService.validateNotificationRequest(sendNotificationRequestDto);
-        return enrolUsingAadhaarService.requestNotification(sendNotificationRequestDto,requestHeaders);
+        return enrolUsingAadhaarService.requestNotification(sendNotificationRequestDto, requestHeaders);
     }
 }

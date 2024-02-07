@@ -17,7 +17,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 @Data
 public class DemographicAuth extends LdgRequest {
-    @JsonProperty("aadhaar")
     @NotEmpty(message = AbhaConstants.AADHAAR_NUMBER_INVALID)
     private String aadhaarNumber;
     @NotEmpty(message = AbhaConstants.INVALID_NAME_FORMAT)
@@ -25,9 +24,8 @@ public class DemographicAuth extends LdgRequest {
     private String dateOfBirth;
     @NotEmpty(message = AbhaConstants.VALIDATION_ERROR_GENDER_FIELD)
     private String gender;
-    private String pinCode;
     private String address;
-    private String profilePhoto ;
+    private String profilePhoto;
     private String mobile;
 
 }

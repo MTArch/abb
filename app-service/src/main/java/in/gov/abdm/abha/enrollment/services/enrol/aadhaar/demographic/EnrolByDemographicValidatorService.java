@@ -141,9 +141,6 @@ public class EnrolByDemographicValidatorService {
             errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
         }
 
-        if (!isNullOrEmpty(demographic.getPinCode()) && !isValidPinCode(demographic.getPinCode())) {
-            errors.put(PIN_CODE, AbhaConstants.INVALID_PIN_CODE);
-        }
         if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImage(demographic.getProfilePhoto())) {
             errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImageFormat(demographic.getProfilePhoto())) {
@@ -153,10 +150,6 @@ public class EnrolByDemographicValidatorService {
         if (isNullOrEmpty(demographic.getDateOfBirth())
                 || !isValidDateFormat(demographic.getDateOfBirth())) {
             errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_DATE_OF_BIRTH);
-        }
-
-        if (!isNullOrEmpty(demographic.getMobile()) && !isValidHealthWorkerMobile(demographic.getMobile())) {
-            errors.put(MOBILE, AbhaConstants.INVALID_MOBILE_NUMBER);
         }
 
         if (!isNullOrEmpty(demographic.getAddress()) && !isValidAddress(demographic.getAddress())) {

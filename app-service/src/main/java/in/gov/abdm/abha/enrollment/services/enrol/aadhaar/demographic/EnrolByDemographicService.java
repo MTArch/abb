@@ -99,6 +99,20 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
 
+    private String validateMobile(String mobile) {
+        if(mobile==null || !mobile.matches(onlyDigitRegex)) {
+            return null;
+        }
+        if (mobile.length() == 10) {
+            return mobile;
+        } else if (mobile.length() == 12 && mobile.startsWith("91")) {
+            return mobile.substring(2);
+        } else if (mobile.length() == 13 && mobile.startsWith("091")) {
+            return mobile.substring(3);
+        }
+        return null;
+    }
+
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
         VerifyDemographicRequest verifyDemographicRequest = new VerifyDemographicRequest();
@@ -108,22 +122,10 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         String dob = Objects.nonNull(demographic.getMonthOfBirth()) ? formatDob(demographic.getYearOfBirth(), demographic.getMonthOfBirth(), demographic.getDayOfBirth()) : Common.removeNulls(demographic.getYearOfBirth());
         verifyDemographicRequest.setDob(dob);
         verifyDemographicRequest.setGender(demographic.getGender());
-        verifyDemographicRequest.setPhone(enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile());
+        verifyDemographicRequest.setPhone(validateMobile(demographic.getMobile()));
         verifyDemographicRequest.setAadhaarLogType(AadhaarLogType.KYC_D_AUTH.name());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
         Mono validateStateCode = Mono.just("");
-        /*if(authMethods.contains(AuthMethods.DEMO_AUTH)){
-            validateStateCode =lgdUtility.getDistrictCode(demographic.getDistrictCode()).flatMap(lgdDistrictResponse -> {
-                if (lgdDistrictResponse.stream()
-                        .anyMatch(vale -> !vale.getStateCode().equals(demographic.getStateCode()))){
-                    LinkedHashMap<String, String> error= new LinkedHashMap<>();
-                    error.put(STATE_DISTRICT, AbhaConstants.INVALID_STATE_DISTRICT);
-                    throw new BadRequestException(error);
-                } else {
-                    return  Mono.just(lgdDistrictResponse);
-                }
-            });
-        }*/
         return validateStateCode.flatMap(data -> {
             Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
             if (!StringUtils.isEmpty(mobileNumber)) {
@@ -207,7 +209,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     accountDto.setXmluid(xmlUid);
                     accountDto.setPincode(demographic.getPinCode());
                     accountDto.setHealthIdNumber(newAbhaNumber);
-                    accountDto.setMobile(demographic.getMobile());
+                    accountDto.setMobile(validateMobile(demographic.getMobile()));
                     accountDto.setHealthWorkerName(demographic.getHealthWorkerName());
                     accountDto.setHealthWorkerMobile(demographic.getHealthWorkerMobile());
                     accountDto.setStatus(AccountStatus.ACTIVE.getValue());
@@ -277,10 +279,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
 
     private Mono<EnrolByAadhaarResponseDto> saveAccountDetails(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, String consentFormImage, RequestHeaders requestHeaders) {
         if (isTransactionManagementEnable) {
-            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> callProcedureToCreateAccount(accountDtoResponse, requestHeaders, enrolByAadhaarRequestDto));
+            return accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders)
+                    .flatMap(accountDtoResponse -> callProcedureToCreateAccount(accountDtoResponse, requestHeaders, enrolByAadhaarRequestDto));
         } else {
             return accountService.createAccountEntity(enrolByAadhaarRequestDto, accountDto, requestHeaders).flatMap(accountDtoResponse -> {
-                HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDtoResponse);
+                HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(accountDto);
                 return hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto).flatMap(phrAddressDto -> addDocumentsInIdentityDocumentEntity(accountDto, consentFormImage)
                         .flatMap(identityDocumentsDto -> addAuthMethods(accountDto, hidPhrAddressDto, requestHeaders)));
             });
