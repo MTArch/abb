@@ -20,7 +20,6 @@ public class Demographic extends  LdgRequest{
     @NotEmpty(message = AbhaConstants.AADHAAR_NUMBER_INVALID)
     @JsonProperty("aadhaar")
     private String aadhaarNumber;
-    //@NotEmpty(message = AbhaConstants.INVALID_FIRST_NAME)
     private String firstName;
     private String middleName;
     private String lastName;
