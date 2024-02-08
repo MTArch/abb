@@ -468,7 +468,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
             String lastName = "";
             String middleName = "";
             if (!StringUtils.isEmpty(demographic.getFirstName())) {
-                String[] nameParts = demographic.getFirstName().split(" ");
+                String[] nameParts = Common.removeNulls(demographic.getFirstName()).split(" ");
                 if (nameParts.length == 1) {
                     firstName = nameParts[0];
                 } else if (nameParts.length == 2) {
