@@ -100,18 +100,20 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     private static final String DISTRICT = "District";
 
     private String validateMobile(String mobile) {
-        if(mobile==null || !mobile.matches(onlyDigitRegex)) {
+        if (mobile == null) {
             return null;
         }
-        if (mobile.length() == 10) {
+        if (mobile.length() == 10 && mobile.matches(onlyDigitRegex)) {
             return mobile;
-        } else if (mobile.length() == 12 && mobile.startsWith("91")) {
+        } else if (mobile.length() == 12 && mobile.startsWith("91") && mobile.matches(onlyDigitRegex)) {
             return mobile.substring(2);
-        } else if (mobile.length() == 13 && mobile.startsWith("091")) {
+        } else if (mobile.length() == 13 && (mobile.startsWith("091") || mobile.startsWith("+91")) && mobile.substring(3).matches(onlyDigitRegex)) {
             return mobile.substring(3);
         }
         return null;
     }
+
+    ;
 
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();

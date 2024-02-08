@@ -353,6 +353,7 @@ public class Common {
     public String removeNulls(String s) {
         return Arrays.stream(s.split("\\s+|\\s*-\\s*"))
                 .filter(word -> !"null".equals(word))
+                .filter(word -> !StringUtils.isEmpty(word))
                 .collect(Collectors.joining(" "));
     }
 
