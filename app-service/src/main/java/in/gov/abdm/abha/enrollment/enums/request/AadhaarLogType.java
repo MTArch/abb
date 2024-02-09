@@ -8,19 +8,54 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public enum AadhaarLogType {
-    KYC_GEN_OTP("KYC_GEN_OTP"), // KYC-OTP Generation
-    KYC_OTP("KYC_OTP"),// KYC-OTP Verify
-    KYC_F("KYC_F"),// KYC-FingerNew
-    KYC_P("KYC_P"),// KYC-Photo(Face)
-    KYC_I("KYC_I"), // KYC-Iris
-    KYC_D_AUTH("KYC_D_AUTH"), // KYC_Auth-demographic
-
-    AUTH_GEN_OTP("AUTH_GEN_OTP"),// Auth-OTP Generation
-    AUTH_OTP("AUTH_OTP"),// Auth-OTP Verify
-    AUTH_F("AUTH_F"),// Auth-FingerNew
-    AUTH_P("AUTH_P"),// AUTH-Photo(Face)
-    AUTH_I("AUTH_I"),// Auth_Iris
-    D_AUTH("D_AUTH");// Auth-demographic
+    /**
+     * KYC-OTP Generation
+     */
+    KYC_GEN_OTP("KYC_GEN_OTP"),
+    /**
+     * KYC-OTP Verify
+     */
+    KYC_OTP("KYC_OTP"),
+    /**
+     * KYC-FingerNew
+     */
+    KYC_F("KYC_F"),
+    /**
+     * KYC-Photo(Face)
+     */
+    KYC_P("KYC_P"),
+    /**
+     * KYC-Iris
+     */
+    KYC_I("KYC_I"),
+    /**
+     * KYC_Auth-demographic
+     */
+    KYC_D_AUTH("KYC_D_AUTH"),
+    /**
+     * Auth-OTP Generation
+     */
+    AUTH_GEN_OTP("AUTH_GEN_OTP"),
+    /**
+     * Auth-OTP Verify
+     */
+    AUTH_OTP("AUTH_OTP"),
+    /**
+     * Auth-FingerNew
+     */
+    AUTH_F("AUTH_F"),
+    /**
+     * AUTH-Photo(Face)
+     */
+    AUTH_P("AUTH_P"),
+    /**
+     * Auth_Iris
+     */
+    AUTH_I("AUTH_I"),
+    /**
+     * Auth-demographic
+     */
+    D_AUTH("D_AUTH");
 
     private String value;
 

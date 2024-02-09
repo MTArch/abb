@@ -63,6 +63,14 @@ import static in.gov.abdm.abha.enrollment.constants.StringConstants.DEMO_AUTH;
 @SuppressWarnings("java:S3776")
 public class EnrolByDemographicService extends EnrolByDemographicValidatorService {
 
+    public static final int N10DigitMobileNumber = 10;
+    public static final int N12DigitMobileNumber = 12;
+    public static final int N13DigitMobileNumber = 13;
+    public static final String N91 = "91";
+    public static final String N091 = "091";
+    public static final String PREFIX_PLUS_91 = "+91";
+    public static final int BEGIN_INDEX_3 = 3;
+    public static final int BEGIN_INDEX_2 = 2;
     @Autowired
     private AadhaarAppService aadhaarAppService;
     @Autowired
@@ -103,17 +111,15 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         if (mobile == null) {
             return null;
         }
-        if (mobile.length() == 10 && mobile.matches(onlyDigitRegex)) {
+        if (mobile.length() == N10DigitMobileNumber && mobile.matches(onlyDigitRegex)) {
             return mobile;
-        } else if (mobile.length() == 12 && mobile.startsWith("91") && mobile.matches(onlyDigitRegex)) {
-            return mobile.substring(2);
-        } else if (mobile.length() == 13 && (mobile.startsWith("091") || mobile.startsWith("+91")) && mobile.substring(3).matches(onlyDigitRegex)) {
-            return mobile.substring(3);
+        } else if (mobile.length() == N12DigitMobileNumber && mobile.startsWith(N91) && mobile.matches(onlyDigitRegex)) {
+            return mobile.substring(BEGIN_INDEX_2);
+        } else if (mobile.length() == N13DigitMobileNumber && (mobile.startsWith(N091) || mobile.startsWith(PREFIX_PLUS_91)) && mobile.substring(BEGIN_INDEX_3).matches(onlyDigitRegex)) {
+            return mobile.substring(BEGIN_INDEX_3);
         }
         return null;
     }
-
-    ;
 
     public Mono<EnrolByAadhaarResponseDto> validateAndEnrolByDemoAuth(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
@@ -263,11 +269,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
     private boolean isValidState(String state) {
-        return !state.isBlank() && state.matches(onlyDigitRegex);
+        return StringUtils.isNotEmpty(state) && state.matches(onlyDigitRegex);
     }
 
     private boolean isValidDistrict(String district) {
-        return !district.isBlank() && district.matches(onlyDigitRegex);
+        return StringUtils.isNotEmpty(district) && district.matches(onlyDigitRegex);
     }
 
     private Mono<EnrolByAadhaarResponseDto> setLdgData(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders, Demographic demographic, List<LgdDistrictResponse> res, AccountDto accountDto) {
@@ -413,17 +419,19 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                 && v.getClientId().equals(requestHeaders.getClientId())).collect(Collectors.toList());
         List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto::getProgramName).collect(Collectors.toList());
 
+        String clientId = requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null;
+
         return HidBenefitDto.builder()
                 .benefitName(requestHeaders.getBenefitName())
                 .programName(programName.get(0) != null ? programName.get(0) : null)
                 .benefitId(benefitId)
                 .status(HidBenefitStatus.LINKED.value())
-                .createdBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .createdBy(clientId)
                 .stateCode(accountDto.getStateCode())
-                .linkedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .linkedBy(clientId)
                 .linkedDate(LocalDateTime.now())
                 .healthIdNumber(accountDto.getHealthIdNumber())
-                .updatedBy(requestHeaders.getClientId() != null ? requestHeaders.getClientId() : null)
+                .updatedBy(clientId)
                 .updatedDate(LocalDateTime.now())
                 .mobileNumber(accountDto.getMobile())
                 .build();

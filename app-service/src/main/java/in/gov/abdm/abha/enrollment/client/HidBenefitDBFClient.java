@@ -18,7 +18,7 @@ public interface HidBenefitDBFClient {
     @PostMapping(URIConstant.DB_ADD_HID_BENEFIT_URI)
     Mono<HidBenefitDto> saveHidBenefit(@RequestBody HidBenefitDto hidBenefitDto);
 
-    @GetMapping(URIConstant.DB_ADD_HID_BENEFIT_URI+"/check")
+    @GetMapping(URIConstant.DB_ADD_HID_BENEFIT_CHECK_URI)
     public  Mono<Boolean> existByHealthIdAndBenefit(@RequestParam("healthIdNumber") String healthIdNumber,
                                                     @RequestParam("benefitName") String benefitName);
 

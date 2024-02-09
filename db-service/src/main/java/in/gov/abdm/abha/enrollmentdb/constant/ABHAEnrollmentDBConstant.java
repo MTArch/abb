@@ -2,7 +2,8 @@ package in.gov.abdm.abha.enrollmentdb.constant;
 
 public class ABHAEnrollmentDBConstant {
 
-    private ABHAEnrollmentDBConstant() {}
+    private ABHAEnrollmentDBConstant() {
+    }
 
     public static final String API_VERSION = "/api/v3/enrollmentdb";
     public static final String ACCOUNT_ENDPOINT = API_VERSION + "/account";
@@ -17,8 +18,9 @@ public class ABHAEnrollmentDBConstant {
     public static final String GET_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     public static final String DELETE_TRANSACTION_BY_TXN_ID = "/txnId/{txnId}";
     public static final String DELETE_ACCOUNT_AUTH_METHOD_BY_HEALTH_ID = "/delete/{healthIdNumber}";
-    public static final String ID ="/{id}";
-    public static final String HID_PHR_ADDRESS_ID= "/{hidPhrAddressId}";
+    public static final String HID_CHECK = "/check";
+    public static final String ID = "/{id}";
+    public static final String HID_PHR_ADDRESS_ID = "/{hidPhrAddressId}";
     public static final String UPDATE_TRANSACTION_BY_ID = ID;
     public static final String ENROLLMENT_LOG_PREFIX = "ENROLLMENT_DB: ";
     public static final String FIELD_BLANK_ERROR_MSG = "Please enter a Valid value for the specified field. " + "Valid Format Reference:" +
@@ -58,9 +60,9 @@ public class ABHAEnrollmentDBConstant {
     public static final String PHR_SYNC_ACKNOWLEDGEMENT_UPDATE_QUERY = "UPDATE sync_acknowledgement SET synced_with_phr = :isSyncedWithPhr, updated_date = :updatedDate WHERE request_id = :requestId and health_id_number = :healthIdNumber";
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_HIECM = "Received sync acknowledgement from HIECM with the request ID: ";
     public static final String MSG_ABHA_PUBLISH_PATIENT_TO_HIECM = "Published event to be consumed by HIECM system to add a new patient.";
-    
+
     public static final String MSG_ABHA_PUBLISH_TO_DASHBOARD = "Published event to be consumed by bashboard db.";
-    
+
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_FROM_PHR = "Received sync acknowledgement from PHR with the request ID: ";
     public static final String MSG_ABHA_CONSUME_ACKNOWLEDGEMENT_SUCCESS_FROM_PHR = "Updated the status of synchronization at ABHA end for the user with PHR/ABHA address: ";
     public static final String MSG_ABHA_PUBLISH_USER_TO_PHR = "User about to be published from ABHA";
@@ -68,21 +70,21 @@ public class ABHAEnrollmentDBConstant {
     public static final String MSG_SYNC_ACKNOWLEDGMENT_ADDED_ABHA = "Acknowledgment object added at ABHA system with request id: ";
     public static final String ABHA_SYNC = "ABHA_SYNC";
 
-    public static final String VERIFIED ="VERIFIED";
+    public static final String VERIFIED = "VERIFIED";
     public static final String PENDING = "PENDING";
     public static final String SYSTEM = "SYSTEM";
     public static final String KAFKA_ERROR_LOG_MSG = "Error while publishing kafka event: {}";
 
     public static final String ENROLLMENT_DB_LOG_MSG = "ABHA_ENROLLMENT_DB: About to Process the request to ";
 
-    public static final String ENROLLMENT_DB_ACCOUNT_ACTION=" for account action .";
-    public static final String ENROLLMENT_DB_AUTH_METHODS=" for auth methods .";
-    public static final String ENROLLMENT_DB_ACCOUNTS=" for accounts .";
-    public static final String ENROLLMENT_DB_DEPENDENT_ACCOUNT_RELATIONSHIP=" for dependent account relationship .";
-    public static final String ENROLLMENT_DB_HID_BENEFIT=" for hid benefit .";
-    public static final String ENROLLMENT_DB_HID_PHR_ADDRESS=" for hid phr address .";
-    public static final String ENROLLMENT_DB_INTEGRATED_PROGRAM=" for integrated program .";
-    public static final String ENROLLMENT_DB_PROCEDURE_CALL=" for procedure call .";
+    public static final String ENROLLMENT_DB_ACCOUNT_ACTION = " for account action .";
+    public static final String ENROLLMENT_DB_AUTH_METHODS = " for auth methods .";
+    public static final String ENROLLMENT_DB_ACCOUNTS = " for accounts .";
+    public static final String ENROLLMENT_DB_DEPENDENT_ACCOUNT_RELATIONSHIP = " for dependent account relationship .";
+    public static final String ENROLLMENT_DB_HID_BENEFIT = " for hid benefit .";
+    public static final String ENROLLMENT_DB_HID_PHR_ADDRESS = " for hid phr address .";
+    public static final String ENROLLMENT_DB_INTEGRATED_PROGRAM = " for integrated program .";
+    public static final String ENROLLMENT_DB_PROCEDURE_CALL = " for procedure call .";
     public static final String PROVISIONAL = "PROVISIONAL";
     public static final String AADHAAR = "AADHAAR";
     public static final String DL = "DL";

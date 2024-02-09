@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ABHAProfileDto {
-	
     @JsonProperty("ABHANumber")
     private String abhaNumber;
     @JsonProperty("abhaStatus")
@@ -35,6 +34,6 @@ public class ABHAProfileDto {
     private String stateCode;
     private String pinCode;
     private AbhaType abhaType;
-    private  String stateName;
-    private  String districtName;
+    private String stateName;
+    private String districtName;
 }

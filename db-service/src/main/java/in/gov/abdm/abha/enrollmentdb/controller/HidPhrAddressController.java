@@ -12,8 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_HID_PHR_ADDRESS;
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_LOG_MSG;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
 @RequestMapping(ABHAEnrollmentDBConstant.HID_PHR_ADDRESS_ENDPOINT)
 @Slf4j
@@ -56,7 +55,7 @@ public class HidPhrAddressController {
         return ResponseEntity.ok(hidPhrAddressService.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers, preferred));
     }
 
-    @GetMapping("/check")
+    @GetMapping(HID_CHECK)
     public ResponseEntity<Flux<HidPhrAddressDto>> findByPhrAddressIn(
             @RequestParam("phrAddress") List<String> phrAddress) {
         log.info(ENROLLMENT_DB_LOG_MSG + "get data based on phrAddress list =" + phrAddress + ENROLLMENT_DB_HID_PHR_ADDRESS);

@@ -22,8 +22,7 @@ import java.util.List;
 @CrossOrigin
 @RequestMapping(URIConstant.AUTH_ENDPOINT)
 @ResponseStatus(HttpStatus.OK)
-public class
-AuthController {
+public class AuthController {
 
     @Autowired
     AuthByAbdmService authByAbdmService;
@@ -52,7 +51,7 @@ AuthController {
         else if (Common.isExactScopesMatching(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.EMAIL_VERIFY))) {
             return authByAbdmService.verifyOtpViaNotification(authByAbdmRequest, Boolean.FALSE);
         } else {
-            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(),ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
     }
 

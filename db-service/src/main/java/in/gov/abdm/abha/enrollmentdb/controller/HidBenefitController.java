@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_HID_BENEFIT;
-import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.ENROLLMENT_DB_LOG_MSG;
+import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.*;
 
 @RequestMapping(ABHAEnrollmentDBConstant.HID_BENEFIT_ENDPOINT)
 @Slf4j
@@ -22,9 +21,7 @@ public class HidBenefitController {
         log.info(ENROLLMENT_DB_LOG_MSG+"save data"+ENROLLMENT_DB_HID_BENEFIT);
         return hidBenefitService.addHidBenefit(hidBenefit);
     }
-
-
-    @GetMapping("/check")
+    @GetMapping(HID_CHECK)
     public  Mono<Boolean> existByHealthIdAndBenefit(@RequestParam("healthIdNumber") String healthIdNumber,
                                                     @RequestParam("benefitName") String benefitName) {
         log.info(ENROLLMENT_DB_LOG_MSG+"get data"+ENROLLMENT_DB_HID_BENEFIT);
