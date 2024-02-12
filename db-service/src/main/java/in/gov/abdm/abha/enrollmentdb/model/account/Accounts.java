@@ -319,6 +319,9 @@ public class Accounts implements Persistable<String>{
 
     private String apiEndPoint;
 
+    private String localizedDetails;
+
+
 
     /**
      * isNewTemplate of boolean type that stores the state of an entity object.
@@ -326,7 +329,9 @@ public class Accounts implements Persistable<String>{
 	@Transient
 	private boolean isNewAccount;
 
-	/**
+
+
+    /**
 	 * When R2DBC repository executes the save method and isNew() method checks
 	 * whether the entity new or not, if true it fires persist call. isNew() method
 	 * to return true based your model has a field annotated with ID and if that ID
