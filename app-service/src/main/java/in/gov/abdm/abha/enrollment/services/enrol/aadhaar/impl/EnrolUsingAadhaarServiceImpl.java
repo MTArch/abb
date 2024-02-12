@@ -476,7 +476,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 .aadhaarNumber(rsaUtil.decrypt(transactionDto.getAadharNo()))
                 .name(accountDto.getName())
                 .phone(enrolByAadhaarRequestDto.getAuthData().getOtp().getMobile())
-                .aadhaarLogType("D_AUTH")
+                .aadhaarLogType(AadhaarLogType.D_AUTH.name())
                 .build();
     }
 
