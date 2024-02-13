@@ -8,7 +8,6 @@ import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
-import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.request.AbhaAddressRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.AbhaAddressResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.abha_address.response.SuggestAbhaResponseDto;
@@ -21,8 +20,9 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio.EnrolByBioService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
-import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
+import in.gov.abdm.abha.enrollment.services.enrol.child.EnrolChildService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
+import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.utilities.BenefitMapper;
 import in.gov.abdm.abha.enrollment.utilities.DataMapper;
 import in.gov.abdm.abha.enrollment.utilities.RequestMapper;
@@ -34,7 +34,10 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID;
 
@@ -62,14 +65,17 @@ public class EnrollmentController {
     EnrolByBioService enrolByBioService;
     @Autowired
     EnrolByIrisService enrolByIrisService;
+    @Autowired
+    EnrolChildService enrolChildService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
     public Mono<Object> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
                                           @RequestHeader(value = AbhaConstants.BENEFIT_NAME, required = false) String benefitName,
                                           @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization,
-                                          @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
+                                          @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken,
+                                          @RequestHeader(value = AbhaConstants.X_TOKEN, required = false) String xToken) {
         List<AuthMethods> authMethods = enrolByAadhaarRequestDto.getAuthData().getAuthMethods();
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName, authorization, fToken);
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(benefitName, authorization, fToken, xToken);
         return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods, fToken)
                 .flatMap(aBoolean -> {
                     if (authMethods.contains(AuthMethods.OTP)) {
@@ -85,6 +91,9 @@ public class EnrollmentController {
                     } else if (authMethods.contains(AuthMethods.IRIS)) {
                         enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
                         return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto, requestHeaders);
+                    } else if (authMethods.contains(AuthMethods.CHILD)) {
+                        enrolByDemographicService.validateEnrolChild(enrolByAadhaarRequestDto, requestHeaders);
+                        return enrolChildService.enrol(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
                         DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();
                         enrolByDemographicService.validateEnrolByDemographic(demoAuth, requestHeaders);
@@ -114,7 +123,7 @@ public class EnrollmentController {
 
         List<AuthMethods> authMethods = new ArrayList<>();
         authMethods.add(AuthMethods.WRONG);
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, fToken);
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, fToken, null);
         return enrolUsingAadhaarService.validateHeaders(requestHeaders, authMethods, fToken)
                 .flatMap(aBoolean -> {
                     if (enrolByDocumentRequestDto.getDocumentType().equals(AbhaConstants.DRIVING_LICENCE)) {
@@ -143,7 +152,7 @@ public class EnrollmentController {
     public Mono<String> requestNotification(@Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization) {
 
-        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, null);
+        RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, null, null);
         enrolUsingAadhaarService.validateNotificationRequest(sendNotificationRequestDto);
         return enrolUsingAadhaarService.requestNotification(sendNotificationRequestDto, requestHeaders);
     }

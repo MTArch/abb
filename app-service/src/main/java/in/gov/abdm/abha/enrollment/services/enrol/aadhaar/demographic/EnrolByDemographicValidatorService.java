@@ -5,10 +5,13 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.Demographic;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.demographic.DemographicAuth;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ChildDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
@@ -19,9 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Date;
+
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -66,6 +74,9 @@ public class EnrolByDemographicValidatorService {
     private String only2Digit = "^[0-9]{1,2}$";
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
+    private static final String PASSWORD_REGEX_PATTERN = "^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$^*_-])[A-Za-z\\d!@#$%^&*_-]{8,}$";
+    private static final int childAbhaAgeLimit = 6;
+    private static final int childParentAgeLimit = 18;
 
     private static final String DATE_FORMATTER = "dd-MM-yyyy";
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
@@ -79,7 +90,7 @@ public class EnrolByDemographicValidatorService {
 
     public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
-        if(demographic == null){
+        if (demographic == null) {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
         LinkedHashMap<String, String> errors;
@@ -197,6 +208,82 @@ public class EnrolByDemographicValidatorService {
         }
     }
 
+    private void validateDob(ChildDto childDto, LinkedHashMap<String, String> errors) {
+        boolean isValidMonthAndYear = true;
+        if (!isValidDateOfBirth(childDto)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
+            isValidMonthAndYear = false;
+        }
+        if (!isValidMonthOfBirth(childDto)) {
+            errors.put(MONTH_OF_BIRTH, AbhaConstants.INVALID_MONTH_OF_BIRTH);
+            isValidMonthAndYear = false;
+        }
+
+        if (!isValidYearOfBirth(childDto)) {
+            errors.put(YEAR_OF_BIRTH, AbhaConstants.INVALID_YEAR_OF_BIRTH);
+            isValidMonthAndYear = false;
+        }
+        if (isValidMonthAndYear && !isValidDayOfBirth(childDto)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
+        }
+
+        if (!isValidFutureDOB(childDto.getYearOfBirth(), childDto.getMonthOfBirth(), childDto.getDayOfBirth())) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_FUTURE_DOB);
+        }
+
+        if (!isValidAge(childDto)) {
+            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
+        }
+    }
+
+    public boolean isValidAge(ChildDto childDto) {
+        long childAge = calculateAgeOnDOB(populateDOB(childDto.getDayOfBirth(),
+                childDto.getMonthOfBirth(), childDto.getYearOfBirth()));
+        if (childAge >= childAbhaAgeLimit) {
+            return false;
+        }
+        return true;
+    }
+
+    public String populateDOB(String day, String month, String year) {
+        month = StringUtils.isEmpty(month) ? null : String.format("%02d", Integer.parseInt(month));
+        day = StringUtils.isEmpty(day) ? null : String.format("%02d", Integer.parseInt(day));
+
+        if (Objects.isNull(month) || Objects.isNull(day)) {
+            return year;
+        }
+        return day.concat("-").concat(month).concat("-").concat(year);
+
+    }
+
+    public long calculateAgeOnDOB(String dobStr) {
+        SimpleDateFormat dateFormat = null;
+        long ageInYears = 0;
+        if (dobStr.length() == 4) {
+            ageInYears = calculateAge(Integer.valueOf(dobStr));
+        } else {
+            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            try {
+                dateFormat.setLenient(false);
+
+                Date dob = dateFormat.parse(dobStr);
+                Date currentDate = new Date();
+
+                long ageInMillis = currentDate.getTime() - dob.getTime();
+                ageInYears = ageInMillis / (365L * 24L * 60L * 60L * 1000L);
+            } catch (ParseException e) {
+                return 0;
+            }
+        }
+        return ageInYears;
+    }
+
+    public long calculateAge(int birthYear) {
+        Calendar currentDate = Calendar.getInstance();
+        int currentYear = currentDate.get(Calendar.YEAR);
+        return (currentYear - birthYear);
+    }
+
 
     private boolean isValidMobileType(Demographic demographic) {
         return !demographic.getMobileType().equals(MobileType.WRONG);
@@ -220,12 +307,24 @@ public class EnrolByDemographicValidatorService {
         return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth()) >= 1900);
     }
 
+    private boolean isValidYearOfBirth(ChildDto demographic) {
+        return (StringUtils.isNotBlank(demographic.getYearOfBirth()) && demographic.getYearOfBirth().matches(only4Digit) && Integer.parseInt(demographic.getYearOfBirth()) <= LocalDateTime.now().getYear() && Integer.parseInt(demographic.getYearOfBirth()) >= 1900);
+    }
+
     private boolean isValidMonthOfBirth(Demographic demographic) {
         return (StringUtils.isNotBlank(demographic.getMonthOfBirth()) && demographic.getMonthOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getMonthOfBirth()) <= 12);
     }
 
+    private boolean isValidMonthOfBirth(ChildDto childDto) {
+        return (StringUtils.isNotBlank(childDto.getMonthOfBirth()) && childDto.getMonthOfBirth().matches(only2Digit) && Integer.parseInt(childDto.getMonthOfBirth()) <= 12);
+    }
+
     private boolean isValidDateOfBirth(Demographic demographic) {
         return (StringUtils.isNotBlank(demographic.getDayOfBirth()) && demographic.getDayOfBirth().matches(only2Digit) && Integer.parseInt(demographic.getDayOfBirth()) <= 31);
+    }
+
+    private boolean isValidDateOfBirth(ChildDto childDto) {
+        return (StringUtils.isNotBlank(childDto.getDayOfBirth()) && childDto.getDayOfBirth().matches(only2Digit) && Integer.parseInt(childDto.getDayOfBirth()) <= 31);
     }
 
     private boolean isValidDayOfBirth(Demographic demographic) {
@@ -234,6 +333,26 @@ public class EnrolByDemographicValidatorService {
         } else {
             YearMonth yearMonth = YearMonth.of(Integer.parseInt(demographic.getYearOfBirth()), Integer.parseInt(demographic.getMonthOfBirth()));
             return yearMonth.isValidDay(Integer.parseInt(demographic.getDayOfBirth()));
+        }
+    }
+
+    private boolean isValidDayOfBirth(ChildDto childDto) {
+        if (StringUtils.isEmpty(childDto.getDayOfBirth())) {
+            return true;
+        } else {
+            YearMonth yearMonth = YearMonth.of(Integer.parseInt(childDto.getYearOfBirth()), Integer.parseInt(childDto.getMonthOfBirth()));
+            return yearMonth.isValidDay(Integer.parseInt(childDto.getDayOfBirth()));
+        }
+    }
+
+    public boolean isValidFutureDOB(String yearOfBirth, String monthOfBirth, String dayOfBirth) {
+        try {
+            LocalDate dob = LocalDate.of(Integer.valueOf(yearOfBirth), Integer.valueOf(monthOfBirth),
+                    Integer.valueOf(dayOfBirth));
+            LocalDate currentDate = LocalDate.now();
+            return dob.isAfter(currentDate) ? false : true;
+        } catch (DateTimeException e) {
+            return false;
         }
     }
 
@@ -288,6 +407,10 @@ public class EnrolByDemographicValidatorService {
         return !firstName.isBlank() && Common.validStringSize(firstName, MAX_NAME_SIZE) && firstName.matches(alphabeticCharOnlyRegex);
     }
 
+    public static boolean isValidPassword(String loginId) {
+        return Pattern.compile(PASSWORD_REGEX_PATTERN).matcher(loginId).matches();
+    }
+
     private boolean isValidGender(String gender) {
         return !gender.isBlank() && (gender.equals(M) ||
                 gender.equals(F) ||
@@ -300,9 +423,7 @@ public class EnrolByDemographicValidatorService {
     }
 
 
-
-
-    private  boolean isValidDateFormat_(String value) {
+    private boolean isValidDateFormat_(String value) {
         if (StringUtils.isEmpty(value)) {
             return false;
         }
@@ -315,10 +436,10 @@ public class EnrolByDemographicValidatorService {
                         .onErrorResume(ex -> Mono.just(false));
             }
         }).subscribeOn(Schedulers.parallel());
-        return  isValidFormatMono.block();
+        return isValidFormatMono.block();
     }
 
-    private  Mono<Boolean> validateDateFormat(String value, String format) {
+    private Mono<Boolean> validateDateFormat(String value, String format) {
         return Mono.fromCallable(() -> {
                     SimpleDateFormat sdf = new SimpleDateFormat(format);
                     sdf.setLenient(false);
@@ -342,6 +463,38 @@ public class EnrolByDemographicValidatorService {
             } catch (ParseException ex) {
                 return false;
             }
+        }
+    }
+
+    public void validateEnrolChild(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
+        ChildDto childDto = enrolByAadhaarRequestDto.getAuthData().getChildDto();
+        if (childDto == null) {
+            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+        }
+        LinkedHashMap<String, String> errors;
+        errors = new LinkedHashMap<>();
+        if (!isValidGender(childDto.getGender())) {
+            errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
+        }
+        validateDob(childDto, errors);
+        if (!isValidFirstName(childDto.getName())) {
+            errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
+        }
+        if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImage(childDto.getProfilePhoto())) {
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
+        } else if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImageFormat(childDto.getProfilePhoto())) {
+            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
+        }
+        if (!errors.isEmpty()) {
+            throw new BadRequestException(errors);
+        }
+    }
+
+    public void isValidParentAge(AccountDto accountDto) {
+        long parentAge = calculateAgeOnDOB(populateDOB(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+        if (childParentAgeLimit > parentAge) {
+            //throw new RuntimeException(INVALID_PARENTS_DOB_DETAILS, CHILD_INVALID_PARENTS_DOB_DETAILS);
+            //TODO throw error INVALID_PARENTS_DOB_DETAILS from abdm.error
         }
     }
 }

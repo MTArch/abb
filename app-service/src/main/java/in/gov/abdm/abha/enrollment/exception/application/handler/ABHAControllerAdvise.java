@@ -80,6 +80,8 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
         } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
+        } else if (exception.getClass() == AbhaNotFountException.class) {
+            return handleAbhaExceptions(HttpStatus.NOT_FOUND, exception.getMessage());
         } else if (exception.getClass() == AbhaDBException.class) {
             return handleAbhaDBExceptions(exception.getMessage());
         } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {

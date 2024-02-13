@@ -72,5 +72,7 @@ public class AuthData {
     @Valid
     private IrisDto iris;
 
-
+    @JsonProperty("child")
+    @Valid
+    private ChildDto childDto;
 }

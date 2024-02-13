@@ -91,6 +91,8 @@ public class AbhaConstants {
 
     public static final String INVALID_DOB = "Invalid DOB";
 
+    public static final String INVALID_FUTURE_DOB = "Invalid DOB, should not be Future DOB";
+
     public static final String INVALID_FRONT_SIDE_PHOTO = "Invalid Front side photo";
 
     public static final String INVALID_BACK_SIDE_PHOTO = "Invalid Back side photo";
@@ -110,6 +112,8 @@ public class AbhaConstants {
     public static final String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
     public static final String INVALID_FILE_FORMAT = "Invalid file extension. Please upload a file with extensions as (JPEG/PNG/JPG/PDF)";
+    private static final String INVALID_PARENTS_DOB_DETAILS = "Child Abha Creation Restricted: Parent's age must be 18 years or older to create Child Abha under their Health ID Number.";
+    private static final String INVALID_PARENTS_MOBILE_NUMBER = "Unable to Create Child Abha: Please Ensure Mobile Number is Mapped to Health ID Number.";
     public static final String INVALID_PIN_CODE = "Invalid PinCode";
 
     public static final String AADHAAR = "AADHAAR";
@@ -184,8 +188,10 @@ public class AbhaConstants {
 
     public static final String PID_INVALID = "Invalid PID";
     public static final String INTEGRATED_PROGRAM_ROLE = "HidIntegratedProgram";
+    public static final String HID_CHILD_ROLE = "Hid_Child";
     public static final String BENEFIT_NAME = "Benefit-Name";
     public static final String F_TOKEN = "F-token";
+    public static final String X_TOKEN = "X-token";
     public static final String SUB = "sub";
     public static final String ROLES = "roles";
 
