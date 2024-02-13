@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import in.gov.abdm.abha.enrollment.configuration.XTokenContextHolder;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.profile.utilities.Common;
@@ -25,15 +26,16 @@ public class RequestMapper {
     public static final String APPLICATION = "application";
     public static final String NAME = "name";
 
-    public static RequestHeaders prepareRequestHeaders(String benefitName, String authorization,String fToken) {
+    public static RequestHeaders prepareRequestHeaders(String benefitName, String authorization, String fToken, String xToken) {
 
         Map<String, Object> claims;
-        String clientId=DEFAULT_CLIENT_ID;
+        String clientId = DEFAULT_CLIENT_ID;
         List<String> benefitRoles = null;
         Map<String, Object> fTokenClaims = null;
+        XTokenContextHolder xTokenContextHolder = null;
 
         if (!StringUtils.isEmpty(authorization)) {
-            authorization =authorization.substring("Bearer ".length());
+            authorization = authorization.substring("Bearer ".length());
             claims = JWTUtil.readJWTToken(authorization);
             if (claims.get(CLIENT_ID) != null) {
                 clientId = claims.get(CLIENT_ID).toString();
@@ -45,16 +47,21 @@ public class RequestMapper {
             if (realmMap != null)
                 benefitRoles = realmMap.get(ROLES);
         }
-        if(fToken!=null) {
+        if (fToken != null) {
             fToken = Common.getValidToken(fToken, "Bearer ");
             fTokenClaims = JWTToken.decodeJWTToken(fToken, GetKeys.getPrivateKey());
         }
 
+        if (xToken != null) {
+            xTokenContextHolder = XTokenHelper.getXToken(xToken);
+        }
+
         return RequestHeaders.builder()
-                .roleList(benefitRoles !=null ? benefitRoles : null)
-                .clientId(clientId !=null ? clientId : null)
-                .benefitName(benefitName !=null ? benefitName : null)
+                .roleList(benefitRoles != null ? benefitRoles : null)
+                .clientId(clientId != null ? clientId : null)
+                .benefitName(benefitName != null ? benefitName : null)
                 .fTokenClaims(fTokenClaims)
+                .xToken(xTokenContextHolder)
                 .build();
     }
 }
