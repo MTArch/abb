@@ -17,7 +17,10 @@ import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -35,7 +38,9 @@ public class GeneralUtils {
     public static final String PNG = "PNG";
     public static final String JPG = "JPG";
     public static final String JPEG = "JPEG";
-    private static final String[] ALLOWED_IMAGE_EXTENSION = { "png", "jpeg", "jpg", "pdf" };
+    private static final String[] ALLOWED_IMAGE_EXTENSION = {"png", "jpeg", "jpg", "pdf"};
+    public static final String DD_MM_YYYY = "dd-MM-yyyy";
+    public static final String D_M_YYYY = "d-M-yyyy";
 
     /**
      * Method to check if given String is palindrome
@@ -94,28 +99,47 @@ public class GeneralUtils {
         try {
             return ImageIO.read(new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(base64))) != null;
         } catch (IOException e) {
-            log.error("Error while parsing the image file format",e);
+            log.error("Error while parsing the image file format", e);
             return false;
         }
     }
 
     public boolean isFileFormat(String base64) {
-            byte[] decodedBytes = Base64.getDecoder().decode(base64);
-            String contentType = new Tika().detect(decodedBytes);
-            String imageExtension = Arrays.stream(contentType.split("/")).collect(Collectors.toList()).get(1);
-            List<String> imageExtensions = Arrays.asList(ALLOWED_IMAGE_EXTENSION);
-            return imageExtensions.contains(imageExtension);
+        byte[] decodedBytes;
+        try {
+            decodedBytes = Base64.getDecoder().decode(base64);
+        } catch (Exception e) {
+            return false;
+        }
+        String contentType = new Tika().detect(decodedBytes);
+        String imageExtension = Arrays.stream(contentType.split("/")).collect(Collectors.toList()).get(1);
+        List<String> imageExtensions = Arrays.asList(ALLOWED_IMAGE_EXTENSION);
+        return imageExtensions.contains(imageExtension);
 
-       }
+    }
 
-    public boolean isValidAadhaarNumber(String aadhaarNumber){
+    public boolean isValidAadhaarNumber(String aadhaarNumber) {
         return VerhoeffAlgorithm.validateVerhoeff(aadhaarNumber);
     }
+
     public Mono<DataBuffer> prepareFilterExceptionResponse(ServerWebExchange exchange, ABDMError error) {
 
         return Mono.just(exchange.getResponse().bufferFactory()
                 .wrap(new JSONObject(new ErrorResponse(error.getCode().split(":")[0], error.getMessage())).toString().getBytes()));
     }
 
+    public LocalDateTime parseStringToLocalDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DD_MM_YYYY);
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern(D_M_YYYY);
+        try {
+            return LocalDate.parse(date, formatter).atStartOfDay();
+        } catch (DateTimeParseException e) {
+            try {
+                return LocalDate.parse(date, formatter2).atStartOfDay();
+            } catch (DateTimeParseException e2) {
+                return null;
+            }
+        }
+    }
 }
 

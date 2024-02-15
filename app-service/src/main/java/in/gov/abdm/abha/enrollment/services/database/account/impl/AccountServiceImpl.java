@@ -1,32 +1,11 @@
 package in.gov.abdm.abha.enrollment.services.database.account.impl;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
-import static in.gov.abdm.abha.enrollment.constants.StringConstants.*;
-
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import in.gov.abdm.abha.enrollment.constants.URIConstant;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
 import in.gov.abdm.abha.enrollment.client.IntegratedProgramDBFClient;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
@@ -37,11 +16,7 @@ import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
-import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidBenefitDto;
-import in.gov.abdm.abha.enrollment.model.entities.HidReattemptDto;
-import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
-import in.gov.abdm.abha.enrollment.model.entities.TransactionDto;
+import in.gov.abdm.abha.enrollment.model.entities.*;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.procedure.SaveAllDataRequest;
@@ -50,8 +25,24 @@ import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DRIVING_LICENCE;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
+import static in.gov.abdm.abha.enrollment.constants.StringConstants.*;
 
 @Service
 @Slf4j
@@ -143,7 +134,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private void updateSource(AccountDto newUser, EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
-        newUser.setApiEndPoint(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
+        newUser.setApiEndPoint(URIConstant.ENROL_ENDPOINT + URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
         if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.OTP)) {
             newUser.setSource(AADHAAR_OTP);
         } else if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.FACE)) {
@@ -277,7 +268,7 @@ public class AccountServiceImpl implements AccountService {
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            return handleAccountByBenefitProgram(accountDto, requestHeaders);
+            return handleAccountByBenefitProgram(enrolByAadhaarRequestDto, accountDto, requestHeaders);
         } else {
             // normal flow
             return abhaDBAccountFClient.createAccount(accountDto)
@@ -285,12 +276,12 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgram(AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> handleAccountByBenefitProgram(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccount(enrolByAadhaarRequestDto, integratedProgramDtos, accountDto, requestHeaders));
         } else {
-            return validateBenefitIfExistsAndCreateAccount(integratedProgramDtos, accountDto, requestHeaders);
+            return validateBenefitIfExistsAndCreateAccount(enrolByAadhaarRequestDto, integratedProgramDtos, accountDto, requestHeaders);
         }
     }
 
@@ -298,12 +289,12 @@ public class AccountServiceImpl implements AccountService {
         return !integratedProgramDtos.isEmpty() && integratedProgramDtos.stream().anyMatch(res -> res.getBenefitName().equals(requestHeaders.getBenefitName()));
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
 
-            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
+            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(enrolByAadhaarRequestDto, accountDto, requestHeaders, integratedProgramDtos))
                     .flatMap(response -> abhaDBAccountFClient.createAccount(accountDto)
                             .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())))));
         } else {
@@ -311,14 +302,14 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+    private HidBenefitDto prepareHidBenefitDto(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
         String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
         List<IntegratedProgramDto> integratedProgramDtoList
                 = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
                 && v.getClientId().equals(requestHeaders.getClientId())).collect(Collectors.toList());
         List<String> programName = integratedProgramDtoList.stream().map(IntegratedProgramDto::getProgramName).collect(Collectors.toList());
 
-        return HidBenefitDto.builder()
+        HidBenefitDto hidBenefitDto = HidBenefitDto.builder()
                 .benefitName(requestHeaders.getBenefitName())
                 .programName(programName.get(0) != null ? programName.get(0) : null)
                 .benefitId(benefitId)
@@ -332,6 +323,17 @@ public class AccountServiceImpl implements AccountService {
                 .updatedDate(LocalDateTime.now())
                 .mobileNumber(accountDto.getMobile())
                 .build();
+
+        if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)) {
+            if (Optional.ofNullable(enrolByAadhaarRequestDto.getAuthData().getDemographic()).isPresent()) {
+                LocalDateTime localDateTime = GeneralUtils.parseStringToLocalDate(enrolByAadhaarRequestDto.getAuthData().getDemographic().getValidity());
+                if(localDateTime != null && localDateTime.isAfter(LocalDateTime.now())) {
+                    hidBenefitDto.setValidTill(localDateTime);
+                }
+            }
+        }
+
+        return hidBenefitDto;
     }
 
     @Override
@@ -371,23 +373,23 @@ public class AccountServiceImpl implements AccountService {
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.BIO)
                 || enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH))) {
             // HID benefit Flow
-            return handleAccountByBenefitProgramForSpCall(accountDto, requestHeaders);
+            return handleAccountByBenefitProgramForSpCall(enrolByAadhaarRequestDto, accountDto, requestHeaders);
         } else {
             // normal flow
             return Mono.just(accountDto);
         }
     }
 
-    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> handleAccountByBenefitProgramForSpCall(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AccountDto accountDto, RequestHeaders requestHeaders) {
         List<IntegratedProgramDto> integratedProgramDtos = redisService.getIntegratedPrograms();
         if (!validBenefitProgram(requestHeaders, integratedProgramDtos)) {
-            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders));
+            return redisService.reloadAndGetIntegratedPrograms().flatMap(integratedProgramDtoList -> validateBenefitIfExistsAndCreateAccountForSpCall(enrolByAadhaarRequestDto, integratedProgramDtos, accountDto, requestHeaders));
         } else {
-            return validateBenefitIfExistsAndCreateAccountForSpCall(integratedProgramDtos, accountDto, requestHeaders);
+            return validateBenefitIfExistsAndCreateAccountForSpCall(enrolByAadhaarRequestDto, integratedProgramDtos, accountDto, requestHeaders);
         }
     }
 
-    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
+    private Mono<AccountDto> validateBenefitIfExistsAndCreateAccountForSpCall(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, List<IntegratedProgramDto> integratedProgramDtos, AccountDto accountDto, RequestHeaders requestHeaders) {
 
         if (integratedProgramDtos.stream().anyMatch(integratedProgramDto -> integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
                 && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)) {
@@ -395,7 +397,7 @@ public class AccountServiceImpl implements AccountService {
             return hidBenefitDBFClient.existByHealthIdAndBenefit(accountDto.getHealthIdNumber(), requestHeaders.getBenefitName())
                     .flatMap(exists -> {
                         if (!exists) {
-                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(accountDto, requestHeaders, integratedProgramDtos))
+                            return hidBenefitDBFClient.saveHidBenefit(prepareHidBenefitDto(enrolByAadhaarRequestDto, accountDto, requestHeaders, integratedProgramDtos))
                                     .flatMap(response -> Mono.just(accountDto))
                                     .onErrorResume(throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getMessage())));
                         } else {
