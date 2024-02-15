@@ -126,7 +126,7 @@ public class GeneralUtils {
     public Mono<DataBuffer> prepareFilterExceptionResponse(ServerWebExchange exchange, ABDMError error) {
 
         return Mono.just(exchange.getResponse().bufferFactory()
-                .wrap(new JSONObject(new ErrorResponse(new Error(error.getCode().split(":")[0], error.getMessage()))).toString().getBytes()));
+                .wrap(new JSONObject(new Error(new Error(error.getCode().split(":")[0], error.getMessage()))).toString().getBytes()));
     }
 
     public LocalDateTime parseStringToLocalDate(String date) {
