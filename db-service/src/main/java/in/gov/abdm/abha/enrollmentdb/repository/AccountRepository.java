@@ -29,7 +29,10 @@ public interface AccountRepository extends R2dbcRepository<Accounts, String> {
     Mono<Accounts> getAccountsByXmluid(@Param("xmluid") String xmluid);
 
     @Query(value = "SELECT * FROM fn_get_accounts_by_document_code(:documentCode::text)")
-    Mono<Accounts> getAccountsByDocumentCode(@Param("documentCode") String documentCode);
+    Mono<Accounts> getAccountByDocumentCode(@Param("documentCode") String documentCode);
+
+    @Query(value = "SELECT * FROM fn_get_accounts_by_document_code(:documentCode::text)")
+    Flux<Accounts> getAccountsByDocumentCode(@Param("documentCode") String documentCode);
 
     @Query(value = "select count from fn_get_accounts_cnt_by_mobile(:mobileNumber)")
     Mono<Integer> getAccountsCountByMobileNumber(String mobileNumber);

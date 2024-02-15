@@ -112,8 +112,6 @@ public class AbhaConstants {
     public static final String INVALID_PHOTO_FORMAT = "Invalid file extension. Please upload a file with extensions as jpg/png";
 
     public static final String INVALID_FILE_FORMAT = "Invalid file extension. Please upload a file with extensions as (JPEG/PNG/JPG/PDF)";
-    private static final String INVALID_PARENTS_DOB_DETAILS = "Child Abha Creation Restricted: Parent's age must be 18 years or older to create Child Abha under their Health ID Number.";
-    private static final String INVALID_PARENTS_MOBILE_NUMBER = "Unable to Create Child Abha: Please Ensure Mobile Number is Mapped to Health ID Number.";
     public static final String INVALID_PIN_CODE = "Invalid PinCode";
 
     public static final String AADHAAR = "AADHAAR";

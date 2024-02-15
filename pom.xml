@@ -49,7 +49,7 @@
         <dependency>
             <groupId>in.gov.abdm</groupId>
             <artifactId>abdm-error</artifactId>
-            <version>1.3.4</version>
+            <version>1.4.8</version>
         </dependency>
         <dependency>
             <groupId>in.gov.abdm</groupId>

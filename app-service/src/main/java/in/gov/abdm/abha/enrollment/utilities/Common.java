@@ -357,4 +357,14 @@ public class Common {
                 .collect(Collectors.joining(" "));
     }
 
+    public String populateDOB(String day, String month, String year) {
+        month = StringUtils.isEmpty(month) ? null : String.format("%02d", Integer.parseInt(month));
+        day = StringUtils.isEmpty(day) ? null : String.format("%02d", Integer.parseInt(day));
+
+        if (Objects.isNull(month) || Objects.isNull(day)) {
+            return year;
+        }
+        return day.concat("-").concat(month).concat("-").concat(year);
+    }
+
 }
