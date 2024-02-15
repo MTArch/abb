@@ -61,6 +61,8 @@ public class EnrolByDemographicValidatorService {
     private static final String STATE = "State";
     private static final String DISTRICT = "District";
     private static final String CONSENT_FORM_IMAGE = "ConsentFormImage";
+    private static final String PROFILE_PHOTO = "profilePhoto";
+    private static final String PASSWORD = "password";
     private static final String MOBILE = "mobile";
 
     private static final String DATE_OF_BIRTH = "dateOfBirth";
@@ -470,9 +472,12 @@ public class EnrolByDemographicValidatorService {
             errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
         }
         if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImage(childDto.getProfilePhoto())) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
+            errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImageFormat(childDto.getProfilePhoto())) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
+            errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_FILE_FORMAT);
+        }
+        if (!rsaUtil.isRSAEncrypted(childDto.getPassword())) {
+            errors.put(PASSWORD, AbhaConstants.INVALID_PASSWORD);
         }
         if (!errors.isEmpty()) {
             throw new BadRequestException(errors);

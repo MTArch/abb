@@ -20,6 +20,7 @@ import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
 import in.gov.abdm.controller.ABDMControllerAdvise;
 import in.gov.abdm.error.ABDMError;
+import in.gov.abdm.error.Error;
 import in.gov.abdm.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -257,7 +258,7 @@ public class ABHAControllerAdvise {
     }
 
     private Mono<ErrorResponse> prepareCustomErrorResponse(String errorCode, String errorMessage) {
-        return Mono.just(new ErrorResponse(errorCode, errorMessage));
+        return Mono.just(new ErrorResponse(new Error(errorCode, errorMessage)));
     }
 
     @ExceptionHandler(ServerWebInputException.class)

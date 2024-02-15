@@ -1,12 +1,14 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
 import in.gov.abdm.abha.enrollment.configuration.XTokenContextHolder;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
 import in.gov.abdm.abha.profile.constants.AbhaConstants;
 import in.gov.abdm.abha.profile.constants.StringConstants;
 import in.gov.abdm.abha.profile.exception.application.BadRequestException;
 import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import in.gov.abdm.abha.profile.utilities.Common;
 import in.gov.abdm.abha.profile.utilities.GetKeys;
+import in.gov.abdm.error.ABDMError;
 import in.gov.abdm.jwt.util.JWTToken;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.experimental.UtilityClass;
@@ -59,7 +61,7 @@ public class XTokenHelper {
             throw new RedisConnectionFailureException(error);
         } else if (AbhaConstants.X_TOKEN_EXPIRED.equals(error) || AbhaConstants.R_TOKEN_EXPIRED.equals(error)
                 || AbhaConstants.T_TOKEN_EXPIRED.equals(error) || ACCOUNT_KYC_NOT_VERIFIED.equals(error)) {
-            throw new UnAuthorizedException(error);
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_X_TOKEN.getCode(), ABDMError.INVALID_X_TOKEN.getMessage());
         } else if (AbhaConstants.INVALID_X_TOKEN.equals(error) || AbhaConstants.INVALID_R_TOKEN.equals(error)
                 || AbhaConstants.INVALID_T_TOKEN.equals(error)) {
             throw new BadRequestException(error);
