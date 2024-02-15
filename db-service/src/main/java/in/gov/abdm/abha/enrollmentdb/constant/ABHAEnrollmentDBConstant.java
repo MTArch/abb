@@ -50,6 +50,7 @@ public class ABHAEnrollmentDBConstant {
     public static final String GET_INTEGRATED_PROGRAM_BY_BENEFIT_NAME = "/{benefitName}";
 
     public static final String GET_ACCOUNT_BY_DOCUMENT_CODE = "/documentCode/{documentCode}";
+    public static final String GET_ACCOUNTS_BY_DOCUMENT_CODE = "s/documentCode/{documentCode}";
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = "/linkedAccountCount/{mobileNumber}";
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_EMAIL = "/linkedAccountCount/email/{email}";
     public static final String DB_GET_DUPLICATE_ACCOUNT = "/check/de-duplicate";

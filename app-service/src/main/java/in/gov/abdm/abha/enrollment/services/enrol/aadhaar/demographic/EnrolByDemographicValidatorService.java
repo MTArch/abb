@@ -231,23 +231,12 @@ public class EnrolByDemographicValidatorService {
     }
 
     public boolean isValidAge(ChildDto childDto) {
-        long childAge = calculateAgeOnDOB(populateDOB(childDto.getDayOfBirth(),
+        long childAge = calculateAgeOnDOB(Common.populateDOB(childDto.getDayOfBirth(),
                 childDto.getMonthOfBirth(), childDto.getYearOfBirth()));
         if (childAge >= childAbhaAgeLimit) {
             return false;
         }
         return true;
-    }
-
-    public String populateDOB(String day, String month, String year) {
-        month = StringUtils.isEmpty(month) ? null : String.format("%02d", Integer.parseInt(month));
-        day = StringUtils.isEmpty(day) ? null : String.format("%02d", Integer.parseInt(day));
-
-        if (Objects.isNull(month) || Objects.isNull(day)) {
-            return year;
-        }
-        return day.concat("-").concat(month).concat("-").concat(year);
-
     }
 
     public long calculateAgeOnDOB(String dobStr) {
@@ -491,10 +480,9 @@ public class EnrolByDemographicValidatorService {
     }
 
     public void isValidParentAge(AccountDto accountDto) {
-        long parentAge = calculateAgeOnDOB(populateDOB(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+        long parentAge = calculateAgeOnDOB(Common.populateDOB(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
         if (childParentAgeLimit > parentAge) {
-            //throw new RuntimeException(INVALID_PARENTS_DOB_DETAILS, CHILD_INVALID_PARENTS_DOB_DETAILS);
-            //TODO throw error INVALID_PARENTS_DOB_DETAILS from abdm.error
+            throw new AbhaUnProcessableException(ABDMError.INVALID_PARENTS_DOB_DETAILS);
         }
     }
 }
