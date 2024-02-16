@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 @Data
-public class Demographic extends  LdgRequest{
+public class Demographic extends LdgRequest {
     @NotEmpty(message = AbhaConstants.AADHAAR_NUMBER_INVALID)
     @JsonProperty("aadhaar")
     private String aadhaarNumber;
@@ -36,4 +36,5 @@ public class Demographic extends  LdgRequest{
     private String consentFormImage;
     private String healthWorkerName;
     private String healthWorkerMobile;
+    private String validity;
 }

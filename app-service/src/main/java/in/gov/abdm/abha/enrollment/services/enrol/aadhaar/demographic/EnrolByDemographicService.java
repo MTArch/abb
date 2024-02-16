@@ -199,7 +199,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                     accountDto.setName(Common.removeNulls(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName())));
                     accountDto.setConsentDate(LocalDateTime.now());
                     accountDto.setVerificationStatus(AbhaConstants.VERIFIED);
-                    if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
+                    if (authMethods.contains(AuthMethods.DEMO_AUTH) && isValidProfilePhoto(demographic.getConsentFormImage())) {
                         accountDto.setProfilePhoto(demographic.getConsentFormImage());
                     } else {
                         accountDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);

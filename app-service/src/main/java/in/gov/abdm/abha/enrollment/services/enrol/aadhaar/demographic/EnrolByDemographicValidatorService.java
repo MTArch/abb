@@ -19,9 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
@@ -79,7 +81,7 @@ public class EnrolByDemographicValidatorService {
 
     public void validateEnrolByDemographic(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         Demographic demographic = enrolByAadhaarRequestDto.getAuthData().getDemographic();
-        if(demographic == null){
+        if (demographic == null) {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
         }
         LinkedHashMap<String, String> errors;
@@ -139,12 +141,6 @@ public class EnrolByDemographicValidatorService {
 
         if (!isValidFirstName(demographic.getName())) {
             errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
-        }
-
-        if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImage(demographic.getProfilePhoto())) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
-        } else if (StringUtils.isNotBlank(demographic.getProfilePhoto()) && !isValidConsentFormImageFormat(demographic.getProfilePhoto())) {
-            errors.put(CONSENT_FORM_IMAGE, AbhaConstants.INVALID_FILE_FORMAT);
         }
 
         if (isNullOrEmpty(demographic.getDateOfBirth())
@@ -299,10 +295,14 @@ public class EnrolByDemographicValidatorService {
                 address.matches(AbhaConstants.ADDRESS_VALIDATOR_REGEX);
     }
 
+    public boolean isValidProfilePhoto(String photo) {
+        if (StringUtils.isEmpty(photo)) {
+            return false;
+        }
+        return isValidConsentFormImage(photo) && isValidConsentFormImageFormat(photo);
+    }
 
-
-
-    private  boolean isValidDateFormat_(String value) {
+    private boolean isValidDateFormat_(String value) {
         if (StringUtils.isEmpty(value)) {
             return false;
         }
@@ -315,10 +315,10 @@ public class EnrolByDemographicValidatorService {
                         .onErrorResume(ex -> Mono.just(false));
             }
         }).subscribeOn(Schedulers.parallel());
-        return  isValidFormatMono.block();
+        return isValidFormatMono.block();
     }
 
-    private  Mono<Boolean> validateDateFormat(String value, String format) {
+    private Mono<Boolean> validateDateFormat(String value, String format) {
         return Mono.fromCallable(() -> {
                     SimpleDateFormat sdf = new SimpleDateFormat(format);
                     sdf.setLenient(false);

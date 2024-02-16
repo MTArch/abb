@@ -27,5 +27,5 @@ public class DemographicAuth extends LdgRequest {
     private String address;
     private String profilePhoto;
     private String mobile;
-
+    private String validity;
 }
