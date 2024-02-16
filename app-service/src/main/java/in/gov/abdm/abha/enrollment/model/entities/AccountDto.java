@@ -284,6 +284,8 @@ public class AccountDto {
      */
 	private boolean isNewAccount;
 
+    private String localizedDetails;
+
     /**
      * Type of account
      */

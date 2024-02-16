@@ -301,4 +301,6 @@ public class AccountDto {
     private String apiVersion;
 
     private String apiEndPoint;
+
+    private String localizedDetails;
 }

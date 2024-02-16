@@ -25,7 +25,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedAccountDetails;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -267,9 +271,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                                             .isNew(false)
                                             .build();
                                 	accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_OTP.code(), rHeaders).onErrorResume(thr -> {
-										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
+										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());
 										return Mono.empty();
-									}).subscribe(); 
+									}).subscribe();
 
                                     if (generateToken) {
                                         ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
@@ -289,6 +293,26 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
+    private String mapAadhaarResponse(LocalizedDetails localizedDetails) {
+        try {
+            ObjectMapper om = new ObjectMapper();
+            LocalizedAccountDetails accountDetails = new LocalizedAccountDetails();
+            accountDetails.setName(localizedDetails.getName());
+            accountDetails.setAddress(localizedDetails.getAddress());
+            accountDetails.setStateName(localizedDetails.getState());
+            accountDetails.setDistrictName(localizedDetails.getDistrict());
+            accountDetails.setSubDistrictName(localizedDetails.getSubDist());
+            accountDetails.setWardName(localizedDetails.getStreet());
+            accountDetails.setTownName(localizedDetails.getLocality());
+            accountDetails.setVillageName(localizedDetails.getVillageTownCity());
+            return om.writeValueAsString(accountDetails);
+        }
+        catch (JsonProcessingException e) {
+            log.error(e.getMessage(),e);
+        }
+        return null;
+    }
+
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
@@ -301,6 +325,9 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             accountDto.setType(AbhaType.STANDARD);
                         } else {
                             accountDto.setType(AbhaType.CHILD);
+                        }
+                        if(null!=aadhaarResponseDto.getAadhaarUserKycDto() || null!=aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()) {
+                            accountDto.setLocalizedDetails(mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
                         }
                         accountDto.setStatus(AccountStatus.ACTIVE.toString());
                         String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
