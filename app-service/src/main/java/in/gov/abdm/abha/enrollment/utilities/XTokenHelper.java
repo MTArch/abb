@@ -61,7 +61,7 @@ public class XTokenHelper {
             throw new RedisConnectionFailureException(error);
         } else if (AbhaConstants.X_TOKEN_EXPIRED.equals(error) || AbhaConstants.R_TOKEN_EXPIRED.equals(error)
                 || AbhaConstants.T_TOKEN_EXPIRED.equals(error) || ACCOUNT_KYC_NOT_VERIFIED.equals(error)) {
-            throw new AbhaUnAuthorizedException(ABDMError.INVALID_X_TOKEN.getCode(), ABDMError.INVALID_X_TOKEN.getMessage());
+            throw new UnAuthorizedException(error);
         } else if (AbhaConstants.INVALID_X_TOKEN.equals(error) || AbhaConstants.INVALID_R_TOKEN.equals(error)
                 || AbhaConstants.INVALID_T_TOKEN.equals(error)) {
             throw new BadRequestException(error);

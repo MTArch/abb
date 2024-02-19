@@ -2,11 +2,12 @@ package in.gov.abdm.abha.enrollment.services.enrol.child;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
+import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
+import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaNotFountException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
-import in.gov.abdm.abha.enrollment.model.common.HealthIdContextHolder;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ChildDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -31,6 +32,7 @@ import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -50,7 +52,9 @@ public class EnrolChildService {
     public static final String REQUEST_CHILD_MATCH_NOT_FOUND_CHILD_NAME_P_HID = "Request child Match Not Found: ChildName- {}, P-HID- {}";
     public static final String ACTIVE = "ACTIVE";
     public static final String CHILD_ABHA_VERIFIER = "ChildAbhaVerifier";
-    private int childAbhaAccountLimit = 15;
+
+    @Value(PropertyConstants.CHILD_ENROLLMENT_LIMIT)
+    private int childAbhaAccountLimit;
 
     @Autowired
     private AccountService accountService;
@@ -75,7 +79,7 @@ public class EnrolChildService {
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
                 .flatMap(accountDto -> {
                     isValidParentAccount(accountDto);
-                    return checkChildAbhaExist(enrolByAadhaarRequestDto, accountDto)
+                    return checkChildAbhaExistAndNotMoreThanLimit(enrolByAadhaarRequestDto, accountDto)
                             .flatMap(child -> respondExistingAccount(child, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST))
                             .switchIfEmpty(Mono.defer(() -> createNewAccount(enrolByAadhaarRequestDto, requestHeaders, accountDto)));
                 }).switchIfEmpty(Mono.error(new AbhaNotFountException(ABDMError.ABHA_USER_NOT_FOUND)));
@@ -108,14 +112,15 @@ public class EnrolChildService {
         }
     }
 
-    private Mono<EnrolByAadhaarResponseDto> generateTokenAndRespond(AccountDto accountDtoResponse) {
+    private Mono<EnrolByAadhaarResponseDto> generateTokenAndRespond(AccountDto accountDto) {
         ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                .token(jwtUtil.generateToken(UUID.randomUUID().toString(), accountDto))
                 .expiresIn(jwtUtil.jwtTokenExpiryTime())
-                .refreshToken(jwtUtil.generateRefreshToken(accountDtoResponse.getHealthIdNumber()))
+                .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
                 .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
                 .build();
         return Mono.just(EnrolByAadhaarResponseDto.builder()
-                .abhaProfileDto(MapperUtils.mapProfileDetails(accountDtoResponse)).responseTokensDto(responseTokensDto)
+                .abhaProfileDto(MapperUtils.mapProfileDetails(accountDto)).responseTokensDto(responseTokensDto)
                 .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
                 .isNew(true)
                 .build());
@@ -128,16 +133,24 @@ public class EnrolChildService {
         }
     }
 
-    private Mono<AccountDto> checkChildAbhaExist(EnrolByAadhaarRequestDto requestChildData, AccountDto parentEntity) {
+    private Mono<AccountDto> checkChildAbhaExistAndNotMoreThanLimit(EnrolByAadhaarRequestDto requestChildData, AccountDto parentEntity) {
         ChildDto childDto = requestChildData.getAuthData().getChildDto();
-        return abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentEntity.getHealthIdNumber())
+
+        Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentEntity.getHealthIdNumber());
+
+        return childAccounts
                 .filter(user -> user.getName().trim().equalsIgnoreCase(childDto.getName().trim())
-                        && user.getKycdob()
-                        .equals(Common.populateDOB(childDto.getDayOfBirth(),
-                                childDto.getMonthOfBirth(), childDto.getYearOfBirth()))
+                        && user.getKycdob().equals(Common.populateDOB(childDto.getDayOfBirth(), childDto.getMonthOfBirth(), childDto.getYearOfBirth()))
                         && user.getGender().equals(childDto.getGender()))
                 .next()
-                .switchIfEmpty(Mono.defer(() -> Mono.empty()));
+                .switchIfEmpty(childAccounts
+                        .count()
+                        .filter(count -> count > childAbhaAccountLimit)
+                        .flatMapMany(countExceeded ->
+                                Mono.error(new AbhaUnProcessableException(ABDMError.CHILD_ENROLLMENT_LIMIT_EXCEEDED.getCode(),
+                                        String.format(ABDMError.CHILD_ENROLLMENT_LIMIT_EXCEEDED.getMessage(), parentEntity.getHealthIdNumber()))))
+                        .then(Mono.empty())
+                );
     }
 
     private Mono<EnrolByAadhaarResponseDto> respondExistingAccount(AccountDto accountDto, boolean generateToken, String responseMessage) {
@@ -182,9 +195,6 @@ public class EnrolChildService {
             encPass = bcryptEncoder.encode(decryptedPwd);
         }
 
-        String clientId = HealthIdContextHolder.clientId();
-        String verificationStatus = StringUtils.isEmpty(clientId) ? AbhaConstants.PROVISIONAL : AbhaConstants.VERIFIED;
-
         AccountDto accountDto = AccountDto.builder().healthIdNumber(AbhaNumberGenerator.generateAbhaNumber())
                 .name(requestChildData.getName()).address(parentEntity.getAddress())
                 .stateName(parentEntity.getStateName()).stateCode(parentEntity.getStateCode()).districtName(parentEntity.getDistrictName())
@@ -196,9 +206,9 @@ public class EnrolChildService {
                 .profilePhoto(requestChildData.getProfilePhoto()).profilePhotoCompressed(false)
                 .dayOfBirth(requestChildData.getDayOfBirth()).monthOfBirth(requestChildData.getMonthOfBirth())
                 .yearOfBirth(requestChildData.getYearOfBirth()).gender(requestChildData.getGender())
-                .verificationStatus(verificationStatus).status(AccountStatus.ACTIVE.getValue())
+                .verificationStatus(AbhaConstants.VERIFIED).status(AccountStatus.ACTIVE.getValue())
                 .mobile(parentEntity.getMobile()).documentCode(parentEntity.getHealthIdNumber())
-                .verificationType(CHILD_ABHA_VERIFIER).password(encPass).kycdob(kycDobYob)
+                .verificationType(CHILD_ABHA_VERIFIER).password(encPass).kycdob(kycDobYob).type(AbhaType.CHILD)
                 .consentVersion(enrolByAadhaarRequestDto.getConsent().getVersion()).consentDate(LocalDateTime.now())
                 .mobileType(parentEntity.getMobileType()).build();
         breakName(accountDto);
