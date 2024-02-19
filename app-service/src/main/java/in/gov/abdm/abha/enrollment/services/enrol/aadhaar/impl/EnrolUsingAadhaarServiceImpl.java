@@ -501,7 +501,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.faceAuth(AadhaarVerifyFaceAuthRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getFace().getAadhaar()))
                 .faceAuthPid(enrolByAadhaarRequestDto.getAuthData().getFace().getRdPidData())
-                .aadhaarLogType(AadhaarLogType.KYC_F.name())
+                .aadhaarLogType(AadhaarLogType.KYC_P.name())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarFaceResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }
