@@ -683,7 +683,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             throw new BenefitNotFoundException(BENEFIT_NAME_OR_F_TOKEN_REQUIRED);
         }
         if (Boolean.FALSE.equals(isValidFacility(requestHeaders, authMethods, fToken))) {
-            throw new AbhaUnAuthorizedException(ABDMError.INVALID_F_TOKEN.getCode(), ABDMError.INVALID_F_TOKEN.getMessage());
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_PROFILE_X_TOKEN);
         }
 
         if (Boolean.FALSE.equals(isValidBenefitRole(requestHeaders, authMethods))) {
@@ -694,8 +694,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
         }
 
-        if (authMethods.contains(AuthMethods.CHILD) && requestHeaders.getXToken().getHealthIdNumber() == null) {
-            throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(), ABDMError.UNAUTHORIZED_ACCESS.getMessage());
+        if (authMethods.contains(AuthMethods.CHILD) && (requestHeaders.getXToken() == null || requestHeaders.getXToken().getHealthIdNumber() == null)) {
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_PROFILE_X_TOKEN);
         }
         return validateBenefitProgram(requestHeaders, authMethods);
     }

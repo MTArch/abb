@@ -94,7 +94,7 @@ public class EnrollmentController {
                         enrolByIrisService.validateEnrolByIris(enrolByAadhaarRequestDto);
                         return enrolByIrisService.verifyIris(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.CHILD)) {
-                        enrolByDemographicService.validateEnrolChild(enrolByAadhaarRequestDto, requestHeaders);
+                        enrolByDemographicService.validateEnrolChild(enrolByAadhaarRequestDto);
                         return enrolChildService.enrol(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
                         DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();

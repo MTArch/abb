@@ -459,7 +459,7 @@ public class EnrolByDemographicValidatorService {
         }
     }
 
-    public void validateEnrolChild(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
+    public void validateEnrolChild(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto) {
         ChildDto childDto = enrolByAadhaarRequestDto.getAuthData().getChildDto();
         if (childDto == null) {
             throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());

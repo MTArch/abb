@@ -37,6 +37,7 @@ public class URIConstant {
     // profile endpoints
     public static final String PROFILE_ENDPOINT = BASE_URI + "/profile";
     public static final String LINK_PARENT_ENDPOINT = "/link/parent";
+    public static final String PARENT_CHILDREN_ENDPOINT = "/children";
 
     // DB URIS
     public static final String DB_BASE_URI = "/api/v3/enrollmentdb";
