@@ -7,7 +7,9 @@ import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaNotFountException;
+import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
+import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ChildDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
@@ -16,12 +18,15 @@ import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDt
 import in.gov.abdm.abha.enrollment.model.entities.AccountAuthMethodsDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
+import in.gov.abdm.abha.enrollment.model.entities.IntegratedProgramDto;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
+import in.gov.abdm.abha.enrollment.model.profile.children.ChildrenProfiles;
 import in.gov.abdm.abha.enrollment.services.database.account.AccountService;
 import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.AccountAuthMethodService;
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
 import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
+import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -44,12 +49,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
+
 @Slf4j
 @Service
 public class EnrolChildService {
 
-    public static final String REQUEST_CHILD_MATCH_FOUND_CHILD_NAME_P_HID = "Request child Match Found: ChildName- {}, P-HID- {}";
-    public static final String REQUEST_CHILD_MATCH_NOT_FOUND_CHILD_NAME_P_HID = "Request child Match Not Found: ChildName- {}, P-HID- {}";
+    private static final String INTEGRATED_PROGRAMS_LOADED_FROM_REDIS = "Integrated Programs loaded from Redis ::";
+    private static final String FAILED_TO_LOAD_INTEGRATED_PROGRAMS = "Failed to load Integrated Programs";
     public static final String ACTIVE = "ACTIVE";
     public static final String CHILD_ABHA_VERIFIER = "ChildAbhaVerifier";
 
@@ -73,7 +80,9 @@ public class EnrolChildService {
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
     @Autowired
-    NotificationService notificationService;
+    private NotificationService notificationService;
+    @Autowired
+    RedisService redisService;
 
     public Mono<EnrolByAadhaarResponseDto> enrol(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
@@ -235,5 +244,66 @@ public class EnrolChildService {
         accountDto.setFirstName(GeneralUtils.stringTrimmer(firstName));
         accountDto.setLastName(GeneralUtils.stringTrimmer(lastName));
         accountDto.setMiddleName(GeneralUtils.stringTrimmer(middleName));
+    }
+
+    public Mono<ChildrenProfiles> getChildren(RequestHeaders requestHeaders) {
+        String parentAbhaNumber = requestHeaders.getXToken().getHealthIdNumber();
+        ChildrenProfiles childrenProfiles = new ChildrenProfiles();
+        Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentAbhaNumber);
+        return childAccounts.collectList().map(childList -> {
+            if(!childList.isEmpty()){
+                List<ABHAProfileDto> childAbhaProfileDtoList = new ArrayList<>();
+                AccountDto childAccount = childList.stream().findFirst().get();
+                childrenProfiles.setParentAbhaNumber(parentAbhaNumber);
+                childrenProfiles.setMobileNumber(childAccount.getMobile());
+                childrenProfiles.setAddress(childAccount.getAddress());
+                childrenProfiles.setChildrenCount(childList.size());
+                childList.forEach(accountDto -> childAbhaProfileDtoList.add(MapperUtils.mapProfileDetails(accountDto)));
+                childrenProfiles.setChildren(childAbhaProfileDtoList);
+            }
+            return childrenProfiles;
+        });
+    }
+
+    public Mono<Boolean> validateChildHeaders(RequestHeaders requestHeaders) {
+        if(requestHeaders.getRoleList() == null){
+            throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS);
+        }
+        if (requestHeaders.getXToken() == null) {
+            throw new AbhaUnAuthorizedException(ABDMError.INVALID_PROFILE_X_TOKEN);
+        }
+        return isValidBenefitProgram(requestHeaders);
+    }
+
+    private Mono<Boolean> isValidBenefitProgram(RequestHeaders requestHeaders){
+        return validateIntegratedPrograms(requestHeaders, redisService.getIntegratedPrograms())
+                .flatMap(aBoolean -> {
+                    log.info(INTEGRATED_PROGRAMS_LOADED_FROM_REDIS + aBoolean);
+                    if (aBoolean.equals(Boolean.FALSE)) {
+                        return redisService.reloadAndGetIntegratedPrograms()
+                                .flatMap(integratedProgramDtos -> integratedProgramDtos.stream()
+                                        .filter(integratedProgramDto ->
+                                                integratedProgramDto.getBenefitName().equals(requestHeaders.getBenefitName())
+                                                        && integratedProgramDto.getClientId().equals(requestHeaders.getClientId()))
+                                        .findAny()
+                                        .map(integratedProgramDto -> Mono.just(true))
+                                        .orElseThrow(() -> new BenefitNotFoundException(INVALID_BENEFIT_NAME)))
+                                .switchIfEmpty(Mono.error(new BenefitNotFoundException(FAILED_TO_LOAD_INTEGRATED_PROGRAMS)));
+                    }
+                    return Mono.just(true);
+                });
+    }
+
+    private Mono<Boolean> validateIntegratedPrograms(RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+        if (integratedProgramDtos != null && !integratedProgramDtos.isEmpty()
+                && requestHeaders.getBenefitName() != null && requestHeaders.getClientId() != null) {
+            return integratedProgramDtos.stream()
+                    .filter(res -> res.getBenefitName().equals(requestHeaders.getBenefitName())
+                            && res.getClientId().equals(requestHeaders.getClientId()))
+                    .findAny()
+                    .map(integratedProgramDto -> Mono.just(true))
+                    .orElse(Mono.just(false));
+        }
+        return Mono.just(false);
     }
 }
