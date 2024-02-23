@@ -326,9 +326,11 @@ public class AccountServiceImpl implements AccountService {
 
         if (enrolByAadhaarRequestDto.getAuthData().getAuthMethods().contains(AuthMethods.DEMO_AUTH)) {
             if (Optional.ofNullable(enrolByAadhaarRequestDto.getAuthData().getDemographic()).isPresent()) {
-                LocalDateTime localDateTime = GeneralUtils.parseStringToLocalDate(enrolByAadhaarRequestDto.getAuthData().getDemographic().getValidity());
-                if(localDateTime != null && localDateTime.isAfter(LocalDateTime.now())) {
-                    hidBenefitDto.setValidTill(localDateTime);
+                if(enrolByAadhaarRequestDto.getAuthData().getDemographic().getValidity() != null) {
+                    LocalDateTime localDateTime = GeneralUtils.parseStringToLocalDate(enrolByAadhaarRequestDto.getAuthData().getDemographic().getValidity());
+                    if (localDateTime != null && localDateTime.isAfter(LocalDateTime.now())) {
+                        hidBenefitDto.setValidTill(localDateTime);
+                    }
                 }
             }
         }
