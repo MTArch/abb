@@ -130,7 +130,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         String dob = Objects.nonNull(demographic.getMonthOfBirth()) ? formatDob(demographic.getYearOfBirth(), demographic.getMonthOfBirth(), demographic.getDayOfBirth()) : Common.removeNulls(demographic.getYearOfBirth());
         verifyDemographicRequest.setDob(dob);
         verifyDemographicRequest.setGender(demographic.getGender());
-        verifyDemographicRequest.setPhone(validateMobile(demographic.getMobile()));
         verifyDemographicRequest.setAadhaarLogType(AadhaarLogType.KYC_D_AUTH.name());
         String mobileNumber = enrolByAadhaarRequestDto.getAuthData().getDemographic().getMobile();
         Mono validateStateCode = Mono.just("");
