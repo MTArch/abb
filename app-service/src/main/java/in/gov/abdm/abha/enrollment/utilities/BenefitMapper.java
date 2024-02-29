@@ -13,7 +13,9 @@ public class BenefitMapper {
         HidBenefitRequestPayload hidBenefitRequestPayload = new HidBenefitRequestPayload();
         ABHAProfileDto abhaProfileDto = enrolByAadhaarResponseDto.getAbhaProfileDto();
         hidBenefitRequestPayload.setHealthIdNumber(abhaProfileDto.getAbhaNumber());
-        Optional.ofNullable(abhaProfileDto.getPhrAddress()).flatMap(address -> Optional.of(address.stream().findFirst())).ifPresent(s -> hidBenefitRequestPayload.setHealthId(s.get()));
+        Optional.ofNullable(abhaProfileDto.getPhrAddress())
+                .flatMap(address -> Optional.of(address.stream().findFirst()))
+                .ifPresent(s -> hidBenefitRequestPayload.setHealthId(s.isPresent() ? s.get() : null));
         hidBenefitRequestPayload.setMobile(abhaProfileDto.getMobile());
         hidBenefitRequestPayload.setFirstName(abhaProfileDto.getFirstName());
         String mName = "";
