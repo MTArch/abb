@@ -8,12 +8,14 @@ import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.DL
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.KAFKA_ERROR_LOG_MSG;
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.PROVISIONAL;
 import static in.gov.abdm.abha.enrollmentdb.constant.ABHAEnrollmentDBConstant.SYSTEM;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -140,7 +142,7 @@ public class KafkaServiceImpl implements KafkaService{
             address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
-            user.setDayOfBirth(accounts.getDayOfBirth());
+            user.setDayOfBirth(accounts.getDayOfBirth()!=null?accounts.getDayOfBirth():EMPTY);
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
             user.setGender(accounts.getGender());
@@ -149,7 +151,7 @@ public class KafkaServiceImpl implements KafkaService{
             user.setMiddleName(accounts.getMiddleName());
             user.setMobileNumber(accounts.getMobile());
             user.setMobileNumberVerified(accounts.getMobile()!=null);
-            user.setMonthOfBirth(accounts.getMonthOfBirth());
+            user.setMonthOfBirth(accounts.getMonthOfBirth()!=null?accounts.getMonthOfBirth():EMPTY);
             user.setFullName(accounts.getName());
             user.setPassword(accounts.getPassword());
             if(accounts.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)){
@@ -157,8 +159,10 @@ public class KafkaServiceImpl implements KafkaService{
             }else{
                 user.setStatus(accounts.getStatus());
             }
-            user.setYearOfBirth(accounts.getYearOfBirth());
-            user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
+            user.setYearOfBirth(accounts.getYearOfBirth()!=null?accounts.getYearOfBirth():EMPTY);
+            if(!StringUtils.isEmpty(accounts.getDayOfBirth()) && !StringUtils.isEmpty(accounts.getMonthOfBirth()) && !StringUtils.isEmpty(accounts.getYearOfBirth())){
+                user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
+            }
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
             user.setUpdatedBy(accounts.getLstUpdatedBy());
@@ -240,12 +244,12 @@ public class KafkaServiceImpl implements KafkaService{
         patientToBePublished.setStatus(accountDto.getStatus());
         return patientToBePublished;
     }
-    
-	@Override
-	public Mono<Void> publishDashBoardAbhaEventByAccounts(AccountReattemptDto rAccountDto) {
-		String requestId = String.valueOf(UUID.randomUUID());
-		dashboardEventPublisher.publish(rAccountDto, requestId);
-		return Mono.empty();
 
-	}
+    @Override
+    public Mono<Void> publishDashBoardAbhaEventByAccounts(AccountReattemptDto rAccountDto) {
+        String requestId = String.valueOf(UUID.randomUUID());
+        dashboardEventPublisher.publish(rAccountDto, requestId);
+        return Mono.empty();
+
+    }
 }
