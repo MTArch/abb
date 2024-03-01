@@ -159,7 +159,7 @@ public class KafkaServiceImpl implements KafkaService{
             }else{
                 user.setStatus(accounts.getStatus());
             }
-            user.setYearOfBirth(accounts.getYearOfBirth()!=null?accounts.getMonthOfBirth():EMPTY);
+            user.setYearOfBirth(accounts.getYearOfBirth()!=null?accounts.getYearOfBirth():EMPTY);
             if(!StringUtils.isEmpty(accounts.getDayOfBirth()) && !StringUtils.isEmpty(accounts.getMonthOfBirth()) && !StringUtils.isEmpty(accounts.getYearOfBirth())){
                 user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
             }
