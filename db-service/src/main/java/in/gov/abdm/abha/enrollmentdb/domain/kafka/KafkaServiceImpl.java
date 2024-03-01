@@ -162,6 +162,8 @@ public class KafkaServiceImpl implements KafkaService{
             user.setYearOfBirth(accounts.getYearOfBirth()!=null?accounts.getYearOfBirth():EMPTY);
             if(!StringUtils.isEmpty(accounts.getDayOfBirth()) && !StringUtils.isEmpty(accounts.getMonthOfBirth()) && !StringUtils.isEmpty(accounts.getYearOfBirth())){
                 user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
+            }else{
+                user.setDateOfBirth(EMPTY);
             }
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
             user.setEmailIdVerified(false); // Email has to be verified at PHR system
