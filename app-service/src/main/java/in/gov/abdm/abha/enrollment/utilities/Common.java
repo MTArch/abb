@@ -130,6 +130,9 @@ public class Common {
     }
 
     public boolean isPhoneNumberMatching(String value1, String value2) {
+        if (StringUtils.isEmpty(value1) || StringUtils.isEmpty(value2)){
+            return false;
+        }
         return value1.substring(6).equals(value2.replace("*", ""));
     }
 
