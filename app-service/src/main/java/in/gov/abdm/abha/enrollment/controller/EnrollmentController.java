@@ -36,7 +36,7 @@ import reactor.core.scheduler.Schedulers;
 import javax.validation.Valid;
 import java.util.*;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TRANSACTION_ID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.*;
 
 @RestController
 @CrossOrigin
@@ -64,7 +64,9 @@ public class EnrollmentController {
     EnrolByIrisService enrolByIrisService;
 
     @PostMapping(URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
-    public Mono<Object> enrolUsingAadhaar(@Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
+    public Mono<Object> enrolUsingAadhaar(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                          @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                          @Valid @RequestBody EnrolByAadhaarRequestDto enrolByAadhaarRequestDto,
                                           @RequestHeader(value = AbhaConstants.BENEFIT_NAME, required = false) String benefitName,
                                           @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization,
                                           @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken) {
@@ -108,7 +110,9 @@ public class EnrollmentController {
     }
 
     @PostMapping(URIConstant.ENROL_BY_DOCUMENT_ENDPOINT)
-    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
+    public Mono<EnrolByDocumentResponseDto> enrolByDocument(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                                            @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                                            @Valid @RequestBody EnrolByDocumentRequestDto enrolByDocumentRequestDto,
                                                             @RequestHeader(value = AbhaConstants.F_TOKEN, required = false) String fToken,
                                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization) {
 
@@ -127,20 +131,25 @@ public class EnrollmentController {
     }
 
     @GetMapping(URIConstant.ENROL_SUGGEST_ABHA_ENDPOINT)
-    public Mono<SuggestAbhaResponseDto> getAbhaAddressSuggestion(
-            @RequestHeader(value = TRANSACTION_ID) String txnId) {
+    public Mono<SuggestAbhaResponseDto> getAbhaAddressSuggestion(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                                                 @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                                                 @RequestHeader(value = TRANSACTION_ID) String txnId) {
         abhaAddressService.validateRequest(txnId);
         return abhaAddressService.getAbhaAddress(txnId);
     }
 
     @PostMapping(URIConstant.ENROL_ABHA_ADDRESS_ENDPOINT)
-    public Mono<AbhaAddressResponseDto> createAbhaAddress(@Valid @RequestBody AbhaAddressRequestDto abhaAddressRequestDto) {
+    public Mono<AbhaAddressResponseDto> createAbhaAddress(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                                          @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                                          @Valid @RequestBody AbhaAddressRequestDto abhaAddressRequestDto) {
         abhaAddressService.validateAbhaAddress(abhaAddressRequestDto);
         return abhaAddressService.createAbhaAddress(abhaAddressRequestDto);
     }
 
     @PostMapping(URIConstant.ENROL_REQUEST_NOTIFICATION_ENDPOINT)
-    public Mono<String> requestNotification(@Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
+    public Mono<String> requestNotification(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                            @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                            @Valid @RequestBody SendNotificationRequestDto sendNotificationRequestDto,
                                             @RequestHeader(value = AbhaConstants.AUTHORIZATION, required = false) String authorization) {
 
         RequestHeaders requestHeaders = RequestMapper.prepareRequestHeaders(null, authorization, null);

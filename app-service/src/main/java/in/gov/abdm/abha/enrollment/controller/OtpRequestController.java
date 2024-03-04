@@ -17,7 +17,11 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.REQUEST_ID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TIMESTAMP;
 
 @RestController
 @CrossOrigin
@@ -36,7 +40,9 @@ public class OtpRequestController {
      * @return txnId and success or failed message as part of responseDto
      */
     @PostMapping(URIConstant.MOBILE_OR_EMAIL_OTP_ENDPOINT)
-    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
+    public Mono<MobileOrEmailOtpResponseDto> mobileOrEmailOtp(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                                              @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                                              @Valid @RequestBody MobileOrEmailOtpRequestDto mobileOrEmailOtpRequestDto) {
 
         // filter scope
         List<Scopes> requestScopes = mobileOrEmailOtpRequestDto.getScope().stream().distinct().collect(Collectors.toList());

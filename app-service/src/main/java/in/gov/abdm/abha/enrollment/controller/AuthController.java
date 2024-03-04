@@ -17,6 +17,10 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.REQUEST_ID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TIMESTAMP;
 
 @RestController
 @CrossOrigin
@@ -32,7 +36,9 @@ public class AuthController {
     RSAUtil rsaUtil;
 
     @PostMapping(URIConstant.AUTH_BY_ABDM_ENDPOINT)
-    public Mono<AuthResponseDto> authByABDM(@Valid @RequestBody AuthRequestDto authByAbdmRequest) {
+    public Mono<AuthResponseDto> authByABDM(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                            @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                            @Valid @RequestBody AuthRequestDto authByAbdmRequest) {
         authByAbdmRequest.getAuthData().getOtp().setOtpValue(rsaUtil.decrypt(authByAbdmRequest.getAuthData().getOtp().getOtpValue()));
         // Enrol By DL otp verify flow
         if (Common.isAllScopesAvailable(authByAbdmRequest.getScope(), List.of(Scopes.ABHA_ENROL, Scopes.DL_FLOW, Scopes.MOBILE_VERIFY))) {
@@ -56,7 +62,9 @@ public class AuthController {
     }
 
     @PostMapping(URIConstant.AUTH_BY_AADHAAR_ENDPOINT)
-    public Mono<AuthResponseDto> authByAadhaar(@Valid @RequestBody AuthRequestDto authByAadhaarRequestDto) {
+    public Mono<AuthResponseDto> authByAadhaar(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                               @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                               @Valid @RequestBody AuthRequestDto authByAadhaarRequestDto) {
         return authByAadhaarService.verifyOtpChildAbha(authByAadhaarRequestDto);
     }
 }

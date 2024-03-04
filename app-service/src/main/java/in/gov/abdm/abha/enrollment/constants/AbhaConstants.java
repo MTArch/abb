@@ -224,5 +224,8 @@ public class AbhaConstants {
     public static final String HEALTH_WORKER_NAME = "healthWorkerName";
     public static final String ADDRESS_VALIDATOR_REGEX = "^[a-zA-Z0-9\\s,.'/-]{3,}$";
     
-    public static final String ABHA_RE_ATTEMPTED = "Error while doing reAttempted Abha {}"; 
+    public static final String ABHA_RE_ATTEMPTED = "Error while doing reAttempted Abha {}";
+
+    public static final String REQUEST_ID = "REQUEST-ID";
+    public static final String TIMESTAMP = "TIMESTAMP";
 }

@@ -12,6 +12,11 @@ import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponse
 import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.REQUEST_ID;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TIMESTAMP;
+
 @RestController
 @CrossOrigin
 @RequestMapping(URIConstant.PROFILE_ENDPOINT)
@@ -22,7 +27,9 @@ public class ProfileController {
     LinkParentService linkParentService;
 
     @PostMapping(URIConstant.LINK_PARENT_ENDPOINT)
-    public Mono<LinkParentResponseDto> linkParent(@Valid @RequestBody LinkParentRequestDto linkParentRequestDto)
+    public Mono<LinkParentResponseDto> linkParent(@RequestHeader(value = REQUEST_ID, required = false) final UUID requestId,
+                                                  @RequestHeader(value = TIMESTAMP, required = false) final String timestamp,
+                                                  @Valid @RequestBody LinkParentRequestDto linkParentRequestDto)
     {
         return linkParentService.linkDependentAccount(linkParentRequestDto);
     }
