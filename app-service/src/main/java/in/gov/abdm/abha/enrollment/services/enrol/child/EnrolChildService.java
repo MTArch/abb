@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.services.enrol.child;
 
 import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
+import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -66,6 +67,8 @@ public class EnrolChildService {
     @Autowired
     private AccountService accountService;
     @Autowired
+    HidBenefitDBFClient hidBenefitDBFClient;
+    @Autowired
     private EnrolByDemographicService validator;
     @Autowired
     private AbhaDBAccountFClient abhaDBAccountFClient;
@@ -82,7 +85,9 @@ public class EnrolChildService {
     @Autowired
     private NotificationService notificationService;
     @Autowired
-    RedisService redisService;
+    private RedisService redisService;
+    @Autowired
+    private EnrolByDemographicService enrolByDemographicService;
 
     public Mono<EnrolByAadhaarResponseDto> enrol(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
@@ -109,6 +114,8 @@ public class EnrolChildService {
 
         return accountAuthMethodService.addAccountAuthMethods(authMethods)
                 .flatMap(accountAuthMethodsDto -> accountService.createAccountEntity(enrolByAadhaarRequestDto, childAccount, requestHeaders)
+                        .flatMap(accountDto -> hidBenefitDBFClient.saveHidBenefit(enrolByDemographicService.prepareHidBenefitDto(accountDto, requestHeaders, redisService.getIntegratedPrograms()))
+                                .flatMap(hidBenefitDto -> Mono.just(accountDto)))
                         .flatMap(this::sendNotification));
     }
 
@@ -228,8 +235,8 @@ public class EnrolChildService {
         String firstName = "";
         String lastName = "";
         String middleName = "";
-        if (!StringUtils.isEmpty(accountDto.getFirstName())) {
-            String[] nameParts = Common.removeNulls(accountDto.getFirstName()).split(" ");
+        if (!StringUtils.isEmpty(accountDto.getName())) {
+            String[] nameParts = Common.removeNulls(accountDto.getName()).split(" ");
             if (nameParts.length == 1) {
                 firstName = nameParts[0];
             } else if (nameParts.length == 2) {
@@ -251,7 +258,7 @@ public class EnrolChildService {
         ChildrenProfiles childrenProfiles = new ChildrenProfiles();
         Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentAbhaNumber);
         return childAccounts.collectList().map(childList -> {
-            if(!childList.isEmpty()){
+            if (!childList.isEmpty()) {
                 List<ABHAProfileDto> childAbhaProfileDtoList = new ArrayList<>();
                 AccountDto childAccount = childList.stream().findFirst().get();
                 childrenProfiles.setParentAbhaNumber(parentAbhaNumber);
@@ -266,7 +273,7 @@ public class EnrolChildService {
     }
 
     public Mono<Boolean> validateChildHeaders(RequestHeaders requestHeaders) {
-        if(requestHeaders.getRoleList() == null){
+        if (requestHeaders.getRoleList() == null) {
             throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS);
         }
         if (requestHeaders.getXToken() == null) {
@@ -275,7 +282,7 @@ public class EnrolChildService {
         return isValidBenefitProgram(requestHeaders);
     }
 
-    private Mono<Boolean> isValidBenefitProgram(RequestHeaders requestHeaders){
+    private Mono<Boolean> isValidBenefitProgram(RequestHeaders requestHeaders) {
         return validateIntegratedPrograms(requestHeaders, redisService.getIntegratedPrograms())
                 .flatMap(aBoolean -> {
                     log.info(INTEGRATED_PROGRAMS_LOADED_FROM_REDIS + aBoolean);

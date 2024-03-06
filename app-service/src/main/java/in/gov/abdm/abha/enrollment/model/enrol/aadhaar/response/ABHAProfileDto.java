@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ABHAProfileDto {
     @JsonProperty("ABHANumber")
     private String abhaNumber;
