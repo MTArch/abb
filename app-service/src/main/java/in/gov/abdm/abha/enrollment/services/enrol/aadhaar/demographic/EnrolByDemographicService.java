@@ -151,9 +151,11 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
                                                 if (existingAccount.getStatus().equals(AccountStatus.DELETED.getValue())) {
                                                     return createNewAccount(enrolByAadhaarRequestDto, verifyDemographicResponse.getXmlUid(), requestHeaders);
                                                 } else if (existingAccount.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
+                                                    publishRetryAccountCreation(existingAccount.getHealthIdNumber(), requestHeaders);
                                                     return respondExistingAccount(existingAccount, false, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST_AND_DEACTIVATED, requestHeaders);
                                                 } else {
                                                     // existing account
+                                                    publishRetryAccountCreation(existingAccount.getHealthIdNumber(), requestHeaders);
                                                     return respondExistingAccount(existingAccount, true, AbhaConstants.THIS_ACCOUNT_ALREADY_EXIST, requestHeaders);
                                                 }
                                             })
@@ -167,6 +169,13 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         });
     }
 
+    private void publishRetryAccountCreation(String abhaNumber, RequestHeaders requestHeaders){
+        accountService.reAttemptedAbha(abhaNumber, AadhaarMethod.AADHAAR_DEMO.code(), requestHeaders)
+                .onErrorResume(thr -> {
+                    log.info(ABHA_RE_ATTEMPTED, abhaNumber);
+                    return Mono.empty();
+                }).subscribe();
+    }
 
     private VerifyDemographicRequest setDemoAuth(String name, String gender, String aadhaar, String yearofBrith) {
         return VerifyDemographicRequest.builder().name(name).gender(gender).aadhaarNumber(aadhaar).dob(yearofBrith).build();
