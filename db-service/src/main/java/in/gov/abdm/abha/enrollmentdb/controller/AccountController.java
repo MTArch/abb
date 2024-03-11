@@ -76,6 +76,12 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAccountByDocumentCode(documentCode));
     }
 
+    @GetMapping(value = ABHAEnrollmentDBConstant.GET_ACCOUNTS_BY_DOCUMENT_CODE)
+    public ResponseEntity<Flux<AccountDto>> getAccountsByDocumentCode(@PathVariable("documentCode") String documentCode) {
+        log.info(ENROLLMENT_DB_LOG_MSG+"get data based on documentCode= "+documentCode+ENROLLMENT_DB_ACCOUNTS);
+        return ResponseEntity.ok(accountService.getAccountsByDocumentCode(documentCode));
+    }
+
     @GetMapping(ABHAEnrollmentDBConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
     public ResponseEntity<Mono<Integer>> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber) {
         log.info(ENROLLMENT_DB_LOG_MSG+"get count of data based on mobileNumber= "+mobileNumber+ENROLLMENT_DB_ACCOUNTS);

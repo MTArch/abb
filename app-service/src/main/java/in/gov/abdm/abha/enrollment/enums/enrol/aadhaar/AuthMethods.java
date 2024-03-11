@@ -15,6 +15,7 @@ public enum AuthMethods {
 	
     OTP("otp"),
     DEMO("demo"),
+    CHILD("child"),
     PI("pi"),
     FACE("face"),
     BIO("bio"),

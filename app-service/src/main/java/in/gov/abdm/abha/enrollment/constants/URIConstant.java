@@ -37,6 +37,7 @@ public class URIConstant {
     // profile endpoints
     public static final String PROFILE_ENDPOINT = BASE_URI + "/profile";
     public static final String LINK_PARENT_ENDPOINT = "/link/parent";
+    public static final String PARENT_CHILDREN_ENDPOINT = "/children";
 
     // DB URIS
     public static final String DB_BASE_URI = "/api/v3/enrollmentdb";
@@ -70,6 +71,7 @@ public class URIConstant {
 
     public static final String DB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/";
     public static final String FDB_GET_ACCOUNT_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/documentCode/{documentCode}";
+    public static final String FDB_GET_ACCOUNTS_BY_DOCUMENT_CODE = DB_BASE_URI + "/account/child/documentCode/{documentCode}";
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER = DB_BASE_URI + "/account/linkedAccountCount/{mobileNumber}";
     public static final String GET_LINKED_ACCOUNT_COUNT_BY_EMAIL = DB_BASE_URI + "/account/linkedAccountCount/email/{email}";
 

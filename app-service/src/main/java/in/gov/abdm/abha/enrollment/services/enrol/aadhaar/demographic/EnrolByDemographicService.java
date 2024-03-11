@@ -420,7 +420,7 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         });
     }
 
-    private HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
+    public HidBenefitDto prepareHidBenefitDto(AccountDto accountDto, RequestHeaders requestHeaders, List<IntegratedProgramDto> integratedProgramDtos) {
         String benefitId = String.valueOf(Common.systemGeneratedBenefitId());
         List<IntegratedProgramDto> integratedProgramDtoList
                 = integratedProgramDtos.stream().filter(v -> v.getBenefitName().equals(requestHeaders.getBenefitName())
@@ -502,7 +502,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         }
         return Mono.just(demographic);
     }
-
 }
 
 

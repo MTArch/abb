@@ -18,6 +18,7 @@ import in.gov.abdm.abha.enrollment.exception.notification.NotificationDBGatewayU
 import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.validators.enums.ClassLevelExceptionConstants;
+import in.gov.abdm.abha.profile.exception.application.UnAuthorizedException;
 import in.gov.abdm.controller.ABDMControllerAdvise;
 import in.gov.abdm.error.ABDMError;
 import in.gov.abdm.error.Error;
@@ -81,6 +82,8 @@ public class ABHAControllerAdvise {
             return handleAbhaExceptions(HttpStatus.CONFLICT, exception.getMessage());
         } else if (exception.getClass().getPackageName().contains(FEIGN)) {
             return handleFienClientExceptions(exception);
+        } else if (exception.getClass() == AbhaNotFountException.class) {
+            return handleAbhaExceptions(HttpStatus.NOT_FOUND, exception.getMessage());
         } else if (exception.getClass() == AbhaDBException.class) {
             return handleAbhaDBExceptions(exception.getMessage());
         } else if (exception.getClass() != NullPointerException.class && exception.getMessage().contains(BAD_REQUEST)) {
@@ -301,6 +304,16 @@ public class ABHAControllerAdvise {
         errorMap.put(StringConstants.MESSAGE, ex.getMessage());
         log.error(EXCEPTIONS + ex.getMessage());
         errorMap.put(RESPONSE_TIMESTAMP, Common.timeStampWithT());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UnAuthorizedException.class)
+    public Map<String, Object> unAuthorizedException(UnAuthorizedException ex) {
+        Map<String, Object> errorMap = new LinkedHashMap<>();
+        errorMap.put(in.gov.abdm.abha.profile.constants.StringConstants.MESSAGE, ex.getMessage());
+        log.error(EXCEPTIONS + ex.getMessage());
+        errorMap.put(RESPONSE_TIMESTAMP, in.gov.abdm.abha.profile.utilities.Common.timeStampWithT());
         return errorMap;
     }
 }

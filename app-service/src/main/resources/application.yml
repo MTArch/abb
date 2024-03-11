@@ -33,6 +33,10 @@ redis:
   expireTimeInMinutes: ${REDIS_EXPIRE_TIMEOUT}
 
 enrollment:
+  child:
+    limit: 15
+    parent:
+      ageLimit: 18
   enableDeduplication: false
   domain: ${ABHA_DOMAIN}
   corsWhitelistURLs: ${CORS_ALLOWED_ORIGIN_PATTERNS}

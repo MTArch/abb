@@ -73,6 +73,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> getAccountByDocumentCode(String documentCode) {
+        return accountRepository.getAccountByDocumentCode(documentCode)
+                .flatMap(this::deCompressProfilePhoto)
+                .map(account -> modelMapper.map(account, AccountDto.class));
+    }
+
+    @Override
+    public Flux<AccountDto> getAccountsByDocumentCode(String documentCode) {
         return accountRepository.getAccountsByDocumentCode(documentCode)
                 .flatMap(this::deCompressProfilePhoto)
                 .map(account -> modelMapper.map(account, AccountDto.class));
