@@ -34,9 +34,9 @@ redis:
 
 enrollment:
   child:
-    limit: ${CHILD_LIMIT}
+    limit: 15
     parent:
-      ageLimit: ${CHILD_PARENT_AGE_LIMIT}
+      ageLimit: 18
   enableDeduplication: false
   domain: ${ABHA_DOMAIN}
   corsWhitelistURLs: ${CORS_ALLOWED_ORIGIN_PATTERNS}
