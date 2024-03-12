@@ -59,7 +59,7 @@ public class EnrolChildService {
     private static final String INTEGRATED_PROGRAMS_LOADED_FROM_REDIS = "Integrated Programs loaded from Redis ::";
     private static final String FAILED_TO_LOAD_INTEGRATED_PROGRAMS = "Failed to load Integrated Programs";
     public static final String ACTIVE = "ACTIVE";
-    public static final String CHILD_ABHA_VERIFIER = "ChildAbhaVerifier";
+    public static final String CHILD_ABHA = "CHILD_ABHA";
 
     @Value(PropertyConstants.CHILD_ENROLLMENT_LIMIT)
     private int childAbhaAccountLimit;
@@ -205,7 +205,6 @@ public class EnrolChildService {
                 requestChildData.getMonthOfBirth(), requestChildData.getYearOfBirth());
 
         String decryptedPwd = rsaUtil.decrypt(requestChildData.getPassword());
-        decryptedPwd = StringUtils.isNotBlank(decryptedPwd) ? decryptedPwd : requestChildData.getPassword();
         String encPass = null;
         if (StringUtils.isNotBlank(decryptedPwd)) {
             encPass = bcryptEncoder.encode(decryptedPwd);
@@ -224,7 +223,8 @@ public class EnrolChildService {
                 .yearOfBirth(requestChildData.getYearOfBirth()).gender(requestChildData.getGender())
                 .verificationStatus(AbhaConstants.VERIFIED).status(AccountStatus.ACTIVE.getValue())
                 .mobile(parentEntity.getMobile()).documentCode(parentEntity.getHealthIdNumber())
-                .verificationType(CHILD_ABHA_VERIFIER).password(encPass).kycdob(kycDobYob).type(AbhaType.CHILD)
+                .source(CHILD_ABHA)
+                .verificationType(CHILD_ABHA).password(encPass).kycdob(kycDobYob).type(AbhaType.CHILD)
                 .consentVersion(enrolByAadhaarRequestDto.getConsent().getVersion()).consentDate(LocalDateTime.now())
                 .mobileType(parentEntity.getMobileType()).build();
         breakName(accountDto);

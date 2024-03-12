@@ -478,7 +478,7 @@ public class EnrolByDemographicValidatorService {
         } else if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImageFormat(childDto.getProfilePhoto())) {
             errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (!rsaUtil.isRSAEncrypted(childDto.getPassword())) {
+        if (!rsaUtil.isRSAEncrypted(childDto.getPassword()) && !isValidPassword(rsaUtil.decrypt(childDto.getPassword()))) {
             errors.put(PASSWORD, AbhaConstants.INVALID_PASSWORD);
         }
         if (!errors.isEmpty()) {
