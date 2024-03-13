@@ -35,6 +35,7 @@ redis:
 enrollment:
   child:
     limit: 15
+    ageLimit: 6
     parent:
       ageLimit: 18
   enableDeduplication: false

@@ -77,7 +77,7 @@ public class EnrolByDemographicValidatorService {
     private String only4Digit = "^[0-9]{1,4}$";
     private static final String MOBILE_NO_10_DIGIT_REGEX_PATTERN = "[1-9]\\d{9}";
     private static final String PASSWORD_REGEX_PATTERN = "^(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$^*_-])[A-Za-z\\d!@#$%^&*_-]{8,}$";
-    private static final int childAbhaAgeLimit = 6;
+
     private static final String DATE_FORMATTER = "dd-MM-yyyy";
 
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB)
@@ -88,6 +88,9 @@ public class EnrolByDemographicValidatorService {
 
     @Value(PropertyConstants.CHILD_ENROLLMENT_PARENT_AGE_LIMIT)
     private int childParentAgeLimit;
+
+    @Value(PropertyConstants.CHILD_ENROLLMENT_CHILD_AGE_LIMIT)
+    private int childAbhaAgeLimit;
 
     @Autowired
     RSAUtil rsaUtil;
