@@ -230,7 +230,7 @@ public class EnrolByDemographicValidatorService {
             isValidDay = false;
         }
 
-        if (isValidDay && !isValidFutureDOB(childDto.getYearOfBirth(), childDto.getMonthOfBirth(), childDto.getDayOfBirth())) {
+        if (isValidMonthAndYear && isValidDay && !isValidFutureDOB(childDto.getYearOfBirth(), childDto.getMonthOfBirth(), childDto.getDayOfBirth())) {
             errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_FUTURE_DOB);
         }
 
