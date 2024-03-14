@@ -471,19 +471,19 @@ public class EnrolByDemographicValidatorService {
         }
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
-        if (!isValidGender(childDto.getGender())) {
+        if (StringUtils.isEmpty(childDto.getGender()) || !isValidGender(childDto.getGender())) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }
         validateDob(childDto, errors);
-        if (!isValidFirstName(childDto.getName())) {
-            errors.put(NAME, AbhaConstants.INVALID_NAME_FORMAT);
+        if (StringUtils.isEmpty(childDto.getName()) || !isValidFirstName(childDto.getName())) {
+            errors.put(NAME, AbhaConstants.INVALID_NAME);
         }
         if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImage(childDto.getProfilePhoto())) {
             errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImageFormat(childDto.getProfilePhoto())) {
             errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_FILE_FORMAT);
         }
-        if (!rsaUtil.isRSAEncrypted(childDto.getPassword()) || !isValidPassword(rsaUtil.decrypt(childDto.getPassword()))) {
+        if (StringUtils.isEmpty(childDto.getPassword()) || !rsaUtil.isRSAEncrypted(childDto.getPassword()) || !isValidPassword(rsaUtil.decrypt(childDto.getPassword()))) {
             errors.put(PASSWORD, AbhaConstants.INVALID_PASSWORD);
         }
         if (!errors.isEmpty()) {
