@@ -234,7 +234,7 @@ public class EnrolByDemographicValidatorService {
             errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_FUTURE_DOB);
         }
 
-        if (!isValidAge(childDto)) {
+        if (isValidMonthAndYear && isValidDay && !isValidAge(childDto)) {
             errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
     }
