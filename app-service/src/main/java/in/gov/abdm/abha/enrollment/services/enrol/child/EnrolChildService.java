@@ -64,6 +64,8 @@ public class EnrolChildService {
 
     @Value(PropertyConstants.CHILD_ENROLLMENT_LIMIT)
     private int childAbhaAccountLimit;
+    @Value(PropertyConstants.CHILD_ENROLLMENT_CHILD_AGE_LIMIT)
+    private int childAbhaAgeLimit;
 
     @Autowired
     private AccountService accountService;
@@ -119,7 +121,7 @@ public class EnrolChildService {
                 .flatMap(accountDto -> hidBenefitDBFClient.saveHidBenefit(enrolByDemographicService.prepareHidBenefitDto(accountDto, requestHeaders, redisService.getIntegratedPrograms())))
                 .flatMap(hidBenefitDto -> accountAuthMethodService.addAccountAuthMethods(authMethods))
                 .flatMap(accountAuthMethodsDtos -> hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto))
-                .flatMap(phrAddressDto ->  sendNotification(childAccount));
+                .flatMap(phrAddressDto -> sendNotification(childAccount));
     }
 
     private Mono<EnrolByAadhaarResponseDto> sendNotification(AccountDto accountDto) {
@@ -156,6 +158,11 @@ public class EnrolChildService {
         ChildDto childDto = requestChildData.getAuthData().getChildDto();
 
         Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentEntity.getHealthIdNumber());
+
+        if (!enrolByDemographicService.isValidAge(childDto)) {
+            throw new AbhaUnProcessableException(ABDMError.CHILD_AGE_LIMIT_EXCEEDED.getCode(),
+                    String.format(ABDMError.CHILD_AGE_LIMIT_EXCEEDED.getMessage(), childAbhaAgeLimit));
+        }
 
         return childAccounts
                 .filter(user -> user.getName().trim().equalsIgnoreCase(childDto.getName().trim())
