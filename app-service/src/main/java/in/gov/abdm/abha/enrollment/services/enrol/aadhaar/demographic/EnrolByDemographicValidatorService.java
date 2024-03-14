@@ -211,6 +211,7 @@ public class EnrolByDemographicValidatorService {
 
     private void validateDob(ChildDto childDto, LinkedHashMap<String, String> errors) {
         boolean isValidMonthAndYear = true;
+        boolean isValidDay = true;
         if (!isValidDateOfBirth(childDto)) {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DAY_OF_BIRTH);
             isValidMonthAndYear = false;
@@ -226,14 +227,15 @@ public class EnrolByDemographicValidatorService {
         }
         if (isValidMonthAndYear && !isValidDayOfBirth(childDto)) {
             errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
+            isValidDay = false;
         }
 
-        if (!isValidFutureDOB(childDto.getYearOfBirth(), childDto.getMonthOfBirth(), childDto.getDayOfBirth())) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_FUTURE_DOB);
+        if (isValidDay && !isValidFutureDOB(childDto.getYearOfBirth(), childDto.getMonthOfBirth(), childDto.getDayOfBirth())) {
+            errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_FUTURE_DOB);
         }
 
         if (!isValidAge(childDto)) {
-            errors.put(DAY_OF_BIRTH, AbhaConstants.INVALID_DOB);
+            errors.put(DATE_OF_BIRTH, AbhaConstants.INVALID_DOB);
         }
     }
 
