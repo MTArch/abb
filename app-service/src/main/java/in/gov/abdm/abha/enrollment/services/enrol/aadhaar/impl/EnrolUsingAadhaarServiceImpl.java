@@ -19,6 +19,7 @@ import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.VALIDATION_ERR
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_RE_ATTEMPTED;
 import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.EMAIL;
 import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.SMS;
+
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedAccountDetails;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -315,9 +317,8 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             accountDetails.setTownName(localizedDetails.getLocality());
             accountDetails.setVillageName(localizedDetails.getVillageTownCity());
             return om.writeValueAsString(accountDetails);
-        }
-        catch (JsonProcessingException e) {
-            log.error(e.getMessage(),e);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -335,7 +336,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                         } else {
                             accountDto.setType(AbhaType.CHILD);
                         }
-                        if(null!=aadhaarResponseDto.getAadhaarUserKycDto() || null!=aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()) {
+                        if (null != aadhaarResponseDto.getAadhaarUserKycDto() || null != aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()) {
                             accountDto.setLocalizedDetails(mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
                         }
                         accountDto.setStatus(AccountStatus.ACTIVE.toString());
@@ -693,11 +694,21 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
         if (authMethods.contains(AuthMethods.DEMO_AUTH) && !isValidHidIntegrated(requestHeaders)) {
             throw new BenefitNotFoundException(INVALID_BENEFIT_ROLE);
         }
+        validateChildAbhaAccess(authMethods, requestHeaders);
 
+        return validateBenefitProgram(requestHeaders, authMethods);
+    }
+
+    private void validateChildAbhaAccess(List<AuthMethods> authMethods, RequestHeaders requestHeaders) {
+        if (authMethods.contains(AuthMethods.CHILD) && StringUtils.isEmpty(requestHeaders.getBenefitName())) {
+            throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
+        }
+        if (authMethods.contains(AuthMethods.CHILD) && (null == requestHeaders.getRoleList() || requestHeaders.getRoleList().isEmpty() || StringUtils.isEmpty(requestHeaders.getClientId()))) {
+            throw new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS);
+        }
         if (authMethods.contains(AuthMethods.CHILD) && (requestHeaders.getXToken() == null || requestHeaders.getXToken().getHealthIdNumber() == null)) {
             throw new AbhaUnAuthorizedException(ABDMError.INVALID_PROFILE_X_TOKEN);
         }
-        return validateBenefitProgram(requestHeaders, authMethods);
     }
 
     private Boolean isAuthorized(RequestHeaders requestHeaders, List<AuthMethods> authMethods, String fToken) {
@@ -713,7 +724,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
 
     private Mono<Boolean> validateBenefitProgram(RequestHeaders requestHeaders, List<AuthMethods> authMethods) {
         if (authMethods != null && (authMethods.contains(AuthMethods.OTP) || authMethods.contains(AuthMethods.BIO)
-                || authMethods.contains(AuthMethods.DEMO)) || authMethods.contains(AuthMethods.DEMO_AUTH)) {
+                || authMethods.contains(AuthMethods.DEMO)) || authMethods.contains(AuthMethods.DEMO_AUTH) || authMethods.contains(AuthMethods.CHILD)) {
             if (!authMethods.contains(AuthMethods.OTP) && requestHeaders.getRoleList() != null && requestHeaders.getRoleList().contains(INTEGRATED_PROGRAM_ROLE)
                     && (requestHeaders.getBenefitName() == null || requestHeaders.getBenefitName().isEmpty())) {
                 throw new BenefitNotFoundException(INVALID_BENEFIT_NAME);
