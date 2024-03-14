@@ -31,6 +31,7 @@ import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
+import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaAddressGenerator;
 import in.gov.abdm.abha.enrollment.utilities.abha_generator.AbhaNumberGenerator;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
@@ -88,6 +89,8 @@ public class EnrolChildService {
     private RedisService redisService;
     @Autowired
     private EnrolByDemographicService enrolByDemographicService;
+    @Autowired
+    private AbhaAddressGenerator abhaAddressGenerator;
 
     public Mono<EnrolByAadhaarResponseDto> enrol(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
@@ -111,12 +114,12 @@ public class EnrolChildService {
         if (StringUtils.isNotBlank(decryptedPwd)) {
             authMethods.add(new AccountAuthMethodsDto(childAccount.getHealthIdNumber(), AccountAuthMethods.PASSWORD.getValue()));
         }
-
-        return accountAuthMethodService.addAccountAuthMethods(authMethods)
-                .flatMap(accountAuthMethodsDto -> accountService.createAccountEntity(enrolByAadhaarRequestDto, childAccount, requestHeaders)
-                        .flatMap(accountDto -> hidBenefitDBFClient.saveHidBenefit(enrolByDemographicService.prepareHidBenefitDto(accountDto, requestHeaders, redisService.getIntegratedPrograms()))
-                                .flatMap(hidBenefitDto -> Mono.just(accountDto)))
-                        .flatMap(this::sendNotification));
+        HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(childAccount);
+        return accountService.createAccountEntity(enrolByAadhaarRequestDto, childAccount, requestHeaders)
+                .flatMap(accountDto -> hidBenefitDBFClient.saveHidBenefit(enrolByDemographicService.prepareHidBenefitDto(accountDto, requestHeaders, redisService.getIntegratedPrograms())))
+                .flatMap(hidBenefitDto -> accountAuthMethodService.addAccountAuthMethods(authMethods))
+                .flatMap(accountAuthMethodsDtos -> hidPhrAddressService.createHidPhrAddressEntity(hidPhrAddressDto))
+                .flatMap(phrAddressDto ->  sendNotification(childAccount));
     }
 
     private Mono<EnrolByAadhaarResponseDto> sendNotification(AccountDto accountDto) {
@@ -209,8 +212,9 @@ public class EnrolChildService {
         if (StringUtils.isNotBlank(decryptedPwd)) {
             encPass = bcryptEncoder.encode(decryptedPwd);
         }
-
-        AccountDto accountDto = AccountDto.builder().healthIdNumber(AbhaNumberGenerator.generateAbhaNumber())
+        String abhaNumber = AbhaNumberGenerator.generateAbhaNumber();
+        String defaultAbhaAddress = abhaAddressGenerator.generateDefaultAbhaAddress(abhaNumber);
+        AccountDto accountDto = AccountDto.builder().healthIdNumber(abhaNumber)
                 .name(requestChildData.getName()).address(parentEntity.getAddress())
                 .stateName(parentEntity.getStateName()).stateCode(parentEntity.getStateCode()).districtName(parentEntity.getDistrictName())
                 .districtCode(parentEntity.getDistrictCode()).subDistrictCode(parentEntity.getSubDistrictCode())
@@ -223,7 +227,7 @@ public class EnrolChildService {
                 .yearOfBirth(requestChildData.getYearOfBirth()).gender(requestChildData.getGender())
                 .verificationStatus(AbhaConstants.VERIFIED).status(AccountStatus.ACTIVE.getValue())
                 .mobile(parentEntity.getMobile()).documentCode(parentEntity.getHealthIdNumber())
-                .source(CHILD_ABHA)
+                .source(CHILD_ABHA).healthId(defaultAbhaAddress).createdDate(LocalDateTime.now())
                 .verificationType(CHILD_ABHA).password(encPass).kycdob(kycDobYob).type(AbhaType.CHILD)
                 .consentVersion(enrolByAadhaarRequestDto.getConsent().getVersion()).consentDate(LocalDateTime.now())
                 .mobileType(parentEntity.getMobileType()).build();

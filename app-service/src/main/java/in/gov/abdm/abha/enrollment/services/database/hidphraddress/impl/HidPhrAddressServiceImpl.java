@@ -23,87 +23,88 @@ import java.util.stream.Collectors;
 @Service
 public class HidPhrAddressServiceImpl implements HidPhrAddressService {
 
-	@Autowired
-	AbhaDBHidPhrAddressFClient abhaDBHidPhrAddressFClient;
+    @Autowired
+    AbhaDBHidPhrAddressFClient abhaDBHidPhrAddressFClient;
 
-	public static final String DEFAULT_CLIENT_ID = "healthid-api";
+    public static final String DEFAULT_CLIENT_ID = "healthid-api";
 
-	@Override
-	public Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto) {
-		hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
-		hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject()  : DEFAULT_CLIENT_ID);
-		return abhaDBHidPhrAddressFClient.createHidPhrAddress( hidPhrAddressDto)
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
+    @Override
+    public Mono<HidPhrAddressDto> createHidPhrAddressEntity(HidPhrAddressDto hidPhrAddressDto) {
+        hidPhrAddressDto.setCreatedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject() : DEFAULT_CLIENT_ID);
+        hidPhrAddressDto.setLastModifiedBy(FacilityContextHolder.getSubject() != null ? FacilityContextHolder.getSubject() : DEFAULT_CLIENT_ID);
+        return abhaDBHidPhrAddressFClient.createHidPhrAddress(hidPhrAddressDto)
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 
-	@Override
-	public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto,
-													ABHAProfileDto abhaProfileDto) {
+    @Override
+    public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto,
+                                                    ABHAProfileDto abhaProfileDto) {
 
-		return HidPhrAddressDto.builder()
-				.healthIdNumber(abhaProfileDto.getAbhaNumber())
-				.phrAddress(abhaProfileDto.getPhrAddress().get(0))
-				.status("ACTIVE")
-				.preferred(1)
-				.lastModifiedBy(accountDto.getLstUpdatedBy())
-				.lastModifiedDate(LocalDateTime.now())
-				.hasMigrated("N")
-				.createdBy(accountDto.getLstUpdatedBy())
-				.createdDate(accountDto.getCreatedDate())
-				.linked(1)
-				.cmMigrated(0)
-				.isNewHidPhrAddress(true)
-				.build();
-	}
+        return HidPhrAddressDto.builder()
+                .healthIdNumber(abhaProfileDto.getAbhaNumber())
+                .phrAddress(abhaProfileDto.getPhrAddress().get(0))
+                .status("ACTIVE")
+                .preferred(1)
+                .lastModifiedBy(accountDto.getLstUpdatedBy())
+                .lastModifiedDate(LocalDateTime.now())
+                .hasMigrated("N")
+                .createdBy(accountDto.getLstUpdatedBy())
+                .createdDate(accountDto.getCreatedDate())
+                .linked(1)
+                .cmMigrated(0)
+                .isNewHidPhrAddress(true)
+                .build();
+    }
 
-	@Override
-	public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto) {
+    @Override
+    public HidPhrAddressDto prepareNewHidPhrAddress(AccountDto accountDto) {
 
-		return HidPhrAddressDto.builder()
-				.healthIdNumber(accountDto.getHealthIdNumber())
-				.phrAddress(accountDto.getHealthId())
-				.status(AccountStatus.ACTIVE.getValue())
-				.preferred(1)
-				.lastModifiedBy(accountDto.getLstUpdatedBy())
-				.hasMigrated("N")
-				.createdBy(accountDto.getLstUpdatedBy())
-				.createdDate(accountDto.getCreatedDate())
-				.lastModifiedDate(LocalDateTime.now())
-				.linked(1)
-				.cmMigrated(0)
-				.isNewHidPhrAddress(true)
-				.build();
-	}
+        return HidPhrAddressDto.builder()
+                .healthIdNumber(accountDto.getHealthIdNumber())
+                .phrAddress(accountDto.getHealthId())
+                .status(AccountStatus.ACTIVE.getValue())
+                .preferred(1)
+                .lastModifiedBy(accountDto.getLstUpdatedBy())
+                .hasMigrated("N")
+                .createdBy(accountDto.getLstUpdatedBy())
+                .createdDate(accountDto.getCreatedDate())
+                .lastModifiedDate(LocalDateTime.now())
+                .linked(1)
+                .cmMigrated(0)
+                .isNewHidPhrAddress(true)
+                .build();
+    }
 
-	@Override
-	public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
-																				  List<Integer> preferred) {
-		return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")),preferred.stream().map(Object::toString).collect(Collectors.joining(",")))
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
+    @Override
+    public Flux<HidPhrAddressDto> getHidPhrAddressByHealthIdNumbersAndPreferredIn(List<String> healthIdNumbers,
+                                                                                  List<Integer> preferred) {
+        return abhaDBHidPhrAddressFClient.getHidPhrAddressByHealthIdNumbersAndPreferredIn(healthIdNumbers.stream().collect(Collectors.joining(",")), preferred.stream().map(Object::toString).collect(Collectors.joining(",")))
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 
-	@Override
-	public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
-		return abhaDBHidPhrAddressFClient.findByPhrAddressIn(phrAddress.stream().collect(Collectors.joining(",")))
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
-	@Override
-	public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
-		return abhaDBHidPhrAddressFClient.getPhrAddress(phrAddress)
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
+    @Override
+    public Flux<HidPhrAddressDto> findByPhrAddressIn(List<String> phrAddress) {
+        return abhaDBHidPhrAddressFClient.findByPhrAddressIn(phrAddress.stream().collect(Collectors.joining(",")))
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 
-	@Override
-	public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
-		return abhaDBHidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
+    @Override
+    public Mono<HidPhrAddressDto> getPhrAddressByPhrAddress(String phrAddress) {
+        return abhaDBHidPhrAddressFClient.getPhrAddress(phrAddress)
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 
-	@Override
-	public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
-		hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId()!=null?ContextHolder.getClientId():DEFAULT_CLIENT_ID);
-		return abhaDBHidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
-				.onErrorResume((throwable->Mono.error(new AbhaDBGatewayUnavailableException())));
-	}
+    @Override
+    public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
+        return abhaDBHidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
+
+    @Override
+    public Mono<HidPhrAddressDto> updateHidPhrAddressById(HidPhrAddressDto hidPhrAddressDto, Long hidPhrAddressId) {
+        hidPhrAddressDto.setLastModifiedBy(ContextHolder.getClientId() != null ? ContextHolder.getClientId() : DEFAULT_CLIENT_ID);
+        return abhaDBHidPhrAddressFClient.updateHidPhrAddress(hidPhrAddressDto, hidPhrAddressId)
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+    }
 
 }
