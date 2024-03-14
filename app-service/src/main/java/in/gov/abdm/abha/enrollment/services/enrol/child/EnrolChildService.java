@@ -164,7 +164,7 @@ public class EnrolChildService {
                 .next()
                 .switchIfEmpty(childAccounts
                         .count()
-                        .filter(count -> count > childAbhaAccountLimit)
+                        .filter(count -> count >= childAbhaAccountLimit)
                         .flatMapMany(countExceeded ->
                                 Mono.error(new AbhaUnProcessableException(ABDMError.CHILD_ENROLLMENT_LIMIT_EXCEEDED.getCode(),
                                         String.format(ABDMError.CHILD_ENROLLMENT_LIMIT_EXCEEDED.getMessage(), parentEntity.getHealthIdNumber()))))

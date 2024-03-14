@@ -36,8 +36,8 @@ public class PropertyConstants {
     public static final String ENROLLMENT_GATEWAY_PHR_BASEURI = "${enrollment.gateway.phr.baseuri}";
     public static final String ENROLLMENT_IS_TRANSACTION = "${enrollment.transaction.aadhaar}";
     public static final String ENROLLMENT_IS_TRANSACTION_DL = "${enrollment.transaction.dl}";
-    public static final String CHILD_ENROLLMENT_PARENT_AGE_LIMIT = "${enrollment.child.parent.ageLimit:18}";
-    public static final String CHILD_ENROLLMENT_CHILD_AGE_LIMIT = "${enrollment.child.ageLimit:6}";
-    public static final String CHILD_ENROLLMENT_LIMIT = "${enrollment.child.limit:15}";
+    public static final String CHILD_ENROLLMENT_PARENT_AGE_LIMIT = "${enrollment.child.parent.ageLimit}";
+    public static final String CHILD_ENROLLMENT_CHILD_AGE_LIMIT = "${enrollment.child.ageLimit}";
+    public static final String CHILD_ENROLLMENT_LIMIT = "${enrollment.child.limit}";
 
 }
