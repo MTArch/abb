@@ -12,7 +12,9 @@ public class PropertyConstants {
     public static final String ENROLLMENT_GATEWAY_LGD_BASEURI = "${enrollment.gateway.lgd.baseuri}";
     public static final String ENROLLMENT_ENABLE_DEDUPLICATION = "${enrollment.enableDeduplication}";
     public static final String ENROLLMENT_DOCUMENT_PHOTO_MIN_SIZE_IN_KB = "${enrollment.documentPhoto.minSizeInKB}";
+    public static final String ENROLLMENT_PROFILE_PHOTO_MIN_SIZE_IN_KB = "${enrollment.photo.minSizeInKB}";
     public static final String ENROLLMENT_DOCUMENT_PHOTO_MAX_SIZE_IN_KB = "${enrollment.documentPhoto.maxSizeInKB}";
+    public static final String ENROLLMENT_PROFILE_PHOTO_MAX_SIZE_IN_KB = "${enrollment.photo.maxSizeInKB}";
     public static final String ENROLLMENT_MAX_MOBILE_LINKING_COUNT = "${enrollment.maxMobileLinkingCount}";
     public static final String ENROLLMENT_DOMAIN = "${enrollment.domain}";
     public static final String ENROLLMENT_PHOTO_MIN_SIZE_IN_KB = "${enrollment.photo.minSizeInKB}";

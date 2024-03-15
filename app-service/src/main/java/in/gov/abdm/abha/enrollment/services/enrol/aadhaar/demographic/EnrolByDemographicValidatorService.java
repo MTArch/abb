@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic;
 
-import com.rabbitmq.client.Return;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.MobileType;
@@ -22,20 +21,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
-
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
-
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -85,6 +81,12 @@ public class EnrolByDemographicValidatorService {
 
     @Value(PropertyConstants.ENROLLMENT_DOCUMENT_PHOTO_MAX_SIZE_IN_KB)
     private String documentPhotoMaxSizeLimit;
+
+    @Value(PropertyConstants.ENROLLMENT_PROFILE_PHOTO_MIN_SIZE_IN_KB)
+    private String photoMinSizeLimit;
+
+    @Value(PropertyConstants.ENROLLMENT_PROFILE_PHOTO_MAX_SIZE_IN_KB)
+    private String photoMaxSizeLimit;
 
     @Value(PropertyConstants.CHILD_ENROLLMENT_PARENT_AGE_LIMIT)
     private int childParentAgeLimit;
@@ -474,8 +476,8 @@ public class EnrolByDemographicValidatorService {
         if (StringUtils.isEmpty(childDto.getName()) || !isValidFirstName(childDto.getName())) {
             errors.put(NAME, AbhaConstants.INVALID_NAME);
         }
-        if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImage(childDto.getProfilePhoto())) {
-            errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_DOCUMENT_PHOTO_SIZE);
+        if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidProfilePhotoSize(childDto.getProfilePhoto())) {
+            errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_PHOTO_SIZE);
         } else if (StringUtils.isNotBlank(childDto.getProfilePhoto()) && !isValidConsentFormImageFormat(childDto.getProfilePhoto())) {
             errors.put(PROFILE_PHOTO, AbhaConstants.INVALID_FILE_FORMAT);
         }
@@ -485,6 +487,12 @@ public class EnrolByDemographicValidatorService {
         if (!errors.isEmpty()) {
             throw new BadRequestException(errors);
         }
+    }
+
+    private boolean isValidProfilePhotoSize(String photo) {
+        double size = GeneralUtils.fileSize(photo);
+        return !(size < Integer.parseInt(photoMinSizeLimit)
+                || size > Integer.parseInt(photoMaxSizeLimit));
     }
 
     public void isValidParentAge(AccountDto accountDto) {
