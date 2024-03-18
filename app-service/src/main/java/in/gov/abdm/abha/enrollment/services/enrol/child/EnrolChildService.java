@@ -105,15 +105,12 @@ public class EnrolChildService {
     }
 
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders, AccountDto parentEntity) {
-        ChildDto childDto = enrolByAadhaarRequestDto.getAuthData().getChildDto();
         List<AccountAuthMethodsDto> authMethods = new ArrayList<>();
         AccountDto childAccount = populateChildEntity(enrolByAadhaarRequestDto, parentEntity);
         if (StringUtils.isNotBlank(parentEntity.getMobile())) {
             authMethods.add(new AccountAuthMethodsDto(childAccount.getHealthIdNumber(), AccountAuthMethods.MOBILE_OTP.getValue()));
         }
-        String decryptedPwd = rsaUtil.decrypt(childDto.getPassword());
-        decryptedPwd = StringUtils.isNotBlank(decryptedPwd) ? decryptedPwd : childDto.getPassword();
-        if (StringUtils.isNotBlank(decryptedPwd)) {
+        if (StringUtils.isNotBlank(childAccount.getPassword())) {
             authMethods.add(new AccountAuthMethodsDto(childAccount.getHealthIdNumber(), AccountAuthMethods.PASSWORD.getValue()));
         }
         HidPhrAddressDto hidPhrAddressDto = hidPhrAddressService.prepareNewHidPhrAddress(childAccount);
