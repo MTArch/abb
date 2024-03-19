@@ -135,9 +135,6 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
         Mono validateStateCode = Mono.just("");
         return validateStateCode.flatMap(data -> {
             Mono<Integer> mobileLinkedAccountCountMono = Mono.just(0);
-            if (!StringUtils.isEmpty(mobileNumber)) {
-                mobileLinkedAccountCountMono = accountService.getMobileLinkedAccountCount(mobileNumber);
-            }
             return mobileLinkedAccountCountMono.flatMap(mobileLinkedAccountCount -> {
                 if (mobileLinkedAccountCount >= maxMobileLinkingCount) {
                     throw new AbhaUnProcessableException(ABDMError.MOBILE_ALREADY_LINKED_TO_6_ACCOUNTS);
