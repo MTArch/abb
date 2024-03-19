@@ -232,6 +232,7 @@ public class EnrolChildService {
                 .verificationStatus(AbhaConstants.VERIFIED).status(AccountStatus.ACTIVE.getValue())
                 .mobile(parentEntity.getMobile()).documentCode(parentEntity.getHealthIdNumber())
                 .source(CHILD_ABHA).healthId(defaultAbhaAddress).createdDate(LocalDateTime.now())
+                .kycVerified(true)
                 .verificationType(CHILD_ABHA).password(encPass).kycdob(kycDobYob).type(AbhaType.CHILD)
                 .consentVersion(enrolByAadhaarRequestDto.getConsent().getVersion()).consentDate(LocalDateTime.now())
                 .mobileType(parentEntity.getMobileType()).build();
