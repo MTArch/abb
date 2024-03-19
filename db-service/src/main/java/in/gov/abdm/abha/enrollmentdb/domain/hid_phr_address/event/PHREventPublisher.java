@@ -30,7 +30,7 @@ public class PHREventPublisher implements EventPublisher {
             header = requestId;
         }
         try {
-            log.info(MSG_ABHA_PUBLISH_USER_TO_PHR);
+            log.info(MSG_ABHA_PUBLISH_USER_TO_PHR, user.getHealthIdNumber(), requestId);
             kafkaTemplate.send(userTopic, header, user);
             log.info(MSG_ABHA_PUBLISH_USER_SUCCESS_TO_PHR);
         }
