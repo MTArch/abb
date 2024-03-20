@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.client.AbhaDBAccountFClient;
 import in.gov.abdm.abha.enrollment.client.HidBenefitDBFClient;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
+import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
@@ -237,6 +238,7 @@ public class EnrolChildService {
                 .consentVersion(enrolByAadhaarRequestDto.getConsent().getVersion()).consentDate(LocalDateTime.now())
                 .mobileType(parentEntity.getMobileType()).build();
         breakName(accountDto);
+        accountDto.setApiEndPoint(URIConstant.ENROL_ENDPOINT + URIConstant.BY_ENROL_AADHAAR_ENDPOINT);
         return accountDto;
     }
 

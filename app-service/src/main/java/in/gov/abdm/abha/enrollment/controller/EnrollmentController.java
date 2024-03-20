@@ -95,6 +95,9 @@ public class EnrollmentController {
                         return enrolChildService.enrol(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.DEMO_AUTH)) {
                         DemographicAuth demoAuth = enrolByAadhaarRequestDto.getAuthData().getDemographicAuth();
+                        if(null == demoAuth){
+                            throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());
+                        }
                         enrolByDemographicService.validateEnrolByDemographic(demoAuth, requestHeaders);
                         Demographic demographic = new DataMapper<Demographic>().mapper(demoAuth, Demographic.class);
                         if (demoAuth.getDateOfBirth().length() == 4) {
