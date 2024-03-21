@@ -55,7 +55,7 @@ public enum AadhaarLogType {
     /**
      * Auth-demographic
      */
-    D_AUTH("D_AUTH");
+    AUTH_D("AUTH_D");
 
     private String value;
 
