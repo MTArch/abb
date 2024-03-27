@@ -16,4 +16,5 @@ public class LocalizedAccountDetails {
     private String wardName;
     private String townName;
     private String address;
+    private String gender;
 }

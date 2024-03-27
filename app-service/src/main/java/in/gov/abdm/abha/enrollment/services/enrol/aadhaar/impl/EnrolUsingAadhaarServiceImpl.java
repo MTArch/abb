@@ -316,6 +316,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
             accountDetails.setWardName(localizedDetails.getStreet());
             accountDetails.setTownName(localizedDetails.getLocality());
             accountDetails.setVillageName(localizedDetails.getVillageTownCity());
+            accountDetails.setGender(localizedDetails.getGender());
             return om.writeValueAsString(accountDetails);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);
