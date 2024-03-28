@@ -19,6 +19,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
@@ -37,10 +40,16 @@ public class TransactionServiceImplTests {
     void setup() {
         MockitoAnnotations.openMocks(this);
         transactionDto=new TransactionDto();
+        TransactionDto transectiond=new TransactionDto(1L,"",1,"","","","", LocalDateTime.now(),"","","","","","","","","",true,"","","",true,"","","",1,"","","","","","", UUID.randomUUID(),"","","","","","","","","","","","","","","","","",true,"","","","",true);
+        Transection t=new Transection(1L,"",1,"","","","", LocalDateTime.now(),"","","","","","","","",true,"","","",true,"","","",1,"","","","","","", UUID.randomUUID(),"","","","","","","","","","","","","","","","","",true,"","","","",true);
+        transection=new Transection(t.getId(),t.getAadharNo(),t.getAadharRetryCount(),t.getAadharTxn(),t.getAccType(),t.getAddress(),t.getCo(),
+        t.getCreatedDate(),t.getDayOfBirth(),t.getDistrictName(),t.getEmail(),t.getGender(),t.getHouse(),t.getKycdob(),t.getKycReason(),t.getKycStatus(),t.isKycVerified(),t.getLm(),t.getLoc(),t.getMobile(),t.isMobileVerified(),t.getMonthOfBirth(),t.getName(),
+                t.getOtp(),t.getOtpRetryCount(),t.getPincode(),t.getPo(),t.getStateName(),t.getStatus(),t.getSubDistrictName(),t.getTownName(),t.getTxnId(),t.getType(),t.getVillageName(),t.getWardName(),t.getXmluid(),t.getYearOfBirth(),t.getResponseCode(),t.getCodeChallenge(),t.getCodeChallengeMethod(),t.getOidcActionType(),t.getOidcClientId(),t.getOidcRedirectUrl(),t.getResponseType(),t.getScope(),t.getState(),t.getKycType(),t.getClientIp(),t.getPhrAddress(),t.isEmailVerified(),t.getDocumentCode(),t.getLoginModeType(),t.getTxnResponse(),t.getHealthIdNumber(),t.isNewTransaction());
         transection=new Transection();
         transactionDto.setKycPhoto("kycphoto");
         transactionDto.setId(1L);
         transection.setId(1L);
+        transection.isNew();
     }
     @AfterEach
     void tearDown() {

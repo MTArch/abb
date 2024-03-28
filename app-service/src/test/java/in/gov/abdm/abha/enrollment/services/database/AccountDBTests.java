@@ -52,7 +52,7 @@ public class AccountDBTests {
 
     @Before
     public void setup(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         HidReattemptDto s=HidReattemptDto.builder().healthIdNumber("").requestType("").createdBy("").updatedBy("").build();
         String test =s.getCreatedBy();test =s.getUpdatedBy();
         test=s.getHealthIdNumber();

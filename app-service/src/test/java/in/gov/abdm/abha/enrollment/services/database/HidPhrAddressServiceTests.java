@@ -34,7 +34,7 @@ public class HidPhrAddressServiceTests {
     AbhaDBHidPhrAddressFClient abhaDBHidPhrAddressFClient;
     @Before
     public void setup(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
 
     }

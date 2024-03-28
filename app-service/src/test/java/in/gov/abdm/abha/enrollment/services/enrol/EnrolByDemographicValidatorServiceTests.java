@@ -52,7 +52,7 @@ public class EnrolByDemographicValidatorServiceTests {
     private DemographicAuth demographicAuth;
     @Before
     public void setup(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         ReflectionTestUtils.setField(enrolByDemographicValidatorService,"documentPhotoMinSizeLimit","1");
         ReflectionTestUtils.setField(enrolByDemographicValidatorService,"documentPhotoMaxSizeLimit","2");
         demographicAuth=new DemographicAuth();

@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +45,9 @@ public class HidPhrAddressServiceImplTests {
     @BeforeEach
     void setup() {
             MockitoAnnotations.openMocks(this);
+        HidPhrAddressDto h2 = new HidPhrAddressDto(1L,"","","",1,"", LocalDateTime.now(),"","",LocalDateTime.now(),1,1,true);
+
+        HidPhrAddress h = new HidPhrAddress(1L,"","","",1,"", LocalDateTime.now(),"","",LocalDateTime.now(),1,1,true);
     }
     @AfterEach
     void teardown() {

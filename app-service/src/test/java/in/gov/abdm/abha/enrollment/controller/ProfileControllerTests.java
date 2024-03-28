@@ -8,10 +8,13 @@ import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.link.parent.Relationship;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ChildAbhaRequestDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ParentAbhaRequestDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.response.LinkParentResponseDto;
+import in.gov.abdm.abha.enrollment.model.profile.children.ChildrenProfiles;
+import in.gov.abdm.abha.enrollment.services.enrol.child.EnrolChildService;
 import in.gov.abdm.abha.enrollment.services.link.parent.LinkParentService;
 import in.gov.abdm.constant.Gender;
 import io.grpc.Status;
@@ -53,14 +56,19 @@ public class ProfileControllerTests {
     ClientFilter clientFilter;*/
     @MockBean
     LinkParentService linkParentService;
+    @MockBean
+    EnrolChildService enrolChildService;
     private LinkParentRequestDto linkParentRequestDto;
     private LinkParentResponseDto linkParentResponseDto;
     private ConsentDto consentDto;
+    private ChildrenProfiles childrenProfiles;
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         linkParentRequestDto=new LinkParentRequestDto();
         linkParentResponseDto=new LinkParentResponseDto();
+        childrenProfiles= ChildrenProfiles.builder().build();
+        childrenProfiles=new ChildrenProfiles(ABHA_NUMBER_VALID,MOBILE_NUMBER_VALID,ABHA_ADDRESS_VALID,1,Arrays.asList(new ABHAProfileDto()));
         consentDto=new ConsentDto();
         consentDto.setCode("abha-enrollment");
         consentDto.setVersion("1.4");
@@ -96,6 +104,29 @@ public class ProfileControllerTests {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.txnId").isEqualTo(TRANSACTION_ID_VALID);
+        //.jsonPath("$.message").isEqualTo(CommonTestData.SUCCESS_MESSAGE);
+
+    }
+    @Test
+    @WithMockUser
+    public void getChildrenTest() throws JsonProcessingException {
+        ObjectMapper objMapper = new ObjectMapper();
+        String jsonString = objMapper.writeValueAsString(linkParentRequestDto);
+        String request = "{\"txnId\":\"09afedef-34fe-51fc-89ab-0123456789ab\",\"scope\":[\"parent-abha-link\"],\"ParentAbha\":[{\"ABHANumber\":\"12-3456-7898-1234\",\"name\":\"Name\",\"yearOfBirth\":\"2000\",\"gender\":\"M\",\"mobile\":\"9872829929\",\"email\":\"abc@abc.com\",\"relationship\":\"mother\",\"document\":\"document.txt\"}],\"ChildAbha\":{\"ABHANumber\":\"12-3456-7898-1234\"},\"consent\":{\"code\":\"abha-enrollment\",\"version\":\"1.4\"}}";
+        Mockito.when(enrolChildService.validateChildHeaders(any())).thenReturn(Mono.just(true));
+        Mockito.when(enrolChildService.getChildren(any())).thenReturn(Mono.just(childrenProfiles));
+        webClient.mutateWith(csrf())
+                .get()
+                .uri(URIConstant.PROFILE_ENDPOINT + URIConstant.PARENT_CHILDREN_ENDPOINT)
+                .header(TIMESTAMP, TIMESTAMP_HEADER_VALUE )
+                .header(REQUEST_ID, REQUEST_ID_VALUE)
+                .header(X_TOKEN,TOKEN_VALID)
+                // .header(AUTHORIZATION,"Bearer AUTHORIZATION")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+                //.jsonPath("$.txnId").isEqualTo(TRANSACTION_ID_VALID);
         //.jsonPath("$.message").isEqualTo(CommonTestData.SUCCESS_MESSAGE);
 
     }

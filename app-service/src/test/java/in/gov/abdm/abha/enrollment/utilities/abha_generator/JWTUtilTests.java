@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.utilities.abha_generator;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.abha.profile.utilities.GetKeys;
 import in.gov.abdm.jwt.util.JWTToken;
 import in.gov.abdm.jwt.util.JWTTokenRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -45,12 +46,12 @@ public class JWTUtilTests {
     void tearDown(){
 
     }
-/*    @Test
-    public void generateTokenTests(){
-        JWTTokenRequest jwtTokenRequest=new JWTTokenRequest();
-        jwtTokenRequest.setSubject("test");
-        Mockito.when(JWTToken.generateToken(jwtTokenRequest,any())).thenReturn("key");
-        Mockito.when(rsaUtil.getJWTPrivateKey()).thenReturn(privateKey);
-        String res = jwtUtil.generateToken("1",accountDto);
-    }*/
+//    @Test
+//    public void generateTokenTests(){
+//        JWTTokenRequest jwtTokenRequest=new JWTTokenRequest();
+//        jwtTokenRequest.setSubject("test");
+//       // Mockito.when(JWTToken.generateToken(any(),any())).thenReturn(GetKeys.privateKeyContent);
+//        Mockito.when(rsaUtil.getJWTPrivateKey()).thenReturn(privateKey);
+//        String res = jwtUtil.generateToken("1",accountDto);
+//    }
 }

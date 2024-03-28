@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollment.services.document;
 
 import in.gov.abdm.abha.enrollment.client.DocumentAppFClient;
 import in.gov.abdm.abha.enrollment.client.DocumentDBIdentityDocumentFClient;
+import in.gov.abdm.abha.enrollment.exception.document.DocumentGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.entities.HidPhrAddressDto;
 import in.gov.abdm.abha.enrollment.model.entities.IdentityDocumentsDto;
 import in.gov.abdm.abha.enrollment.model.nepix.VerifyDLRequest;
@@ -34,7 +35,7 @@ public class DocumentTests {
 
     @Before
     public void setup(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -52,6 +53,23 @@ public class DocumentTests {
         VerifyDLResponse result =  documentAppService.verify(verifyDLRequest).block();
 
         Assert.assertEquals("Failed to Validate","","");
+
+    }
+    @Test
+    public void verifyTest2(){
+        VerifyDLResponse verifyDLResponse= new VerifyDLResponse();
+        verifyDLResponse.setAuthResult("Success");
+        verifyDLResponse.setMessage("success");
+        VerifyDLRequest verifyDLRequest = new VerifyDLRequest();
+        verifyDLRequest.setDocumentId("id");
+        verifyDLRequest.setDob("12-12-2000");
+        VerifyDLResponse verifyDLResponse2=new VerifyDLResponse("", verifyDLResponse.getMessage());
+
+        VerifyDLRequest v = new VerifyDLRequest(verifyDLRequest.getDocumentType(), verifyDLRequest.getDocumentId(), verifyDLRequest.getFirstName(), verifyDLRequest.getMiddleName(), verifyDLRequest.getLastName(), verifyDLRequest.getDob(), verifyDLRequest.getGender());
+        Mockito.when(documentAppFClient.verify(any())).thenReturn(Mono.error(Exception::new));
+        Assert.assertThrows(DocumentGatewayUnavailableException.class,()->documentAppService.verify(verifyDLRequest).block());
+
+       // Assert.assertEquals("Failed to Validate","","");
 
     }
     @Test

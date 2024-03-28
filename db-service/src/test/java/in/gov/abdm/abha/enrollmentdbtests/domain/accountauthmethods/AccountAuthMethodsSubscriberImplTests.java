@@ -20,6 +20,10 @@ public class AccountAuthMethodsSubscriberImplTests {
     Subscription s;
     @BeforeEach
     void setup() {
+        AccountAuthMethodsDto a=new AccountAuthMethodsDto("1","authMethod");
+        AccountAuthMethodsDto accountAuthMethodsDto=new AccountAuthMethodsDto();
+        accountAuthMethodsDto.setAuthMethods(a.getAuthMethods());
+        accountAuthMethodsDto.setHealthIdNumber(a.getHealthIdNumber());
         MockitoAnnotations.openMocks(this);
     }
     @Test

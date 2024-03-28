@@ -2,10 +2,12 @@ package in.gov.abdm.abha.enrollmentdbtests.domain.account;
 
 import in.gov.abdm.abha.enrollmentdb.domain.account.AccountServiceImpl;
 import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.model.de_duplication.DeDuplicationRequest;
+import in.gov.abdm.abha.enrollmentdb.model.hid_phr_address.HidPhrAddress;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -47,9 +50,29 @@ public class AccountServiceImplTests {
         accounts.setKycPhoto("photo");
         accounts.setCompPhoto(new byte[12]);
         accounts.setProfilePhoto("profile.png");
+        Accounts aa =new Accounts("","","",LocalDateTime.now(),"","","","","","","","","","",true,"","","","","",true,"","","","","","","","","","",LocalDateTime.now(),"","","","","","","", LocalDateTime.now(),true,LocalDateTime.now(),"","","","","","","","","","","",AbhaType.CHILD.toString().getBytes(), AbhaType.CHILD,new HidPhrAddress(),"","","","",true);
+
+        AccountDto a =new AccountDto("","","",LocalDateTime.now(),"","","","","","","","","",true,"","","","","",true,"","","","","","","","","",LocalDateTime.now(),"","","","","","","",LocalDateTime.now(),true, LocalDateTime.now(),"","","","","","","","","","","",true, AbhaType.CHILD,"","",new HidPhrAddress(),"","","","");
+        String s = a.getOrigin(); s = a.getFacilityId(); s = a.getKycdob(); s = a.getHipId(); s = a.getXmluid(); s = a.getConsentVersion(); s = a.getCmMigrated(); s = a.getPhrMigrated(); s = a.getHealthWorkerMobile(); s = a.getHealthWorkerName(); s = a.getMobileType(); s = a.getSource(); s = a.getApiVersion(); s = a.getApiEndPoint(); s = a.getLocalizedDetails();
+        boolean boo = a.isNewAccount();boo = a.isOkycVerified();
+        LocalDateTime time = a.getConsentDate();time=a.getCreatedDate();time=a.getUpdateDate();time=a.getEmailVerificationDate();
+        AbhaType abhatype = a.getType();
         accountDto=new AccountDto();
         accountDto.setKycPhoto("");
         accountDto.setProfilePhoto("");
+        AccountReattemptDto accountReattemptDto=new AccountReattemptDto("1","1","abc");
+        String data = accountReattemptDto.getCreatedBy();
+        data=accountReattemptDto.getRequestType();data=accountReattemptDto.getHealthIdNumber();
+        accountReattemptDto=AccountReattemptDto.builder().healthIdNumber(accountReattemptDto.getHealthIdNumber()).requestType(accountReattemptDto.getRequestType()).createdBy(accountReattemptDto.getCreatedBy()).build();
+        DeDuplicationRequest d =DeDuplicationRequest.builder().build();
+        DeDuplicationRequest deDuplicationRequest=new DeDuplicationRequest("","",1,1,1,"");
+        d.setFirstName(deDuplicationRequest.getFirstName());
+        d.setLastName(deDuplicationRequest.getLastName());
+        d.setDob(deDuplicationRequest.getDob());
+        d.setMob(deDuplicationRequest.getMob());
+        d.setYob(deDuplicationRequest.getYob());
+        d.setGender(deDuplicationRequest.getGender());
+
     }
     @AfterEach
     void teardown(){
@@ -99,7 +122,8 @@ public class AccountServiceImplTests {
     @Test
     public void getAccountByDocumentCodeTests(){
         Mockito.when(modelMapper.map(any(Accounts.class),any())).thenReturn(new AccountDto());
-        Mockito.when(accountRepository.getAccountsByDocumentCode(any())).thenReturn(Mono.just(accounts));
+        Mockito.when(accountRepository.getAccountsByDocumentCode(any())).thenReturn(Flux.just(accounts));
+        Mockito.when(accountRepository.getAccountByDocumentCode(any())).thenReturn(Mono.just(accounts));
         StepVerifier.create(accountService.getAccountByDocumentCode("test"))
                 .expectNextCount(1L)
                 .verifyComplete();

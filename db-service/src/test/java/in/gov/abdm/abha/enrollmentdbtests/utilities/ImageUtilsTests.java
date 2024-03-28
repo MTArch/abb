@@ -43,12 +43,12 @@ public class ImageUtilsTests {
     }
     @org.junit.Test()
     public void decompressTests() throws DataFormatException {
-        String s = "name";
+        String s = "a";
         byte[] data = s.getBytes();
         String sbuffer = "nameghjkjh";
         byte[] buffer = sbuffer.getBytes();
-        Mockito.when(Mockito.mock(Inflater.class).inflate(any(),anyInt(),anyInt())).thenReturn(0);
-        Mockito.when(Mockito.mock(Inflater.class).inflate(buffer)).thenReturn(0);
+        Mockito.when(Mockito.mock(Inflater.class).inflate(any(),anyInt(),anyInt())).thenReturn(1);
+        Mockito.when(Mockito.mock(Inflater.class).inflate(buffer)).thenReturn(1);
 
         byte[] result = ImageUtils.decompress(data);
         Assert.assertEquals(result.length,0);

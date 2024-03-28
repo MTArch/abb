@@ -49,11 +49,16 @@ public class ProcedureServiceImplTests {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+        saveAllDataRequest =new SaveAllDataRequest(List.of(new Accounts()),List.of(new HidPhrAddress()),List.of(new AccountAuthMethods()));
         saveAllDataRequest =new SaveAllDataRequest();
         accounts=new Accounts();
         accounts.setHealthId("12321");
         hidPhrAddress=new HidPhrAddress();
+        AccountAuthMethods a= new AccountAuthMethods("1","authMethod",true);
         accountAuthMethods=new AccountAuthMethods();
+        accountAuthMethods.setAuthMethods(a.getAuthMethods());
+        accountAuthMethods.setHealthIdNumber(a.getHealthIdNumber());
+        accountAuthMethods.setNewAccountAuthMethods(a.isNewAccountAuthMethods());
         List<Accounts> listAccounts = new ArrayList<>();
         listAccounts.add(accounts);
         List<HidPhrAddress> listHidPhrAddress = new ArrayList<>();

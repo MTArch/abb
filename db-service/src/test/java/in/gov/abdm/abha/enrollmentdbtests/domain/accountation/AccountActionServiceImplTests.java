@@ -7,6 +7,7 @@ import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActionDto;
 import in.gov.abdm.abha.enrollmentdb.model.accountaction.AccountActions;
 import in.gov.abdm.abha.enrollmentdb.repository.AccountActionRepository;
+import liquibase.pro.packaged.S;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -38,6 +42,9 @@ public class AccountActionServiceImplTests {
 
     @BeforeEach
     void setup() {
+        AccountActions a = new AccountActions(BigInteger.ONE,"", LocalDateTime.now(),"","","","","","","",true);
+        String s = a.getAction();s = a.getField();s = a.getHealthIdNumber();s = a.getNewValue();s = a.getPreviousValue();s = a.getReactivationDate();s = a.getReason();s = a.getReasons();
+        LocalDateTime time=a.getCreatedDate();boolean newAcc=a.isNewAccount();newAcc=a.isNew();BigInteger b=a.getId();
         MockitoAnnotations.openMocks(this);
     }
     @AfterEach

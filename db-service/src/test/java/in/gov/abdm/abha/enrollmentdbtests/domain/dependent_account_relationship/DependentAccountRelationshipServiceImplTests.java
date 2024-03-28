@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -46,6 +47,9 @@ public class DependentAccountRelationshipServiceImplTests {
     void setup() {
         MockitoAnnotations.openMocks(this);
         dependentAccountRelationshipDto=new DependentAccountRelationshipDto();
+        DependentAccountRelationshipDto d2= new DependentAccountRelationshipDto(1L,"","","","","","",LocalDateTime.now(),LocalDateTime.now());
+        DependentAccountRelationship d = new DependentAccountRelationship(1L,"","","","","","", LocalDateTime.now(),LocalDateTime.now(),true);
+        boolean s=d.isNew();
     }
     @AfterEach
     void teardown() {

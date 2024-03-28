@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(SpringExtension.class)
@@ -32,6 +34,17 @@ public class AccountActionControllerTests {
     void setup(){
         MockitoAnnotations.openMocks(this);
         accountActionDto=new AccountActionDto();
+        AccountActionDto accountActionDto2=new AccountActionDto("test", LocalDateTime.now(),"test","test","test","test","test","test","test",true);
+        accountActionDto.setAction(accountActionDto2.getAction());
+        accountActionDto.setCreatedDate(accountActionDto2.getCreatedDate());
+        accountActionDto.setField(accountActionDto2.getField());
+        accountActionDto.setHealthIdNumber(accountActionDto2.getHealthIdNumber());
+        accountActionDto.setNewValue(accountActionDto2.getNewValue());
+        accountActionDto.setPreviousValue(accountActionDto2.getPreviousValue());
+        accountActionDto.setReactivationDate(accountActionDto2.getReactivationDate());
+        accountActionDto.setReason(accountActionDto2.getReason());
+        accountActionDto.setReasons(accountActionDto2.getReasons());
+        accountActionDto.setNewAccount(accountActionDto2.isNewAccount());
     }
     @AfterEach
     void teardown(){

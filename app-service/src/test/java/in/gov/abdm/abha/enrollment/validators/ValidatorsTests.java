@@ -54,6 +54,7 @@ public class ValidatorsTests {
     @BeforeEach
     void setup(){
         requestScopes=new ArrayList<>();
+        String s = Scopes.WRONG.toString();
         requestScopes.add(Scopes.PARENT_ABHA_LINK);
         linkParentRequestDto=new LinkParentRequestDto();
         otpDto = new OtpDto();

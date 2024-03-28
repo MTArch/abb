@@ -33,6 +33,7 @@ import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.bio.EnrolByBioService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.demographic.EnrolByDemographicService;
 import in.gov.abdm.abha.enrollment.services.enrol.aadhaar.iris.EnrolByIrisService;
 import in.gov.abdm.abha.enrollment.services.enrol.abha_address.AbhaAddressService;
+import in.gov.abdm.abha.enrollment.services.enrol.child.EnrolChildService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolByDocumentValidatorService;
 import in.gov.abdm.abha.enrollment.services.enrol.document.EnrolUsingDrivingLicence;
 import in.gov.abdm.abha.enrollment.utilities.BenefitMapper;
@@ -89,6 +90,8 @@ public class EnrollmentControllerTests {
     EnrolByBioService enrolByBioService;
     @MockBean
     EnrolByIrisService enrolByIrisService;
+    @MockBean
+    EnrolChildService enrolChildService;
     @MockBean
     RSAUtil rsaUtil;
     private EnrolByAadhaarRequestDto enrolByAadhaarRequestDto;
@@ -552,6 +555,86 @@ public class EnrollmentControllerTests {
                 .body(BodyInserters.fromValue(sendNotificationRequestDto))
                 .exchange()
                 .expectStatus().isOk()
+                .expectBody();
+    }
+    @Test
+    @WithMockUser
+    public void enrolUsingAadhaarCHILDTests() throws JsonProcessingException {
+        ArrayList<AuthMethods> listAuthMethods=new ArrayList<>();
+        listAuthMethods.add(AuthMethods.CHILD);
+        authData.setAuthMethods(listAuthMethods);
+        authData.setToken(tokenDto);
+        demographicAuth.setDateOfBirth("2000");
+        authData.setDemographic(demographic);
+        authData.setDemographicAuth(demographicAuth);
+
+        consentDto=new ConsentDto();
+        consentDto.setCode("abha-enrollment");
+        consentDto.setVersion("1.4");
+        enrolByAadhaarRequestDto.setAuthData(authData);
+        enrolByAadhaarRequestDto.setConsent(consentDto);
+        enrolByAadhaarResponseDto.setAbhaProfileDto(new ABHAProfileDto(ABHA_NUMBER_VALID, AccountStatus.ACTIVE,"name","MidName","LastName","2000","M","photo","9876543235",EMAIL_VALID, Arrays.asList("add"),"add","1","1","234322", AbhaType.STANDARD,"",""));
+        enrolByAadhaarResponseDto.setResponseTokensDto(new ResponseTokensDto("1",1L,"1",1L));
+        enrolByAadhaarResponseDto.setTxnId(TRANSACTION_ID_VALID);
+        enrolByAadhaarResponseDto.setNew(true);
+        enrolByAadhaarResponseDto.setMessage("success");
+        ObjectMapper obj = new ObjectMapper();
+        String a= obj.writeValueAsString(enrolByAadhaarRequestDto);
+        String key = "{\"authData\":{\"authMethods\":[\"child\"],\"token\":{\"id_token\":\"1\"},\"otp\":null,\"demo\":{\"stateCode\":null,\"districtCode\":null,\"firstName\":\"NAme\",\"middleName\":\"MidName\",\"lastName\":\"LastName\",\"dayOfBirth\":\"\",\"monthOfBirth\":\"\",\"yearOfBirth\":\"\",\"gender\":\"\",\"mobile\":\"9878667865\",\"mobileType\":\"FAMILY\",\"state\":\"\",\"district\":\"\",\"pinCode\":\"\",\"address\":\"\",\"consentFormImage\":\"\",\"healthWorkerName\":\"\",\"healthWorkerMobile\":\"\",\"validity\":\"\",\"aadhaar\":\"ab1619680693\"},\"demo_auth\":{\"stateCode\":null,\"districtCode\":null,\"aadhaarNumber\":\"ab1619680693\",\"name\":\"Name\",\"dateOfBirth\":\"2000\",\"gender\":\"F\",\"address\":\"\",\"profilePhoto\":\"photo\",\"mobile\":\"9878667865\",\"validity\":\"\"},\"face\":null,\"bio\":null,\"iris\":null},\"consent\":{\"code\":\"abha-enrollment\",\"version\":\"1.4\"}}";
+        Mockito.when(rsaUtil.decrypt(any())).thenReturn("421619680693");
+        Mockito.when(enrolUsingAadhaarService.validateHeaders(any(),any(),any())).thenReturn(Mono.just(true));
+        Mockito.when(enrolChildService.enrol(any(),any())).thenReturn(Mono.just(enrolByAadhaarResponseDto));
+        Mockito.when(enrolByDemographicService.validateAndEnrolByDemoAuth(any(),any())).thenReturn(Mono.just(enrolByAadhaarResponseDto));
+        webTestClient.mutateWith(csrf())
+                .post()
+                .uri(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
+                .header(TIMESTAMP,TIMESTAMP_HEADER_VALUE)
+                .header("REQUEST-ID",REQUEST_ID_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(key)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
+    @Test
+    @WithMockUser
+    public void enrolUsingAadhaarDEMO_AuthTests3() throws JsonProcessingException {
+        ArrayList<AuthMethods> listAuthMethods=new ArrayList<>();
+        listAuthMethods.add(AuthMethods.DEMO_AUTH);
+        authData.setAuthMethods(listAuthMethods);
+        authData.setToken(tokenDto);
+        demographicAuth.setDateOfBirth("2000");
+        authData.setDemographic(demographic);
+        authData.setDemographicAuth(null);
+
+        consentDto=new ConsentDto();
+        consentDto.setCode("abha-enrollment");
+        consentDto.setVersion("1.4");
+        enrolByAadhaarRequestDto.setAuthData(authData);
+        enrolByAadhaarRequestDto.setConsent(consentDto);
+        enrolByAadhaarResponseDto.setAbhaProfileDto(new ABHAProfileDto(ABHA_NUMBER_VALID, AccountStatus.ACTIVE,"name","MidName","LastName","2000","M","photo","9876543235",EMAIL_VALID, Arrays.asList("add"),"add","1","1","234322", AbhaType.STANDARD,"",""));
+        enrolByAadhaarResponseDto.setResponseTokensDto(new ResponseTokensDto("1",1L,"1",1L));
+        enrolByAadhaarResponseDto.setTxnId(TRANSACTION_ID_VALID);
+        enrolByAadhaarResponseDto.setNew(true);
+        enrolByAadhaarResponseDto.setMessage("success");
+        ObjectMapper obj = new ObjectMapper();
+        String a= obj.writeValueAsString(enrolByAadhaarRequestDto);
+        String key="{\"authData\":{\"authMethods\":[\"demo_auth\"],\"token\":{\"id_token\":\"1\"},\"otp\":null,\"demo\":{\"stateCode\":null,\"districtCode\":null,\"firstName\":\"NAme\",\"middleName\":\"MidName\",\"lastName\":\"LastName\",\"dayOfBirth\":\"\",\"monthOfBirth\":\"\",\"yearOfBirth\":\"\",\"gender\":\"\",\"mobile\":\"9878667865\",\"mobileType\":\"FAMILY\",\"state\":\"\",\"district\":\"\",\"pinCode\":\"\",\"address\":\"\",\"consentFormImage\":\"\",\"healthWorkerName\":\"\",\"healthWorkerMobile\":\"\",\"validity\":\"\",\"aadhaar\":\"421619680693\"},\"demo_auth\":null,\"face\":null,\"bio\":null,\"iris\":null,\"child\":null},\"consent\":{\"code\":\"abha-enrollment\",\"version\":\"1.4\"}}";
+        //String key = "{\"authData\":{\"authMethods\":[\"demo_auth\"],\"token\":{\"id_token\":\"1\"},\"otp\":null,\"demo\":{\"stateCode\":null,\"districtCode\":null,\"firstName\":\"NAme\",\"middleName\":\"MidName\",\"lastName\":\"LastName\",\"dayOfBirth\":\"\",\"monthOfBirth\":\"\",\"yearOfBirth\":\"\",\"gender\":\"\",\"mobile\":\"9878667865\",\"mobileType\":\"FAMILY\",\"state\":\"\",\"district\":\"\",\"pinCode\":\"\",\"address\":\"\",\"consentFormImage\":\"\",\"healthWorkerName\":\"\",\"healthWorkerMobile\":\"\",\"validity\":\"\",\"aadhaar\":\"ab1619680693\"},\"demo_auth\":{\"stateCode\":null,\"districtCode\":null,\"aadhaarNumber\":\"ab1619680693\",\"name\":\"Name\",\"dateOfBirth\":\"2000\",\"gender\":\"F\",\"address\":\"\",\"profilePhoto\":\"photo\",\"mobile\":\"9878667865\",\"validity\":\"\"},\"face\":null,\"bio\":null,\"iris\":null},\"consent\":{\"code\":\"abha-enrollment\",\"version\":\"1.4\"}}";
+        Mockito.when(rsaUtil.decrypt(any())).thenReturn("421619680693");
+        Mockito.when(enrolUsingAadhaarService.validateHeaders(any(),any(),any())).thenReturn(Mono.just(true));
+        Mockito.when(enrolByDemographicService.validateAndEnrolByDemoAuth(any(EnrolByAadhaarRequestDto.class),any())).thenReturn(Mono.just(enrolByAadhaarResponseDto));
+        webTestClient.mutateWith(csrf())
+                .post()
+                .uri(URIConstant.ENROL_ENDPOINT+URIConstant.BY_ENROL_AADHAAR_ENDPOINT)
+                .header(TIMESTAMP,TIMESTAMP_HEADER_VALUE)
+                .header("REQUEST-ID",REQUEST_ID_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(key)
+                .exchange()
+                .expectStatus().isBadRequest()
                 .expectBody();
     }
 

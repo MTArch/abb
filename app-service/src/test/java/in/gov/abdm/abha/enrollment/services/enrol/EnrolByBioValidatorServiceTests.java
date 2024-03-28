@@ -35,7 +35,7 @@ public class EnrolByBioValidatorServiceTests {
 
     @Before
     public void setup(){
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

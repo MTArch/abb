@@ -66,7 +66,7 @@ public class ABHAControllerAdviseTests {
     }
     @Test
     public void abhaUnAuthorizedExceptionTest(){
-        ResponseEntity<Mono<ErrorResponse>> res =abhaControllerAdvise.exception(new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS.getCode(),"msg"));
+        ResponseEntity<Mono<ErrorResponse>> res =abhaControllerAdvise.exception(new AbhaUnAuthorizedException(ABDMError.UNAUTHORIZED_ACCESS));
         Assert.assertNotNull(res);
     }
     @Test

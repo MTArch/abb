@@ -4,9 +4,11 @@ import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.enums.enrol.aadhaar.AuthMethods;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
+import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnAuthorizedException;
 import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableException;
 import in.gov.abdm.abha.enrollment.exception.application.BadRequestException;
+import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.*;
 import in.gov.abdm.abha.enrollment.model.aadhaar.verify_demographic.VerifyDemographicResponse;
@@ -139,7 +141,7 @@ public class EnrolServiceTests {
     {
         MockitoAnnotations.openMocks(this);
         sendNotificationRequestDto=new SendNotificationRequestDto();
-        LocalizedAccountDetails localizedAccDetails=new LocalizedAccountDetails("","","","","","","","");
+        LocalizedAccountDetails localizedAccDetails=new LocalizedAccountDetails("","","","","","","","","");
         receiverOtpTracker=new ReceiverOtpTracker("",1,1,true);
         transactionDto = new TransactionDto();
         notificationResponseDto = new NotificationResponseDto();
@@ -1612,11 +1614,19 @@ public class EnrolServiceTests {
                 .expectError(AadhaarExceptions.class).verify();
     }
 
+    @Test
+    void verifyAadhaarOtpErr1() {
+        Assert.assertThrows(TransactionNotFoundException.class,()->enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto, requestHeaders));
+    }
+    @Test
+    void verifyAadhaarOtpErr2() {
+        when(redisService.getRedisOtp(any())).thenReturn(redisOtp);
+        Assert.assertThrows(UnauthorizedUserToSendOrVerifyOtpException.class,()->enrolUsingAadhaarService.verifyOtp(enrolByAadhaarRequestDto, requestHeaders));
+    }
 
 
 
 
 
 
-
-}
+    }

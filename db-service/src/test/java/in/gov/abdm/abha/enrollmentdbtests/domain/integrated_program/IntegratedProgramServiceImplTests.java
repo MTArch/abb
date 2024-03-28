@@ -19,6 +19,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDateTime;
+
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(SpringExtension.class)
@@ -30,6 +32,23 @@ public class IntegratedProgramServiceImplTests {
 
     @BeforeEach
     void setup() {
+        IntegratedProgram integratedProgram=new IntegratedProgram("","","","","","","", LocalDateTime.now(),LocalDateTime.now(),"","",true);
+        integratedProgram.getId();
+        integratedProgram.isNew();
+        integratedProgram.setAsNew();
+        IntegratedProgram i = new IntegratedProgram();
+        i.setIntegratedProgramId(integratedProgram.getIntegratedProgramId());
+        i.setProgramName(integratedProgram.getProgramName());
+        i.setBenefitName(integratedProgram.getBenefitName());
+        i.setClientId(integratedProgram.getClientId());
+        i.setEndPointUrlSearch(integratedProgram.getEndPointUrlSearch());
+        i.setEndPointUrlLink(integratedProgram.getEndPointUrlLink());
+        i.setDescription(integratedProgram.getDescription());
+        i.setCreatedDate(integratedProgram.getCreatedDate());
+        i.setCreatedBy(integratedProgram.getCreatedBy());
+        i.setUpdatedDate(integratedProgram.getUpdatedDate());
+        i.setUpdatedBy(integratedProgram.getUpdatedBy());
+        i.setNewIntegratedProgram(integratedProgram.isNewIntegratedProgram());
         MockitoAnnotations.openMocks(this);
     }
     @AfterEach
