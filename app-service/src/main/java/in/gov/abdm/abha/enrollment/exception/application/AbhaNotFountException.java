@@ -10,4 +10,8 @@ public class AbhaNotFountException extends RuntimeException {
     public AbhaNotFountException(ABDMError errorCode) {
         super(errorCode.getCode() + errorCode.getMessage());
     }
+
+    public AbhaNotFountException(String message){
+        super(message);
+    }
 }

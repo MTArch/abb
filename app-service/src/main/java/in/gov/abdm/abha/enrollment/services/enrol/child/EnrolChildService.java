@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
+import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.NO_LINKED_CHILD_ABHA;
 
 @Slf4j
 @Service
@@ -266,10 +267,11 @@ public class EnrolChildService {
 
     public Mono<ChildrenProfiles> getChildren(RequestHeaders requestHeaders) {
         String parentAbhaNumber = requestHeaders.getXToken().getHealthIdNumber();
-        ChildrenProfiles childrenProfiles = new ChildrenProfiles();
+
         Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentAbhaNumber);
         return childAccounts.collectList().map(childList -> {
             if (!childList.isEmpty()) {
+                ChildrenProfiles childrenProfiles = new ChildrenProfiles();
                 List<ABHAProfileDto> childAbhaProfileDtoList = new ArrayList<>();
                 AccountDto childAccount = childList.stream().findFirst().get();
                 childrenProfiles.setParentAbhaNumber(parentAbhaNumber);
@@ -278,8 +280,10 @@ public class EnrolChildService {
                 childrenProfiles.setChildrenCount(childList.size());
                 childList.forEach(accountDto -> childAbhaProfileDtoList.add(MapperUtils.mapProfileDetails(accountDto)));
                 childrenProfiles.setChildren(childAbhaProfileDtoList);
+                return childrenProfiles;
+            } else {
+                throw new AbhaNotFountException(NO_LINKED_CHILD_ABHA + parentAbhaNumber);
             }
-            return childrenProfiles;
         });
     }
 

@@ -52,7 +52,7 @@ public class RequestMapper {
             fTokenClaims = JWTToken.decodeJWTToken(fToken, GetKeys.getPrivateKey());
         }
 
-        if (xToken != null) {
+        if (StringUtils.isNotEmpty(xToken) && xToken.startsWith("Bearer ")) {
             xTokenContextHolder = XTokenHelper.getXToken(xToken);
         }
 

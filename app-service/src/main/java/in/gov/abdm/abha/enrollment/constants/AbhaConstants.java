@@ -235,4 +235,5 @@ public class AbhaConstants {
 
     public static final String REQUEST_ID = "REQUEST-ID";
     public static final String TIMESTAMP = "TIMESTAMP";
+    public static final String NO_LINKED_CHILD_ABHA = "No child account linked to the given ABHA Number ";
 }
