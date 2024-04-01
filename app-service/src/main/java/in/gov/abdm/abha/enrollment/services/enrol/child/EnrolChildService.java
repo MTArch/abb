@@ -97,6 +97,7 @@ public class EnrolChildService {
     private AbhaAddressGenerator abhaAddressGenerator;
 
     public Mono<EnrolByAadhaarResponseDto> enrol(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
+        Mono<AccountDto> a =accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber());
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
                 .flatMap(accountDto -> {
                     isValidParentAccount(accountDto);
