@@ -457,6 +457,9 @@ public class AccountServiceImpl implements AccountService {
         if (newUser.getProfilePhoto() != null) {
             newUser.setProfilePhotoCompressed(false);
         }
+        if(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails() != null){
+            newUser.setLocalizedDetails(Common.mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
+        }
     }
 
     @Override

@@ -1,10 +1,14 @@
 package in.gov.abdm.abha.enrollment.utilities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.configuration.ContextHolder;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.enums.request.OtpSystem;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedAccountDetails;
+import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedDetails;
 import in.gov.abdm.abha.enrollment.model.hidbenefit.RequestHeaders;
 import in.gov.abdm.abha.enrollment.model.lgd.LgdDistrictResponse;
 import in.gov.abdm.abha.enrollment.model.notification.NotificationType;
@@ -370,4 +374,23 @@ public class Common {
         return day.concat("-").concat(month).concat("-").concat(year);
     }
 
+    public String mapAadhaarResponse(LocalizedDetails localizedDetails) {
+        try {
+            ObjectMapper om = new ObjectMapper();
+            LocalizedAccountDetails accountDetails = new LocalizedAccountDetails();
+            accountDetails.setName(localizedDetails.getName());
+            accountDetails.setAddress(localizedDetails.getAddress());
+            accountDetails.setStateName(localizedDetails.getState());
+            accountDetails.setDistrictName(localizedDetails.getDistrict());
+            accountDetails.setSubDistrictName(localizedDetails.getSubDist());
+            accountDetails.setWardName(localizedDetails.getStreet());
+            accountDetails.setTownName(localizedDetails.getLocality());
+            accountDetails.setVillageName(localizedDetails.getVillageTownCity());
+            accountDetails.setGender(localizedDetails.getGender());
+            return om.writeValueAsString(accountDetails);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
 }

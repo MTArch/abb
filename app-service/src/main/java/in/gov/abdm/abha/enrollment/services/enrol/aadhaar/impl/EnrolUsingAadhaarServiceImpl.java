@@ -304,26 +304,6 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                 }).switchIfEmpty(Mono.error(new TransactionNotFoundException(AbhaConstants.TRANSACTION_NOT_FOUND_EXCEPTION_MESSAGE)));
     }
 
-    private String mapAadhaarResponse(LocalizedDetails localizedDetails) {
-        try {
-            ObjectMapper om = new ObjectMapper();
-            LocalizedAccountDetails accountDetails = new LocalizedAccountDetails();
-            accountDetails.setName(localizedDetails.getName());
-            accountDetails.setAddress(localizedDetails.getAddress());
-            accountDetails.setStateName(localizedDetails.getState());
-            accountDetails.setDistrictName(localizedDetails.getDistrict());
-            accountDetails.setSubDistrictName(localizedDetails.getSubDist());
-            accountDetails.setWardName(localizedDetails.getStreet());
-            accountDetails.setTownName(localizedDetails.getLocality());
-            accountDetails.setVillageName(localizedDetails.getVillageTownCity());
-            accountDetails.setGender(localizedDetails.getGender());
-            return om.writeValueAsString(accountDetails);
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
     private Mono<EnrolByAadhaarResponseDto> createNewAccount(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
                 .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
@@ -338,7 +318,7 @@ public class EnrolUsingAadhaarServiceImpl implements EnrolUsingAadhaarService {
                             accountDto.setType(AbhaType.CHILD);
                         }
                         if (null != aadhaarResponseDto.getAadhaarUserKycDto() || null != aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()) {
-                            accountDto.setLocalizedDetails(mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
+                            accountDto.setLocalizedDetails(Common.mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
                         }
                         accountDto.setStatus(AccountStatus.ACTIVE.toString());
                         String newAbhaNumber = AbhaNumberGenerator.generateAbhaNumber();
