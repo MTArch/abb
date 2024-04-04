@@ -112,7 +112,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         Mono<AadhaarResponseDto> aadhaarResponseDtoMono = aadhaarAppService.verifyBio(requestHeaders, AadhaarVerifyBioRequestDto.builder()
                 .aadhaarNumber(rsaUtil.decrypt(enrolByAadhaarRequestDto.getAuthData().getBio().getAadhaar()))
                 .pid(enrolByAadhaarRequestDto.getAuthData().getBio().getFingerPrintAuthPid())
-                        .aadhaarLogType(AadhaarLogType.KYC_F.name())
+                .aadhaarLogType(AadhaarLogType.KYC_F.name())
                 .build());
         return aadhaarResponseDtoMono.flatMap(aadhaarResponseDto -> handleAadhaarBioResponse(enrolByAadhaarRequestDto, aadhaarResponseDto, requestHeaders));
     }
@@ -132,7 +132,9 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
         return transactionService.createTransactionEntity(transactionDto).flatMap(transaction -> {
             transactionService.mapTransactionWithEkyc(transaction, aadhaarResponseDto.getAadhaarUserKycDto(), KycAuthType.OTP.getValue());
-            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature()).flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount,requestHeaders)).switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
+            return accountService.findByXmlUid(aadhaarResponseDto.getAadhaarUserKycDto().getSignature())
+                    .flatMap(existingAccount -> existingAccountBio(transaction, aadhaarResponseDto, existingAccount, requestHeaders))
+                    .switchIfEmpty(Mono.defer(() -> createNewAccountUsingBio(enrolByAadhaarRequestDto, aadhaarResponseDto, transaction, requestHeaders)));
         });
     }
 
@@ -150,10 +152,19 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             }
         }
     }
+
     @SuppressWarnings("java:S3776")
     private Mono<EnrolByAadhaarResponseDto> createNewAccountUsingBio(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, AadhaarResponseDto aadhaarResponseDto, TransactionDto transactionDto, RequestHeaders requestHeaders) {
         Mono<AccountDto> newAccountDto = lgdUtility.getLgdData(transactionDto.getPincode(), transactionDto.getStateName())
-                .flatMap(lgdDistrictResponse -> accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse));
+                .flatMap(lgdDistrictResponse -> {
+                    return accountService.prepareNewAccount(transactionDto, enrolByAadhaarRequestDto, lgdDistrictResponse)
+                            .flatMap(accountDto -> {
+                                if (aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails() != null) {
+                                    accountDto.setLocalizedDetails(Common.mapAadhaarResponse(aadhaarResponseDto.getAadhaarUserKycDto().getLocalizedDetails()));
+                                }
+                                return Mono.just(accountDto);
+                            });
+                });
         return newAccountDto.flatMap(accountDto -> {
             accountDto.setFacilityId(requestHeaders.getFTokenClaims() != null && requestHeaders.getFTokenClaims().get(SUB) != null ? requestHeaders.getFTokenClaims().get(SUB).toString() : null);
             int age = Common.calculateYearDifference(accountDto.getYearOfBirth(), accountDto.getMonthOfBirth(), accountDto.getDayOfBirth());
@@ -186,7 +197,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                             if (isTransactionManagementEnable) {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
                                         .flatMap(transactionDtoResponse -> accountService.settingClientIdAndOrigin(enrolByAadhaarRequestDto, accountDto, requestHeaders))
-                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto,requestHeaders));
+                                        .flatMap(response -> callProcedureToCreateAccount(response, transactionDto, abhaProfileDto, requestHeaders));
 
                             } else {
                                 return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getTxnId()))
@@ -248,7 +259,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         });
     }
 
-    private Mono<EnrolByAadhaarResponseDto> existingAccountBio(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, RequestHeaders rHeaders ) {
+    private Mono<EnrolByAadhaarResponseDto> existingAccountBio(TransactionDto transactionDto, AadhaarResponseDto aadhaarResponseDto, AccountDto accountDto, RequestHeaders rHeaders) {
         return transactionService.findTransactionDetailsFromDB(String.valueOf(transactionDto.getTxnId()))
                 .flatMap(transactionDtoResponse ->
                 {
@@ -261,12 +272,12 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
 
                                 return fluxPhrAddress.collectList().flatMap(Mono::just).flatMap(phrAddressList -> {
                                     accountService.reAttemptedAbha(abhaProfileDto.getAbhaNumber(), AadhaarMethod.AADHAAR_FMR.code(), rHeaders).onErrorResume(thr -> {
-                          										log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());		
-                          										return Mono.empty();
-                          									}).subscribe();
+                                        log.info(ABHA_RE_ATTEMPTED, abhaProfileDto.getAbhaNumber());
+                                        return Mono.empty();
+                                    }).subscribe();
                                     abhaProfileDto.setPhrAddress(phrAddressList);
                                     if (!accountDto.getStatus().equals(AccountStatus.DEACTIVATED.getValue())) {
-                                    	
+
                                         ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                                                 .token(jwtUtil.generateToken(transactionDto.getTxnId().toString(), accountDto))
                                                 .expiresIn(jwtUtil.jwtTokenExpiryTime())
@@ -279,7 +290,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                                                 .abhaProfileDto(abhaProfileDto)
                                                 .build());
                                     }
-							       
+
                                     // Final response for existing user
                                     return Mono.just(EnrolByAadhaarResponseDto.builder()
                                             .txnId(transactionDto.getTxnId().toString())
@@ -300,7 +311,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                 .build();
     }
 
-    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto,RequestHeaders requestHeaders) {
+    private Mono<EnrolByAadhaarResponseDto> callProcedureToCreateAccount(AccountDto accountDtoResponse, TransactionDto transactionDto, ABHAProfileDto abhaProfileDto, RequestHeaders requestHeaders) {
         List<AccountDto> accountList = new ArrayList<>();
         List<HidPhrAddressDto> hidPhrAddressDtoList = new ArrayList<>();
         accountList.add(accountDtoResponse);
@@ -316,7 +327,7 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
             }
 
             log.info("going to call procedure to create account");
-            return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> sendAccountCreatedSMS(accountDtoResponse,hidPhrAddressDto,requestHeaders, transactionDto));
+            return accountService.saveAllData(SaveAllDataRequest.builder().accounts(accountList).hidPhrAddress(hidPhrAddressDtoList).accountAuthMethods(accountAuthMethodsDtos).build()).flatMap(v -> sendAccountCreatedSMS(accountDtoResponse, hidPhrAddressDto, requestHeaders, transactionDto));
         } else {
             throw new AbhaDBGatewayUnavailableException();
         }
@@ -327,12 +338,12 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
         if (accountDto.getMobile() != null && !accountDto.getMobile().isBlank() && !DEFAULT_CLIENT_ID.equalsIgnoreCase(requestHeaders.getClientId())) {
             return notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber()).flatMap(notificationResponseDto -> {
                 if (notificationResponseDto.getStatus().equals(SENT)) {
-                            ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
+                    ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                             .token(jwtUtil.generateToken(transaction.getTxnId().toString(), accountDto))
-                                    .expiresIn(jwtUtil.jwtTokenExpiryTime())
+                            .expiresIn(jwtUtil.jwtTokenExpiryTime())
                             .refreshToken(jwtUtil.generateRefreshToken(accountDto.getHealthIdNumber()))
-                                    .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
-                                    .build();
+                            .refreshExpiresIn(jwtUtil.jwtRefreshTokenExpiryTime())
+                            .build();
                     ABHAProfileDto abhaProfileDto = MapperUtils.mapProfileDetails(accountDto);
                     abhaProfileDto.setPhrAddress(Collections.singletonList(hidPhrAddressDto.getPhrAddress()));
                     // Final create account response
@@ -342,11 +353,11 @@ public class EnrolByBioService extends EnrolByBioValidatorService {
                             .message(AbhaConstants.ACCOUNT_CREATED_SUCCESSFULLY)
                             .isNew(true)
                             .responseTokensDto(responseTokensDto).build());
-                        } else {
+                } else {
                     throw new NotificationGatewayUnavailableException();
-                        }
+                }
             });
-        }else{
+        } else {
             ResponseTokensDto responseTokensDto = ResponseTokensDto.builder()
                     .token(jwtUtil.generateToken(transaction.getTxnId().toString(), accountDto))
                     .expiresIn(jwtUtil.jwtTokenExpiryTime())
