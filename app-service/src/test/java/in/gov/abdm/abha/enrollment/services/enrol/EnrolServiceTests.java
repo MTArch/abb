@@ -141,7 +141,6 @@ public class EnrolServiceTests {
     {
         MockitoAnnotations.openMocks(this);
         sendNotificationRequestDto=new SendNotificationRequestDto();
-        LocalizedAccountDetails localizedAccDetails=new LocalizedAccountDetails("","","","","","","","","");
         receiverOtpTracker=new ReceiverOtpTracker("",1,1,true);
         transactionDto = new TransactionDto();
         notificationResponseDto = new NotificationResponseDto();
@@ -153,7 +152,7 @@ public class EnrolServiceTests {
         authData = new AuthData();
         otpDto = new OtpDto();
         consentDto = new ConsentDto();
-        aadhaarUserKycDto=new AadhaarUserKycDto("","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",new LocalizedDetails("","","","","","","","","","","","","","","","","","","","","","","","","","",""));
+        aadhaarUserKycDto=new AadhaarUserKycDto("","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",null);
         aadhaarUserKycDto = new AadhaarUserKycDto();
         lgdDistrictResponse = new LgdDistrictResponse();
         redisOtp = new RedisOtp();
