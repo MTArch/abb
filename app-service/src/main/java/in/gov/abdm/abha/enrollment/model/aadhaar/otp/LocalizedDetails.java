@@ -35,4 +35,6 @@ public class LocalizedDetails {
     private String migrated;
     private String txnId;
     private String address;
+    private String lang;
+    private LocalizedLabels localizedLabels;
 }

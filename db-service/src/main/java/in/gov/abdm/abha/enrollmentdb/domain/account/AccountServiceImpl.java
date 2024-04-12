@@ -1,5 +1,12 @@
 package in.gov.abdm.abha.enrollmentdb.domain.account;
 
+import java.util.List;
+
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountDto;
 import in.gov.abdm.abha.enrollmentdb.model.account.AccountReattemptDto;
@@ -10,15 +17,11 @@ import in.gov.abdm.abha.enrollmentdb.repository.AccountRepository;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.abha.enrollmentdb.utilities.ImageUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +41,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
+        accountDto.setKycVerified(accountDto.getType() != AbhaType.CHILD && accountDto.isKycVerified());
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))

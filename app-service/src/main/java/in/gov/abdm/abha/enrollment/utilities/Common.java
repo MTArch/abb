@@ -387,6 +387,7 @@ public class Common {
             accountDetails.setTownName(localizedDetails.getLocality());
             accountDetails.setVillageName(localizedDetails.getVillageTownCity());
             accountDetails.setGender(localizedDetails.getGender());
+            accountDetails.setLocalizedLabels(localizedDetails.getLocalizedLabels());
             return om.writeValueAsString(accountDetails);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);
