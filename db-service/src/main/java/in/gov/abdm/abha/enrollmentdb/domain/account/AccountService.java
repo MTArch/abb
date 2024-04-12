@@ -57,6 +57,7 @@ public interface AccountService {
 
     Mono<AccountDto> getAccountByDocumentCode(String documentCode);
     Flux<AccountDto> getAccountsByDocumentCode(String documentCode);
+    Flux<AccountDto> getAccountsByDocumentCodeEnrol(String documentCode);
 
     Mono<Integer> getMobileLinkedAccountsCount(String mobileNumber);
     Mono<Integer> getEmailLinkedAccountsCount(String email);

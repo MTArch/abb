@@ -38,6 +38,9 @@ public interface AbhaDBAccountFClient {
     @GetMapping(URIConstant.FDB_GET_ACCOUNTS_BY_DOCUMENT_CODE)
     public Flux<AccountDto> getAccountsEntityByDocumentCode(@PathVariable("documentCode") String documentCode);
 
+    @GetMapping(URIConstant.GET_ACCOUNTS_BY_DOCUMENT_CODE_ENROL)
+    public Flux<AccountDto> getAccountsEntityByDocumentCodeEnrol(@PathVariable("documentCode") String documentCode);
+
     @GetMapping(URIConstant.GET_LINKED_ACCOUNT_COUNT_BY_MOBILE_NUMBER)
     public Mono<Integer> getMobileLinkedAccountCount(@PathVariable("mobileNumber") String mobileNumber);
 

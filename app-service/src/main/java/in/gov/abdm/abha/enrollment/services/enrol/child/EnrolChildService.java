@@ -98,7 +98,6 @@ public class EnrolChildService {
     private AbhaAddressGenerator abhaAddressGenerator;
 
     public Mono<EnrolByAadhaarResponseDto> enrol(EnrolByAadhaarRequestDto enrolByAadhaarRequestDto, RequestHeaders requestHeaders) {
-        Mono<AccountDto> a =accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber());
         return accountService.getAccountByHealthIdNumber(requestHeaders.getXToken().getHealthIdNumber())
                 .flatMap(accountDto -> {
                     isValidParentAccount(accountDto);
@@ -158,7 +157,7 @@ public class EnrolChildService {
     private Mono<AccountDto> checkChildAbhaExistAndNotMoreThanLimit(EnrolByAadhaarRequestDto requestChildData, AccountDto parentEntity) {
         ChildDto childDto = requestChildData.getAuthData().getChildDto();
 
-        Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCode(parentEntity.getHealthIdNumber());
+        Flux<AccountDto> childAccounts = abhaDBAccountFClient.getAccountsEntityByDocumentCodeEnrol(parentEntity.getHealthIdNumber());
 
         if (!enrolByDemographicService.isValidAge(childDto)) {
             throw new AbhaUnProcessableException(ABDMError.CHILD_AGE_LIMIT_EXCEEDED.getCode(),

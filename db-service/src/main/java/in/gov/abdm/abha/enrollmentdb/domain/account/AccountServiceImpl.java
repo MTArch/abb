@@ -90,6 +90,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Flux<AccountDto> getAccountsByDocumentCodeEnrol(String documentCode) {
+        return accountRepository.getAccountsByDocumentCode(documentCode)
+                .flatMap(this::deCompressProfilePhoto)
+                .map(account -> modelMapper.map(account, AccountDto.class));
+    }
+
+    @Override
     public Flux<AccountDto> getAccountsByDocumentCode(String documentCode) {
 
         Mono<List<AccountDto>> childMonoList = accountRepository.getAccountsByDocumentCode(documentCode)
@@ -99,37 +106,40 @@ public class AccountServiceImpl implements AccountService {
 
         return childMonoList.flatMapMany(childes -> {
             List<AccountDto> finalChildAccount = new ArrayList<>();
-            Mono<List<HidPhrAddress>> childPhrMonoList = hidPhrAddressRepository.fetchPhrAddresses(childes.stream().map(AccountDto::getHealthIdNumber).collect(Collectors.toList())).collectList();
-            return childPhrMonoList.flatMapMany(childPhrList -> {
-                for (AccountDto childAccount : childes) {
-                    List<HidPhrAddress> activeChildPhrs = childPhrList.stream()
-                            .filter(hidPhrAddress -> hidPhrAddress.getHealthIdNumber().equals(childAccount.getHealthIdNumber())
-                                    && hidPhrAddress.getStatus().equalsIgnoreCase("active")).collect(Collectors.toList());
-                    if (activeChildPhrs.isEmpty()) {
-                        childAccount.setHealthId("");
-                    }
-                    if (activeChildPhrs.size() == 1) {
-                        childAccount.setHealthId(activeChildPhrs.get(0).getPhrAddress());
-                    } else {
-                        List<HidPhrAddress> preferredPhrList = activeChildPhrs.stream().filter(hidPhrAddress -> hidPhrAddress.getPreferred().equals(1)).collect(Collectors.toList());
-                        if (!preferredPhrList.isEmpty()) {
-                            if (preferredPhrList.size() == 1) {
-                                childAccount.setHealthId(preferredPhrList.get(0).getPhrAddress());
+            if (!childes.isEmpty()) {
+                Mono<List<HidPhrAddress>> childPhrMonoList = hidPhrAddressRepository.fetchPhrAddresses(childes.stream().map(AccountDto::getHealthIdNumber).collect(Collectors.toList())).collectList();
+                return childPhrMonoList.flatMapMany(childPhrList -> {
+                    for (AccountDto childAccount : childes) {
+                        List<HidPhrAddress> activeChildPhrs = childPhrList.stream()
+                                .filter(hidPhrAddress -> hidPhrAddress.getHealthIdNumber().equals(childAccount.getHealthIdNumber())
+                                        && hidPhrAddress.getStatus().equalsIgnoreCase("active")).collect(Collectors.toList());
+                        if (activeChildPhrs.isEmpty()) {
+                            childAccount.setHealthId("");
+                        }
+                        if (activeChildPhrs.size() == 1) {
+                            childAccount.setHealthId(activeChildPhrs.get(0).getPhrAddress());
+                        } else {
+                            List<HidPhrAddress> preferredPhrList = activeChildPhrs.stream().filter(hidPhrAddress -> hidPhrAddress.getPreferred().equals(1)).collect(Collectors.toList());
+                            if (!preferredPhrList.isEmpty()) {
+                                if (preferredPhrList.size() == 1) {
+                                    childAccount.setHealthId(preferredPhrList.get(0).getPhrAddress());
+                                } else {
+                                    childAccount.setHealthId(preferredPhrList.stream()
+                                            .max(Comparator.comparing(HidPhrAddress::getLastModifiedDate))
+                                            .get().getPhrAddress());
+                                }
                             } else {
-                                childAccount.setHealthId(preferredPhrList.stream()
+                                childAccount.setHealthId(activeChildPhrs.stream()
                                         .max(Comparator.comparing(HidPhrAddress::getLastModifiedDate))
                                         .get().getPhrAddress());
                             }
-                        } else {
-                            childAccount.setHealthId(activeChildPhrs.stream()
-                                    .max(Comparator.comparing(HidPhrAddress::getLastModifiedDate))
-                                    .get().getPhrAddress());
                         }
+                        finalChildAccount.add(childAccount);
                     }
-                    finalChildAccount.add(childAccount);
-                }
-                return Flux.fromIterable(finalChildAccount);
-            });
+                    return Flux.fromIterable(finalChildAccount);
+                });
+            }
+            return Flux.fromIterable(childes);
         });
     }
 
@@ -148,6 +158,7 @@ public class AccountServiceImpl implements AccountService {
         }
         return account;
     }
+
     @Override
     public Mono<Integer> getEmailLinkedAccountsCount(String email) {
         return accountRepository.getAccountsCountByEmailNumber(email);
