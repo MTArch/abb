@@ -17,4 +17,7 @@ public interface HidPhrAddressRepository extends R2dbcRepository<HidPhrAddress, 
 	Mono<HidPhrAddress> getPhrAddressByPhrAddress(String phrAddress);
 	@Query("SELECT * from hid_phr_address phr where phr.preferred = 1 AND phr.health_id_number = :healthIdNumber")
 	Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber);
+
+	@Query("SELECT * from hid_phr_address phr where phr.health_id_number IN (:healthIdNumber)")
+	Flux<HidPhrAddress> fetchPhrAddresses(List<String> healthIdnumbers);
 }

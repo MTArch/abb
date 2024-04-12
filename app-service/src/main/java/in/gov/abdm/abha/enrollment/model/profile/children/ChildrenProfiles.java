@@ -1,6 +1,7 @@
 package in.gov.abdm.abha.enrollment.model.profile.children;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAChildProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,5 +20,5 @@ public class ChildrenProfiles {
 	private String mobileNumber;
 	private String address;
 	private long childrenCount;
-	public List<ABHAProfileDto> children;
+	public List<ABHAChildProfileDto> children;
 }
