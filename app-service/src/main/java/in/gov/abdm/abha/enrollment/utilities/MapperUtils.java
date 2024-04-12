@@ -3,6 +3,7 @@ package in.gov.abdm.abha.enrollment.utilities;
 import in.gov.abdm.abha.enrollment.enums.AccountStatus;
 import in.gov.abdm.abha.enrollment.model.aadhaar.otp.AadhaarUserKycDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAChildProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import lombok.experimental.UtilityClass;
@@ -55,6 +56,17 @@ public class MapperUtils {
 
         return abhaProfileDto;
     }
+
+    public ABHAChildProfileDto mapChildProfileDetails(AccountDto accountDto) {
+        ABHAChildProfileDto abhaProfileDto = new ABHAChildProfileDto();
+        abhaProfileDto.setDateOfBirth(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+        abhaProfileDto.setAbhaNumber(accountDto.getHealthIdNumber());
+        abhaProfileDto.setGender(accountDto.getGender());
+        abhaProfileDto.setName(Common.removeNulls(Common.getName(accountDto.getFirstName(), accountDto.getMiddleName(), accountDto.getLastName())));
+        abhaProfileDto.setPhrAddress(accountDto.getHealthId());
+        return abhaProfileDto;
+    }
+
 
     public AccountResponseDto mapAccountDtoToAccountResponse(AccountDto accDto, String phrAddress) {
         return AccountResponseDto.builder()

@@ -14,6 +14,7 @@ import in.gov.abdm.abha.enrollment.exception.application.AbhaUnProcessableExcept
 import in.gov.abdm.abha.enrollment.exception.hidbenefit.BenefitNotFoundException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ChildDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.EnrolByAadhaarRequestDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAChildProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.EnrolByAadhaarResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ResponseTokensDto;
@@ -273,13 +274,13 @@ public class EnrolChildService {
         return childAccounts.collectList().map(childList -> {
             if (!childList.isEmpty()) {
                 ChildrenProfiles childrenProfiles = new ChildrenProfiles();
-                List<ABHAProfileDto> childAbhaProfileDtoList = new ArrayList<>();
+                List<ABHAChildProfileDto> childAbhaProfileDtoList = new ArrayList<>();
                 AccountDto childAccount = childList.stream().findFirst().get();
                 childrenProfiles.setParentAbhaNumber(parentAbhaNumber);
                 childrenProfiles.setMobileNumber(childAccount.getMobile());
                 childrenProfiles.setAddress(childAccount.getAddress());
                 childrenProfiles.setChildrenCount(childList.size());
-                childList.forEach(accountDto -> childAbhaProfileDtoList.add(MapperUtils.mapProfileDetails(accountDto)));
+                childList.forEach(accountDto -> childAbhaProfileDtoList.add(MapperUtils.mapChildProfileDetails(accountDto)));
                 childrenProfiles.setChildren(childAbhaProfileDtoList);
                 return childrenProfiles;
             } else {
