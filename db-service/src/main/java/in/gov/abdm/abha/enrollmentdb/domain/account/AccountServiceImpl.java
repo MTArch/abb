@@ -92,6 +92,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Flux<AccountDto> getAccountsByDocumentCodeEnrol(String documentCode) {
         return accountRepository.getAccountsByDocumentCode(documentCode)
+                .filter(accounts -> !accounts.getStatus().equalsIgnoreCase("DELETED"))
                 .flatMap(this::deCompressProfilePhoto)
                 .map(account -> modelMapper.map(account, AccountDto.class));
     }
@@ -100,6 +101,7 @@ public class AccountServiceImpl implements AccountService {
     public Flux<AccountDto> getAccountsByDocumentCode(String documentCode) {
 
         Mono<List<AccountDto>> childMonoList = accountRepository.getAccountsByDocumentCode(documentCode)
+                .filter(accounts -> !accounts.getStatus().equalsIgnoreCase("DELETED"))
                 .flatMap(this::deCompressProfilePhoto)
                 .map(accounts -> modelMapper.map(accounts, AccountDto.class))
                 .collectList();
@@ -112,7 +114,7 @@ public class AccountServiceImpl implements AccountService {
                     for (AccountDto childAccount : childes) {
                         List<HidPhrAddress> activeChildPhrs = childPhrList.stream()
                                 .filter(hidPhrAddress -> hidPhrAddress.getHealthIdNumber().equals(childAccount.getHealthIdNumber())
-                                        && hidPhrAddress.getStatus().equalsIgnoreCase("active")).collect(Collectors.toList());
+                                        && hidPhrAddress.getStatus().equalsIgnoreCase("ACTIVE")).collect(Collectors.toList());
                         if (activeChildPhrs.isEmpty()) {
                             childAccount.setHealthId("");
                         }
