@@ -2,6 +2,7 @@ package in.gov.abdm.abha.enrollmentdb.domain.account;
 
 import java.util.List;
 
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> addAccount(AccountDto accountDto) {
+        accountDto.setKycVerified(accountDto.getType() != AbhaType.CHILD && accountDto.isKycVerified());
         Accounts account = map(accountDto);
         return accountRepository.saveAccounts(account.setAsNew())
                 .map(accounts -> modelMapper.map(account, AccountDto.class))
