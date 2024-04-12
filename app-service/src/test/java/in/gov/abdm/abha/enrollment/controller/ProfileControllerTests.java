@@ -8,6 +8,7 @@ import in.gov.abdm.abha.enrollment.constants.URIConstant;
 import in.gov.abdm.abha.enrollment.enums.link.parent.Relationship;
 import in.gov.abdm.abha.enrollment.enums.request.Scopes;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.request.ConsentDto;
+import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAChildProfileDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.response.ABHAProfileDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.ChildAbhaRequestDto;
 import in.gov.abdm.abha.enrollment.model.link.parent.request.LinkParentRequestDto;
@@ -68,7 +69,7 @@ public class ProfileControllerTests {
         linkParentRequestDto=new LinkParentRequestDto();
         linkParentResponseDto=new LinkParentResponseDto();
         childrenProfiles= ChildrenProfiles.builder().build();
-        childrenProfiles=new ChildrenProfiles(ABHA_NUMBER_VALID,MOBILE_NUMBER_VALID,ABHA_ADDRESS_VALID,1,Arrays.asList(new ABHAProfileDto()));
+        childrenProfiles=new ChildrenProfiles(ABHA_NUMBER_VALID,MOBILE_NUMBER_VALID,ABHA_ADDRESS_VALID,1,Arrays.asList(new ABHAChildProfileDto()));
         consentDto=new ConsentDto();
         consentDto.setCode("abha-enrollment");
         consentDto.setVersion("1.4");
