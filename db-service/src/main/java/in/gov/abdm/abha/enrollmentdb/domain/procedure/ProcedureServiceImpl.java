@@ -1,7 +1,10 @@
 package in.gov.abdm.abha.enrollmentdb.domain.procedure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import in.gov.abdm.abha.account.Account;
 import in.gov.abdm.abha.enrollmentdb.domain.kafka.KafkaService;
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
+import in.gov.abdm.abha.enrollmentdb.model.account.Accounts;
 import in.gov.abdm.abha.enrollmentdb.model.procedure.SaveAllDataRequest;
 import in.gov.abdm.abha.enrollmentdb.repository.HidPhrAddressRepository;
 import in.gov.abdm.abha.enrollmentdb.repository.procedure.ProcedureRepository;
@@ -35,6 +38,8 @@ public class ProcedureServiceImpl implements ProcedureService {
             saveAllDataRequest.getAccounts().get(0).setUpdateDate(null);
             saveAllDataRequest.getHidPhrAddress().get(0).setLastModifiedDate(null);
             saveAllDataRequest.getHidPhrAddress().get(0).setCreatedDate(null);
+            Accounts account = saveAllDataRequest.getAccounts().get(0);
+            saveAllDataRequest.getAccounts().get(0).setKycVerified(account.getType() != AbhaType.CHILD && account.isKycVerified());
             return procedureRepository.saveAllDataProcedure(om.writeValueAsString(saveAllDataRequest.getAccounts()),
                             om.writeValueAsString(saveAllDataRequest.getHidPhrAddress()), om.writeValueAsString(saveAllDataRequest.getAccountAuthMethods()))
                     .flatMap(response -> {
