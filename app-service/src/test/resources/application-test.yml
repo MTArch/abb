@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: abha-enrollment-test-app
+  codec:
+    max-in-memory-size: 10MB
 
 logging:
   level:

@@ -1,41 +1,5 @@
 package in.gov.abdm.abha.enrollment.services.enrol.aadhaar.impl;
 
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_CREATED_TEMPLATE_ID;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_NUMBER;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.BENEFIT_NAME_OR_F_TOKEN_REQUIRED;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.CREATION;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.DEFAULT_CLIENT_ID;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.EMAIL_ACCOUNT_CREATION_SUBJECT;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INTEGRATED_PROGRAM_ROLE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_NAME;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.INVALID_BENEFIT_ROLE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.MOBILE_ALREADY_LINKED_TO_MAX_ACCOUNTS;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.OFFLINE_HID;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ROLES;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SENT;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.SUB;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.TYPE;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.VALIDATION_ERROR_NOTIFICATION_TYPE_FIELD;
-import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.ABHA_RE_ATTEMPTED;
-import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.EMAIL;
-import static in.gov.abdm.abha.enrollment.model.notification.NotificationType.SMS;
-
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import in.gov.abdm.abha.enrollment.enums.request.AadhaarLogType;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedAccountDetails;
-import in.gov.abdm.abha.enrollment.model.aadhaar.otp.LocalizedDetails;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.PropertyConstants;
 import in.gov.abdm.abha.enrollment.enums.AccountAuthMethods;
@@ -89,6 +53,7 @@ import in.gov.abdm.abha.enrollment.utilities.jwt.JWTUtil;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
 import in.gov.abdm.error.ABDMError;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
