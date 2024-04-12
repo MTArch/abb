@@ -6,13 +6,10 @@ import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 
-import lombok.Builder;
+import lombok.*;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import in.gov.abdm.abha.enrollment.enums.childabha.AbhaType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Data Transfer Object for Account
@@ -92,6 +89,7 @@ public class AccountDto {
 	/**
      * kyc verified flag for user
      */
+    @Getter(AccessLevel.NONE)
     private boolean kycVerified;
 	
 	/**
@@ -310,4 +308,7 @@ public class AccountDto {
     private String apiEndPoint;
     private String apiVersion;
 
+    public boolean isKycVerified(){
+        return type == AbhaType.CHILD || kycVerified;
+    }
 }
