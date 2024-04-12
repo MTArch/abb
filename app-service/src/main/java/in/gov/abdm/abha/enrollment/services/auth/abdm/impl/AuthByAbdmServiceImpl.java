@@ -9,6 +9,7 @@ import in.gov.abdm.abha.enrollment.exception.abha_db.AbhaDBGatewayUnavailableExc
 import in.gov.abdm.abha.enrollment.exception.application.AbhaBadRequestException;
 import in.gov.abdm.abha.enrollment.exception.application.UnauthorizedUserToSendOrVerifyOtpException;
 import in.gov.abdm.abha.enrollment.exception.abha_db.TransactionNotFoundException;
+import in.gov.abdm.abha.enrollment.exception.notification.NotificationGatewayUnavailableException;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.request.AuthRequestDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AccountResponseDto;
 import in.gov.abdm.abha.enrollment.model.enrol.aadhaar.child.abha.response.AuthResponseDto;
@@ -26,6 +27,7 @@ import in.gov.abdm.abha.enrollment.services.database.account_auth_methods.Accoun
 import in.gov.abdm.abha.enrollment.services.database.hidphraddress.HidPhrAddressService;
 import in.gov.abdm.abha.enrollment.services.database.transaction.TransactionService;
 import in.gov.abdm.abha.enrollment.services.idp.IdpAppService;
+import in.gov.abdm.abha.enrollment.services.notification.NotificationService;
 import in.gov.abdm.abha.enrollment.services.redis.RedisService;
 import in.gov.abdm.abha.enrollment.utilities.GeneralUtils;
 import in.gov.abdm.abha.enrollment.utilities.MapperUtils;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static in.gov.abdm.abha.enrollment.constants.AbhaConstants.UTC_TIMEZONE_ID;
 import static in.gov.abdm.abha.enrollment.services.idp.IdpAppService.TIMESTAMP_FORMAT;
+import static in.gov.abdm.abha.profile.constants.StringConstants.SENT;
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -63,6 +66,10 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     private static final String EMAIL_LINKED_SUCCESSFULLY = "Email address linked successfully";
 
+    private static final String NOTIFICATION_SEND_ON = "Notification send on ";
+
+    private static final String FOR_ABHA_CREATION = "for Abha Creation";
+
     @Autowired
     IdpAppService idpAppService;
 
@@ -77,6 +84,8 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
 
     @Autowired
     private AccountAuthMethodService accountAuthMethodService;
+    @Autowired
+    NotificationService notificationService;
 
     @Autowired
     RedisService redisService;
@@ -200,6 +209,15 @@ public class AuthByAbdmServiceImpl implements AuthByAbdmService {
         accountDto.setUpdateDate(now());
         redisService.deleteRedisOtp(transactionDto.getTxnId().toString());
         redisService.deleteReceiverOtpTracker(redisOtp.getReceiver());
+
+        notificationService.sendABHACreationSMS(accountDto.getMobile(), accountDto.getName(), accountDto.getHealthIdNumber())
+                .flatMap(notificationResponseDto -> {
+                    if (notificationResponseDto.getStatus().equalsIgnoreCase(SENT))
+                        log.info(NOTIFICATION_SEND_ON + accountDto.getMobile() + FOR_ABHA_CREATION);
+                    else
+                        throw new NotificationGatewayUnavailableException();
+                    return Mono.empty();
+                }).subscribe();
         return transactionService.updateTransactionEntity(transactionDto, String.valueOf(transactionDto.getId()))
                 .flatMap(transactionDto1 -> accountService.updateAccountByHealthIdNumber(accountDto, accountDto.getHealthIdNumber()))
                 .flatMap(accountDto1 -> updateAccountAuthMethodsWithMobileOtp(accountDto1.getHealthIdNumber()))
