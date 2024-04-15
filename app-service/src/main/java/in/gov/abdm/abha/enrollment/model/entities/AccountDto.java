@@ -309,6 +309,6 @@ public class AccountDto {
     private String apiVersion;
 
     public boolean isKycVerified(){
-        return type == AbhaType.CHILD || source.equalsIgnoreCase("CHILD_ABHA") || kycVerified;
+        return type == AbhaType.CHILD || verificationType.equalsIgnoreCase("CHILD_ABHA") || kycVerified;
     }
 }
