@@ -1,5 +1,6 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
+import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
@@ -65,7 +66,7 @@ public class ABHAControllerAdvise {
         String trackingId = UUID.randomUUID().toString();
         log.error(trackingId + StringConstants.COLON + "Message : ", exception);
         if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
-            return handleDatabaseConstraintFailedException(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE);
+            return handleDatabaseConstraintFailedException(ABDMError.valueOf(RETRY_MESSAGE));
         } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
