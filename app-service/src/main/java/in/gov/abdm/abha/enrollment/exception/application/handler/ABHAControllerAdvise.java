@@ -1,6 +1,5 @@
 package in.gov.abdm.abha.enrollment.exception.application.handler;
 
-import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarErrorCodes;
 import in.gov.abdm.abha.enrollment.exception.aadhaar.AadhaarExceptions;
@@ -142,7 +141,7 @@ public class ABHAControllerAdvise {
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleDatabaseConstraintFailedException(ABDMError abdmError) {
-        log.error(abdmError.getMessage());
+        log.error(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE + STRING_SPACE + abdmError.getMessage());
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(abdmError.getCode() + abdmError.getMessage())
