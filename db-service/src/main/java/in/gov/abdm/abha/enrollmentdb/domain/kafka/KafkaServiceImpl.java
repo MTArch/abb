@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import in.gov.abdm.abha.enrollmentdb.enums.AbhaType;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
-public class KafkaServiceImpl implements KafkaService{
+public class KafkaServiceImpl implements KafkaService {
 
     @Autowired
     HidPhrAddressRepository hidPhrAddressRepository;
@@ -54,40 +55,40 @@ public class KafkaServiceImpl implements KafkaService{
     DashboardEventPublisher dashboardEventPublisher;
 
     @Override
-    public Mono<Void> publishPhrUserPatientEvent(HidPhrAddress hidPhrAddress){
+    public Mono<Void> publishPhrUserPatientEvent(HidPhrAddress hidPhrAddress) {
         String requestId = String.valueOf(UUID.randomUUID());
         return accountRepository.getAccountsByHealthIdNumber(hidPhrAddress.getHealthIdNumber())
                 .flatMap(account -> {
                     account.setHidPhrAddress(hidPhrAddress);
                     AccountDto accountDto = modelMapper.map(account, AccountDto.class);
-                    saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(),hidPhrAddress.getPhrAddress());
+                    saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(), hidPhrAddress.getPhrAddress());
                     User userToPublish = setUserToPublish(accountDto);
                     Patient patientToPublish = setPatientToPublish(accountDto);
                     if (!accountDto.getVerificationStatus().equalsIgnoreCase(PROVISIONAL) && !accountDto.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)) {
-                        userToPublish.setCreatedBy(userToPublish.getCreatedBy() + (accountDto.getDocumentCode()==null ? StringConstants.HASH + AADHAAR : StringConstants.HASH + DL));
+                        userToPublish.setCreatedBy(userToPublish.getCreatedBy() + (accountDto.getDocumentCode() == null ? StringConstants.HASH + AADHAAR : StringConstants.HASH + DL));
                         phrEventPublisher.publish(userToPublish.setAsNew(true), requestId);
                         patientEventPublisher.publish(patientToPublish.setNew(true), requestId);
-                    }else{
+                    } else {
                         phrEventPublisher.publish(userToPublish.setAsNew(false), requestId);
                         patientEventPublisher.publish(patientToPublish.setNew(false), requestId);
                     }
                     return Mono.empty();
-                }).onErrorResume(e->{
-                    log.error(KAFKA_ERROR_LOG_MSG ,e.getMessage());
+                }).onErrorResume(e -> {
+                    log.error(KAFKA_ERROR_LOG_MSG, e.getMessage());
                     return Mono.empty();
                 }).then();
 
     }
 
     @Override
-    public Mono<Void> publishPhrUserPatientEventByAccounts(AccountDto accountDto){
+    public Mono<Void> publishPhrUserPatientEventByAccounts(AccountDto accountDto) {
         String requestId = String.valueOf(UUID.randomUUID());
         return hidPhrAddressRepository.getPhrAddressByPhrAddress(accountDto.getHealthId())
                 .flatMap(hidPhrAddress -> {
                     accountDto.setHidPhrAddress(hidPhrAddress);
-                    User userToBePublished =null;
+                    User userToBePublished = null;
                     Patient patientToBePublished = null;
-                    saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(),hidPhrAddress.getPhrAddress());
+                    saveSyncAcknowledgement(requestId, hidPhrAddress.getHealthIdNumber(), hidPhrAddress.getPhrAddress());
                     if (accountDto.getVerificationType().equalsIgnoreCase(DRIVING_LICENCE) && accountDto.getVerificationStatus().equalsIgnoreCase(VERIFIED)) {
                         userToBePublished = setUserToPublish(accountDto);
                         userToBePublished.setCreatedBy(userToBePublished.getCreatedBy() + StringConstants.HASH + DL);
@@ -101,8 +102,8 @@ public class KafkaServiceImpl implements KafkaService{
                         patientEventPublisher.publish(patientToBePublished.setNew(false), requestId);
                     }
                     return Mono.empty();
-                }).onErrorResume(e->{
-                    log.error(KAFKA_ERROR_LOG_MSG,e.getMessage());
+                }).onErrorResume(e -> {
+                    log.error(KAFKA_ERROR_LOG_MSG, e.getMessage());
                     return Mono.empty();
                 }).then();
     }
@@ -142,7 +143,7 @@ public class KafkaServiceImpl implements KafkaService{
             address.setUpdatedBy(ABHA_SYNC);
 
             user.setHealthIdNumber(accounts.getHealthIdNumber());
-            user.setDayOfBirth(accounts.getDayOfBirth()!=null?accounts.getDayOfBirth():EMPTY);
+            user.setDayOfBirth(accounts.getDayOfBirth() != null ? accounts.getDayOfBirth() : EMPTY);
             user.setEmailId(accounts.getEmail());
             user.setFirstName(accounts.getFirstName());
             user.setGender(accounts.getGender());
@@ -150,19 +151,19 @@ public class KafkaServiceImpl implements KafkaService{
             user.setLastName(accounts.getLastName());
             user.setMiddleName(accounts.getMiddleName());
             user.setMobileNumber(accounts.getMobile());
-            user.setMobileNumberVerified(accounts.getMobile()!=null);
-            user.setMonthOfBirth(accounts.getMonthOfBirth()!=null?accounts.getMonthOfBirth():EMPTY);
+            user.setMobileNumberVerified(accounts.getMobile() != null);
+            user.setMonthOfBirth(accounts.getMonthOfBirth() != null ? accounts.getMonthOfBirth() : EMPTY);
             user.setFullName(accounts.getName());
             user.setPassword(accounts.getPassword());
-            if(accounts.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)){
+            if (accounts.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM)) {
                 user.setStatus(SYSTEM);
-            }else{
+            } else {
                 user.setStatus(accounts.getStatus());
             }
-            user.setYearOfBirth(accounts.getYearOfBirth()!=null?accounts.getYearOfBirth():EMPTY);
-            if(!StringUtils.isEmpty(accounts.getDayOfBirth()) && !StringUtils.isEmpty(accounts.getMonthOfBirth()) && !StringUtils.isEmpty(accounts.getYearOfBirth())){
+            user.setYearOfBirth(accounts.getYearOfBirth() != null ? accounts.getYearOfBirth() : EMPTY);
+            if (!StringUtils.isEmpty(accounts.getDayOfBirth()) && !StringUtils.isEmpty(accounts.getMonthOfBirth()) && !StringUtils.isEmpty(accounts.getYearOfBirth())) {
                 user.setDateOfBirth(accounts.getDayOfBirth() + "-" + accounts.getMonthOfBirth() + "-" + accounts.getYearOfBirth());
-            }else{
+            } else {
                 user.setDateOfBirth(EMPTY);
             }
             user.setProfilePhotoCompressed(accounts.isProfilePhotoCompressed());
@@ -172,10 +173,9 @@ public class KafkaServiceImpl implements KafkaService{
             user.setUpdatedBy(ABHA_SYNC);
             user.setPhrAddress(accounts.getHidPhrAddress().getPhrAddress());
             user.setUserAddress(address);
-            user.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
-        }
-        catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+            user.setKycStatus((null != accounts.getType() && accounts.getType() == AbhaType.CHILD) ? "PENDING" : accounts.isKycVerified() ? "VERIFIED" : "NOT VERIFIED");
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
         return user;
     }
@@ -193,18 +193,18 @@ public class KafkaServiceImpl implements KafkaService{
             patient.setFirstName(accounts.getFirstName());
             patient.setGender(accounts.getGender());
             patient.setPhoneNumber(accounts.getMobile());
-            if(null != accounts.getYearOfBirth())
+            if (null != accounts.getYearOfBirth())
                 patient.setYearOfBirth(BigInteger.valueOf(Integer.valueOf(accounts.getYearOfBirth())));
-            if(null != accounts.getMonthOfBirth())
+            if (null != accounts.getMonthOfBirth())
                 patient.setMonthOfBirth(BigInteger.valueOf(Integer.valueOf(accounts.getMonthOfBirth())));
-            if(null != accounts.getDayOfBirth())
+            if (null != accounts.getDayOfBirth())
                 patient.setDateOfBirth(BigInteger.valueOf(Integer.valueOf(accounts.getDayOfBirth())));
             patient.setMiddleName(accounts.getMiddleName());
             patient.setLastName(accounts.getLastName());
             patient.setHealthIdNumber(accounts.getHealthIdNumber());
             patient.setStateCode(accounts.getStateCode());
             patient.setDistrictCode(accounts.getDistrictCode());
-            if(accounts.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM))
+            if (accounts.getHidPhrAddress().getStatus().equalsIgnoreCase(SYSTEM))
                 patient.setStatus(SYSTEM);
             else
                 patient.setStatus(accounts.getStatus());
@@ -214,10 +214,9 @@ public class KafkaServiceImpl implements KafkaService{
             patient.setEmailVerified(null != accounts.getEmailVerified());
             patient.setKycStatus(accounts.isKycVerified() ? "VERIFIED" : "PENDING");
             patient.setKycVerified(accounts.isKycVerified());
-            patient.setMobileVerified(accounts.getMobile()!=null);
-        }
-        catch (Exception ex) {
-            log.error(ex.getMessage(),ex);
+            patient.setMobileVerified(accounts.getMobile() != null);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
         return patient;
     }
