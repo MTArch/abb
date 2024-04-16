@@ -65,7 +65,7 @@ public class ABHAControllerAdvise {
         String trackingId = UUID.randomUUID().toString();
         log.error(trackingId + StringConstants.COLON + "Message : ", exception);
         if (exception.getClass() == AbhaDBGatewayUnavailableException.class) {
-            return handleDatabaseConstraintFailedException(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE);
+            return handleDatabaseConstraintFailedException(ABDMError.valueOf(RETRY_MESSAGE));
         } else if (exception.getClass() == NotificationDBGatewayUnavailableException.class) {
             return handleDatabaseConstraintFailedException(ABDMError.NOTIFICATION_DB_SERVICE_UNAVAILABLE);
         } else if (exception.getClass() == DocumentDBGatewayUnavailableException.class) {
@@ -141,7 +141,7 @@ public class ABHAControllerAdvise {
     }
 
     private ResponseEntity<Mono<ErrorResponse>> handleDatabaseConstraintFailedException(ABDMError abdmError) {
-        log.error(abdmError.getMessage());
+        log.error(ABDMError.ABHA_DB_SERVICE_UNAVAILABLE + STRING_SPACE + abdmError.getMessage());
         return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(
                 ABDMControllerAdvise.handleException(
                         new Exception(abdmError.getCode() + abdmError.getMessage())
