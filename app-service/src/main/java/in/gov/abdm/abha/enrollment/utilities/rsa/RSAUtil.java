@@ -4,6 +4,7 @@ import in.gov.abdm.abha.enrollment.constants.StringConstants;
 import in.gov.abdm.abha.enrollment.utilities.Common;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,7 @@ public class RSAUtil {
     }
 
     public String decrypt(String data) {
-        if (data.isEmpty()) {
+        if (StringUtils.isEmpty(data)) {
             return StringConstants.EMPTY;
         } else {
             try {
