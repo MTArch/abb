@@ -85,6 +85,7 @@ public class EnrollmentController {
                     } else if (authMethods.contains(AuthMethods.FACE)) {
                         return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.BIO)) {
+
                         enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto, fToken);
                         return enrolByBioService.verifyBio(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.IRIS)) {
@@ -109,9 +110,9 @@ public class EnrollmentController {
                             demographic.setYearOfBirth(parts[2]);
                         }
                         demographic.setFirstName(demoAuth.getName());
-                        demographic.setConsentFormImage(demoAuth.getProfilePhoto());
                         enrolByAadhaarRequestDto.getAuthData().setDemographic(demographic);
                         return enrolByDemographicService.validateAndEnrolByDemoAuth(enrolByAadhaarRequestDto, requestHeaders)
+
                                 .map(BenefitMapper::mapHidBenefitRequestPayload);
                     }
                     throw new AbhaBadRequestException(ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getCode(), ABDMError.INVALID_COMBINATIONS_OF_SCOPES.getMessage());

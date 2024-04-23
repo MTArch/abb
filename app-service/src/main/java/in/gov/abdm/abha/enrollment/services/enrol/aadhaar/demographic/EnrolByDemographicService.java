@@ -295,22 +295,24 @@ public class EnrolByDemographicService extends EnrolByDemographicValidatorServic
     }
 
     private Mono<IdentityDocumentsDto> addDocumentsInIdentityDocumentEntity(AccountDto accountDto, String consentFromImage) {
-
-        IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
-        identityDocumentsDto.setDocumentNumber(accountDto.getXmluid());
-        identityDocumentsDto.setDocumentType(AbhaConstants.OFFLINE_AADHAAR);
-        identityDocumentsDto.setDob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
-        identityDocumentsDto.setGender(accountDto.getGender());
-        identityDocumentsDto.setFirstName(accountDto.getFirstName());
-        identityDocumentsDto.setLastName(accountDto.getLastName());
-        identityDocumentsDto.setMiddleName(accountDto.getMiddleName());
-        identityDocumentsDto.setStatus(accountDto.getStatus());
-        identityDocumentsDto.setHealthIdNumber(accountDto.getHealthIdNumber());
-        identityDocumentsDto.setPhoto(consentFromImage);
-        identityDocumentsDto.setVerificationStatus(accountDto.getVerificationStatus());
-        identityDocumentsDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
-
-        return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
+        if (!StringUtils.isEmpty(consentFromImage)) {
+            IdentityDocumentsDto identityDocumentsDto = new IdentityDocumentsDto();
+            identityDocumentsDto.setDocumentNumber(accountDto.getXmluid());
+            identityDocumentsDto.setDocumentType(AbhaConstants.OFFLINE_AADHAAR);
+            identityDocumentsDto.setDob(Common.getDob(accountDto.getDayOfBirth(), accountDto.getMonthOfBirth(), accountDto.getYearOfBirth()));
+            identityDocumentsDto.setGender(accountDto.getGender());
+            identityDocumentsDto.setFirstName(accountDto.getFirstName());
+            identityDocumentsDto.setLastName(accountDto.getLastName());
+            identityDocumentsDto.setMiddleName(accountDto.getMiddleName());
+            identityDocumentsDto.setStatus(accountDto.getStatus());
+            identityDocumentsDto.setHealthIdNumber(accountDto.getHealthIdNumber());
+            identityDocumentsDto.setPhoto(consentFromImage);
+            identityDocumentsDto.setVerificationStatus(accountDto.getVerificationStatus());
+            identityDocumentsDto.setVerificationType(AbhaConstants.OFFLINE_AADHAAR);
+            return identityDocumentDBService.addIdentityDocuments(identityDocumentsDto);
+        } else {
+            return Mono.just(new IdentityDocumentsDto());
+        }
     }
 
     private Mono<EnrolByAadhaarResponseDto> addAuthMethods(AccountDto accountDto, HidPhrAddressDto hidPhrAddressDto, RequestHeaders requestHeaders) {
