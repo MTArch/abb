@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import in.gov.abdm.abha.enrollment.constants.AbhaConstants;
 import in.gov.abdm.abha.enrollment.model.entities.AccountDto;
 import in.gov.abdm.abha.enrollment.utilities.rsa.RSAUtil;
+import in.gov.abdm.abha.profile.enums.account.AbhaType;
 import in.gov.abdm.jwt.util.JWTToken;
 import in.gov.abdm.jwt.util.JWTTokenRequest;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -29,6 +30,7 @@ public class JWTUtil {
     private static final String KYC_VERIFIED = "isKycVerified";
     private static final String ABHA_NUMBER = "abhaNumber";
     private static final String TYPE = "typ";
+    public static final String ACCOUNT_TYPE = "accountType";
 
     @Value(JWT_TOKEN_VALIDITY_IN_SEC)
     private long jwtUserTokenValidityInSec;
@@ -48,9 +50,14 @@ public class JWTUtil {
         claims.put(TYPE, AbhaConstants.TOKEN_TYPE_TRANSACTION);
         claims.put(ABHA_NUMBER, account.getHealthIdNumber());
         claims.put(MOBILE, account.getMobile());
+        claims.put(ACCOUNT_TYPE, getAccountType(account.getType().getValue(), account.getVerificationType()));
         claims.put(KYC_VERIFIED,account.isKycVerified());
 
         return new JWTTokenRequest(account.getHealthIdNumber(), jwtUserTokenValidityInSec / 60, claims);
+    }
+
+    public String getAccountType(String type, String verificationType){
+        return (null != type && type.equalsIgnoreCase("child")) || (null != verificationType && verificationType.equalsIgnoreCase("CHILD_ABHA")) ? AbhaType.CHILD.getValue() : AbhaType.STANDARD.getValue();
     }
 
     private JWTTokenRequest prepareClaimsForRefreshToken(String subject) {
