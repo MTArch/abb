@@ -97,7 +97,8 @@ public class HidPhrAddressServiceImpl implements HidPhrAddressService {
     @Override
     public Mono<HidPhrAddressDto> findByHealthIdNumber(String healthIdNumber) {
         return abhaDBHidPhrAddressFClient.findByByHealthIdNumber(healthIdNumber)
-                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException())));
+                .onErrorResume((throwable -> Mono.error(new AbhaDBGatewayUnavailableException(throwable.getLocalizedMessage()))));
+
     }
 
     @Override
