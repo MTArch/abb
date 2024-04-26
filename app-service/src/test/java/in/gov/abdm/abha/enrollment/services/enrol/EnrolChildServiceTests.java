@@ -94,7 +94,7 @@ public class EnrolChildServiceTests {
         authData=new AuthData();
         consentDto=new ConsentDto();
         hidPhrAddressDto=new HidPhrAddressDto(1L,"","add1","",1,"", LocalDateTime.now(),"","",LocalDateTime.now(),1,1,true);
-        authData.setChildDto(new ChildDto("name","12","12","2021","F","password","photo"));
+        authData.setChildDto(new ChildDto("name","12","12","2021","F","password","photo","true"));
         enrolByAadhaarRequestDto.setConsent(consentDto);
         enrolByAadhaarRequestDto.setAuthData(authData);
         accountDto=new AccountDto();
@@ -149,7 +149,7 @@ public class EnrolChildServiceTests {
     //@Test
     //TODO FIX
     public void enrolTest3(){
-        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo"));
+        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo","true"));
         enrolByAadhaarRequestDto.setAuthData(authData);
         Mockito.when(enrolByDemographicService.isValidAge(any())).thenReturn(true);
         Mockito.when(rsaUtil.decrypt(any())).thenReturn("1");
@@ -169,7 +169,7 @@ public class EnrolChildServiceTests {
     //TODO FIX
     // @Test
     public void enrolTest4(){
-        authData.setChildDto(new ChildDto("name mid lst","12","12","2021","F","password","photo"));
+        authData.setChildDto(new ChildDto("name mid lst","12","12","2021","F","password","photo","true"));
         enrolByAadhaarRequestDto.setAuthData(authData);
         Mockito.when(enrolByDemographicService.isValidAge(any())).thenReturn(true);
         Mockito.when(rsaUtil.decrypt(any())).thenReturn("1");
@@ -243,7 +243,7 @@ public class EnrolChildServiceTests {
     @Test
     public void enrolTestErr2(){
         accountDto.setMobile(null);
-        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo"));
+        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo","true"));
         enrolByAadhaarRequestDto.setAuthData(authData);
         Mockito.when(enrolByDemographicService.isValidAge(any())).thenReturn(true);
         Mockito.when(rsaUtil.decrypt(any())).thenReturn("1");
@@ -262,7 +262,7 @@ public class EnrolChildServiceTests {
     @Test
     public void enrolTestErr3(){
         ReflectionTestUtils.setField(enrolChildService,"childAbhaAccountLimit",-1);
-        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo"));
+        authData.setChildDto(new ChildDto("name mid","12","12","2021","F","password","photo","true"));
         enrolByAadhaarRequestDto.setAuthData(authData);
         Mockito.when(enrolByDemographicService.isValidAge(any())).thenReturn(true);
         Mockito.when(rsaUtil.decrypt(any())).thenReturn("1");
