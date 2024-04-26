@@ -45,6 +45,7 @@ public class EnrolByDemographicValidatorService {
     private static final String O = "O";
     private static final String AADHAAR = "Aadhaar";
     private static final String GENDER = "Gender";
+    private static final String PARENT_CONSENT = "parentConsent";
     private static final String DAY_OF_BIRTH = "dayOfBirth";
     private static final String MONTH_OF_BIRTH = "monthOfBirth";
     private static final String YEAR_OF_BIRTH = "yearOfBirth";
@@ -66,6 +67,8 @@ public class EnrolByDemographicValidatorService {
     private static final String HEALTH_WORKER_MOBILE = "healthWorkerMobile";
     private static final String ADDRESS = "address";
     public static final int MAX_NAME_SIZE = 255;
+    public static final String PARENTAL_CONSENT_REQUIRED_TO_CREATE_CHILD_ABHA_ID_KINDLY_PROVIDE_PARENTAL_CONSENT = "Parental Consent Required: To Create Child Abha ID, Kindly Provide Parental Consent.";
+    public static final String TRUE = "true";
     private String alphabeticCharOnlyRegex = "^[A-Za-z' ]+$";
     private String alphabeticCharAndNumberRegexWithSpace = "^[A-Za-z0-9 ]+$";
     private String onlyDigitRegex = "^[0-9]{6}$";
@@ -469,6 +472,9 @@ public class EnrolByDemographicValidatorService {
         }
         LinkedHashMap<String, String> errors;
         errors = new LinkedHashMap<>();
+        if(StringUtils.isEmpty(childDto.getParentConsent()) || !childDto.getParentConsent().equals(TRUE)){
+            errors.put(PARENT_CONSENT, PARENTAL_CONSENT_REQUIRED_TO_CREATE_CHILD_ABHA_ID_KINDLY_PROVIDE_PARENTAL_CONSENT);
+        }
         if (StringUtils.isEmpty(childDto.getGender()) || !isValidGender(childDto.getGender())) {
             errors.put(GENDER, AbhaConstants.VALIDATION_ERROR_GENDER_FIELD);
         }

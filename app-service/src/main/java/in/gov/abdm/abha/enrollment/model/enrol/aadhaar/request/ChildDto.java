@@ -22,4 +22,5 @@ public class ChildDto {
     private String gender;
     private String password;
     private String profilePhoto;
+    private String parentConsent;
 }

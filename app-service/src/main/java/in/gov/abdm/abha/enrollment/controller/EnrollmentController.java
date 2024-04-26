@@ -85,7 +85,6 @@ public class EnrollmentController {
                     } else if (authMethods.contains(AuthMethods.FACE)) {
                         return enrolUsingAadhaarService.faceAuth(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.BIO)) {
-
                         enrolByBioService.validateEnrolByBio(enrolByAadhaarRequestDto, fToken);
                         return enrolByBioService.verifyBio(enrolByAadhaarRequestDto, requestHeaders);
                     } else if (authMethods.contains(AuthMethods.IRIS)) {
